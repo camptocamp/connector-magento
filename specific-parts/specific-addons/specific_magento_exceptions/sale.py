@@ -185,54 +185,21 @@ Exception :
                         })
         cr.commit()
 
-    def mage_import_base(self, cr, uid, conn, external_referential_id, defaults=None, context=None):
+    def mage_import_one_by_one(self, cr, uid, conn, external_referential_id, mapping_id, data, defaults=None, context=None):
         if context is None:
             context = {}
-        if defaults is None:
-            defaults = {}
-        if not 'ids_or_filter' in context.keys():
-            context['ids_or_filter'] = []
         result = {'create_ids': [], 'write_ids': []}
-        mapping_id = self.pool.get('external.mapping').search(cr, uid, [('model', '=', self._name), (
-        'referential_id', '=', external_referential_id)])
-        if mapping_id:
-            data = []
-            if context.get('id', False):
-                get_method = self.pool.get('external.mapping').read(cr, uid, mapping_id[0],
-                                                                    ['external_get_method']).get('external_get_method',
-                                                                                                 False)
-                if get_method:
-                    data = [conn.call(get_method, [context.get('id', False)])]
-                    data[0]['external_id'] = context.get('id', False)
-                    result = self.ext_import(cr, uid, data, external_referential_id, defaults, context)
-            else:
-                list_method = self.pool.get('external.mapping').read(cr, uid, mapping_id[0],
-                                                                     ['external_list_method']).get(
-                    'external_list_method', False)
-                if list_method:
-                    data = conn.call(list_method, context['ids_or_filter'])
-
-                    #it may happen that list method doesn't provide enough information, forcing us to use get_method on each record (case for sale orders)
-                    if context.get('one_by_one', False):
-                        del(context['one_by_one'])
-
-                        for record in data:
-                            id = record[
-                                 self.pool.get('external.mapping').read(cr, uid, mapping_id[0], ['external_key_name'])[
-                                 'external_key_name']]
-                            get_method = self.pool.get('external.mapping').read(cr, uid, mapping_id[0],['external_get_method']).get('external_get_method', False)
-
-                            try:
-                                rec_data = [conn.call(get_method, [id])]
-                                rec_result = self.ext_import(cr, uid, rec_data, external_referential_id, defaults,
-                                                             context)
-                                result['create_ids'].append(rec_result['create_ids'])
-                                result['write_ids'].append(rec_result['write_ids'])
-                            except Exception, e:
-                                self.import_order_exception(cr, uid, id, e)
-                                raise e
-                    else:
-                        result = self.ext_import(cr, uid, data, external_referential_id, defaults, context)
+        for record in data:
+            id = record[self.pool.get('external.mapping').read(cr, uid, mapping_id, ['external_key_name'])['external_key_name']]
+            get_method = self.pool.get('external.mapping').read(cr, uid, mapping_id, ['external_get_method']).get('external_get_method',False)
+            try:
+                rec_data = [conn.call(get_method, [id])]
+                rec_result = self.ext_import(cr, uid, rec_data, external_referential_id, defaults, context)
+                result['create_ids'].append(rec_result['create_ids'])
+                result['write_ids'].append(rec_result['write_ids'])
+            except Exception, e:
+                self.import_order_exception(cr, uid, id, e)
+                raise e
         return result
 
 sale_order()

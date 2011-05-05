@@ -30,7 +30,8 @@ class Product(magerp_osv.magerp_osv):
     _inherit = 'product.product'
 
     _columns = {
-        'to_deactivate': fields.boolean('To deactivate', help="If checked, on the next Export catalog, the product will be deactivated on Magento and then on OpenERP. If an open picking using this product exists on OpenERP, the product will not be deactivated before the next Export catalog.")
+        'to_deactivate': fields.boolean('To deactivate', help="If checked, on the next Export catalog, the product will be deactivated on Magento and then on OpenERP. If an open picking using this product exists on OpenERP, the product will not be deactivated before the next Export catalog."),
+        'bom_ids': fields.one2many('mrp.bom','product_id','BoMs'),
     }
 
     _defaults = {
