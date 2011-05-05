@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record id="view_partner_form_magerp_client_code" model="ir.ui.view">
+			<field name="name">res.partner.form_magerp.client_code</field>
+			<field name="model">res.partner</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="magentoerpconnect.view_partner_form_magerp" />
+			<field name="arch" type="xml">
+				<field name="store_id" position="after">
+					<field name="old_client_code" />
+				</field>
+			</field>
+		</record>
+	</data>
+</openerp>

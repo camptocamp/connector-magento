@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<openerp>
+	<data>
+        <report id="purchase.report_purchase_quotation"
+                model="purchase.order"
+                name="purchase.quotation_custom"
+                rml="specific_report/report/purchase_request_quotation.rml"
+                string="Request for Quotation"/>
+
+        <report id="purchase.report_purchase_order"
+                model="purchase.order"
+                name="purchase.order_custom"
+                rml="specific_report/report/purchase_order.rml"
+                string="Purchase Order"/>
+
+        <report id="sale.report_sale_order"
+                model="sale.order"
+                name="sale.order_custom"
+                rml="specific_report/report/sale_order.rml"
+                string="Quotation / Order"/>
+
+        <report
+            id="sale_delivery_report.report_shipping"
+            model="stock.picking"
+            name="sale.shipping_custom"
+            rml="specific_report/report/shipping.rml" 
+            string="Delivery order"/>
+
+	</data>
+</openerp>

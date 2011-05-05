@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="company_csv_config">
+            <field name="name">res.company.form.inherit</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <notebook  position="inside">
+            		<page string="Debonix specific configuration ">
+                        <separator string="Chronopost" colspan="4"/>
+                        <field name="tracking_csv_path_out"/>
+                        <field name="tracking_csv_path_in"/>
+                        <field name="chronopost_subaccount_number"/>
+                        <field name="cash_on_delivery_method"/>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+    </data>
+</openerp>
+

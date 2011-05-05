@@ -1,0 +1,76 @@
+"id","type_id:id","model_id:id","external_field","type","external_type","in_function","out_function"
+"magentoerpconnect.mag_erp_so_carrier_id","magentoerpconnect.magento1324","sale.model_sale_order","shipping_method","in_out","str","if ifield:
+    carrier_ids = self.pool.get('delivery.carrier').search(cr, uid, [('name', '=', ifield)])
+    if carrier_ids:
+        result=[('carrier_id', carrier_ids[0])]
+    else:
+        result=[]",
+"magentoerpconnect.mag_erp_prd_custom_1","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_ean13","in_out","str","result =[('ean13',ifield)]","result=[('zdbx_default_ean13',record['ean13'])]"
+"magentoerpconnect.magento_prt_adr_4","magentoerpconnect.magento1324","base.model_res_partner_address","firstname","in_out","str","result = [('name', ifield + ' ' + data['lastname'])]",
+"magentoerpconnect.magento_prt_adr_custom_1","magentoerpconnect.magento1324","base.model_res_partner_address","company","in_out","str","if ifield and data['address_type'] == 'billing':
+    partner_obj = self.pool.get('res.partner')
+    partner_id = partner_obj.extid_to_oeid(cr, uid, data['customer_id'], external_referential_id)
+    if partner_id:
+        partner_obj.write(cr, uid, partner_id, {'name': ifield})
+    result = []","result=[('zdbx_default_code',record['default_code'])]"
+"magentoerpconnect.mag_erp_prd_5","magentoerpconnect.magento1324","product.model_product_product","sku","in_out","str","result = [('magento_sku',ifield)]",
+"mag_erp_prd_default_code","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_code","in_out","str","result = [('default_code',ifield)]",
+"magentoerpconnect.mag_erp_prd_11","magentoerpconnect.magento1324","product.model_product_product","special_price","in_out","float","result = [('x_magerp_special_price',ifield)]","if record['x_magerp_special_price'] and record['x_magerp_special_price'] != 0:
+    result = [('special_price', record['x_magerp_special_price'])]
+else:
+    result = [('special_price', False)]"
+"prt_adr_custom_prefix","magentoerpconnect.magento1324","base.model_res_partner_address","prefix","in_out","str","if ifield:
+    title_obj = self.pool.get('res.partner.title')
+    if not title_obj.search(cr, uid, [('domain', '=', 'contact'), ('shortcut', '=', ifield)]):
+        title_obj.create(cr, uid, {'name': ifield,
+                                   'shortcut': ifield,
+                                   'domain': 'contact'})
+    result = [('title', ifield)]",""
+"c2c_magento_products_components.prd_custom_components","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_sku_coffrets","in_out","str",,"# Modify components_list to the name of your Magento attribute's name
+result=[('zdbx_default_sku_coffrets', record['components_lists'])]"
+"c2c_magento_set_and_pack_product.prd_custom_set_or_pack","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_set_pack","in_out","str",," # Modify x_magerp_set_or_pack and set_or_pack to the name of your Magento attribute's name
+if record.get('simple_set_or_pack', False):
+    # mapping between module values and debonix website attribute options
+    # 1 and 2 values are for backward compatibility with previous version module. Can be removed as soon as all simple_set_or_pack values contains only set or pack.
+    debonix_option = {'set': '1',
+                      'pack': '2',
+                      '1': '1',
+                      '2': '2'}
+
+    result = [('zdbx_default_set_pack', debonix_option.get(record['simple_set_or_pack'], '0'))]
+else:
+    result = [('zdbx_default_set_pack', '0')]"
+"mag_partner_client_code","magentoerpconnect.magento1324","base.model_res_partner","code_client_openerp","in_out","str","result = [('ref',ifield)]",""
+"prd_custom_activer_ventes_flash","magentoerpconnect.magento1324","product.model_product_product","activer_ventes_flash","in_out","str","if ifield:
+    attribute_id = self.pool.get('magerp.product_attributes').search(cr,uid,[('attribute_code','=','activer_ventes_flash')])[0]
+    if attribute:
+        option_id = self.pool.get('magerp.product_attribute_options').search(cr,uid,[('attribute_id','=',attribute_id),('value','=',ifield)])
+        if option_id:
+            result = [('x_magerp_activer_ventes_flash',option_id[0])]","res = 0
+if record['x_magerp_activer_ventes_flash']:
+    option=self.pool.get('magerp.product_attribute_options').browse(cr, uid, record['x_magerp_activer_ventes_flash'][0])
+    if option:
+        res = option.value
+result=[('activer_ventes_flash',res)]"
+"magentoerpconnect.magento_prt_12","magentoerpconnect.magento1324","base.model_res_partner","dob","in_out","str","if ifield and not ifield[:10] == '0000-00-00':
+    result =[('mag_birthday',ifield[:10])]
+else:
+    result=[]",
+"custom_product_status","magentoerpconnect.magento1324","product.model_product_product","status","in_out","int","if ifield:
+    option_id = self.pool.get('magerp.product_attribute_options').search(cr,uid,[('attribute_id','=',145),('value','=',ifield)])
+    if option_id:
+        result = [('x_magerp_status',option_id[0])]","if record['to_deactivate']:
+    #deactivate product on magento
+    result=[('status','2')]
+else:
+    if record['x_magerp_status']:
+        option=self.pool.get('magerp.product_attribute_options').browse(cr, uid, record['x_magerp_status'][0])
+        if option:
+            result=[('status',option.value)]"
+"custom_product_rdcategories","magentoerpconnect.magento1324","product.model_product_product","rdcategories","in_out","int","# no import -> configured on categories for Debonix (specific)","category = self.pool.get('product.category').browse(cr, uid, record['categ_id'][0])
+res = False
+if category.magento_rdc_category_default:
+    option=self.pool.get('magerp.product_attribute_options').browse(cr, uid, category.magento_rdc_category_default.id)
+    if option:
+        res = option.value
+result=[('rdcategories', res)]"
