@@ -172,23 +172,11 @@ sale_shop()
 class sale_order(magerp_osv.magerp_osv):
     _inherit = "sale.order"
 
-    def import_order_exception(self, cr, uid, ext_id, e):
-        request = self.pool.get('res.request')
-        summary = """Error during orders import on Magento order id : %s
-Exception :
-%s""" % (ext_id, e)
-        request.create(cr, uid,
-                       {'name': "Import orders error",
-                        'act_from': uid,
-                        'act_to': uid,
-                        'body': summary,
-                        })
-        cr.commit()
-
     def mage_import_one_by_one(self, cr, uid, conn, external_referential_id, mapping_id, data, defaults=None, context=None):
         if context is None:
             context = {}
         result = {'create_ids': [], 'write_ids': []}
+        del(context['one_by_one'])
         for record in data:
             id = record[self.pool.get('external.mapping').read(cr, uid, mapping_id, ['external_key_name'])['external_key_name']]
             get_method = self.pool.get('external.mapping').read(cr, uid, mapping_id, ['external_get_method']).get('external_get_method',False)
@@ -198,8 +186,17 @@ Exception :
                 result['create_ids'].append(rec_result['create_ids'])
                 result['write_ids'].append(rec_result['write_ids'])
             except Exception, e:
-                self.import_order_exception(cr, uid, id, e)
-                raise e
+                request = self.pool.get('res.request')
+                summary = _("Error during orders import on Magento order id : %s\n\n"
+                            "Exception :\n"
+                            "%s") % (id, e)
+                request.create(cr, uid,
+                               {'name': "Import orders error",
+                                'act_from': uid,
+                                'act_to': uid,
+                                'body': summary,
+                                })
+                raise
         return result
 
 sale_order()
