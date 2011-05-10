@@ -25,6 +25,7 @@ import netsvc
 from tools.translate import _
 import time
 
+
 class sale_shop(external_osv.external_osv):
     _inherit = "sale.shop"
 
@@ -108,7 +109,6 @@ Exception :
                                                                                              context)
                     except Exception, e:
                         exception_pickings[result[0]] = e
-                        continue
 
                     if ext_shipping_id:
                         ir_model_data_vals = {
@@ -179,7 +179,7 @@ class sale_order(magerp_osv.magerp_osv):
         del(context['one_by_one'])
         for record in data:
             id = record[self.pool.get('external.mapping').read(cr, uid, mapping_id, ['external_key_name'])['external_key_name']]
-            get_method = self.pool.get('external.mapping').read(cr, uid, mapping_id, ['external_get_method']).get('external_get_method',False)
+            get_method = self.pool.get('external.mapping').read(cr, uid, mapping_id, ['external_get_method']).get('external_get_method', False)
             try:
                 rec_data = [conn.call(get_method, [id])]
                 rec_result = self.ext_import(cr, uid, rec_data, external_referential_id, defaults, context)

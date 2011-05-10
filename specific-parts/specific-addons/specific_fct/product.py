@@ -148,7 +148,8 @@ class ProductCategory(magerp_osv.magerp_osv):
             if product.categ_id.magento_rdc_category_default.id == magento_rdc_category_id:
                 product_ids_to_update.append(product.id)
 
-        cr.execute("update product_product set write_date = now() where id in %s", (tuple(product_ids_to_update),))
+        if len(product_ids_to_update) > 0:
+            cr.execute("update product_product set write_date = now() where id in %s", (tuple(product_ids_to_update),))
         return True
 
     def create(self, cr, uid, vals, context=None):
