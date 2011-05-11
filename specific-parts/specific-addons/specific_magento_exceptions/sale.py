@@ -186,17 +186,19 @@ class sale_order(magerp_osv.magerp_osv):
                 result['create_ids'].append(rec_result['create_ids'])
                 result['write_ids'].append(rec_result['write_ids'])
             except Exception, e:
-                request = self.pool.get('res.request')
                 summary = _("Error during orders import on Magento order id : %s\n\n"
                             "Exception :\n"
                             "%s") % (id, e)
-                request.create(cr, uid,
-                               {'name': "Import orders error",
-                                'act_from': uid,
-                                'act_to': uid,
-                                'body': summary,
-                                })
-                raise
+                self.pool.get('res.request').create(cr, uid,
+                                                    {'name': _("Import orders error"),
+                                                     'act_from': uid,
+                                                     'act_to': uid,
+                                                     'body': summary,
+                                                     })
+                # if we import orders by flag, we can let the import continue because the missing order will
+                # be imported on the next import
+                if not 'import_order_flag' in context.keys() or not context['import_order_flag']:
+                    raise
         return result
 
 sale_order()
