@@ -29,13 +29,83 @@ import time
 class sale_shop(external_osv.external_osv):
     _inherit = "sale.shop"
 
+# -*- encoding: utf-8 -*-
+##############################################################################
+#
+#    Author Guewen Baconnier. Copyright Camptocamp SA
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+##############################################################################
+
+from osv import osv, fields
+from base_external_referentials import external_osv
+
+
+class sale_shop(external_osv.external_osv):
+    _inherit = "sale.shop"
+
     def export_inventory(self, cr, uid, ids, context=None):
         if context is None:
             context = {}
+
+        bom_obj = self.pool.get('mrp.bom')
+        move_obj = self.pool.get('stock.move')
         for shop in self.browse(cr, uid, ids):
 
             context['shop_id'] = shop.id
             context['conn_obj'] = self.external_connection(cr, uid, shop.referential_id)
+
+            ##########################################################################
+            # CODE FOR PACK AND SET FROM C2C_MAGENTO_PACK_AND_SET
+            # get pack components
+            # if a pack's component has a stock movement, we have to update the pack product
+            bom_components = bom_obj.search(cr, uid, [('bom_id', '!=', False)])
+            component_product_ids = [component.product_id.id
+                                     for component
+                                     in bom_obj.browse(cr, uid, bom_components)]
+            component_product_ids = [x for x in set(component_product_ids)] # unique!
+            if shop.last_inventory_export_date:
+                recent_move_ids = move_obj.search(cr, uid, [('date_planned', '>', shop.last_inventory_export_date),
+                                                            ('product_id', 'in', component_product_ids),
+                                                            ('state', '!=', 'draft'),
+                                                            ('state', '!=', 'cancel')])
+            else:
+                recent_move_ids = move_obj.search(cr, uid, [('product_id', 'in', component_product_ids)])
+
+            # find the bom components with the product having a stock move
+            component_product_ids = [move.product_id.id
+                                     for move
+                                     in move_obj.browse(cr, uid, recent_move_ids)]
+            component_product_ids = [x for x in set(component_product_ids)] # unique!
+            bom_components = bom_obj.search(cr,
+                                            uid,
+                                            [('bom_id', '!=', False),
+                                             ('product_id', 'in', component_product_ids)])
+            # get bom pack and the product ids of the pack
+            bom_packs = [bom_component.bom_id
+                         for bom_component
+                         in bom_obj.browse(cr, uid, bom_components)]
+            pack_product_ids = [bom_pack.product_id.id
+                                for bom_pack
+                                in bom_packs
+                                if (bom_pack.product_id.state != 'obsolete'
+                                    and bom_pack.product_id.magento_exportable)]
+            pack_product_ids = [x for x in set(pack_product_ids)] # unique!
+            
+            ##########################################################################
+            # GENERIC CODE FROM MAGENTOERPCONNECT
             product_ids = [product.id for product in shop.exportable_product_ids]
             if shop.last_inventory_export_date:
                 recent_move_ids = self.pool.get('stock.move').search(cr, uid, [
@@ -46,7 +116,8 @@ class sale_shop(external_osv.external_osv):
             product_ids = [move.product_id.id for move in self.pool.get('stock.move').browse(cr, uid, recent_move_ids)
                            if move.product_id.state != 'obsolete']
             product_ids = [x for x in set(product_ids)]
-            res = self.pool.get('product.product').export_inventory(cr, uid, product_ids, '', context)
+
+            res = self.pool.get('product.product').export_inventory(cr, uid, pack_product_ids + product_ids, '', context)
             shop.write({'last_inventory_export_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 
             request = self.pool.get('res.request')
