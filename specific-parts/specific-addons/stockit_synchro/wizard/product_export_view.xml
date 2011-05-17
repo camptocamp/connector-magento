@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="product_export_stockit_view" model="ir.ui.view">
+             <field name="name">Product Export for Stock iT</field>
+             <field name="model">product.export.stockit</field>
+             <field name="type">form</field>
+             <field name="arch" type="xml">
+                <form string="Product Export for Stock iT">
+                    <field name="filename"/>
+                    <separator string ="" colspan="4"/>
+                    <group colspan="2" col="4">
+                         <button special="cancel" string="Cancel" icon="gtk-cancel"/>
+                        <button name="export" string="Export" type="object" icon="terp-stock_effects-object-colorize"/>
+                     </group>
+                </form>
+             </field>
+         </record>
+
+        <record id="action_product_export_stockit" model="ir.actions.act_window">
+             <field name="name">Product Export for Stock iT</field>
+             <field name="res_model">product.export.stockit</field>
+             <field name="type">ir.actions.act_window</field>
+             <field name="view_type">form</field>
+             <field name="view_mode">tree,form</field>
+             <field name="view_id" ref="product_export_stockit_view"/>
+             <field name="context">{'record_id':active_id}</field>
+             <field name="target">new</field>
+       </record>
+
+        <menuitem
+            icon="STOCK_EXECUTE"
+            name="Product Export for Stock iT"
+            action="action_product_export_stockit"
+            id="menu_product_export_stockit"
+            parent="product.menu_main_product"
+            sequence="200"
+            />
+
+    </data>
+</openerp>
