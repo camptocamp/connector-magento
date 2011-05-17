@@ -2,12 +2,12 @@
 <openerp>
     <data>
 
-        <record id="stockit_export_product_view" model="ir.ui.view">
-             <field name="name">Product Export for Stock iT</field>
-             <field name="model">stockit.export.product</field>
+        <record id="stockit_export_product_ean13_view" model="ir.ui.view">
+             <field name="name">Product Export EAN13 for Stock iT</field>
+             <field name="model">stockit.export.product.ean13</field>
              <field name="type">form</field>
              <field name="arch" type="xml">
-                <form string="Product Export for Stock iT">
+                <form string="Product Export EAN13 for Stock iT">
                     <field name="filename"/>
                     <separator string ="" colspan="4"/>
                     <group colspan="2" col="4">
@@ -18,24 +18,24 @@
              </field>
          </record>
 
-        <record id="action_stockit_export_product" model="ir.actions.act_window">
-             <field name="name">Product Export for Stock iT</field>
-             <field name="res_model">stockit.export.product</field>
+        <record id="action_stockit_export_product_ean13" model="ir.actions.act_window">
+             <field name="name">Product Export EAN13 for Stock iT</field>
+             <field name="res_model">stockit.export.product.ean13</field>
              <field name="type">ir.actions.act_window</field>
              <field name="view_type">form</field>
              <field name="view_mode">tree,form</field>
-             <field name="view_id" ref="stockit_export_product_view"/>
+             <field name="view_id" ref="stockit_export_product_ean13_view"/>
              <field name="context">{'record_id':active_id}</field>
              <field name="target">new</field>
        </record>
 
         <menuitem
             icon="STOCK_EXECUTE"
-            name="Product Export for Stock iT"
-            action="action_stockit_export_product"
-            id="menu_stockit_export_product"
+            name="Product Export EAN13 for Stock iT"
+            action="action_stockit_export_product_ean13"
+            id="menu_stockit_export_product_ean13"
             parent="product.menu_main_product"
-            sequence="200"
+            sequence="201"
             />
 
     </data>

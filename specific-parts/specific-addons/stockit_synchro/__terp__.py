@@ -21,7 +21,7 @@
 {
     "name": "Stock-it synchro",
     "version": "1.0",
-    "depends": ["base", 'product', 'delivery'],
+    "depends": ["base", 'product', 'stock', 'delivery', 'product_multi_ean'],
     "author": "Camptocamp",
     "description": """Synchro with stock-it (stock management)
     """,
@@ -29,7 +29,9 @@
     "category": "Synchronisation",
     "init_xml": [],
     "demo_xml": [],
-    "update_xml": ['wizard/product_export_view.xml'],
+    "update_xml": ['wizard/product_export_view.xml',
+                   'wizard/ean_export_view.xml',
+                   ],
     "installable": True,
     "active": False,
 }

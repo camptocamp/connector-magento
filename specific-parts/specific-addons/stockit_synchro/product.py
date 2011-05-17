@@ -18,13 +18,10 @@
 #
 ##############################################################################
 
-from osv import osv, fields
-
-
+#from osv import osv, fields
+#
 #class ProductProduct(osv.osv):
-#
-#    def stockit_export(self, cr, uid, ids, context=None):
-#
+#    _inherit = 'product.product'
 #
 #ProductProduct()
-
+#

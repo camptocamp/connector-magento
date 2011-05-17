@@ -21,12 +21,13 @@
 import base64
 from osv import osv, fields
 from tools.translate import _
+from tools import flatten
 from stockit_synchro.stockit_exporter.exporter import StockitExporter
 
 
-class StockItProductExport(osv.osv_memory):
-    _name = 'stockit.export.product'
-    _description = 'Export product in Stock iT format'
+class StockItProductEANExport(osv.osv_memory):
+    _name = 'stockit.export.product.ean13'
+    _description = 'Export product EAN in Stock iT format'
 
     _columns = {
         'filename': fields.char('Filename', 256, readonly=True),
@@ -38,25 +39,17 @@ class StockItProductExport(osv.osv_memory):
         rows = []
         prod_ids = product_obj.search(cr, uid, [('type', '!=', 'service')], context=context)
         for product in product_obj.browse(cr, uid, prod_ids):
-            row = [
+            ean13_list = [ean13.name for ean13 in product.ean13_ids]
+            row = flatten([
                 product.default_code,
-                product.name,
-                '0',  # height
-                '0',  # width
-                '0',  # length
-                product.weight_net and str(product.weight_net) or '0',
-                product.weight and str(product.weight) or '0',
-                product.categ_id.complete_name,
-                product.x_magerp_zdbx_default_marque and product.x_magerp_zdbx_default_marque.label or '',
-                '',
-                '0',
-            ]
+                ean13_list
+            ])
             rows.append(row)
 
         self.write_file(cr, uid, ids, rows, context)
 
     def write_file(self, cr, uid, ids, data, context=None):
-        filename = '/tmp/product_export.csv'  # TODO: set a filename: manual / generated filename ?
+        filename = '/tmp/product_ean13_export.csv'  # TODO: set a filename: manual / generated filename ?
         exporter = StockitExporter(filename)
         exporter.export_file(data)
         result = self.write(cr,
@@ -66,4 +59,4 @@ class StockItProductExport(osv.osv_memory):
                             context=context)
         return result
 
-StockItProductExport()
+StockItProductEANExport()
