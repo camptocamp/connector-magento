@@ -34,7 +34,8 @@ class StockItProductExport(osv.osv_memory):
 
     def export(self, cr, uid, ids, context=None):
         product_obj = self.pool.get('product.product')
-
+        context['lang'] = 'fr_FR'
+        
         rows = []
         prod_ids = product_obj.search(cr, uid, [('type', '!=', 'service')], context=context)
         for product in product_obj.browse(cr, uid, prod_ids):
