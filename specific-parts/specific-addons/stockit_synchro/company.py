@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 ##############################################################################
 #
-#    Author Guewen Baconnier. Copyright Camptocamp SA
+#    Author Nicolas Bessi & Guewen Baconnier. Copyright Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -18,8 +18,18 @@
 #
 ##############################################################################
 
-import product
-import wizard
-import file_writer
-import stockit_exporter
-import company
+import ftplib
+
+from osv import fields, osv
+from tools.translate import _
+
+
+class ResCompany(osv.osv):
+    """override company to add ftp config for stock it"""
+    _inherit = "res.company"
+
+    _columns = {
+        'stockit_ftp_connection': fields.many2one('ftp.connection','FTP Connection for Stock iT synchronisations')
+    }
+
+ResCompany()

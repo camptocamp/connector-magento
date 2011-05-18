@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!-- Resource: ftp.connection -->
+        <record id="ftp_connection_stockit" model="ftp.connection">
+            <field name="name">stockit</field>
+            <!-- server environnement config file is used -->
+            <field name="server">localhost</field>
+            <field name="login">dummy</field>
+        </record>
+
+        
+    </data>
+</openerp>
