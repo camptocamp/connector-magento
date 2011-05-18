@@ -218,9 +218,9 @@ Exception :
                             })
         return True
 
-    def update_shop_orders(self, cr, uid, order, ext_id, ctx):
+    def update_shop_orders(self, cr, uid, order, ext_id, context):
         try:
-            res = super(sale_shop, self).update_shop_orders(cr, uid, order, ext_id, ctx)
+            res = super(sale_shop, self).update_shop_orders(cr, uid, order, ext_id, context)
         except Exception, e:
             request = self.pool.get('res.request')
             summary = """Error during orders update on order id : %d

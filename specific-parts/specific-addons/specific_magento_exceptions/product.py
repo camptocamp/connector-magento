@@ -33,9 +33,9 @@ class product_product(magerp_osv.magerp_osv):
     _inherit = "product.product"
 
 
-    def export_inventory(self, cr, uid, ids, shop, ctx):
+    def export_inventory(self, cr, uid, ids, shop, context):
         logger = netsvc.Logger()
-        stock_id = self.pool.get('sale.shop').browse(cr, uid, ctx['shop_id']).warehouse_id.lot_stock_id.id
+        stock_id = self.pool.get('sale.shop').browse(cr, uid, context['shop_id']).warehouse_id.lot_stock_id.id
         success_counter = 0
         exception_products = {}
         for product in self.browse(cr, uid, ids):
@@ -65,7 +65,7 @@ class product_product(magerp_osv.magerp_osv):
                         }
                         notify_msg = "Successfully updated stock configuration to not manage stock for product with SKU %s" % (product.magento_sku,)
                     
-                    ctx['conn_obj'].call('product_stock.update', [product.magento_sku, stock_options])
+                    context['conn_obj'].call('product_stock.update', [product.magento_sku, stock_options])
                     logger.notifyChannel('ext synchro', netsvc.LOG_INFO, notify_msg)
                     success_counter += 1
                 except Exception, e:

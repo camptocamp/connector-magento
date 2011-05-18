@@ -28,12 +28,12 @@ class Stock(osv.osv):
     _inherit = 'stock.picking'
 
     # let the exception raise, will be catched upper and returned in a request
-    def create_ext_complete_shipping(self, cr, uid, id, external_referential_id, magento_incrementid, ctx):
-        return self._create_custom_shipping(cr, uid, id, external_referential_id, magento_incrementid, ctx)
+    def create_ext_complete_shipping(self, cr, uid, id, external_referential_id, magento_incrementid, context):
+        return self._create_custom_shipping(cr, uid, id, external_referential_id, magento_incrementid, context)
 
     # let the exception raise, will be catched upper and returned in a request
-    def create_ext_partial_shipping(self, cr, uid, id, external_referential_id, magento_incrementid, ctx):
-        return self._create_custom_shipping(cr, uid, id, external_referential_id, magento_incrementid, ctx)
+    def create_ext_partial_shipping(self, cr, uid, id, external_referential_id, magento_incrementid, context):
+        return self._create_custom_shipping(cr, uid, id, external_referential_id, magento_incrementid, context)
 
 
 Stock()
