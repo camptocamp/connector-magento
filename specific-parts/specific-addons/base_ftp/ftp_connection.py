@@ -23,7 +23,7 @@ import paramiko
 
 from osv import fields, osv
 from tools.translate import _
-
+from base_ftp.ftp_services.ftp import Service
 
 class FtpConnection(osv.osv):
     """ (S)FTP Connection"""
@@ -31,11 +31,12 @@ class FtpConnection(osv.osv):
     _columns = {
         'name': fields.char('Connection name', size=30, required=True),
         'server': fields.char('Server url', size=256, required=True),
+        'port': fields.integer('Port'),
         'remote_cwd': fields.char('Default remote repository', size=256),
         'login': fields.char('Username', size=64, required=True),
         'password': fields.char('Password', size=64),
-        'is_tsl': fields.boolean('TSL?'),
-        'is_ssh': fields.boolean('SFTP?'),
+        'is_tls': fields.boolean('TLS?'),
+        'type': fields.selection((('ftp', 'FTP'),('sftp', 'SFTP')), 'Connection type' ,required=True),
         'local_cwd': fields.char('Default local repository', size=256),
     }
 
@@ -43,31 +44,15 @@ class FtpConnection(osv.osv):
         if not context:
             context = {}
 
-        ftp = None
-        ftp_conn = self.browse(cr, uid, id, context)
-        is_ssh = ftp_conn.is_ssh
-        try:
-            # TODO: port configuration
-            if is_ssh:
-                transport = paramiko.Transport((ftp_conn.server, 22))
-                transport.connect(username=ftp_conn.login,
-                                  password=ftp_conn.password)
-                ftp = paramiko.SFTPClient.from_transport(transport)
-                if ftp_conn.remote_cwd:
-                    ftp.chdir(ftp_conn.remote_cwd)
-            else:
-                if ftp_conn.is_tsl:
-                    ftp = ftplib.FTP_TLS(ftp_conn.server)
-                else:
-                    ftp = ftplib.FTP(ftp_conn.server)
-                ftp.login(ftp_conn.login,
-                          ftp_conn.password)
-                if ftp_conn.remote_cwd:
-                    ftp.cwd(ftp_conn.remote_cwd)
-        except Exception, e:
-            raise Exception(
-                _('Could not establish connection with ftp/sftp server: ')
-                + str(e))
+        ftp_conf = self.browse(cr, uid, id, context)
+        ftp = Service(ftp_conf.type,
+                      ftp_conf.server,
+                      port=ftp_conf.port,
+                      login=ftp_conf.login,
+                      password=ftp_conf.password,
+                      remote_cwd=ftp_conf.remote_cwd,
+                      local_cwd=ftp_conf.local_cwd,
+                      is_tls=ftp_conf.is_tls,)
         return ftp
 
 FtpConnection()

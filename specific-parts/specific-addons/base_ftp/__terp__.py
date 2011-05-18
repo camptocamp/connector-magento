@@ -21,7 +21,7 @@
 {
     "name": "Manage FTP Connections",
     "version": "1.0",
-    "depends": ['base', ],
+    "depends": ['base',],
     "author": "Camptocamp",
     "description": """Manage ftp connections.
     """,

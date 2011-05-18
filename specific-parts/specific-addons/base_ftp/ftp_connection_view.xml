@@ -13,12 +13,12 @@
                 <field name="name"/>
                 <separator colspan="4"/>
                 <group col="2" colspan="4" string="Remote">
+                    <field name="type"/>
                     <field name="server"/>
                     <field name="remote_cwd"/>
                     <field name="login"/>
                     <field name="password"/>
-                    <field name="is_tsl"/>
-                    <field name="is_ssh"/>
+                    <field name="is_tls"/>
                 </group>
                 <separator colspan="4"/>
                 <group col="2" colspan="4" string="Local">
@@ -36,6 +36,7 @@
 			<field name="arch" type="xml">
 				<tree string="(S)FTP Connections">
 					<field name="name" select="1"/>
+                    <field name="type" select="1"/>
                     <field name="server" select="1"/>
 				</tree>
 			</field>
@@ -51,7 +52,6 @@
                   name="(S)FTP Connections"
                   parent="base.menu_config"
                   action="act_ftp_connection"
-                  icon="STOCK_PROPERTIES"
                   sequence="100"/>
 
     </data>
