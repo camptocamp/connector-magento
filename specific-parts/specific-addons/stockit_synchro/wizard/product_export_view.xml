@@ -29,14 +29,5 @@
              <field name="target">new</field>
        </record>
 
-        <menuitem
-            icon="STOCK_EXECUTE"
-            name="Product Export for Stock iT"
-            action="action_stockit_export_product"
-            id="menu_stockit_export_product"
-            parent="product.menu_main_product"
-            sequence="200"
-            />
-
     </data>
 </openerp>

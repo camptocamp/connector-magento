@@ -24,40 +24,45 @@ from tools.translate import _
 from stockit_synchro.stockit_exporter.exporter import StockitExporter
 
 
-class StockItProductExport(osv.osv_memory):
-    _name = 'stockit.export.product'
-    _description = 'Export product in Stock iT format'
+class StockItOutPickingExport(osv.osv_memory):
+    _name = 'stockit.export.out.picking'
+    _description = 'Export outgoing pickings in Stock iT format'
 
     _columns = {
         'filename': fields.char('Filename', 256, readonly=True),
     }
 
     def export(self, cr, uid, ids, context=None):
-        product_obj = self.pool.get('product.product')
+        """Export outgoing pickings in Stock iT format"""
+        picking_obj = self.pool.get('stock.picking')
         context['lang'] = 'fr_FR'
-        
+
+        priority_mapping = {'1': 'BASSE', '2': 'NORMALE', '3': 'HAUTE'}
+
         rows = []
-        prod_ids = product_obj.search(cr, uid, [('type', '!=', 'service')], context=context)
-        for product in product_obj.browse(cr, uid, prod_ids):
-            row = [
-                product.default_code,
-                product.name,
-                '0',  # height
-                '0',  # width
-                '0',  # length
-                product.weight_net and str(product.weight_net) or '0',
-                product.weight and str(product.weight) or '0',
-                product.categ_id.complete_name,  # Stock IT class A
-                product.x_magerp_zdbx_default_marque and product.x_magerp_zdbx_default_marque.label or '',  # Stock IT class B
-                '',  # Stock IT class C
-                '0',
-            ]
-            rows.append(row)
+        picking_ids = picking_obj.search(cr, uid,
+                                         [('type', '=', 'out'),
+                                          ('state', '=', 'confirmed')],  # FIXME: check
+                                         context=context)
+        for picking in picking_obj.browse(cr, uid, picking_ids):
+            for line in picking.move_lines:
+                row = [
+                    'S',  # type
+                    picking.name,  # ref/name
+                    line.date_planned,  # expected date
+                    line.product_id.default_code,  # product code
+                    str(line.product_qty),  # quantity
+                    picking.priority and
+                    priority_mapping[picking.priority] or
+                    picking.priority['2'],  # priority
+                ]
+                rows.append(row)
 
         self.write_file(cr, uid, ids, rows, context)
+        return True
 
     def write_file(self, cr, uid, ids, data, context=None):
-        filename = '/tmp/product_export.csv'  # TODO: set a filename: manual / generated filename ?
+        filename = '/tmp/out_picking_export.csv'  # TODO: set a filename: manual / generated filename ?
         exporter = StockitExporter(filename)
         exporter.export_file(data)
         result = self.write(cr,
@@ -67,4 +72,4 @@ class StockItProductExport(osv.osv_memory):
                             context=context)
         return result
 
-StockItProductExport()
+StockItOutPickingExport()

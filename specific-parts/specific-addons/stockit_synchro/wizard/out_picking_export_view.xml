@@ -2,12 +2,12 @@
 <openerp>
     <data>
 
-        <record id="stockit_export_product_ean13_view" model="ir.ui.view">
-             <field name="name">Product Export EAN13 for Stock iT</field>
-             <field name="model">stockit.export.product.ean13</field>
+        <record id="stockit_export_out_picking_view" model="ir.ui.view">
+             <field name="name">Outgoing Pickings Export for Stock iT</field>
+             <field name="model">stockit.export.out.picking</field>
              <field name="type">form</field>
              <field name="arch" type="xml">
-                <form string="Product Export EAN13 for Stock iT">
+                <form string="Outgoing Pickings Export for Stock iT">
                     <field name="filename"/>
                     <separator string ="" colspan="4"/>
                     <group colspan="2" col="4">
@@ -18,13 +18,13 @@
              </field>
          </record>
 
-        <record id="action_stockit_export_product_ean13" model="ir.actions.act_window">
-             <field name="name">Product Export EAN13 for Stock iT</field>
-             <field name="res_model">stockit.export.product.ean13</field>
+        <record id="action_stockit_export_out_picking" model="ir.actions.act_window">
+             <field name="name">Outgoing Pickings Export for Stock iT</field>
+             <field name="res_model">stockit.export.out.picking</field>
              <field name="type">ir.actions.act_window</field>
              <field name="view_type">form</field>
              <field name="view_mode">tree,form</field>
-             <field name="view_id" ref="stockit_export_product_ean13_view"/>
+             <field name="view_id" ref="stockit_export_out_picking_view"/>
              <field name="context">{'record_id':active_id}</field>
              <field name="target">new</field>
        </record>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <menuitem
+            name="Stock-it"
+            id="menu_stockit_main"
+            parent="product.menu_main_product"
+            sequence="200"
+            />
+
+        <menuitem
+            icon="STOCK_EXECUTE"
+            name="Product Export"
+            action="action_stockit_export_product"
+            id="menu_stockit_export_product"
+            parent="menu_stockit_main"
+            sequence="100"
+            />
+
+        <menuitem
+            icon="STOCK_EXECUTE"
+            name="Product Export EAN13"
+            action="action_stockit_export_product_ean13"
+            id="menu_stockit_export_product_ean13"
+            parent="menu_stockit_main"
+            sequence="105"
+            />
+
+        <menuitem
+            icon="STOCK_EXECUTE"
+            name="Outgoing Pickings Export"
+            action="action_stockit_export_out_picking"
+            id="menu_stockit_export_out_picking"
+            parent="menu_stockit_main"
+            sequence="110"
+            />
+
+        <menuitem
+            icon="STOCK_EXECUTE"
+            name="Ingoing Pickings Export"
+            action="action_stockit_export_in_picking"
+            id="menu_stockit_export_in_picking"
+            parent="menu_stockit_main"
+            sequence="115"
+            />
+
+    </data>
+</openerp>

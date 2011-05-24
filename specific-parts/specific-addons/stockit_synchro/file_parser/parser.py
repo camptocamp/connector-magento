@@ -52,15 +52,14 @@ class FileParser(object):
         else:
             raise Exception(_('No buffer file'))
             
-            
-    def parse(self):
+    def parse(self, **kwargs):
         if self.decode_base_64:
             self._decode_64b_stream()
         res = None
         if self.ftype == 'csv':
-            res = self.parse_csv()
+            res = self.parse_csv(**kwargs)
         else:
-            res = self.parse_xls()
+            res = self.parse_xls(**kwargs)
         if self.keys_to_validate:
             self._validate_column(res, self.keys_to_validate)
         return res
@@ -131,4 +130,3 @@ class FileParser(object):
         return func(result_set, conversion_rules)
         
     
-        
