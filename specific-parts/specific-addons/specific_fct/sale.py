@@ -123,7 +123,6 @@ class sale_shop(magerp_osv.magerp_osv):
             context['conn_obj'] = self.external_connection(cr, uid, shop.referential_id)
             self.export_categories(cr, uid, shop, context)
             self.export_products(cr, uid, shop, context)
-            self.export_product_links(cr, uid, shop, context)
             shop.write({'last_products_export_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 
         self.deactivate_products(cr, uid, context=context)
