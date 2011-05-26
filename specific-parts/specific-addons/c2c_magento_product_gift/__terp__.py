@@ -20,7 +20,7 @@
 {
     'name' : 'Magento Product Gifts',
     'version' : '1.0',
-    'depends' : ['base', 'product_links',],
+    'depends' : ['base', 'product_links', 'magentoerpconnect'],
     'author' : 'Camptocamp',
     'description': """ Create product links of type "Gift".
 Needs Magento module : name_of_module

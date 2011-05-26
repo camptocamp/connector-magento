@@ -33,7 +33,12 @@ class ProductLink(osv.osv):
         return res
 
     _columns = {
-        'type': fields.selection(get_link_type_selection, 'Link type', required=True)
+        'type': fields.selection(get_link_type_selection, 'Link type', required=True),
+        'sequence': fields.integer('Position / Quantity (for Gift)'),
+    }
+
+    _defaults = {
+        'sequence': lambda *a: 1,
     }
 
 ProductLink()
