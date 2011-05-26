@@ -28,8 +28,8 @@ class ProductLink(osv.osv):
 
     def get_link_type_selection(self, cr, uid, context=None):
         res = super(ProductLink, self).get_link_type_selection(cr, uid, context)
-        if not 'gift' in [key[0] for key in res]:
-            res.append(('gift', 'Gift'))
+        if not 'dacrydium_cadeau' in [key[0] for key in res]:
+            res.append(('dacrydium_cadeau', 'Gift'))
         return res
 
     _columns = {
