@@ -3,11 +3,11 @@
     <data>
 
         <record id="stockit_export_in_picking_view" model="ir.ui.view">
-             <field name="name">Ingoing Pickings Export for Stock iT</field>
+             <field name="name">Incoming Pickings Export for Stock iT</field>
              <field name="model">stockit.export.in.picking</field>
              <field name="type">form</field>
              <field name="arch" type="xml">
-                <form string="Ingoing Pickings Export for Stock iT">
+                <form string="Incoming Pickings Export for Stock iT">
                     <field name="filename"/>
                     <separator string ="" colspan="4"/>
                     <group colspan="2" col="4">
@@ -19,7 +19,7 @@
          </record>
 
         <record id="action_stockit_export_in_picking" model="ir.actions.act_window">
-             <field name="name">Ingoing Pickings Export for Stock iT</field>
+             <field name="name">Incoming Pickings Export for Stock iT</field>
              <field name="res_model">stockit.export.in.picking</field>
              <field name="type">ir.actions.act_window</field>
              <field name="view_type">form</field>

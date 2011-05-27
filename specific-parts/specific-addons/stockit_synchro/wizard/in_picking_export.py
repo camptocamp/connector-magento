@@ -26,14 +26,14 @@ from stockit_synchro.stockit_exporter.exporter import StockitExporter
 
 class StockItInPickingExport(osv.osv_memory):
     _name = 'stockit.export.in.picking'
-    _description = 'Export ingoing pickings in Stock iT format'
+    _description = 'Export incoming pickings in Stock iT format'
 
     _columns = {
         'filename': fields.char('Filename', 256, readonly=True),
     }
 
     def export(self, cr, uid, ids, context=None):
-        """Export ingoing pickings in Stock iT format"""
+        """Export incoming pickings in Stock iT format"""
         picking_obj = self.pool.get('stock.picking')
         context['lang'] = 'fr_FR'
 

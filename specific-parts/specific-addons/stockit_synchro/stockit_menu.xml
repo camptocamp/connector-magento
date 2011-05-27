@@ -38,9 +38,18 @@
 
         <menuitem
             icon="STOCK_EXECUTE"
-            name="Ingoing Pickings Export"
+            name="Incoming Pickings Export"
             action="action_stockit_export_in_picking"
             id="menu_stockit_export_in_picking"
+            parent="menu_stockit_main"
+            sequence="115"
+            />
+
+        <menuitem
+            icon="STOCK_EXECUTE"
+            name="Incoming Pickings Import"
+            action="action_stockit_import_in_picking"
+            id="menu_stockit_import_in_picking"
             parent="menu_stockit_main"
             sequence="115"
             />

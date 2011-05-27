@@ -72,6 +72,9 @@ class StockItInventoryImport(osv.osv_memory):
         rows = importer.csv_to_dict(header)
         rows = importer.cast_rows(rows, conversion_types)
 
+        # I means inventory for stock it
+        rows = [row for row in rows if row['type'] == 'I']
+
         # create ean on product if it does not already exist
         product_ean_list = {}
         for row in rows:
@@ -99,18 +102,18 @@ class StockItInventoryImport(osv.osv_memory):
                     last = rows[index]
 
         inventory_rows = []
-        for row_index in rows:
+        for row in rows:
             product_ids = product_obj.search(cr, uid,
-                [('default_code', '=', row_index['default_code'])])
+                [('default_code', '=', row['default_code'])])
             if not product_ids:
                 raise Exception('ImportError', "Product code %s not found !" %
-                                               (row_index['default_code'],))
+                                               (row['default_code'],))
             product_id = product_ids[0]
             product_uom = product_obj.browse(cr, uid, product_id).uom_id
 
             inventory_row = {'product_id': product_id,
-                             'product_qty': row_index['quantity'],
-                             'product_uom': product_uom.id,
+                             'product_qty': row['quantity'],
+                             'product_uom': product_uom.id,  # TODO use onchange
                              'location_id': 11,  # FIXME get the right location
                              #select in wizard or get info zone from the file?
                              }
@@ -131,7 +134,7 @@ class StockItInventoryImport(osv.osv_memory):
         for frontend action, opens the form with the created inventory
         """
         inventory_id = self.import_inventory(cr, uid, ids, context)
-        res = False
+        res = {'type': 'ir.actions.act_window_close'}
         if inventory_id:
             model_obj = self.pool.get('ir.model.data')
             model_data_ids = model_obj.search(cr, uid, [

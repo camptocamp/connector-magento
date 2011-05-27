@@ -39,12 +39,13 @@ class StockitImporter(object):
     def cast_rows(self, rows, conversion_rules):
         for row in rows:
             for rule in conversion_rules:
-                if conversion_rules[rule] == datetime.datetime:
-                    date_string = row[rule].split(' ')[0]
-                    row[rule] = datetime.datetime.strptime(date_string,
-                                                           '%Y-%M-%d')
-                else:
-                    row[rule] = conversion_rules[rule](row[rule])
+                if row[rule]:
+                    if conversion_rules[rule] == datetime.datetime:
+                        date_string = row[rule].split(' ')[0]
+                        row[rule] = datetime.datetime.strptime(date_string,
+                                                               '%Y-%M-%d')
+                    else:
+                        row[rule] = conversion_rules[rule](row[rule])
         return rows
 
     def read_from_base64(self, data):

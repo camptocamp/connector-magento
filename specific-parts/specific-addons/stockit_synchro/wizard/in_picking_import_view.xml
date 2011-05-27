@@ -2,12 +2,12 @@
 <openerp>
     <data>
 
-        <record id="stockit_import_inventory_view" model="ir.ui.view">
-             <field name="name">Inventory Import for Stock iT</field>
-             <field name="model">stockit.import.inventory</field>
+        <record id="stockit_import_in_picking_view" model="ir.ui.view">
+             <field name="name">Incoming Pickings Import for Stock iT</field>
+             <field name="model">stockit.import.in.picking</field>
              <field name="type">form</field>
              <field name="arch" type="xml">
-                <form string="Inventory Import for Stock iT">
+                <form string="Incoming Pickings Import for Stock iT">
                     <field name="data" filename="filename" />
                     <field name="filename" colspan="2"/>
                     <separator string ="" colspan="4"/>
@@ -19,13 +19,13 @@
              </field>
          </record>
 
-        <record id="action_stockit_import_inventory" model="ir.actions.act_window">
-             <field name="name">Inventory Import for Stock iT</field>
-             <field name="res_model">stockit.import.inventory</field>
+        <record id="action_stockit_import_in_picking" model="ir.actions.act_window">
+             <field name="name">Incoming Pickings Import for Stock iT</field>
+             <field name="res_model">stockit.import.in.picking</field>
              <field name="type">ir.actions.act_window</field>
              <field name="view_type">form</field>
              <field name="view_mode">tree,form</field>
-             <field name="view_id" ref="stockit_import_inventory_view"/>
+             <field name="view_id" ref="stockit_import_in_picking_view"/>
              <field name="context">{'record_id':active_id}</field>
              <field name="target">new</field>
        </record>
