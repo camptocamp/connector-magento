@@ -72,7 +72,18 @@ class StockItInventoryImport(osv.osv_memory):
         rows = importer.csv_to_dict(header)
         rows = importer.cast_rows(rows, conversion_types)
 
-        # loop on product + ean and add them if they are missing
+        # create ean on product if it does not already exist
+        product_ean_list = {}
+        for row in rows:
+            product_ids = product_obj.search(cr, uid,
+                [('default_code', '=', row['default_code'])])
+            product_id = product_ids[0]
+            if product_id not in product_ean_list.keys():
+                product_ean_list[product_id] = []
+            product_ean_list[product_id].append(row['ean'])
+
+        for product_id in product_ean_list:
+            product_obj.add_ean_if_not_exists(cr, uid, product_id, product_ean_list[product_id], context)
 
         # sum quantities of duplicate products and remove them
         rows = sorted(rows, key=itemgetter('default_code', 'zone'))

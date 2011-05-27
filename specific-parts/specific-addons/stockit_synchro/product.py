@@ -18,10 +18,34 @@
 #
 ##############################################################################
 
-#from osv import osv, fields
-#
-#class ProductProduct(osv.osv):
-#    _inherit = 'product.product'
-#
-#ProductProduct()
-#
+from osv import osv, fields
+
+
+class ProductProduct(osv.osv):
+    _inherit = 'product.product'
+
+    def add_ean_if_not_exists(self, cr, uid, id, ean_list, context=None):
+        """ Given a list of EAN13, check on the product if it already exists
+         and create it if not
+        """
+        product_ean_obj = self.pool.get('product.ean13')
+        product_obj = self.pool.get('product.product')
+        product = product_obj.browse(cr, uid, id, context=context)
+        ean_list = list(set(ean_list))  # remove duplicates
+        for input_ean in ean_list:
+            ean_exists = False
+            max_sequence = 0
+            for ean in product.ean13_ids:
+                if ean.sequence > max_sequence:
+                    max_sequence = ean.sequence
+                if input_ean == ean.name:
+                    ean_exists = True
+            if not ean_exists:
+                product_ean_obj.create(cr, uid,
+                                       {'name': input_ean,
+                                        'product_id': id,
+                                        'sequence': max_sequence + 1,
+                    })
+        return True
+
+ProductProduct()
