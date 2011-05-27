@@ -12,7 +12,7 @@ class StockitExporter(object):
 
     def _write_file(self, data):
         file = open(self.filename, 'w')
-        writer = UnicodeWriter(file, delimiter='|')
+        writer = UnicodeWriter(file, dialect='stockit')
         writer.writerows(data)
         file.close()
 

@@ -18,6 +18,7 @@
 #
 ##############################################################################
 
+import stockit_csv_dialect
 import product
 import wizard
 import file_writer

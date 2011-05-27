@@ -40,6 +40,7 @@
                    'wizard/ean_export_view.xml',
                    'wizard/out_picking_export_view.xml',
                    'wizard/in_picking_export_view.xml',
+                   'wizard/inventory_import_view.xml',
                    'stockit_menu.xml',
                    'company_view.xml',
                    ],

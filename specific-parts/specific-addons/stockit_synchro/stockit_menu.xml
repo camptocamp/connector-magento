@@ -45,5 +45,14 @@
             sequence="115"
             />
 
+        <menuitem
+            icon="STOCK_EXECUTE"
+            name="Inventory Import"
+            action="action_stockit_import_inventory"
+            id="menu_stockit_import_inventory"
+            parent="menu_stockit_main"
+            sequence="115"
+            />
+
     </data>
 </openerp>

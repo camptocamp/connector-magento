@@ -25,9 +25,9 @@ from tools.translate import _
 from stockit_synchro.file_parser.parser import FileParser
 
 
-class StockItInPickingExport(osv.osv_memory):
-    _name = 'stockit.export.in.picking'
-    _description = 'Export ingoing pickings in Stock iT format'
+class StockItInPickingImport(osv.osv_memory):
+    _name = 'stockit.import.in.picking'
+    _description = 'Import ingoing pickings in Stock iT format'
 
     _columns = {
         'data': fields.binary('File', required=True),
@@ -101,4 +101,4 @@ class StockItInPickingExport(osv.osv_memory):
         }
         return res
 
-StockItInPickingExport()
+StockItInPickingImport()

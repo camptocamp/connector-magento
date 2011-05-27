@@ -2,3 +2,4 @@ import product_export
 import ean_export
 import out_picking_export
 import in_picking_export
+import inventory_import
