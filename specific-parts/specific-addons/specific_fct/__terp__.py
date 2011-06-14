@@ -29,6 +29,8 @@
                  'poweremail',
                  'c2c_magento_set_and_pack_product',
                  'c2c_magento_product_components',
+                 'sale',
+                 'sale_margin',
                  ],
     'author' : 'Camptocamp',
     'description': """Code customisation module""",

@@ -59,6 +59,23 @@ class sale_order(magerp_osv.magerp_osv):
         res = self.get_order_cash_on_delivery(cr, uid, res, external_referential_id, data_record, key_field, mapping_lines, defaults, context)
         return res
 
+    def oe_create(self, cr, uid, vals, data, external_referential_id, defaults, context):
+        """call sale_margin's module on_change to compute margin when order's created from magento"""
+        order_id = super(sale_order, self).oe_create(cr, uid, vals, data, external_referential_id, defaults, context)
+        order_line_obj = self.pool.get('sale.order.line')
+        order = self.browse(cr, uid, order_id, context)
+        for line in order.order_line:
+            line_changes = order_line_obj.product_id_change(cr, uid, line.id, order.pricelist_id.id, line.product_id.id,
+                                             qty=line.product_uom_qty, uom=line.product_uom.id,
+                                             qty_uos=line.product_uos_qty, uos=line.product_uos and line.product_uos.id,
+                                             name=line.name, partner_id=order.partner_id.id, lang='lang' in context and context['lang'],
+                                             date_order=order.date_order, packaging=line.product_packaging.id,
+                                             fiscal_position=order.fiscal_position and order.fiscal_position.id,
+                                             discount=line.discount, price_unit=line.price_unit)
+            order_line_obj.write(cr, uid, line.id, line_changes['value'], context=context)
+
+        return order_id
+
     def create(self, cr, uid, vals, context={}):
         """ Creation of the sale order. Delete components of a BoM with 0.0 price.
             Override sale.order to delete the components of a "Pack" product when they are
