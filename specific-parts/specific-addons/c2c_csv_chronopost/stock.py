@@ -83,7 +83,7 @@ class StockCsvColissimo(osv.osv):
         writer = csv.writer(fid, delimiter=';', quotechar='"', quoting=csv.QUOTE_ALL)
         for row in content:
             writer.writerow([field.encode("utf-8") for field in row.get_fields()])
-        fid.close
+        fid.close()
         # chronopost needs to drop the file so we have to put the write permission on the group
         os.chmod(filename, 0664)
 
@@ -139,7 +139,6 @@ class StockCsvColissimo(osv.osv):
                     file.append(line)
                 
                 self._write_csv(os.path.join(company.tracking_csv_path_out, filename), file)
-
         return super(StockCsvColissimo, self).action_done(cr, uid, ids, context)
 
     def _get_packing_weight(self, cr, uid, packing):

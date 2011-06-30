@@ -31,6 +31,7 @@
                  'c2c_magento_product_components',
                  'sale',
                  'sale_margin',
+                 'c2c_pack_product_chg',
                  ],
     'author' : 'Camptocamp',
     'description': """Code customisation module""",
