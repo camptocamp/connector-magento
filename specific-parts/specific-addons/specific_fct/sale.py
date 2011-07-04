@@ -67,14 +67,17 @@ class sale_order(magerp_osv.magerp_osv):
         order_line_obj = self.pool.get('sale.order.line')
         order = self.browse(cr, uid, order_id, context)
         for line in order.order_line:
-            line_changes = order_line_obj.product_id_change(cr, uid, line.id, order.pricelist_id.id, line.product_id.id,
+            if line.price_unit:  # skip margin computation on gifts
+                line_changes = order_line_obj.product_id_change(cr, uid, line.id, order.pricelist_id.id, line.product_id.id,
                                              qty=line.product_uom_qty, uom=line.product_uom.id,
                                              qty_uos=line.product_uos_qty, uos=line.product_uos and line.product_uos.id,
                                              name=line.name, partner_id=order.partner_id.id, lang='lang' in context and context['lang'],
                                              date_order=order.date_order, packaging=line.product_packaging.id,
                                              fiscal_position=order.fiscal_position and order.fiscal_position.id,
                                              discount=line.discount, price_unit=line.price_unit)
-            order_line_obj.write(cr, uid, line.id, line_changes['value'], context=context)
+                values = dict(filter(lambda x: x[0] in ('purchase_price', 'margin', 'marginpourcent'),
+                                     line_changes['value'].items()))
+                order_line_obj.write(cr, uid, line.id, values, context=context)
 
         return order_id
 
