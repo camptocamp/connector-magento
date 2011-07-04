@@ -67,6 +67,16 @@ class Product(magerp_osv.magerp_osv):
         self.write(cr, uid, product_ids, {'active': False} , context=context)
         return True
 
+    def create(self, cr, uid, vals, context=None):
+        if vals.get('default_code', False):
+            vals['default_code'] = vals['default_code'].strip()
+        return super(Product, self).create(cr, uid, vals, context=context)
+
+    def write(self, cr, uid, ids, vals, context=None):
+        if vals.get('default_code', False):
+            vals['default_code'] = vals['default_code'].strip()
+        return super(Product, self).write(cr, uid, ids, vals, context=context)
+
 Product()
 
 
