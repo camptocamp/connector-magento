@@ -145,6 +145,8 @@ Exception :
     def export_shipping(self, cr, uid, ids, context):
         """Export shipping in their order from first to last. Based on the backorder id.
         Only the SQL query is modified on that function"""
+        if context is None:
+            context = {}
         logger = netsvc.Logger()
         for shop in self.browse(cr, uid, ids):
             context['conn_obj'] = self.external_connection(cr, uid, shop.referential_id)
