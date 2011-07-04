@@ -236,7 +236,7 @@ Exception :
                             'body': summary,
                             })
             cr.commit()
-            raise e
+            raise 
         return res
 
 sale_shop()
