@@ -8,8 +8,8 @@
             <!-- server environnement config file is used -->
             <field name="server">localhost</field>
             <field name="login">dummy</field>
+            <field name="type">ftp</field>
         </record>
 
-        
     </data>
 </openerp>

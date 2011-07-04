@@ -8,11 +8,13 @@
              <field name="type">form</field>
              <field name="arch" type="xml">
                 <form string="Product Export EAN13 for Stock iT">
-                    <field name="filename"/>
+                    <group colspan="4" >
+                        <field name="data"/>
+                    </group>
                     <separator string ="" colspan="4"/>
                     <group colspan="2" col="4">
                          <button special="cancel" string="Cancel" icon="gtk-cancel"/>
-                        <button name="export" string="Export" type="object" icon="gtk-execute"/>
+                        <button name="action_manual_export" string="Export" type="object" icon="gtk-execute"/>
                      </group>
                 </form>
              </field>

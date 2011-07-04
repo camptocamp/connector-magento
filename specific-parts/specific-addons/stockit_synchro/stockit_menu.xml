@@ -5,61 +5,75 @@
         <menuitem
             name="Stock-it"
             id="menu_stockit_main"
-            parent="product.menu_main_product"
+            parent="stock.menu_stock_root"
             sequence="200"
             />
 
         <menuitem
-            icon="STOCK_EXECUTE"
-            name="Product Export"
-            action="action_stockit_export_product"
-            id="menu_stockit_export_product"
+            name="Export"
+            id="menu_stockit_export"
             parent="menu_stockit_main"
             sequence="100"
             />
 
         <menuitem
-            icon="STOCK_EXECUTE"
-            name="Product Export EAN13"
-            action="action_stockit_export_product_ean13"
-            id="menu_stockit_export_product_ean13"
+            name="Import"
+            id="menu_stockit_import"
             parent="menu_stockit_main"
             sequence="105"
             />
 
         <menuitem
             icon="STOCK_EXECUTE"
-            name="Outgoing Pickings Export"
+            name="Product"
+            action="action_stockit_export_product"
+            id="menu_stockit_export_product"
+            parent="menu_stockit_export"
+            sequence="100"
+            />
+
+        <menuitem
+            icon="STOCK_EXECUTE"
+            name="Product EAN13"
+            action="action_stockit_export_product_ean13"
+            id="menu_stockit_export_product_ean13"
+            parent="menu_stockit_export"
+            sequence="105"
+            />
+
+        <menuitem
+            icon="STOCK_EXECUTE"
+            name="Outgoing Pickings"
             action="action_stockit_export_out_picking"
             id="menu_stockit_export_out_picking"
-            parent="menu_stockit_main"
+            parent="menu_stockit_export"
             sequence="110"
             />
 
         <menuitem
             icon="STOCK_EXECUTE"
-            name="Incoming Pickings Export"
+            name="Incoming Pickings"
             action="action_stockit_export_in_picking"
             id="menu_stockit_export_in_picking"
-            parent="menu_stockit_main"
+            parent="menu_stockit_export"
             sequence="115"
             />
 
         <menuitem
             icon="STOCK_EXECUTE"
-            name="Incoming Pickings Import"
+            name="Incoming Pickings"
             action="action_stockit_import_in_picking"
             id="menu_stockit_import_in_picking"
-            parent="menu_stockit_main"
+            parent="menu_stockit_import"
             sequence="115"
             />
 
         <menuitem
             icon="STOCK_EXECUTE"
-            name="Inventory Import"
+            name="Inventory"
             action="action_stockit_import_inventory"
             id="menu_stockit_import_inventory"
-            parent="menu_stockit_main"
+            parent="menu_stockit_import"
             sequence="115"
             />
 

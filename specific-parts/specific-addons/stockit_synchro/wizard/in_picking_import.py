@@ -60,12 +60,13 @@ class StockItInPickingImport(osv.osv_memory):
 
         # header to apply on the csv file (no header on the file)
         # in the right order
-        header = ['type', 'picking_name', 'planned_date', 'default_code',
+        header = ['type', 'id', 'picking_name', 'planned_date', 'default_code',
                   'brand', 'expected_qty', 'received_qty', 'ean', 'width',
                   'length', 'height', 'picking_capacity', ]
 
         conversion_types = {
             'type': unicode,
+            'id': int,
             'picking_name': unicode,
             'planned_date': datetime.datetime,
             'default_code': unicode,
@@ -92,6 +93,9 @@ class StockItInPickingImport(osv.osv_memory):
         for row in rows:
             product_ids = product_obj.search(cr, uid,
                 [('default_code', '=', row['default_code'])])
+            if not product_ids:
+                raise Exception('ImportError', "Product %s not found !" %
+                                               (row['default_code'],))
             product_id = product_ids[0]
             if product_id not in product_ean_list.keys():
                 product_ean_list[product_id] = []
@@ -104,11 +108,11 @@ class StockItInPickingImport(osv.osv_memory):
                                               context)
 
         # sum quantities of duplicate products in a packing and remove them
-        rows = sorted(rows, key=itemgetter('picking_name', 'default_code'))
+        rows = sorted(rows, key=itemgetter('id', 'default_code'))
         if rows:
             last = rows[-1]
             for index in range(len(rows) - 2, -1, -1):
-                if last['picking_name'] == rows[index]['picking_name'] and \
+                if last['id'] == rows[index]['id'] and \
                    last['default_code'] == rows[index]['default_code']:
                     last['expected_qty'] = last['expected_qty'] + \
                                        rows[index]['expected_qty']
@@ -120,13 +124,13 @@ class StockItInPickingImport(osv.osv_memory):
 
         imported_picking_ids = []
 
-        for picking_name, rows in groupby(rows,
-                                          lambda row: row['picking_name']):
+        for picking_id, rows in groupby(rows,
+                                          lambda row: row['id']):
             picking_ids = picking_obj.search(cr, uid,
-                [('name', '=', picking_name)])
+                [('id', '=', picking_id)])
             if not picking_ids:
                 raise Exception('ImportError', "Picking %s not found !" %
-                                               (picking_name,))
+                                               (picking_id,))
             picking_id = picking_ids[0]
             imported_picking_ids.append(picking_id)
             picking = picking_obj.browse(cr, uid, picking_id)
@@ -139,7 +143,21 @@ class StockItInPickingImport(osv.osv_memory):
                     raise Exception('ImportError', "Product %s not found !" %
                                                    (row['default_code'],))
                 product_id = product_ids[0]
-                product = product_obj.browse(cr, uid, product_id)
+#                product = product_obj.browse(cr, uid, product_id)
+                # update values on product
+                # fields does not exist
+#                cols_to_check = {'height': 'height',
+#                                 'width': 'width',
+#                                 'length': 'length'}
+#                values_to_update = {}
+#                for col in cols_to_check:
+#                    import pdb; pdb.set_trace()
+#                    if row[col] and getattr(product, col) != row[col]:
+#                        values_to_update[col] = row[col]
+#                if values_to_update:
+#                    product_obj.write(cr, uid, product.id,
+#                                      values_to_update)
+
                 found_product = False
                 for move in picking.move_lines:
                     if move.product_id.id == product_id:
@@ -171,7 +189,7 @@ class StockItInPickingImport(osv.osv_memory):
                     )['value']
 
                     stock_move_values.update({
-                        'picking_id': picking_id,
+                        'picking_name': row['picking_name'],
                         'product_id': product_id,
                         'product_qty': row['received_qty'],
                     })

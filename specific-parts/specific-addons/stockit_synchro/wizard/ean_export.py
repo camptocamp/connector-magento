@@ -19,6 +19,8 @@
 ##############################################################################
 
 import base64
+import tempfile
+import os
 from osv import osv, fields
 from tools.translate import _
 from tools import flatten
@@ -30,14 +32,35 @@ class StockItProductEANExport(osv.osv_memory):
     _description = 'Export product EAN in Stock iT format'
 
     _columns = {
-        'filename': fields.char('Filename', 256, readonly=True),
+        'data': fields.binary('File', readonly=True),
     }
 
-    def export(self, cr, uid, ids, context=None):
+    def action_manual_export(self, cr, uid, ids, context=None):
+        rows = self.get_data(cr, uid, ids, context)
+        exporter = StockitExporter()
+        data = exporter.get_csv_data(rows)
+        result = self.write(cr,
+                            uid,
+                            ids,
+                            {'data': base64.encodestring(data)},
+                            context=context)
+        return result
+
+    def action_background_export(self, cr, uid, ids, context=None):
+        # TODO: set a filename: manual / generated filename ?
+        filename = os.path.join(tempfile.gettempdir(),
+                                'product_ean13_export.csv')
+        rows = self.get_data(cr, uid, ids, context)
+        exporter = StockitExporter(filename)
+        data = exporter.get_csv_data(rows)
+        exporter.export_file(data)
+
+    def get_data(self, cr, uid, ids, context=None):
         product_obj = self.pool.get('product.product')
 
         rows = []
-        prod_ids = product_obj.search(cr, uid, [('type', '!=', 'service')], context=context)
+        prod_ids = product_obj.search(cr, uid, [('type', '!=', 'service')],
+                                      context=context)
         for product in product_obj.browse(cr, uid, prod_ids):
             ean13_list = [ean13.name for ean13 in product.ean13_ids]
             row = flatten([
@@ -45,18 +68,6 @@ class StockItProductEANExport(osv.osv_memory):
                 ean13_list
             ])
             rows.append(row)
-
-        self.write_file(cr, uid, ids, rows, context)
-
-    def write_file(self, cr, uid, ids, data, context=None):
-        filename = '/tmp/product_ean13_export.csv'  # TODO: set a filename: manual / generated filename ?
-        exporter = StockitExporter(filename)
-        exporter.export_file(data)
-        result = self.write(cr,
-                            uid,
-                            ids,
-                            {'filename': filename, },
-                            context=context)
-        return result
+        return rows
 
 StockItProductEANExport()

@@ -26,7 +26,7 @@
                 'stock',
                 'delivery',
                 'product_multi_ean',
-                'server_environment',
+                'base_ftp',
                 ],
     "author": "Camptocamp",
     "description": """Synchro with stock-it (stock management)

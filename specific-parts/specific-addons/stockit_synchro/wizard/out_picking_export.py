@@ -18,6 +18,8 @@
 #
 ##############################################################################
 
+import os
+import tempfile
 import base64
 from osv import osv, fields
 from tools.translate import _
@@ -29,10 +31,30 @@ class StockItOutPickingExport(osv.osv_memory):
     _description = 'Export outgoing pickings in Stock iT format'
 
     _columns = {
-        'filename': fields.char('Filename', 256, readonly=True),
+        'data': fields.binary('File', readonly=True),
     }
 
-    def export(self, cr, uid, ids, context=None):
+    def action_manual_export(self, cr, uid, ids, context=None):
+        rows = self.get_data(cr, uid, ids, context)
+        exporter = StockitExporter()
+        data = exporter.get_csv_data(rows)
+        result = self.write(cr,
+                            uid,
+                            ids,
+                            {'data': base64.encodestring(data)},
+                            context=context)
+        return result
+
+    def action_background_export(self, cr, uid, ids, context=None):
+        # TODO: set a filename: manual / generated filename ?
+        filename = os.path.join(tempfile.gettempdir(),
+                                'out_picking_export.csv')
+        rows = self.get_data(cr, uid, ids, context)
+        exporter = StockitExporter(filename)
+        data = exporter.get_csv_data(rows)
+        exporter.export_file(data)
+
+    def get_data(self, cr, uid, ids, context=None):
         """Export outgoing pickings in Stock iT format"""
         picking_obj = self.pool.get('stock.picking')
         context['lang'] = 'fr_FR'
@@ -40,14 +62,16 @@ class StockItOutPickingExport(osv.osv_memory):
         priority_mapping = {'1': 'BASSE', '2': 'NORMALE', '3': 'HAUTE'}
 
         rows = []
+         # FIXME: check domain
         picking_ids = picking_obj.search(cr, uid,
                                          [('type', '=', 'out'),
-                                          ('state', '=', 'confirmed')],  # FIXME: check
+                                          ('state', '=', 'confirmed')],
                                          context=context)
         for picking in picking_obj.browse(cr, uid, picking_ids):
             for line in picking.move_lines:
                 row = [
                     'S',  # type
+                    str(picking.id),  # unique id
                     picking.name,  # ref/name
                     line.date_planned,  # expected date
                     line.product_id.default_code,  # product code
@@ -57,19 +81,6 @@ class StockItOutPickingExport(osv.osv_memory):
                     picking.priority['2'],  # priority
                 ]
                 rows.append(row)
-
-        self.write_file(cr, uid, ids, rows, context)
-        return True
-
-    def write_file(self, cr, uid, ids, data, context=None):
-        filename = '/tmp/out_picking_export.csv'  # TODO: set a filename: manual / generated filename ?
-        exporter = StockitExporter(filename)
-        exporter.export_file(data)
-        result = self.write(cr,
-                            uid,
-                            ids,
-                            {'filename': filename, },
-                            context=context)
-        return result
+        return rows
 
 StockItOutPickingExport()
