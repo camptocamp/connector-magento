@@ -1,16 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>a
 <openerp>
-	<data>
-		<record id="view_partner_form_magerp_client_code" model="ir.ui.view">
-			<field name="name">res.partner.form_magerp.client_code</field>
-			<field name="model">res.partner</field>
-			<field name="type">form</field>
-			<field name="inherit_id" ref="magentoerpconnect.view_partner_form_magerp" />
-			<field name="arch" type="xml">
-				<field name="store_id" position="after">
-					<field name="old_client_code" />
-				</field>
-			</field>
-		</record>
-	</data>
+        <data>
+        <record id="view_partner_address_tree_custom" model="ir.ui.view">
+            <field name="name">res.partner.address.tree.custom</field>
+            <field name="model">res.partner.address</field>
+            <field name="inherit_id" ref="base.view_partner_address_tree"/>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <data>
+                    <field name="partner_id" position="after">
+                        <field name="type"/>
+                    </field>
+                </data>
+            </field>
+        </record>
+        </data>
 </openerp>
+
