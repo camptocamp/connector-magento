@@ -32,6 +32,7 @@
                  'sale',
                  'sale_margin',
                  'c2c_pack_product_chg',
+                 'account_statement_import',
                  ],
     'author' : 'Camptocamp',
     'description': """Code customisation module""",
@@ -42,7 +43,8 @@
                    'poweremail_data.xml',
                    'sale_view.xml',
                    'account_invoice_view.xml',
-                   'magerp_data.xml'
+                   'magerp_data.xml',
+                   'partner_view.xml',
                   ],
     'demo_xml': [],
     'installable': True,
