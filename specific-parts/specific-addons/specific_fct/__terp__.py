@@ -45,6 +45,7 @@
                    'account_invoice_view.xml',
                    'magerp_data.xml',
                    'partner_view.xml',
+                   'wizard.xml',
                   ],
     'demo_xml': [],
     'installable': True,

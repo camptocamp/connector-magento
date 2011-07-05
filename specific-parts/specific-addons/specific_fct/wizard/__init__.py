@@ -1,0 +1,1 @@
+import wizard_partial_picking_no_confirm

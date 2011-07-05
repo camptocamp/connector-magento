@@ -21,3 +21,4 @@ import product
 import partner
 import magerp_core
 import sale
+import wizard
