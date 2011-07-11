@@ -70,30 +70,6 @@ def _get_moves(self, cr, uid, data, context):
                 'string': _to_xml(m.name),
                 'type' : 'float', 'required' : True, 'default' : make_default(quantity)}
 
-        if (pick.type == 'in') and (m.product_id.cost_method == 'average'):
-            price = m.product_id.standard_price
-            if hasattr(m, 'purchase_line_id') and m.purchase_line_id:
-                price=m.purchase_line_id.price_unit
-
-            currency=0
-            if hasattr(pick, 'purchase_id') and pick.purchase_id:
-                currency=pick.purchase_id.pricelist_id.currency_id.id
-
-            _moves_arch_lst.append('<group col="6"><field name="uom%s" nolabel="1"/>\
-                    <field name="price%s"/>' % (m.id,m.id,))
-
-            _moves_fields['price%s' % m.id] = {'string': 'Unit Price',
-                    'type': 'float', 'required': True, 'default': make_default(price)}
-
-            _moves_fields['uom%s' % m.id] = {'string': 'UOM', 'type': 'many2one',
-                    'relation': 'product.uom', 'required': True,
-                    'default': make_default(m.product_uom.id)}
-
-            _moves_arch_lst.append('<field name="currency%d" nolabel="1"/></group>' % (m.id,))
-            _moves_fields['currency%s' % m.id] = {'string': 'Currency',
-                    'type': 'many2one', 'relation': 'res.currency',
-                    'required': True, 'default': make_default(currency)}
-
         _moves_arch_lst.append('<newline/>')
         res.setdefault('moves', []).append(m.id)
 
@@ -117,38 +93,6 @@ def _do_split(self, cr, uid, data, context):
             too_few.append(move)
         else:
             too_many.append(move)
-
-        # Average price computation
-        if (pick.type == 'in') and (move.product_id.cost_method == 'average'):
-            product_obj = pool.get('product.product')
-            currency_obj = pool.get('res.currency')
-            users_obj = pool.get('res.users')
-            uom_obj = pool.get('product.uom')
-
-            product = product_obj.browse(cr, uid, [move.product_id.id])[0]
-            user = users_obj.browse(cr, uid, [uid])[0]
-
-            qty = data['form']['move%s' % move.id]
-            uom = data['form']['uom%s' % move.id]
-            price = data['form']['price%s' % move.id]
-            currency = data['form']['currency%s' % move.id]
-
-            qty = uom_obj._compute_qty(cr, uid, uom, qty, product.uom_id.id)
-
-            if (qty > 0):
-                new_price = currency_obj.compute(cr, uid, currency,
-                        user.company_id.currency_id.id, price)
-                new_price = uom_obj._compute_price(cr, uid, uom, new_price,
-                        product.uom_id.id)
-                if product.qty_available<=0:
-                    new_std_price = new_price
-                else:
-                    new_std_price = ((product.standard_price * product.qty_available)\
-                        + (new_price * qty))/(product.qty_available + qty)
-
-                product_obj.write(cr, uid, [product.id],
-                        {'standard_price': new_std_price})
-                move_obj.write(cr, uid, [move.id], {'price_unit': new_price})
 
     for move in too_few:
         if not new_picking:
