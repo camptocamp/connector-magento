@@ -26,7 +26,6 @@
                 'stock',
                 'delivery',
                 'product_multi_ean',
-                'base_ftp',
                 ],
     "author": "Camptocamp",
     "description": """Synchro with stock-it (stock management)
@@ -36,6 +35,7 @@
     "init_xml": [],
     "demo_xml": [],
     "update_xml": ['stockit_data.xml',
+                   'stock_workflow.xml',
                    'wizard/product_export_view.xml',
                    'wizard/ean_export_view.xml',
                    'wizard/out_picking_export_view.xml',
@@ -44,6 +44,7 @@
                    'wizard/inventory_import_view.xml',
                    'stockit_menu.xml',
                    'company_view.xml',
+                   'stock_view.xml',
                    ],
     "installable": True,
     "active": False,

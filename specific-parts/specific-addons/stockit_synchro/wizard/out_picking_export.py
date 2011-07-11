@@ -23,6 +23,7 @@ import tempfile
 import base64
 from osv import osv, fields
 from tools.translate import _
+from datetime import datetime
 from stockit_synchro.stockit_exporter.exporter import StockitExporter
 
 
@@ -45,18 +46,26 @@ class StockItOutPickingExport(osv.osv_memory):
                             context=context)
         return result
 
-    def action_background_export(self, cr, uid, ids, context=None):
-        # TODO: set a filename: manual / generated filename ?
-        filename = os.path.join(tempfile.gettempdir(),
-                                'out_picking_export.csv')
-        rows = self.get_data(cr, uid, ids, context)
-        exporter = StockitExporter(filename)
+    def run_background_export(self, cr, uid, context=None):
+        user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
+        company = user.company_id
+        if not company.stockit_base_path or not company.stockit_out_picking_export:
+            raise osv.except_osv(_('Error'), _('Stockit path is not configured on company.'))
+        now = datetime.now()
+        filename = "out_picking_export_%i%i%i%i%i.csv" % (now.year, now.month, now.day, now.hour, now.minute)
+        filepath = os.path.join(company.stockit_base_path,
+                                company.stockit_out_picking_export,
+                                filename)
+        rows = self.get_data(cr, uid, [], context)
+        exporter = StockitExporter(filepath)
         data = exporter.get_csv_data(rows)
         exporter.export_file(data)
+        return True
 
     def get_data(self, cr, uid, ids, context=None):
         """Export outgoing pickings in Stock iT format"""
         picking_obj = self.pool.get('stock.picking')
+        context = context or {}
         context['lang'] = 'fr_FR'
 
         priority_mapping = {'1': 'BASSE', '2': 'NORMALE', '3': 'HAUTE'}

@@ -19,6 +19,10 @@
 ##############################################################################
 
 import time
+import os
+import glob
+import netsvc
+
 from osv import osv, fields
 from tools.translate import _
 from operator import itemgetter
@@ -37,11 +41,6 @@ class StockItInventoryImport(osv.osv_memory):
                                 readonly=False),
     }
 
-    def get_from_ftp(self, cr, uid, ids, context=None):
-        """ Connect on the ftp and copy the file locally
-        """
-        pass
-
     def import_inventory(self, cr, uid, ids, context=None):
         """ Import inventories according to the Stock it file
         and returns the created inventory id
@@ -57,6 +56,10 @@ class StockItInventoryImport(osv.osv_memory):
         if not wizard.data:
             raise osv.except_osv(_('UserError'),
                                  _("You need to select a file!"))
+
+        user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
+        company = user.company_id
+        default_location_id = company.stockit_inventory_location_id
 
         header = ['type', 'default_code', 'quantity', 'ean', 'zone']
         conversion_types = {
@@ -80,6 +83,8 @@ class StockItInventoryImport(osv.osv_memory):
         for row in rows:
             product_ids = product_obj.search(cr, uid,
                 [('default_code', '=', row['default_code'])])
+            if not product_ids:
+                raise osv.except_osv(_('ImportError'), _('Product with default_code %s does not exist!') % (row['default_code'],))
             product_id = product_ids[0]
             if product_id not in product_ean_list.keys():
                 product_ean_list[product_id] = []
@@ -113,12 +118,11 @@ class StockItInventoryImport(osv.osv_memory):
 
             inventory_row = {'product_id': product_id,
                              'product_qty': row['quantity'],
-                             'product_uom': product_uom.id,  # TODO use onchange
-                             'location_id': 11,  # FIXME get the right location
-                             #select in wizard or get info zone from the file?
+                             'product_uom': product_uom.id,
+                             'location_id': default_location_id.id,  # FIXME check if the location is in the file
                              }
             inventory_rows.append(inventory_row)
-
+            
         if inventory_rows:
             inventory_id = inventory_obj.create(cr, uid,
                     {'name': _('Stockit inventory'),
@@ -127,6 +131,7 @@ class StockItInventoryImport(osv.osv_memory):
                                             for row
                                             in inventory_rows]}
             )
+
         return inventory_id
 
     def action_import(self, cr, uid, ids, context=None):
@@ -157,5 +162,51 @@ class StockItInventoryImport(osv.osv_memory):
                 'context': context,
             }
         return res
+
+    def create_request_error(self, cr, uid, file, err_msg, context=None):
+        logger = netsvc.Logger()
+        logger.notifyChannel(
+                             _("Stockit inventory import"),
+                             netsvc.LOG_ERROR,
+                             _("Error importing inventory file %s : %s" % (file, err_msg)))
+
+        request = self.pool.get('res.request')
+        summary = _("Stock-it inventory import failed on file : %s\n"
+                    "With error:\n"
+                    "%s") % (file, err_msg)
+
+        request.create(cr, uid,
+                       {'name': _("Stock-it inventory import"),
+                        'act_from': uid,
+                        'act_to': uid,
+                        'body': summary,
+                        })
+        return True
+
+    def run_background_import(self, cr, uid, context=None):
+        user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
+        company = user.company_id
+        if not company.stockit_base_path or not company.stockit_inventory_import:
+            raise osv.except_osv(_('Error'), _('Stockit path is not configured on company.'))
+
+        files_folder = os.path.join(company.stockit_base_path,
+                                    company.stockit_inventory_import)
+        files = glob.glob(os.path.join(files_folder, '*'))
+        for file in files:
+            inventory_id = False
+            data_file = open(file, 'r')
+            try:
+                data = data_file.read().encode("base64")
+                wizard = self.create(cr, uid, {'data': data}, context=context)
+                inventory_id = self.import_inventory(cr, uid, [wizard], context)
+            except osv.except_osv, e:
+                self.create_request_error(cr, uid, file, e.value, context)
+            except Exception, e:
+                self.create_request_error(cr, uid, file, str(e), context)
+            finally:
+                data_file.close()
+            if inventory_id:
+                os.unlink(file)
+        return True
 
 StockItInventoryImport()

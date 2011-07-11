@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
         <record model="ir.ui.view" id="view_company_form_stockit">
@@ -8,11 +9,24 @@
             <field name="arch" type="xml">
                 <notebook position="inside">
             		<page string="Stock iT">
-            		    <field name ="stockit_ftp_connection"/>
+                        <separator string="Base" colspan="4"/>
+            		    <field name ="stockit_base_path" colspan="4"/>
+                        <separator string="Export" colspan="4"/>
+                        <field name="stockit_in_picking_export"/>
+                        <field name="stockit_out_picking_export"/>
+                        <field name="stockit_product_export"/>
+                        <field name="stockit_product_ean_export"/>
+                        <separator string="Import" colspan="4"/>
+                        <field name="stockit_in_picking_import"/>
+                        <newline/>
+                        <field name="stockit_in_picking_location_id" domain="[('usage','&lt;&gt;','view')]"/>
+                        <field name="stockit_in_picking_location_dest_id" domain="[('usage','=','internal')]"/>
+                        <newline/>
+                        <field name="stockit_inventory_import"/>
+                        <field name="stockit_inventory_location_id" domain="[('usage','=','internal')]" />
                     </page>
                 </notebook>
             </field>
         </record>
     </data>
 </openerp>
-

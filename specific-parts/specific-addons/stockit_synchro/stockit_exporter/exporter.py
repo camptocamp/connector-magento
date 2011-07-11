@@ -1,4 +1,5 @@
 import StringIO
+import os
 from stockit_synchro.file_writer.writer import UnicodeWriter
 
 
@@ -7,9 +8,8 @@ class StockitExporter(object):
     Utilities to write stockit files and export them
     """
 
-    def __init__(self, filename=None, ftp=None):
+    def __init__(self, filename=None):
         self.filename = filename
-        self.ftp = ftp
 
     def get_csv_data(self, rows):
         file_data = StringIO.StringIO()
@@ -23,13 +23,10 @@ class StockitExporter(object):
         file = open(self.filename, 'w')
         file.write(data)
         file.close()
-
-    def _ftp_put(self):
-        pass
+        # stockit needs to drop the file so we have to put the write permission on the group
+        os.chmod(self.filename, 0664)
 
     def export_file(self, csv_data):
         if not self.filename:
             raise Exception('Error', 'Please specify a filename!')
         self._write_file(csv_data)
-        if self.ftp:
-            self._ftp_put()

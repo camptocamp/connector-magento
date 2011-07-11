@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="stock_move_memory_stockit_tree_in" model="ir.ui.view">
+            <field name="name">stock.move.memory.stockit.tree</field>
+            <field name="model">stock.move.memory.stockit.in</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Product Moves" editable="top">
+                    <field name="product_id" readonly="True"/>
+                    <field name="cost" />
+                    <field name="currency" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="stock_move_memory_stockit_form_in" model="ir.ui.view">
+            <field name="name">stock.move.memory.stockit.form</field>
+            <field name="model">stock.move.memory.stockit.in</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form>
+                    <field name="product_id" readonly="True"/>
+                    <field name="cost" />
+                    <field name="currency" />
+                    <field name="quantity" readonly="True"/>
+                    <field name="product_uom" readonly="True"/>
+                    <field name="prodlot_id" domain="[('product_id', '=', product_id)]" groups="base.group_extended" readonly="True"/>
+                 </form>
+            </field>
+        </record>
+
+        <record id="action_confirm_stockit_picking" model="ir.actions.act_window">
+            <field name="name">Close Picking Confirmed by Stock-it</field>
+            <field name="res_model">stockit.confirm.in.picking</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</openerp>

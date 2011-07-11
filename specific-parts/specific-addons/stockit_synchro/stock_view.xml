@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_picking_in_form_stockit">
+            <field name="name">stock.picking.in.form.stockit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_in_form"/>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <data>
+                    <button name="%(stock.partial_picking)d" states="assigned" string="Products Received" type="action" position="replace">
+                        <button name="%(stock.partial_picking)d" states="assigned,stockit_confirm" string="Products Received" type="action"/>
+                    </button>
+
+                    <button name="button_cancel" states="assigned,confirmed,draft" string="Cancel" position="replace">
+                        <button name="button_cancel" states="assigned,confirmed,draft,stockit_confirm" string="Cancel"/>
+                    </button>
+
+                </data>
+            </field>
+        </record>
+    </data>
+</openerp>

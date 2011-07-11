@@ -18,18 +18,26 @@
 #
 ##############################################################################
 
-import ftplib
-
 from osv import fields, osv
 from tools.translate import _
 
 
 class ResCompany(osv.osv):
-    """override company to add ftp config for stock it"""
+    """override company to add config for stock it"""
     _inherit = "res.company"
 
     _columns = {
-        'stockit_ftp_connection': fields.many2one('ftp.connection','FTP Connection for Stock iT synchronisations')
+        'stockit_base_path': fields.char('Base Path', size=256),
+        'stockit_in_picking_export': fields.char('Ingoing Picking Export Folder', size=32),
+        'stockit_in_picking_import': fields.char('Ingoing Picking Import Folder', size=32),
+        'stockit_out_picking_export': fields.char('Outgoing Picking Export Folder', size=32),
+        'stockit_inventory_import': fields.char('Inventory Import Folder', size=32),
+        'stockit_product_export': fields.char('Product Export Folder', size=32),
+        'stockit_product_ean_export': fields.char('Product EAN13 Export Folder', size=32),
+        'stockit_in_picking_location_id': fields.many2one('stock.location', 'Ingoing Picking Default Source Location', required=True),
+        'stockit_in_picking_location_dest_id': fields.many2one('stock.location', 'Ingoing Picking Default Dest. Location', required=True),
+        'stockit_inventory_location_id': fields.many2one('stock.location', 'Inventory Default Location', required=True),
+
     }
 
 ResCompany()

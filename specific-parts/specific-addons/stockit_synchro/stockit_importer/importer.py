@@ -9,16 +9,9 @@ class StockitImporter(object):
     Utilities to import stockit files and read them
     """
 
-    def __init__(self, ftp=None):
-        self.ftp = ftp
+    def __init__(self):
         self.csv_reader = None
         self.data = None
-
-    def ftp_get(self, path, ftp=None):
-        ftp = ftp or self.ftp
-        if not ftp:
-            raise Exception('Error', 'No FTP connection')
-        pass
 
     def _to_list(self):
         """ Returns a list with data
@@ -33,7 +26,7 @@ class StockitImporter(object):
         """
         self.csv_reader = csv.reader(self.data, dialect='stockit')
         csv_list = self._to_list()
-        res = [dict(zip(header, row)) for row in csv_list]
+        res = [dict(zip(header, row)) for row in csv_list if row]
         return res
 
     def cast_rows(self, rows, conversion_rules):
