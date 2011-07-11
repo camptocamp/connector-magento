@@ -114,6 +114,17 @@ class sale_order(magerp_osv.magerp_osv):
 
         return super(sale_order, self).create(cr, uid, vals, context=context)
 
+    def action_invoice_create(self, cr, uid, ids, grouped=False, states=['confirmed', 'done', 'exception']):
+        """ open invoices directly (bypass draft) when created from an order"""
+        invoice_id = super(sale_order, self).action_invoice_create(cr, uid, ids, grouped, states)
+        if invoice_id:
+            invoice = self.pool.get('account.invoice').browse(cr, uid, invoice_id)
+            if invoice.state == 'draft':
+                wf_service = netsvc.LocalService("workflow")
+                wf_service.trg_validate(uid, 'account.invoice',
+                                        invoice_id, 'invoice_open', cr)
+        return invoice_id
+
 sale_order()
 
 class sale_shop(magerp_osv.magerp_osv):
