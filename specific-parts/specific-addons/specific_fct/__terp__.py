@@ -46,6 +46,7 @@
                    'magerp_data.xml',
                    'partner_view.xml',
                    'wizard.xml',
+                   'stock_view.xml',
                   ],
     'demo_xml': [],
     'installable': True,
