@@ -90,7 +90,7 @@ class StockItInPickingImport(osv.osv_memory):
         rows = importer.cast_rows(rows, conversion_types)
 
         # E means incoming product for stockit
-        rows = [row for row in rows if row['type'] == 'E']
+        rows = [row for row in rows if row['type'] == 'RE']
 
         # create ean on product if it does not already exist
         product_ean_list = {}

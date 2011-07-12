@@ -19,8 +19,9 @@
 ##############################################################################
 
 import base64
-import tempfile
 import os
+import netsvc
+
 from osv import osv, fields
 from tools.translate import _
 from datetime import datetime
@@ -47,6 +48,26 @@ class StockItProductEANExport(osv.osv_memory):
                             context=context)
         return result
 
+    def create_request_error(self, cr, uid, err_msg, context=None):
+        logger = netsvc.Logger()
+        logger.notifyChannel(
+                             _("Stockit Product EAN13 Export"),
+                             netsvc.LOG_ERROR,
+                             _("Error exporting product ean13 file : %s" % (err_msg,)))
+
+        request = self.pool.get('res.request')
+        summary = _("Stock-it product export EAN13 failed\n"
+                    "With error:\n"
+                    "%s") % (err_msg,)
+
+        request.create(cr, uid,
+                       {'name': _("Stock-it product EAN13 export"),
+                        'act_from': uid,
+                        'act_to': uid,
+                        'body': summary,
+                        })
+        return True
+
     def run_background_export(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
@@ -57,10 +78,13 @@ class StockItProductEANExport(osv.osv_memory):
         filepath = os.path.join(company.stockit_base_path,
                                 company.stockit_product_ean_export,
                                 filename)
-        rows = self.get_data(cr, uid, [], context)
-        exporter = StockitExporter(filepath)
-        data = exporter.get_csv_data(rows)
-        exporter.export_file(data)
+        try:
+            rows = self.get_data(cr, uid, [], context)
+            exporter = StockitExporter(filepath)
+            data = exporter.get_csv_data(rows)
+            exporter.export_file(data)
+        except Exception, e:
+            self.create_request_error(cr, uid, str(e), context)
         return True
 
     def get_data(self, cr, uid, ids, context=None):

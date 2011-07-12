@@ -20,7 +20,8 @@
 
 import base64
 import os
-import tempfile
+import netsvc
+
 from osv import osv, fields
 from tools.translate import _
 from datetime import datetime
@@ -46,6 +47,26 @@ class StockItInPickingExport(osv.osv_memory):
                             context=context)
         return result
 
+    def create_request_error(self, cr, uid, err_msg, context=None):
+        logger = netsvc.Logger()
+        logger.notifyChannel(
+                             _("Stockit Ingoing Picking Export"),
+                             netsvc.LOG_ERROR,
+                             _("Error exporting ingoing pickings file : %s" % (err_msg,)))
+
+        request = self.pool.get('res.request')
+        summary = _("Stock-it ingoing pickings failed\n"
+                    "With error:\n"
+                    "%s") % (err_msg,)
+
+        request.create(cr, uid,
+                       {'name': _("Stock-it ingoing pickings export"),
+                        'act_from': uid,
+                        'act_to': uid,
+                        'body': summary,
+                        })
+        return True
+
     def run_background_export(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
@@ -56,10 +77,13 @@ class StockItInPickingExport(osv.osv_memory):
         filepath = os.path.join(company.stockit_base_path,
                                 company.stockit_in_picking_export,
                                 filename)
-        rows = self.get_data(cr, uid, [], context)
-        exporter = StockitExporter(filepath)
-        data = exporter.get_csv_data(rows)
-        exporter.export_file(data)
+        try:
+            rows = self.get_data(cr, uid, [], context)
+            exporter = StockitExporter(filepath)
+            data = exporter.get_csv_data(rows)
+            exporter.export_file(data)
+        except Exception, e:
+            self.create_request_error(cr, uid, str(e), context)
         return True
 
     def get_data(self, cr, uid, ids, context=None):
