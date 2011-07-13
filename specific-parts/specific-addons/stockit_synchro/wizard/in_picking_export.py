@@ -102,14 +102,17 @@ class StockItInPickingExport(osv.osv_memory):
             partner_name = picking.address_id.partner_id \
                            and picking.address_id.partner_id.name \
                            or picking.address_id.name
+            name = picking.name
+            if picking.origin:
+                name += '-' + picking.origin
             for line in picking.move_lines:
                 row = [
                     'E',  # type
                     str(picking.id),  # unique id
-                    picking.name,  # ref/name
+                    name.replace('|', '')[:22],  # ref/name
                     line.date_planned,  # expected date
                     line.product_id.default_code,  # product code
-                    partner_name,  # product supplier name
+                    partner_name[:10],  # product supplier name
                     str(line.product_qty),  # quantity
                     '',  # 6 empty fields for the return of stock it
                     '',
