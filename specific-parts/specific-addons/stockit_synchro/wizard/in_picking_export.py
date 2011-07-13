@@ -99,6 +99,9 @@ class StockItInPickingExport(osv.osv_memory):
                                           ('state', '=', 'assigned')],
                                          context=context)
         for picking in picking_obj.browse(cr, uid, picking_ids):
+            partner_name = picking.address_id.partner_id \
+                           and picking.address_id.partner_id.name \
+                           or picking.address_id.name
             for line in picking.move_lines:
                 row = [
                     'E',  # type
@@ -106,9 +109,7 @@ class StockItInPickingExport(osv.osv_memory):
                     picking.name,  # ref/name
                     line.date_planned,  # expected date
                     line.product_id.default_code,  # product code
-                    line.product_id.x_magerp_zdbx_default_marque and
-                    line.product_id.x_magerp_zdbx_default_marque.label or
-                    '',  # product brand
+                    partner_name,  # product supplier name
                     str(line.product_qty),  # quantity
                     '',  # 6 empty fields for the return of stock it
                     '',
