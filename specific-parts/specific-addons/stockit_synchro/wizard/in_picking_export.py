@@ -21,11 +21,17 @@
 import base64
 import os
 import netsvc
+import string
 
 from osv import osv, fields
 from tools.translate import _
 from datetime import datetime
 from stockit_synchro.stockit_exporter.exporter import StockitExporter
+
+
+def make_string_valid_filename(name):
+    valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+    return ''.join(c for c in name if c in valid_chars)
 
 
 class StockItInPickingExport(osv.osv_memory):
@@ -105,14 +111,15 @@ class StockItInPickingExport(osv.osv_memory):
             name = picking.name
             if picking.origin:
                 name += '-' + picking.origin
+            name = make_string_valid_filename(name)
             for line in picking.move_lines:
                 row = [
                     'E',  # type
                     str(picking.id),  # unique id
-                    name.replace('|', '')[:22],  # ref/name
+                    name[:18],  # ref/name
                     line.date_planned,  # expected date
                     line.product_id.default_code,  # product code
-                    partner_name[:10],  # product supplier name
+                    partner_name[:20],  # product supplier name
                     str(line.product_qty),  # quantity
                     '',  # 6 empty fields for the return of stock it
                     '',
