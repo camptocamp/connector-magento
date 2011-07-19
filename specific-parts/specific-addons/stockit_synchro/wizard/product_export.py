@@ -74,7 +74,8 @@ class StockItProductExport(osv.osv_memory):
         if not company.stockit_base_path or not company.stockit_product_export:
             raise osv.except_osv(_('Error'), _('Stockit path is not configured on company.'))
         now = datetime.now()
-        filename = "product_export_%i%i%i%i%i.csv" % (now.year, now.month, now.day, now.hour, now.minute)
+        date_str = now.strftime('%Y%m%d%H%M%S')
+        filename = "product_export_%s.csv" % (date_str,)
         filepath = os.path.join(company.stockit_base_path,
                                 company.stockit_product_export,
                                 filename)

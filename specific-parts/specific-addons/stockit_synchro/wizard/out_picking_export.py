@@ -24,7 +24,6 @@ import base64
 
 from osv import osv, fields
 from tools.translate import _
-from datetime import datetime
 from stockit_synchro.stockit_exporter.exporter import StockitExporter
 
 
@@ -72,8 +71,7 @@ class StockItOutPickingExport(osv.osv_memory):
         company = user.company_id
         if not company.stockit_base_path or not company.stockit_out_picking_export:
             raise osv.except_osv(_('Error'), _('Stockit path is not configured on company.'))
-        now = datetime.now()
-        filename = "out_picking_export_%i%i%i%i%i.csv" % (now.year, now.month, now.day, now.hour, now.minute)
+        filename = "out_picking_export_with_id.csv"
         filepath = os.path.join(company.stockit_base_path,
                                 company.stockit_out_picking_export,
                                 filename)
@@ -98,7 +96,7 @@ class StockItOutPickingExport(osv.osv_memory):
          # FIXME: check domain
         picking_ids = picking_obj.search(cr, uid,
                                          [('type', '=', 'out'),
-                                          ('state', '=', 'confirmed')],
+                                          ('state', '=', 'assigned')],
                                          context=context)
         for picking in picking_obj.browse(cr, uid, picking_ids):
             for line in picking.move_lines:

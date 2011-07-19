@@ -27,6 +27,7 @@ from osv import osv, fields
 from tools.translate import _
 from operator import itemgetter
 from stockit_synchro.stockit_importer.importer import StockitImporter
+from wizard_utils import archive_file
 
 
 class StockItInventoryImport(osv.osv_memory):
@@ -191,7 +192,7 @@ class StockItInventoryImport(osv.osv_memory):
 
         files_folder = os.path.join(company.stockit_base_path,
                                     company.stockit_inventory_import)
-        files = glob.glob(os.path.join(files_folder, '*'))
+        files = glob.glob(os.path.join(files_folder, '*.*'))
         for file in files:
             inventory_id = False
             data_file = open(file, 'r')
@@ -206,7 +207,8 @@ class StockItInventoryImport(osv.osv_memory):
             finally:
                 data_file.close()
             if inventory_id:
-                os.unlink(file)
+                archive_file(file)
         return True
 
 StockItInventoryImport()
+

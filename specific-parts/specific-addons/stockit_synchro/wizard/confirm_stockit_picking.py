@@ -219,7 +219,6 @@ class StockItConfirmPicking(osv.osv_memory):
                         new_std_price = ((move.product_id.standard_price * move.product_id.qty_available)
                                          + (new_price * qty))/(move.product_id.qty_available + qty)
 
-                    import pdb; pdb.set_trace()
                     product_obj.write(cr, uid, [move.product_id.id],
                             {'standard_price': new_std_price})
                     move_obj.write(cr, uid, [move.move_id.id], {'price_unit': new_price})

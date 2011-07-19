@@ -23,11 +23,13 @@ import os
 import glob
 import netsvc
 
+
 from osv import osv, fields
 from tools.translate import _
 from operator import itemgetter
 from itertools import groupby
 from stockit_synchro.stockit_importer.importer import StockitImporter
+from wizard_utils import archive_file
 
 
 class StockItInPickingImport(osv.osv_memory):
@@ -212,7 +214,7 @@ class StockItInPickingImport(osv.osv_memory):
 
         picking = pick_obj.browse(cr, uid, picking_id)
 
-        if too_few or new_moves:
+        if too_few:
             # create a backorder
             new_picking = pick_obj.copy(cr, uid, picking.id,
                     {
@@ -242,7 +244,7 @@ class StockItInPickingImport(osv.osv_memory):
                     })
 
         for move in new_moves:
-            move.update({'picking_id': new_picking})
+            move.update({'picking_id': new_picking or picking.id})
             move_id = move_obj.create(cr, uid, move)
             move_obj.force_assign(cr, uid, move_id)
 
@@ -336,7 +338,7 @@ class StockItInPickingImport(osv.osv_memory):
 
         files_folder = os.path.join(company.stockit_base_path,
                                     company.stockit_in_picking_import)
-        files = glob.glob(os.path.join(files_folder, '*'))
+        files = glob.glob(os.path.join(files_folder, '*.*'))
         for file in files:
             imported_picking_ids = False
             data_file = open(file, 'r')
@@ -351,8 +353,7 @@ class StockItInPickingImport(osv.osv_memory):
             finally:
                 data_file.close()
             if imported_picking_ids:
-                os.unlink(file)
+                archive_file(file)
         return True
-
 
 StockItInPickingImport()

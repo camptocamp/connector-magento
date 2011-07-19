@@ -25,7 +25,6 @@ import string
 
 from osv import osv, fields
 from tools.translate import _
-from datetime import datetime
 from stockit_synchro.stockit_exporter.exporter import StockitExporter
 
 
@@ -78,8 +77,7 @@ class StockItInPickingExport(osv.osv_memory):
         company = user.company_id
         if not company.stockit_base_path or not company.stockit_in_picking_export:
             raise osv.except_osv(_('Error'), _('Stockit path is not configured on company.'))
-        now = datetime.now()
-        filename = "in_picking_export_%i%i%i%i%i.csv" % (now.year, now.month, now.day, now.hour, now.minute)
+        filename = "in_picking_export_with_id.csv"
         filepath = os.path.join(company.stockit_base_path,
                                 company.stockit_in_picking_export,
                                 filename)
