@@ -127,7 +127,6 @@ class StockItInPickingExport(osv.osv_memory):
                     '',
                 ]
                 rows.append(row)
-
         return rows
 
 StockItInPickingExport()

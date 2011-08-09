@@ -41,6 +41,16 @@ class stock_picking(osv.osv):
         stockit_state = ('stockit_confirm', 'Confirmed by Stock-it')
         if stockit_state not in self._columns['state'].selection :
             self._columns['state'].selection.append(stockit_state)
+            
+    _columns = {
+        'stockit_outdated': fields.boolean('Stockit outdated'),
+        'stockit_export_date': fields.datetime('Stockit export date')
+    }
 
-
+    def action_cancel(self, cr, uid, ids, context={}):
+        res = super(stock_picking, self).action_cancel(cr, uid, ids, context)
+        for pick in self.browse(cr, uid, ids):
+            if pick.stockit_export_date:
+                pick.write({'stockit_outdated': True})
+        return res
 stock_picking()

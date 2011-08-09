@@ -22,8 +22,9 @@ import datetime
 import os
 import glob
 import netsvc
+import pooler
 
-
+from collections import defaultdict
 from osv import osv, fields
 from tools.translate import _
 from operator import itemgetter
@@ -95,23 +96,31 @@ class StockItInPickingImport(osv.osv_memory):
         rows = [row for row in rows if row['type'] == 'RE']
 
         # create ean on product if it does not already exist
-        product_ean_list = {}
+        product_ean_list = defaultdict(list)
+        errors_report = []
         for row in rows:
             product_ids = product_obj.search(cr, uid,
                 [('default_code', '=', row['default_code'])])
             if not product_ids:
-                raise Exception('ImportError', "Product %s not found !" %
-                                               (row['default_code'],))
+                errors_report.append(_('Product with default code %s does not exist!') % (row['default_code'],))
+                continue
             product_id = product_ids[0]
-            if product_id not in product_ean_list.keys():
-                product_ean_list[product_id] = []
+            # defaultdict
             product_ean_list[product_id].append(row['ean'])
 
         for product_id in product_ean_list:
-            product_obj.add_ean_if_not_exists(cr, uid,
-                                              product_id,
-                                              product_ean_list[product_id],
-                                              context)
+            try:
+                product_obj.add_ean_if_not_exists(cr, uid,
+                                                  product_id,
+                                                  product_ean_list[product_id],
+                                                  context)
+            except Exception, e:
+                errors_report.append(_('Can not create new ean for product %s'
+                                     ' one of the following ean %s seems not correct.'
+                                     ' You can look in the log for more details')\
+                                      % (product_id, str(product_ean_list[product_id])))
+        if errors_report:
+            raise osv.except_osv(_('ImportError'), "\n".join(errors_report))
 
         # sum quantities of duplicate products in a packing and remove them
         rows = sorted(rows, key=itemgetter('id', 'default_code'))
@@ -131,79 +140,85 @@ class StockItInPickingImport(osv.osv_memory):
         imported_picking_ids = []
 
         for picking_id, rows in groupby(rows,
-                                          lambda row: row['id']):
-            picking_ids = picking_obj.search(cr, uid,
-                [('id', '=', picking_id)])
+                                        lambda row: row['id']):
+            try:
+                picking_ids = picking_obj.search(cr, uid,
+                    [('id', '=', picking_id)])
 
-            if not picking_ids:
-                raise osv.except_osv(_('ImportError'), _("Picking %s not found !") %
-                                               (picking_id,))
-            picking_id = picking_ids[0]
-            picking = picking_obj.browse(cr, uid, picking_id)
+                if not picking_ids:
+                    raise osv.except_osv(_('ImportError'), _("Picking %s not found !") %
+                                                   (picking_id,))
+                picking_id = picking_ids[0]
+                picking = picking_obj.browse(cr, uid, picking_id)
 
-            if picking.state in ('stockit_confirm', 'done'):
-                continue  # already imported
+                if picking.state in ('stockit_confirm', 'done'):
+                    continue  # already imported
 
-            not_receipt_moves = {}
-            for move in picking.move_lines:
-                not_receipt_moves[move.product_id.id] = move
-
-            complete, too_many, too_few, new_moves = [], [], [], []
-            for row in rows:
-                product_ids = product_obj.search(cr, uid,
-                                                 [('default_code', '=',
-                                                   row['default_code'])])
-                if not product_ids:
-                    raise osv.except_osv(_('ImportError'), _("Product %s not found !") %
-                                                   (row['default_code'],))
-                product_id = product_ids[0]
-
-                found_product = False
+                not_receipt_moves = {}
                 for move in picking.move_lines:
-                    if move.product_id.id == product_id:
-                        del(not_receipt_moves[product_id])
-                        found_product = True
+                    not_receipt_moves[move.product_id.id] = move
 
-                        backorder_move = {'move': move,
-                                          'qty': row['received_qty']}
+                complete, too_many, too_few, new_moves = [], [], [], []
+                for row in rows:
+                    product_ids = product_obj.search(cr, uid,
+                                                     [('default_code', '=',
+                                                       row['default_code'])])
+                    if not product_ids:
+                        raise osv.except_osv(_('ImportError'), _("Product %s not found !") %
+                                                       (row['default_code'],))
+                    product_id = product_ids[0]
 
-                        if move.product_qty == row['received_qty']:
-                            complete.append(backorder_move)
-                        elif move.product_qty > row['received_qty']:
-                            too_few.append(backorder_move)
-                        else:
-                            too_many.append(backorder_move)
-                        break
+                    found_product = False
+                    for move in picking.move_lines:
+                        if move.product_id.id == product_id:
+                            del(not_receipt_moves[product_id])
+                            found_product = True
 
-                # new product in the picking
-                if not found_product:
-                    stock_move_values = stock_move_obj.onchange_product_id(
-                        cr, uid, [],
-                        prod_id=product_id,
-                        loc_id=default_location_id.id,
-                        loc_dest_id=default_location_dest_id.id,
-                        address_id=picking.address_id.id
-                    )['value']
+                            backorder_move = {'move': move,
+                                              'qty': row['received_qty']}
 
-                    stock_move_values.update({
-                        'picking_name': row['picking_name'],
-                        'product_id': product_id,
-                        'product_qty': row['received_qty']
-                    })
-                    new_moves.append(stock_move_values)
+                            if move.product_qty == row['received_qty']:
+                                complete.append(backorder_move)
+                            elif move.product_qty > row['received_qty']:
+                                too_few.append(backorder_move)
+                            else:
+                                too_many.append(backorder_move)
+                            break
 
-            for product_id, move in not_receipt_moves.iteritems():
-                backorder_move = {'move': move, 'qty': 0.0}
-                too_few.append(backorder_move)
+                    # new product in the picking
+                    if not found_product:
+                        stock_move_values = stock_move_obj.onchange_product_id(
+                            cr, uid, [],
+                            prod_id=product_id,
+                            loc_id=default_location_id.id,
+                            loc_dest_id=default_location_dest_id.id,
+                            address_id=picking.address_id.id
+                        )['value']
 
-            backorder_id = self._create_backorder(cr, uid, picking.id, complete,
-                                                  too_many, too_few, new_moves,
-                                                  context=context)
+                        stock_move_values.update({
+                            'picking_name': row['picking_name'],
+                            'product_id': product_id,
+                            'product_qty': row['received_qty']
+                        })
+                        new_moves.append(stock_move_values)
 
-            picking_obj.write(cr, uid, backorder_id, {'state': 'stockit_confirm'})
-            wf_service.trg_write(uid, 'stock.picking', backorder_id, cr)
-            imported_picking_ids.append(backorder_id)
+                for product_id, move in not_receipt_moves.iteritems():
+                    backorder_move = {'move': move, 'qty': 0.0}
+                    too_few.append(backorder_move)
 
+                backorder_id = self._create_backorder(cr, uid, picking.id, complete,
+                                                      too_many, too_few, new_moves,
+                                                      context=context)
+
+                picking_obj.write(cr, uid, backorder_id, {'state': 'stockit_confirm'})
+                wf_service.trg_write(uid, 'stock.picking', backorder_id, cr)
+                imported_picking_ids.append(backorder_id)
+            except osv.except_osv, e:
+                errors_report.append(_('Processing error append: %') % (e.value, ))
+            except Exception, e:
+                errors_report.append(_('Processing error append: %') % (str(e)))
+        if errors_report:
+            raise osv.except_osv(_('ImportError'), "\n".join(errors_report))
         return imported_picking_ids
 
     def _create_backorder(self, cr, uid, picking_id, complete, too_many,
@@ -285,6 +300,8 @@ class StockItInPickingImport(osv.osv_memory):
         """
 
         imported_picking_ids = self.import_in_picking(cr, uid, ids, context)
+        if not imported_picking_ids:
+            raise osv.except_osv(_('Nothing to do'), _('Stock are OK'))
         res = {'type': 'ir.actions.act_window_close'}
         if imported_picking_ids:
             model_obj = self.pool.get('ir.model.data')
@@ -345,7 +362,16 @@ class StockItInPickingImport(osv.osv_memory):
             try:
                 data = data_file.read().encode("base64")
                 wizard = self.create(cr, uid, {'data': data}, context=context)
-                imported_picking_ids = self.import_in_picking(cr, uid, [wizard], context)
+                db, pool = pooler.get_db_and_pool(cr.dbname)
+                mycursor = db.cursor()
+                try:
+                    imported_picking_ids = self.import_in_picking(mycursor, uid, [wizard], context)
+                    mycursor.commit()
+                except Exception, e:
+                    mycursor.rollback()
+                    raise e
+                finally:
+                    mycursor.close()
             except osv.except_osv, e:
                 self.create_request_error(cr, uid, file, e.value, context)
             except Exception, e:

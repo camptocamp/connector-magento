@@ -30,6 +30,11 @@
              <field name="context">{'record_id':active_id}</field>
              <field name="target">new</field>
        </record>
-
+       <wizard 
+           id="wizard_stockit_export_out_picking" 
+           model="stock.picking" 
+           name="stockit.export.selected" 
+           string="Export selected picking to stockit"
+       />
     </data>
 </openerp>

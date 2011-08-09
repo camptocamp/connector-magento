@@ -21,9 +21,11 @@
 import time
 import os
 import glob
-import netsvc
+from collections import defaultdict
 
+import netsvc
 from osv import osv, fields
+import pooler
 from tools.translate import _
 from operator import itemgetter
 from stockit_synchro.stockit_importer.importer import StockitImporter
@@ -80,20 +82,29 @@ class StockItInventoryImport(osv.osv_memory):
         rows = [row for row in rows if row['type'] == 'I']
 
         # create ean on product if it does not already exist
-        product_ean_list = {}
+        product_ean_list = defaultdict(list)
+        errors_report = []
         for row in rows:
             product_ids = product_obj.search(cr, uid,
                 [('default_code', '=', row['default_code'])])
             if not product_ids:
-                raise osv.except_osv(_('ImportError'), _('Product with default_code %s does not exist!') % (row['default_code'],))
+                errors_report.append(_('Product with default code %s does not exist!') % (row['default_code'],))
+                continue
             product_id = product_ids[0]
-            if product_id not in product_ean_list.keys():
-                product_ean_list[product_id] = []
+            # defaultdict magic
             product_ean_list[product_id].append(row['ean'])
 
         for product_id in product_ean_list:
-            product_obj.add_ean_if_not_exists(cr, uid, product_id, product_ean_list[product_id], context)
-
+            try:
+                product_obj.add_ean_if_not_exists(cr, uid, product_id, 
+                                                  product_ean_list[product_id], context)
+            except Exception, e:
+                errors_report.append(_('Can not create new ean for product %s'
+                                       ' one of the following ean %s seems not correct.'
+                                       ' You can look in the log for more details')\
+                                        % (product_id, str(product_ean_list[product_id])))
+        if errors_report:
+            raise osv.except_osv(_('ImportError'), "\n".join(errors_report))
         # sum quantities of duplicate products and remove them
         rows = sorted(rows, key=itemgetter('default_code', 'zone'))
         if rows:
@@ -109,29 +120,34 @@ class StockItInventoryImport(osv.osv_memory):
 
         inventory_rows = []
         for row in rows:
-            product_ids = product_obj.search(cr, uid,
-                [('default_code', '=', row['default_code'])])
-            if not product_ids:
-                raise Exception('ImportError', "Product code %s not found !" %
-                                               (row['default_code'],))
-            product_id = product_ids[0]
-            product_uom = product_obj.browse(cr, uid, product_id).uom_id
+            try:
+                product_ids = product_obj.search(cr, uid,
+                    [('default_code', '=', row['default_code'])])
+                if not product_ids:
+                    raise Exception('ImportError', "Product code %s not found !" %
+                                                   (row['default_code'],))
+                product_id = product_ids[0]
+                product_uom = product_obj.browse(cr, uid, product_id).uom_id
 
-            inventory_row = {'product_id': product_id,
-                             'product_qty': row['quantity'],
-                             'product_uom': product_uom.id,
-                             'location_id': default_location_id.id,  # FIXME check if the location is in the file
-                             }
-            inventory_rows.append(inventory_row)
-            
+                inventory_row = {'product_id': product_id,
+                                 'product_qty': row['quantity'],
+                                 'product_uom': product_uom.id,
+                                 'location_id': default_location_id.id,  # FIXME check if the location is in the file
+                                 }
+                inventory_rows.append(inventory_row)
+            except osv.except_osv, e:
+                errors_report.append(_('Processing error append: %') % (e.value, ))
+            except Exception, e:
+                errors_report.append(_('Processing error append: %') % (str(e)))
+        if errors_report:
+             raise osv.except_osv(_('ImportError'), "\n".join(errors_report))    
         if inventory_rows:
             inventory_id = inventory_obj.create(cr, uid,
                     {'name': _('Stockit inventory'),
                      'date': time.strftime('%Y-%m-%d %H:%M:%S'),
                      'inventory_line_id': [(0, 0, row)
                                             for row
-                                            in inventory_rows]}
-            )
+                                            in inventory_rows]})
 
         return inventory_id
 
@@ -139,6 +155,7 @@ class StockItInventoryImport(osv.osv_memory):
         """ Import inventories according to the Stock it file
         for frontend action, opens the form with the created inventory
         """
+        #Wizard call from XML RPC transaction are atomic
         inventory_id = self.import_inventory(cr, uid, ids, context)
         res = {'type': 'ir.actions.act_window_close'}
         if inventory_id:
@@ -199,7 +216,16 @@ class StockItInventoryImport(osv.osv_memory):
             try:
                 data = data_file.read().encode("base64")
                 wizard = self.create(cr, uid, {'data': data}, context=context)
-                inventory_id = self.import_inventory(cr, uid, [wizard], context)
+                try:
+                    db, pool = pooler.get_db_and_pool(cr.dbname)
+                    mycursor = db.cursor()
+                    inventory_id = self.import_inventory(mycursor, uid, [wizard], context)
+                    mycursor.commit()
+                except Exception, e:
+                    mycursor.rollback()
+                    raise e
+                finally:
+                    mycursor.close()
             except osv.except_osv, e:
                 self.create_request_error(cr, uid, file, e.value, context)
             except Exception, e:

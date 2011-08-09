@@ -2,7 +2,7 @@ import csv
 import base64
 import datetime
 import tempfile
-
+from stockit_synchro.unicode_csv.reader import UnicodeReader
 
 class StockitImporter(object):
     """
@@ -13,20 +13,11 @@ class StockitImporter(object):
         self.csv_reader = None
         self.data = None
 
-    def _to_list(self):
-        """ Returns a list with data
-        """
-        res = []
-        for row in self.csv_reader:
-            res.append(row)
-        return res
-
     def csv_to_dict(self, header):
         """ Returns a dict with data
         """
-        self.csv_reader = csv.reader(self.data, dialect='stockit')
-        csv_list = self._to_list()
-        res = [dict(zip(header, row)) for row in csv_list if row]
+        self.csv_reader = UnicodeReader(self.data, dialect='stockit')
+        res = [dict(zip(header, row)) for row in self.csv_reader if row]
         return res
 
     def cast_rows(self, rows, conversion_rules):
