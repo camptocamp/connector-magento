@@ -1,0 +1,13 @@
+=== modified file 'stock/stock.py'
+--- stock/stock.py	2011-03-25 09:29:44 +0000
++++ stock/stock.py	2011-08-10 07:53:01 +0000
+@@ -110,7 +110,7 @@
+             result[id] = {}.fromkeys(field_names, 0.0)
+         for field_name in field_names:
+             for loc in ids:
+-                ret_dict = self.product_detail(cr, uid, loc, field=field_name)
++                ret_dict = self.product_detail(cr, uid, loc, field=field_name, context=context)
+                 result[loc][field_name] = ret_dict
+         return result
+ 
+

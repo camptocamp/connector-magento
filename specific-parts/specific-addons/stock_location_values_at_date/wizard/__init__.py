@@ -1,0 +1,1 @@
+import open_location_values
