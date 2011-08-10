@@ -154,10 +154,7 @@ class sale_shop(magerp_osv.magerp_osv):
 
         self.deactivate_products(cr, uid, context=context)
 
-        # does not export inventory for Debonix specifically because this take too much processing time
-        # and freeze OpenERP for users during the export. Stock update is not very useful for Debonix
-        # as the products can be ordered anyway and they can do it with the appropriate button / cron.
-#        self.export_inventory(cr, uid, ids, context)
+        self.export_inventory(cr, uid, ids, context)
         return False
 
     #TODO: Check if we have to create the invoice or not on Magento
