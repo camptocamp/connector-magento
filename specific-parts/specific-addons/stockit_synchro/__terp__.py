@@ -26,6 +26,7 @@
                 'stock',
                 'delivery',
                 'product_multi_ean',
+                'c2c_magento_packing_priority',
                 ],
     "author": "Camptocamp",
     "description": """Synchro with stock-it (stock management)

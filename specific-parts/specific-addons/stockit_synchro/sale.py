@@ -2,7 +2,6 @@
 ##############################################################################
 #
 # Copyright (c) 2011 Camptocamp SA (http://www.camptocamp.com)
-# All Right Reserved
 #
 # Author : Guewen Baconnier (Camptocamp)
 #
@@ -32,25 +31,17 @@
 from osv import osv, fields
 
 
-class stock_picking(osv.osv):
-    _inherit = "stock.picking"
+class base_sale_payment_type(osv.osv):
+    _inherit = 'base.sale.payment.type'
 
-    def __init__(self, pool, cr):
-        """ Add the stockit status in the available states """
-        super(stock_picking, self).__init__(pool, cr)
-        stockit_state = ('stockit_confirm', 'Confirmed by Stock-it')
-        if stockit_state not in self._columns['state'].selection :
-            self._columns['state'].selection.append(stockit_state)
+    def get_priority_selection(self, cr, uid, context=None):
+        res = super(base_sale_payment_type, self).get_priority_selection(cr, uid, context=context)
+        new_selection = list(res)
+        new_selection.append(('9', 'SHOP'))  # special priority used for stockit, stockit has no other mean to now the product is for a shop
+        return tuple(new_selection)
 
     _columns = {
-        'stockit_outdated': fields.boolean('Stockit outdated'),
-        'stockit_export_date': fields.datetime('Stockit export date'),
+        'packing_priority': fields.selection(get_priority_selection, 'Packing Priority')
     }
 
-    def action_cancel(self, cr, uid, ids, context={}):
-        res = super(stock_picking, self).action_cancel(cr, uid, ids, context)
-        for pick in self.browse(cr, uid, ids):
-            if pick.stockit_export_date:
-                pick.write({'stockit_outdated': True})
-        return res
-stock_picking()
+base_sale_payment_type()

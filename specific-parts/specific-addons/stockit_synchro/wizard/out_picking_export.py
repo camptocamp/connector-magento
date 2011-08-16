@@ -100,11 +100,19 @@ class StockItOutPickingExport(osv.osv_memory):
         context = context or {}
         context['lang'] = 'fr_FR'
 
-        priority_mapping = {'1': 'BASSE', '2': 'NORMALE', '3': 'HAUTE'}
+        user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
+        company = user.company_id
+        if not company.stockit_out_pick_exp_location_id:
+            raise osv.except_osv(_('Error'), _('Location to export is not configured on the company.'))
+
+        only_from_location = company.stockit_out_pick_exp_location_id
+
+        priority_mapping = {'1': 'BASSE', '2': 'NORMALE', '3': 'HAUTE', '9': 'SHOP'}
         rows = []
-         # FIXME: check domain
+
         search =  [('type', '=', 'out'),
-           ('state', '=', 'assigned')]
+                   ('state', '=', 'assigned'),
+        ]
         if ids:
             search.append(('id', 'in', ids))
         picking_ids = picking_obj.search(cr,
@@ -134,6 +142,8 @@ class StockItOutPickingExport(osv.osv_memory):
                 rows.append(row)
             else:
                 for line in picking.move_lines:
+                    if only_from_location and line.location_id.id != only_from_location.id:
+                        continue  # skip line if stock location is not the one to export
                     row = ['S',  # type
                            str(picking.id),  # unique id
                            picking.name,  # ref/name

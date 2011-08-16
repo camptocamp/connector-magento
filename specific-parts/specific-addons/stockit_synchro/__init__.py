@@ -25,3 +25,4 @@ import wizard
 import unicode_csv
 import stockit_exporter
 import company
+import sale
