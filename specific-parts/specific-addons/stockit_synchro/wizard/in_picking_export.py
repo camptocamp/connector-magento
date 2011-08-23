@@ -111,6 +111,8 @@ class StockItInPickingExport(osv.osv_memory):
                 name += '-' + picking.origin
             name = make_string_valid_filename(name)
             for line in picking.move_lines:
+                if line.product_id.type == 'service':
+                    continue  # skip service products
                 row = [
                     'E',  # type
                     str(picking.id),  # unique id

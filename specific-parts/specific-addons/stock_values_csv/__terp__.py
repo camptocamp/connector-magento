@@ -28,20 +28,21 @@
 #
 ##############################################################################
 
-
 {
-    "name" : "Stock Locations Values at Date",
+    "name" : "Stock Values at Date",
     "version" : "1.0",
     "author" : "Camptocamp",
-    "description" : """Add a view which display the location's values at a given date.
-    Needs to apply addons.patch on addons to fix a bug on addons.
+    "description" : """Debonix Specific.
+    Add a wizard to export the stock value for each product in a location at a given date.
+    The data is exported as a CSV file.
     """,
     "website" : "http://www.camptocamp.com",
     "depends" : ['stock'],
     "category" : 'Generic Modules/Inventory Control',
     "init_xml" : [],
     "demo_xml" : [],
-    "update_xml" : ['wizard.xml',
+    "update_xml" : ['wizard/stock_values_view.xml',
+                    'menu.xml',
                     ],
     'demo_xml': [],
     'installable': True,

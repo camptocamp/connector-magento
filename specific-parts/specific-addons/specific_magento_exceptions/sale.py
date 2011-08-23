@@ -22,36 +22,10 @@ from osv import osv, fields
 from base_external_referentials import external_osv
 from magentoerpconnect import magerp_osv
 import netsvc
+import pooler
 from tools.translate import _
 import time
-
-
-class sale_shop(external_osv.external_osv):
-    _inherit = "sale.shop"
-
-# -*- encoding: utf-8 -*-
-##############################################################################
-#
-#    Author Guewen Baconnier. Copyright Camptocamp SA
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
-
-from osv import osv, fields
-from base_external_referentials import external_osv
-
+import xmlrpclib
 
 class sale_shop(external_osv.external_osv):
     _inherit = "sale.shop"
@@ -159,6 +133,7 @@ Exception :
                   left join ir_model_data on stock_picking.id = ir_model_data.res_id and ir_model_data.model='stock.picking'
                   left join delivery_carrier on delivery_carrier.id = stock_picking.carrier_id
                  where shop_id = %s and ir_model_data.res_id ISNULL and stock_picking.state = 'done'
+                       and COALESCE(stock_picking.magento_do_not_export, false) = false
                  Group By stock_picking.id, sale_order.id, stock_picking.backorder_id, delivery_carrier.magento_export_needs_tracking, stock_picking.carrier_tracking_ref
                  order by sale_order.id asc, COALESCE(stock_picking.backorder_id, NULL, 0) asc;
                 """, (shop.id,))
@@ -180,8 +155,25 @@ Exception :
                                                                                              picking_type,
                                                                                              shop.referential_id.id,
                                                                                              context)
+
+                    except xmlrpclib.Fault, e:
+                        # hack to flag the "do not export to magento" on the packing to not try to export it again
+                        # fault 102 is : <Fault 102: u"Impossible de faire l\'exp\xe9dition de la commande.">
+                        # this is the result returned by Magento, in a such case it will never accept to create it.
+                        if e.faultCode == 102:
+                            local_db, local_pool = pooler.get_db_and_pool(cr.dbname)
+                            local_cr = local_db.cursor()
+                            try:
+                                local_pool.get('stock.picking').write(local_cr, uid, result[0], {'magento_do_not_export': True}, context=context)
+                            finally:
+                                local_cr.commit()
+                                local_cr.close()
+                        exception_pickings[result[0]] = e
+                        continue
+
                     except Exception, e:
                         exception_pickings[result[0]] = e
+                        continue
 
                     if ext_shipping_id:
                         ir_model_data_vals = {
@@ -191,8 +183,13 @@ Exception :
                             'external_referential_id': shop.referential_id.id,
                             'module': 'extref/' + shop.referential_id.name,
                             }
-                        self.pool.get('ir.model.data').create(cr, uid, ir_model_data_vals)
-                        cr.commit()
+                        local_db, local_pool = pooler.get_db_and_pool(cr.dbname)
+                        local_cr = local_db.cursor()
+                        try:
+                            local_pool.get('ir.model.data').create(local_cr, uid, ir_model_data_vals)
+                        finally:
+                            local_cr.commit()
+                            local_cr.close()
                         logger.notifyChannel('ext synchro', netsvc.LOG_INFO,
                                              "Successfully creating shipping with OpenERP id %s and ext id %s in external sale system" % (
                                              result[0], ext_shipping_id))
@@ -224,19 +221,24 @@ Exception :
         try:
             res = super(sale_shop, self).update_shop_orders(cr, uid, order, ext_id, context)
         except Exception, e:
-            request = self.pool.get('res.request')
-            summary = """Error during orders update on order id : %d
-Order reference : %s
-Exception :
-%s""" % (order.id, order.name, e)
-            request.create(cr, uid,
-                           {'name': "Update orders error",
-                            'act_from': uid,
-                            'act_to': uid,
-                            'body': summary,
-                            })
-            cr.commit()
-            raise 
+            local_db, local_pool = pooler.get_db_and_pool(cr.dbname)
+            local_cr = local_db.cursor()
+            try:
+                request = local_pool.get('res.request')
+                summary = """Error during orders update on order id : %d
+    Order reference : %s
+    Exception :
+    %s""" % (order.id, order.name, e)
+                request.create(local_cr, uid,
+                               {'name': "Update orders error",
+                                'act_from': uid,
+                                'act_to': uid,
+                                'body': summary,
+                                })
+            finally:
+                local_cr.commit()
+                local_cr.close()
+            raise e
         return res
 
 sale_shop()
@@ -245,33 +247,71 @@ sale_shop()
 class sale_order(magerp_osv.magerp_osv):
     _inherit = "sale.order"
 
-    def mage_import_one_by_one(self, cr, uid, conn, external_referential_id, mapping_id, data, defaults=None, context=None):
+    def import_order_exception(self, cr, uid, ext_id, e):
+        local_db, local_pool = pooler.get_db_and_pool(cr.dbname)
+        local_cr = local_db.cursor()
+        try:
+            request = local_pool.get('res.request')
+            summary = """Error during orders import on Magento order id : %s
+    Exception :
+    %s""" % (ext_id, e)
+            request.create(local_cr, uid,
+                           {'name': "Import orders error",
+                            'act_from': uid,
+                            'act_to': uid,
+                            'body': summary,
+                            })
+        finally:
+            local_cr.commit()
+            local_cr.close()
+
+    def mage_import_base(self, cr, uid, conn, external_referential_id, defaults=None, context=None):
         if context is None:
             context = {}
+        if defaults is None:
+            defaults = {}
+        if not 'ids_or_filter' in context.keys():
+            context['ids_or_filter'] = []
         result = {'create_ids': [], 'write_ids': []}
-        del(context['one_by_one'])
-        for record in data:
-            id = record[self.pool.get('external.mapping').read(cr, uid, mapping_id, ['external_key_name'])['external_key_name']]
-            get_method = self.pool.get('external.mapping').read(cr, uid, mapping_id, ['external_get_method']).get('external_get_method', False)
-            try:
-                rec_data = [conn.call(get_method, [id])]
-                rec_result = self.ext_import(cr, uid, rec_data, external_referential_id, defaults, context)
-                result['create_ids'].append(rec_result['create_ids'])
-                result['write_ids'].append(rec_result['write_ids'])
-            except Exception, e:
-                summary = _("Error during orders import on Magento order id : %s\n\n"
-                            "Exception :\n"
-                            "%s") % (id, e)
-                self.pool.get('res.request').create(cr, uid,
-                                                    {'name': _("Import orders error"),
-                                                     'act_from': uid,
-                                                     'act_to': uid,
-                                                     'body': summary,
-                                                     })
-                # if we import orders by flag, we can let the import continue because the missing order will
-                # be imported on the next import
-                if not 'import_order_flag' in context.keys() or not context['import_order_flag']:
-                    raise
+        mapping_id = self.pool.get('external.mapping').search(cr, uid, [('model', '=', self._name), (
+        'referential_id', '=', external_referential_id)])
+        if mapping_id:
+            data = []
+            if context.get('id', False):
+                get_method = self.pool.get('external.mapping').read(cr, uid, mapping_id[0],
+                                                                    ['external_get_method']).get('external_get_method',
+                                                                                                 False)
+                if get_method:
+                    data = [conn.call(get_method, [context.get('id', False)])]
+                    data[0]['external_id'] = context.get('id', False)
+                    result = self.ext_import(cr, uid, data, external_referential_id, defaults, context)
+            else:
+                list_method = self.pool.get('external.mapping').read(cr, uid, mapping_id[0],
+                                                                     ['external_list_method']).get(
+                    'external_list_method', False)
+                if list_method:
+                    data = conn.call(list_method, context['ids_or_filter'])
+
+                    #it may happen that list method doesn't provide enough information, forcing us to use get_method on each record (case for sale orders)
+                    if context.get('one_by_one', False):
+                        del(context['one_by_one'])
+
+                        for record in data:
+                            id = record[
+                                 self.pool.get('external.mapping').read(cr, uid, mapping_id[0], ['external_key_name'])['external_key_name']]
+                            get_method = self.pool.get('external.mapping').read(cr, uid, mapping_id[0],['external_get_method']).get('external_get_method', False)
+
+                            try:
+                                rec_data = [conn.call(get_method, [id])]
+                                rec_result = self.ext_import(cr, uid, rec_data, external_referential_id, defaults,
+                                                             context)
+                                result['create_ids'].append(rec_result['create_ids'])
+                                result['write_ids'].append(rec_result['write_ids'])
+                            except Exception, e:
+                                self.import_order_exception(cr, uid, id, e)
+                                raise
+                    else:
+                        result = self.ext_import(cr, uid, data, external_referential_id, defaults, context)
         return result
 
 sale_order()

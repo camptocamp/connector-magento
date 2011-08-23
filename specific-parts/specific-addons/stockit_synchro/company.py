@@ -31,6 +31,7 @@ class ResCompany(osv.osv):
         'stockit_in_picking_export': fields.char('Ingoing Picking Export Folder', size=32),
         'stockit_in_picking_import': fields.char('Ingoing Picking Import Folder', size=32),
         'stockit_out_picking_export': fields.char('Outgoing Picking Export Folder', size=32),
+        'stockit_out_pick_exp_location_id': fields.many2one('stock.location', 'Outgoing Picking Export Location'),
         'stockit_inventory_import': fields.char('Inventory Import Folder', size=32),
         'stockit_product_export': fields.char('Product Export Folder', size=32),
         'stockit_product_ean_export': fields.char('Product EAN13 Export Folder', size=32),

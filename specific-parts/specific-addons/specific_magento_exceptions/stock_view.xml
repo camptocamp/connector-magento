@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_picking_out_form_exception" model="ir.ui.view">
+            <field name="name">stock.picking.out.form.except</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_out_form"/>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <page string="Others info" position="inside">
+                    <field name="magento_do_not_export" select="2"/>
+                </page>
+            </field>
+        </record>
+    </data>
+</openerp>

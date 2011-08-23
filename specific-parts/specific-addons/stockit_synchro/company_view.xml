@@ -15,6 +15,7 @@
                         <field name="stockit_in_picking_export"/>
                         <field name="stockit_out_picking_export"/>
                         <field name="stockit_product_export"/>
+                        <field name="stockit_out_pick_exp_location_id"/>
                         <field name="stockit_product_ean_export"/>
                         <separator string="Import" colspan="4"/>
                         <field name="stockit_in_picking_import"/>

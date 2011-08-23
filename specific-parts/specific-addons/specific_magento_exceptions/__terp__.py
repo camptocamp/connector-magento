@@ -38,7 +38,7 @@
     """,
     'website': 'http://www.camptocamp.com',
     'init_xml': [],
-    'update_xml': [
+    'update_xml': ['stock_view.xml',
                   ],
     'demo_xml': [],
     'installable': True,

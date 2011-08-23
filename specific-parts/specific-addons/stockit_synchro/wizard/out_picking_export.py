@@ -142,14 +142,17 @@ class StockItOutPickingExport(osv.osv_memory):
                 rows.append(row)
             else:
                 for line in picking.move_lines:
+                    if line.product_id.type == 'service':
+                        continue  # skip service products
                     if only_from_location and line.location_id.id != only_from_location.id:
                         continue  # skip line if stock location is not the one to export
+                    qty = line.state != 'cancel' and line.product_qty or 0.0
                     row = ['S',  # type
                            str(picking.id),  # unique id
                            picking.name,  # ref/name
                            line.date_planned,  # expected date
                            line.product_id.default_code,  # product code
-                           str(line.product_qty),  # quantity
+                           str(qty),  # quantity
                            picking.priority and
                            priority_mapping[picking.priority] or
                            picking.priority['2'],]  # priority
