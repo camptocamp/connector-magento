@@ -30,21 +30,19 @@
                 </data>
             </field>
         </record>
-        
+
         <record model="ir.ui.view" id="view_order_tree">
 			<field name="name">sale.order.tree.magento</field>
 			<field name="model">sale.order</field>
 			<field name="inherit_id" ref="sale.view_order_tree" />
 			<field name="type">tree</field>
 			<field name="arch" type="xml">
-				<tree string="Sales orders">
-                    <field name="invoiced_rate" widget="progressbar" position="after">
-					    <field name="date_invoiced" select="1"/>
-                    </field>
-				</tree>
+                <field name="invoiced_rate" widget="progressbar" position="after">
+                    <field name="date_invoiced" select="1"/>
+                </field>
 			</field>
 		</record>
-		
+
 		<record model="ir.ui.view" id="view_order_form">
 			<field name="name">sale.order.form.magento</field>
 			<field name="model">sale.order</field>
@@ -56,12 +54,11 @@
 				</field>
 			</field>
 		</record>
-        
+
         <!-- Remove autrefresh -->
         <record model="ir.actions.act_window" id="sale.action_order_form">
     		<field name="auto_refresh" eval="0"/>
     	</record>
-        
         
         <record id="action_order_tree_cheque" model="ir.actions.act_window">
             <field name="name">Sales Order Waiting Cheque</field>
