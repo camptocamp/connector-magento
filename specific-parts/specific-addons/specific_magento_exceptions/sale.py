@@ -138,7 +138,7 @@ Exception :
                  order by sale_order.id asc, COALESCE(stock_picking.backorder_id, NULL, 0) asc;
                 """, (shop.id,))
             results = cr.fetchall()
-
+            
             success_counter = 0
             exception_pickings = {}
             for result in results:
@@ -194,7 +194,8 @@ Exception :
                                              "Successfully creating shipping with OpenERP id %s and ext id %s in external sale system" % (
                                              result[0], ext_shipping_id))
                         success_counter += 1
-
+                    cr.commit()
+                    
             request = self.pool.get('res.request')
             summary = """Export ended at %s
 %d pickings have been correctly exported.
@@ -215,6 +216,7 @@ Exception :
                             'act_to': uid,
                             'body': summary,
                             })
+            cr.commit()
         return True
 
     def update_shop_orders(self, cr, uid, order, ext_id, context):
@@ -312,6 +314,7 @@ class sale_order(magerp_osv.magerp_osv):
                                 raise
                     else:
                         result = self.ext_import(cr, uid, data, external_referential_id, defaults, context)
+
         return result
 
 sale_order()

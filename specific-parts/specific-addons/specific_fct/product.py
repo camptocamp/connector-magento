@@ -65,6 +65,7 @@ class Product(magerp_osv.magerp_osv):
         # remove products used by stock moves from the products to deactivate
         [product_ids.remove(id) for id in products_not_to_deactivate]
         self.write(cr, uid, product_ids, {'active': False} , context=context)
+        cr.commit()
         return True
 
     def create(self, cr, uid, vals, context=None):

@@ -138,6 +138,7 @@ class sale_shop(magerp_osv.magerp_osv):
             self.export_products(cr, uid, shop, context)
             shop.write({'last_products_export_date' : time.strftime('%Y-%m-%d %H:%M:%S')})
 
+        cr.commit()
         self.deactivate_products(cr, uid, context=context)
         self.export_inventory(cr, uid, ids, context)
         return False
@@ -154,6 +155,7 @@ class sale_shop(magerp_osv.magerp_osv):
             # remove the 'need_to_update': True
             if order.need_to_update:
                 self.pool.get('sale.order').write(cr, uid, order.id, {'need_to_update': False})
+                cr.commit()
 
         #creation of Magento invoice eventually:
         # remove invoice creation for debonix
