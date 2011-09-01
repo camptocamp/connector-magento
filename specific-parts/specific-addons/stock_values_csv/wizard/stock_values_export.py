@@ -107,7 +107,9 @@ class StockValuesExport(osv.osv_memory):
                 u'brand',
                 u'quantity',
                 u'standard_price',
-                u'total']
+                u'total',
+                u'supplier_price',
+                u'total_supplier_price',]
 
     def _get_rows(self, cr, uid, ids, products_qty, context=None):
         """
@@ -120,6 +122,16 @@ class StockValuesExport(osv.osv_memory):
             quantity = products_qty[product.id]
             total = quantity * product.standard_price
 
+            supplier_price = 0.0
+            if product.seller_ids:
+                seller = product.seller_ids[0]
+                for pricelist in seller.pricelist_ids:
+                    if pricelist.min_quantity < 2:
+                        supplier_price = pricelist.price
+                        break
+
+            total_supplier_price = quantity * supplier_price
+
             row = [
                 product.default_code,
                 product.name,
@@ -127,6 +139,8 @@ class StockValuesExport(osv.osv_memory):
                 str(quantity),
                 str(product.standard_price),
                 str(total),
+                str(supplier_price),
+                str(total_supplier_price),
             ]
             rows.append(row)
         return rows
