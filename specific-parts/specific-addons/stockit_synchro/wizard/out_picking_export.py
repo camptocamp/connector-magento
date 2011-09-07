@@ -40,7 +40,7 @@ class StockItOutPickingExport(osv.osv_memory):
     }
 
     def action_manual_export(self, cr, uid, ids, context=None):
-        rows = self.get_data(cr, uid, [], context)
+        rows = self.get_data(cr, uid, [], context=context)
         exporter = StockitExporter()
         data = exporter.get_csv_data(rows)
         result = self.write(cr,
@@ -75,14 +75,14 @@ class StockItOutPickingExport(osv.osv_memory):
         company = user.company_id
         if not company.stockit_base_path or not company.stockit_out_picking_export:
             raise osv.except_osv(_('Error'), _('Stockit path is not configured on company.'))
-        filename = "out_picking_export_with_id.csv"
+        filename = "out_picking_export_with_id_%s.csv" % (datetime.now().isoformat().replace(':','_'),)
         filepath = os.path.join(company.stockit_base_path,
                                 company.stockit_out_picking_export,
                                 filename)
         db, pool = pooler.get_db_and_pool(cr.dbname)
         mycursor = db.cursor()
         try:
-            rows = self.get_data(mycursor, uid, [], context)
+            rows = self.get_data(mycursor, uid, [], context=context)
             exporter = StockitExporter(filepath)
             data = exporter.get_csv_data(rows)
             exporter.export_file(data)
@@ -94,9 +94,10 @@ class StockItOutPickingExport(osv.osv_memory):
             mycursor.close()
         return True
 
-    def get_data(self, cr, uid, ids, context=None):
+    def get_data(self, cr, uid, ids, add_picking_ids=None, context=None):
         """Export outgoing pickings in Stock iT format"""
         picking_obj = self.pool.get('stock.picking')
+        add_picking_ids = add_picking_ids or []
         context = context or {}
         context['lang'] = 'fr_FR'
 
@@ -110,27 +111,29 @@ class StockItOutPickingExport(osv.osv_memory):
         priority_mapping = {'1': 'BASSE', '2': 'NORMALE', '3': 'HAUTE', '9': 'SHOP'}
         rows = []
 
-        search =  [('type', '=', 'out'),
-                   ('state', '=', 'assigned'),
-        ]
-        if ids:
-            search.append(('id', 'in', ids))
-        picking_ids = picking_obj.search(cr,
-                                         uid,
-                                         search,
-                                         context=context)
+        # use cr.execute because we cannot compare 2 fields using orm search
+        cr.execute("SELECT id FROM stock_picking "
+                   " WHERE type = 'out' "
+                   "   AND state = 'assigned' "
+                   "   AND (stockit_export_date ISNULL "
+                   "        OR write_date > stockit_export_date)"
+                   "   AND active = true")
+
+        picking_ids = [pick_id[0] for pick_id in cr.fetchall()]
+
         # we look for outdated
         search = [('type', '=', 'out'),
                   ('stockit_outdated', '=', True),
-                  ('state', '=', 'cancel')]
-        if ids:
-            search.append(('id', 'in', ids))
+                  ('state', '=', 'cancel'),]
+
         picking_ids += picking_obj.search(cr,
                                           uid,
                                           search,
                                           context=context)
+
+        picking_ids += add_picking_ids
         picking_ids = list(set(picking_ids))
-        for picking in picking_obj.browse(cr, uid, picking_ids):
+        for picking in picking_obj.browse(cr, uid, picking_ids, context=context):
             if picking.state == 'cancel':
                 row=['S',  # type
                      str(picking.id),  # unique id
@@ -209,7 +212,7 @@ def _compute_export(self, cr, uid, data, context):
     filepath = os.path.join(company.stockit_base_path,
                            company.stockit_out_picking_export,
                            filename)
-    rows = exp_obj.get_data(cr, uid, ids, context)
+    rows = exp_obj.get_data(cr, uid, [], ids, context)
     if not rows:
         raise wizard.except_wizard(_('No row exported'),
                                    _('Only out and assigned rows will be exported'

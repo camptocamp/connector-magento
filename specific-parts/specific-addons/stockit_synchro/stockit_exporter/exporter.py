@@ -29,4 +29,5 @@ class StockitExporter(object):
     def export_file(self, csv_data):
         if not self.filename:
             raise Exception('Error', 'Please specify a filename!')
-        self._write_file(csv_data)
+        if csv_data:
+            self._write_file(csv_data)
