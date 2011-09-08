@@ -21,11 +21,10 @@
 import time
 import os
 import glob
-from collections import defaultdict
-
 import netsvc
-from osv import osv, fields
 import pooler
+
+from osv import osv, fields
 from tools.translate import _
 from operator import itemgetter
 from stockit_synchro.stockit_importer.importer import StockitImporter
@@ -64,13 +63,11 @@ class StockItInventoryImport(osv.osv_memory):
         company = user.company_id
         default_location_id = company.stockit_inventory_location_id
 
-        header = ['type', 'default_code', 'quantity', 'ean', 'zone']
+        header = ['type', 'default_code', 'quantity']
         conversion_types = {
             'type': unicode,
             'default_code': unicode,
             'quantity': int,
-            'ean': unicode,
-            'zone': unicode,
         }
 
         importer = StockitImporter()
@@ -81,8 +78,6 @@ class StockItInventoryImport(osv.osv_memory):
         # I means inventory for stock it
         rows = [row for row in rows if row['type'] == 'I']
 
-        # create ean on product if it does not already exist
-        product_ean_list = defaultdict(list)
         errors_report = []
         for row in rows:
             product_ids = product_obj.search(cr, uid,
@@ -91,27 +86,16 @@ class StockItInventoryImport(osv.osv_memory):
                 errors_report.append(_('Product with default code %s does not exist!') % (row['default_code'],))
                 continue
             product_id = product_ids[0]
-            # defaultdict magic
-            product_ean_list[product_id].append(row['ean'])
 
-        for product_id in product_ean_list:
-            try:
-                product_obj.add_ean_if_not_exists(cr, uid, product_id, 
-                                                  product_ean_list[product_id], context)
-            except Exception, e:
-                errors_report.append(_('Can not create new ean for product %s'
-                                       ' one of the following ean %s seems not correct.'
-                                       ' You can look in the log for more details')\
-                                        % (product_id, str(product_ean_list[product_id])))
         if errors_report:
             raise osv.except_osv(_('ImportError'), "\n".join(errors_report))
+
         # sum quantities of duplicate products and remove them
-        rows = sorted(rows, key=itemgetter('default_code', 'zone'))
+        rows = sorted(rows, key=itemgetter('default_code'))
         if rows:
             last = rows[-1]
             for index in range(len(rows) - 2, -1, -1):
-                if last['default_code'] == rows[index]['default_code'] and \
-                   last['zone'] == rows[index]['zone']:
+                if last['default_code'] == rows[index]['default_code']:
                     last['quantity'] = last['quantity'] + \
                                        rows[index]['quantity']
                     del rows[index]
@@ -136,9 +120,9 @@ class StockItInventoryImport(osv.osv_memory):
                                  }
                 inventory_rows.append(inventory_row)
             except osv.except_osv, e:
-                errors_report.append(_('Processing error append: %') % (e.value, ))
+                errors_report.append(_('Processing error append: %s') % (e.value, ))
             except Exception, e:
-                errors_report.append(_('Processing error append: %') % (str(e)))
+                errors_report.append(_('Processing error append: %s') % (str(e)))
         if errors_report:
              raise osv.except_osv(_('ImportError'), "\n".join(errors_report))    
         if inventory_rows:
