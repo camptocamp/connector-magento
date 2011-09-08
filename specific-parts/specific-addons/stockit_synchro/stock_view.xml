@@ -15,7 +15,21 @@
                     <button name="button_cancel" states="assigned,confirmed,draft" string="Cancel" position="replace">
                         <button name="button_cancel" states="assigned,confirmed,draft,stockit_confirm" string="Cancel"/>
                     </button>
+                </data>
+            </field>
+        </record>
 
+        <record model="ir.ui.view" id="view_picking_out_form_stockit">
+            <field name="name">stock.picking.out.form.stockit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_out_form"/>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <data>
+
+                    <page string="Others info" position="inside">
+                        <field name="stockit_export_date"/>
+                    </page>
                 </data>
             </field>
         </record>
