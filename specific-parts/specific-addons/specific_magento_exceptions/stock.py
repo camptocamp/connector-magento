@@ -27,6 +27,7 @@ class Stock(osv.osv):
 
     _inherit = 'stock.picking'
 
+
     _columns = {
         'magento_do_not_export': fields.boolean('Do not export to Magento', select=2)
     }

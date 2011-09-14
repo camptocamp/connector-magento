@@ -132,6 +132,8 @@ class StockItInventoryImport(osv.osv_memory):
                      'inventory_line_id': [(0, 0, row)
                                             for row
                                             in inventory_rows]})
+            
+            inventory_obj.action_done(cr, uid, [inventory_id], context=context)
 
         return inventory_id
 
