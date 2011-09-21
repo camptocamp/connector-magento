@@ -134,10 +134,11 @@ class StockItOutPickingExport(osv.osv_memory):
         picking_ids += add_picking_ids
         picking_ids = list(set(picking_ids))
         for picking in picking_obj.browse(cr, uid, picking_ids, context=context):
+            name = picking.name
             if picking.state == 'cancel':
                 row=['S',  # type
                      str(picking.id),  # unique id
-                     picking.name,  # ref/name
+                     name[:18],  # ref/name
                      '',  # expected date
                      '',  # product code
                      0.0,  # quantity
@@ -152,7 +153,7 @@ class StockItOutPickingExport(osv.osv_memory):
                     qty = line.state != 'cancel' and line.product_qty or 0.0
                     row = ['S',  # type
                            str(picking.id),  # unique id
-                           picking.name,  # ref/name
+                           name[:18],  # ref/name
                            line.date_planned,  # expected date
                            line.product_id.default_code,  # product code
                            str(qty),  # quantity
