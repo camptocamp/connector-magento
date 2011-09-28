@@ -86,14 +86,12 @@ class StockCsvColissimo(osv.osv):
         fid.close()
         # chronopost needs to drop the file so we have to put the write permission on the group
         os.chmod(filename, 0664)
+        return True
 
-
-    def action_done(self, cr, uid, ids, context=None):
+    def create_chronopost_file(self, cr, uid, ids, context=None):
         """
-        Overriding of the stock picking, function called when the picking is done.
         Export a fixed width file with the picking informations
         """
-        # get company
         user = self.pool.get('res.users').browse(cr, uid, uid)
         company = user.company_id
 
@@ -106,6 +104,7 @@ class StockCsvColissimo(osv.osv):
         if not company.chronopost_subaccount_number:
             raise osv.except_osv(_("Chronopost Error"), _("The Chronopost Sub-Account number is not configured in the company setup."))
 
+        
         for packing in self.browse(cr, uid, ids, context):
             # only create a csv for out packings with transporter
             if packing.type == 'out' and packing.carrier_id:
@@ -113,11 +112,10 @@ class StockCsvColissimo(osv.osv):
                 file = []
                 filename = "%s.txt" % packing.name
                 line = ChronopostLine()
-                
-                line.subaccount = company.chronopost_subaccount_number 
+
+                line.subaccount = company.chronopost_subaccount_number
                 line.client_code = packing.address_id and str(packing.address_id.partner_id.id) or ''
                 line.name1 = packing.address_id and packing.address_id.name or ''
-#                line.name2 = 
                 line.street1 = packing.address_id and packing.address_id.street or ''
                 line.street2 = packing.address_id and packing.address_id.street2 or ''
                 line.zip = packing.address_id and packing.address_id.zip or ''
@@ -137,8 +135,15 @@ class StockCsvColissimo(osv.osv):
                 number_of_line = packing.package_number > 0 and packing.package_number or 1
                 for x in range(number_of_line):
                     file.append(line)
-                
+
                 self._write_csv(os.path.join(company.tracking_csv_path_out, filename), file)
+        return True
+
+    def action_done(self, cr, uid, ids, context=None):
+        """
+        Overriding of the stock picking, function called when the picking is done.
+        """
+        self.create_chronopost_file(cr, uid, ids, context=context)
         return super(StockCsvColissimo, self).action_done(cr, uid, ids, context)
 
     def _get_packing_weight(self, cr, uid, packing):
