@@ -21,3 +21,4 @@ import stock
 import company
 import delivery
 import sale
+import wizard
