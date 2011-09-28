@@ -32,6 +32,7 @@
                  'sale_margin',
                  'account_statement_import',
                  'c2c_pack_product_chg',
+                 'c2c_magento_equivalences',
                  ],
     'author' : 'Camptocamp',
     'description': """Code customisation module""",
