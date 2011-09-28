@@ -135,6 +135,6 @@ if record['x_magerp_pixmania_price_stock']:
 if record['x_magerp_pixmania_new']:
     result=[('pixmania_new', True)]"
 "mag_erp_so_trans_id","magentoerpconnect.magento1324","sale.model_sale_order","transaction_id","in","str","result=[('transaction_id', data['payment_transaction_id'])]",
-"c2c_magento_equivalences.prd_equivalence","magentoerpconnect.magento1324","product.model_product_product","x_magerp_zdbx_default_sku_secours","out","int",,"if record.get('c2c_debonix_equiv',False):
-    magento_product_id = self.oeid_to_extid(cr, uid, record.get('c2c_debonix_equiv')[0], external_referential_id)
-    result = [('x_magerp_zdbx_default_sku_secours', magento_product_id)]"
+"c2c_magento_equivalences.prd_equivalence","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_sku_secours","out","int",,"if record.get('c2c_debonix_equiv',False):
+    equiv_sku = self.pool.get('product.product').read(cr, uid, record.get('c2c_debonix_equiv')[0], ['magento_sku'], context=context)['magento_sku']
+    result = [('zdbx_default_sku_secours', equiv_sku)]"
