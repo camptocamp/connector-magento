@@ -16,12 +16,12 @@
 #
 ##############################################################################
 
-from magentoerpconnect import magerp_osv
-import netsvc
 import time
 import netsvc
+import c2c_pack_product_chg
+
+from magentoerpconnect import magerp_osv
 from tools.translate import _
-import string
 from osv import osv
 from osv import fields
 
@@ -33,6 +33,7 @@ class sale_order(magerp_osv.magerp_osv):
     
 
     def get_order_cash_on_delivery(self, cr, uid, res, external_referential_id, data_record, key_field, mapping_lines, defaults, context):
+        """Get cash on delivery amounts on orders imported from magento"""
         if data_record.get('cod_fee', False) and float(data_record.get('cod_fee', False)) > 0:
             cod_product_id = self.pool.get('product.product').search(cr, uid, [('default_code', '=', 'CASH ON DELIVERY MAGENTO')])[0]
             cod_product = self.pool.get('product.product').browse(cr, uid, cod_product_id, context)
@@ -55,12 +56,13 @@ class sale_order(magerp_osv.magerp_osv):
         return res
 
     def get_order_lines(self, cr, uid, res, external_referential_id, data_record, key_field, mapping_lines, defaults, context):
+        """Add cash on delivery on orders imported from magento"""
         res = super(sale_order, self).get_order_lines(cr, uid, res, external_referential_id, data_record, key_field, mapping_lines, defaults, context)
         res = self.get_order_cash_on_delivery(cr, uid, res, external_referential_id, data_record, key_field, mapping_lines, defaults, context)
         return res
 
     def oe_create(self, cr, uid, vals, data, external_referential_id, defaults, context):
-        """call sale_margin's module on_change to compute margin"""
+        """call sale_margin's module on_change to compute margin when order's created from magento"""
         order_id = super(sale_order, self).oe_create(cr, uid, vals, data, external_referential_id, defaults, context)
         order_line_obj = self.pool.get('sale.order.line')
         order = self.browse(cr, uid, order_id, context)
@@ -124,11 +126,20 @@ class sale_shop(magerp_osv.magerp_osv):
     _inherit = 'sale.shop'
 
     def deactivate_products(self, cr, uid, context=None):
+        """
+        Deactivate all products planned to deactivation on OpenERP
+        Only if no picking uses the product
+        """
+
         product_ids = self.pool.get('product.product').search(cr, uid, [('to_deactivate', '=', True)])
         self.pool.get('product.product').try_deactivate_product(cr, uid, product_ids, context=context)
         return True
 
     def export_catalog(self, cr, uid, ids, context=None):
+        """
+            Changes from magentoerpconnect : add the auto deactivation of products at the end of the export
+        """
+
         if context is None:
             context = {}
         for shop in self.browse(cr, uid, ids):
@@ -136,7 +147,7 @@ class sale_shop(magerp_osv.magerp_osv):
             context['conn_obj'] = self.external_connection(cr, uid, shop.referential_id)
             self.export_categories(cr, uid, shop, context)
             self.export_products(cr, uid, shop, context)
-            shop.write({'last_products_export_date' : time.strftime('%Y-%m-%d %H:%M:%S')})
+            shop.write({'last_products_export_date': time.strftime('%Y-%m-%d %H:%M:%S')})
 
         cr.commit()
         self.deactivate_products(cr, uid, context=context)
@@ -175,50 +186,60 @@ class sale_shop(magerp_osv.magerp_osv):
 sale_shop()
 
 
-class sale_order_line(osv.osv):
-    _inherit = 'sale.order.line'
+c2c_pack_product_chg.sale.sale_order_line.BASE_TEXT_FOR_PRD_REPLACE = _("""This product replaces partially or completely the ordered product :
+""")
 
-    # BASE_TEXT_FOR_PRD_REPLACE = _("""
-    # --
-    # This product has been partially or completely replaced by : 
-    # """)
+def invoice_line_create(self, cr, uid, ids, context={}):
+    """Override this method to add a create the line with the replaced product in the related packing
+    (but same price as original product). Add a comment which indicates the modification
 
-    def invoice_line_create(self, cr, uid, ids, context={}):
-        """Override this method to add a comment in the line when a product has been
-        replaced in the related packing. So it'll inform the customer of the change.
-        
-        CHANGE from c2c_pack_product_chg => Delete the invoice note before writting the
-        product changes..."""
-        inv_created_ids = super(sale_order_line,self).invoice_line_create(cr,uid,ids,context)
-        inv_line_obj = self.pool.get('account.invoice.line')
-        # for inv_line in inv_line_obj.browse(cr,uid,inv_created_ids):
-        inv_line_obj.write(cr, uid, inv_created_ids, {'note': ''})
-            # inv_line_obj.write(cr, uid, inv_line.id, {'note': new_note})
-        
-        prod_obj=self.pool.get('product.product')
-        partner_obj = self.pool.get('res.partner')
-        ctx ={}
-        inv_line_obj = self.pool.get('account.invoice.line')
-        for so_line in self.browse(cr,uid,ids):
-            product_changed_id = False
-            # If one of the stock move generated by the SO lines has
-            # a product replaced
-            for move in so_line.move_ids:
-                if move.old_product_id:
-                    product_changed_id = move.product_id.id
-                    break
-            if product_changed_id:
-                if so_line.invoice_lines:
-                    # We add a comment into all related invoices lines
-                    concerned_inv_line_ids=[x.id for x in so_line.invoice_lines]
-                    lang = partner_obj.browse(cr, uid, so_line.order_id.partner_id.id).lang
-                    ctx = {'lang': lang}
-                    for inv_line in inv_line_obj.browse(cr,uid,concerned_inv_line_ids):
-                        current_note = ''
-                        # current_note = inv_line.note or ''
-                        product_note = prod_obj.name_get(cr, uid, [product_changed_id], context=ctx)[0][1]
-                        new_note = current_note + self.BASE_TEXT_FOR_PRD_REPLACE + product_note
-                        inv_line_obj.write(cr, uid, inv_line.id, {'note': new_note})
-        return inv_created_ids
+    CHANGE FROM C2C_PACK_PRODUCT_CHG: DELETE NOTE BEFORE UPDATE LINE"""
+    inv_created_ids = super(c2c_pack_product_chg.sale.sale_order_line, self).invoice_line_create(cr, uid, ids, context)
 
-sale_order_line()
+    prod_obj = self.pool.get('product.product')
+    partner_obj = self.pool.get('res.partner')
+    inv_line_obj = self.pool.get('account.invoice.line')
+
+    inv_line_obj.write(cr, uid, inv_created_ids, {'note': ''})
+    for so_line in self.browse(cr, uid, ids):
+        product_changed_id = False
+        # If one of the stock move generated by the SO lines has
+        # a product replaced
+        for move in so_line.move_ids:
+            if move.old_product_id:
+                product_changed_id = move.product_id.id
+                break
+        # we replace the product on the invoice
+        # but keep the price of the original product
+        if product_changed_id:
+            if so_line.invoice_lines:
+                # We add a comment into all related invoices lines
+                inv_line_ids_to_change = [inv_line.id for inv_line in so_line.invoice_lines]
+                lang = partner_obj.browse(cr, uid, so_line.order_id.partner_id.id).lang
+                context = {'lang': lang}
+                for inv_line in inv_line_obj.browse(cr, uid, inv_line_ids_to_change):
+                    note = ''
+                    product_note = inv_line.name
+                    product_name = prod_obj.name_get(cr, uid, [product_changed_id], context=context)[0][1]
+                    result = inv_line_obj.product_id_change(cr, uid,
+                                                            inv_line.id,
+                                                            product_changed_id,
+                                                            inv_line.uos_id.id,
+                                                            qty=inv_line.quantity,
+                                                            name=product_name,
+                                                            type='out_invoice',
+                                                            partner_id=so_line.order_id.partner_id.id,
+                                                            fposition_id=so_line.order_id.partner_id.property_account_position.id,
+                                                            price_unit=inv_line.price_unit,
+                                                            context=context)
+
+                    new_note = note + self.BASE_TEXT_FOR_PRD_REPLACE + product_note
+                    inv_line_obj.write(cr, uid, inv_line.id, {'note': new_note,
+                                                              'account_id': result['value']['account_id'],
+                                                              'invoice_line_tax_id': result['value']['invoice_line_tax_id'],
+                                                              'uos_id': result['value']['uos_id'],
+                                                              'name': product_name,
+                                                              'product_id': product_changed_id})
+    return inv_created_ids
+
+c2c_pack_product_chg.sale.sale_order_line.invoice_line_create = invoice_line_create
