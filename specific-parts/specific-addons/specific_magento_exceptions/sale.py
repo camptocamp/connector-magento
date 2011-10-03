@@ -244,3 +244,38 @@ Exception :
         return res
 
 sale_shop()
+
+
+class sale_order(magerp_osv.magerp_osv):
+    _inherit = 'sale.order'
+
+    def mage_import_one_by_one(self, cr, uid, conn, external_referential_id, mapping_id, data, defaults=None, context=None):
+        """
+        When an exception raises, we report an error and let the import continue.
+        With the import by flag, it will be imported another time.
+        """
+        if context is None:
+            context = {}
+        result = {'create_ids': [], 'write_ids': []}
+        del(context['one_by_one'])
+        for record in data:
+            id = record[self.pool.get('external.mapping').read(cr, uid, mapping_id, ['external_key_name'])['external_key_name']]
+            get_method = self.pool.get('external.mapping').read(cr, uid, mapping_id, ['external_get_method']).get('external_get_method', False)
+            try:
+                rec_data = [conn.call(get_method, [id])]
+                rec_result = self.ext_import(cr, uid, rec_data, external_referential_id, defaults, context)
+                result['create_ids'].append(rec_result['create_ids'])
+                result['write_ids'].append(rec_result['write_ids'])
+            except Exception, e:
+                summary = _("Error during orders import on Magento order id : %s\n\n"
+                            "Exception :\n"
+                            "%s") % (id, e)
+                self.pool.get('res.request').create(cr, uid,
+                                                    {'name': _("Import orders error"),
+                                                     'act_from': uid,
+                                                     'act_to': uid,
+                                                     'body': summary,
+                                                     })
+        return result
+
+sale_order()

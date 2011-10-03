@@ -28,7 +28,8 @@ class StockPicking(osv.osv):
         if isinstance(ids, (int, long)):
             ids = [ids]
 
-        domain = [('state', '=', 'assigned')]
+        domain = [('type', '=', 'out'),
+                  ('state', '=', 'assigned')]
 
         if ids:
             domain += [('ids', 'in', ids)]
