@@ -243,6 +243,30 @@ Exception :
             raise e
         return res
 
+    def _check_need_to_update_order(self, cr, uid, ids, referential, order, context=None):
+        try:
+            res = super(sale_shop, self)._check_need_to_update_order(cr, uid, ids, referential, order, context=context)
+            return res
+        except Exception, e:
+            local_db, local_pool = pooler.get_db_and_pool(cr.dbname)
+            local_cr = local_db.cursor()
+            try:
+                request = local_pool.get('res.request')
+                summary = """Error during order status update from Magento (\"Need to update\") : %d
+    Order reference : %s
+    Exception :
+    %s""" % (order.id, order.name, e)
+                request.create(local_cr, uid,
+                               {'name': "Need to Update order error",
+                                'act_from': uid,
+                                'act_to': uid,
+                                'body': summary,
+                                })
+            finally:
+                local_cr.commit()
+                local_cr.close()
+        return False
+
 sale_shop()
 
 
