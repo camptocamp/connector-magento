@@ -1,8 +1,6 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-#    Author Nicolas Bessi. Copyright Camptocamp SA
-#
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
@@ -17,9 +15,29 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import product
-import partner
-import magerp_core
-import sale
-import wizard
-import stock
+
+from tools.translate import _
+from osv import osv
+from osv import fields
+
+
+class StockPicking(osv.osv):
+    _inherit = "stock.picking"
+
+    def try_action_assign_all(self, cr, uid, ids, context=None):
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+
+        domain = [('type', '=', 'out'),
+                  ('state', '=', 'confirmed')]
+
+        if ids:
+            domain += [('ids', 'in', ids)]
+
+        picking_ids = self.search(cr, uid, domain, order='priority desc')
+
+        assigned_ids = self.action_assign(cr, uid, picking_ids)
+
+        return assigned_ids
+
+StockPicking()
