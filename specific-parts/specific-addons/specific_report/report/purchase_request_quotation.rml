@@ -104,8 +104,8 @@
           </para>
         </td>
         <td>
-          <para style="terp_default_9">[[ (hide_partner_name(order.partner_id) or order.partner_id.name.lower() == order.partner_address_id.name.lower()) and removeParentNode('para') or '' ]][[ (order.partner_id and order.partner_id.title.upper()) or '' ]] [[ order.partner_id.name.upper() ]]</para>
-          <para style="terp_default_9">[[ (order.partner_address_id and order.partner_address_id.title and order.partner_address_id.title.upper()) or '' ]] [[ order.partner_address_id.name.upper() ]] </para>
+          <para style="terp_default_9">[[ (hide_partner_name(order.partner_id) or order.partner_id.name.lower() == order.partner_address_id.name.lower()) and removeParentNode('para') or '' ]][[ (order.partner_id and order.partner_id.title and order.partner_id.title.upper()) or '' ]] [[ order.partner_id.name.upper() ]]</para>
+          <para style="terp_default_9">[[ (order.partner_address_id and order.partner_address_id.title and order.partner_address_id.title.upper()) or '' ]] [[ order.partner_address_id.name and order.partner_address_id.name.upper() or '' ]] </para>
           <para style="terp_default_9">[[ (order.partner_address_id and order.partner_address_id.street.upper()) or '']] [[ order.partner_address_id.street2 and order.partner_address_id.street2.upper() or '' ]]</para>
           <para style="terp_default_9">[[ (order.partner_address_id and order.partner_address_id.zip) or '' ]] [[ (order.partner_address_id and order.partner_address_id.city and order.partner_address_id.city.upper()) or '' ]]</para>
           <para style="terp_default_9">[[ order.partner_address_id.state_id.code ]] [[ (order.partner_address_id and order.partner_address_id.country_id and order.partner_address_id.country_id.code) or '' ]]</para>
