@@ -138,3 +138,5 @@ if record['x_magerp_pixmania_new']:
 "c2c_magento_equivalences.prd_equivalence","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_sku_secours","out","int",,"if record.get('c2c_debonix_equiv',False):
     equiv_sku = self.pool.get('product.product').read(cr, uid, record.get('c2c_debonix_equiv')[0], ['magento_sku'], context=context)['magento_sku']
     result = [('zdbx_default_sku_secours', equiv_sku)]"
+"prd_custom_vf_date_debut","magentoerpconnect.magento1324","product.model_product_product","vf_date_debut","in_out","str","result =[('x_magerp_special_from_date',ifield)]","result=[('vf_date_debut',record['x_magerp_special_from_date'])]"
+"prd_custom_vf_date_fin","magentoerpconnect.magento1324","product.model_product_product","vf_date_fin","in_out","str","result =[('x_magerp_special_to_date',ifield)]","result=[('vf_date_fin',record['x_magerp_special_to_date'])]"
