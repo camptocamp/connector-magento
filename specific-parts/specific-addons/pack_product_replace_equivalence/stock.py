@@ -41,8 +41,9 @@ class stock_move(osv.osv):
         if isinstance(ids, (int, long)):
             ids = [ids]
         for move in self.browse(cr, uid, ids, context=context):
-            if move.product_id.c2c_debonix_equiv:
-                self.replace_product(cr, uid, move.id, move.product_id.c2c_debonix_equiv.id, context=context)
+            if move.picking_id and move.picking_id.type == 'out':
+                if move.product_id.c2c_debonix_equiv:
+                    self.replace_product(cr, uid, move.id, move.product_id.c2c_debonix_equiv.id, context=context)
         return True
     
     def create(self, cr, uid, vals, context=None):
