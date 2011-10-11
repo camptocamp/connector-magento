@@ -50,6 +50,7 @@ class StockItInventoryImport(osv.osv_memory):
         if isinstance(ids, list):
             ids = ids[0]
 
+        logger = netsvc.Logger()
         inventory_id = False
         inventory_obj = self.pool.get('stock.inventory')
         product_obj = self.pool.get('product.product')
@@ -80,8 +81,12 @@ class StockItInventoryImport(osv.osv_memory):
 
         errors_report = []
         for row in rows:
-            product_ids = product_obj.search(cr, uid,
-                [('default_code', '=', row['default_code'])])
+            ctx = context.copy()
+            ctx.update({'active_test': False})
+            product_ids = product_obj.search(
+                cr, uid,
+                [('default_code', '=', row['default_code'])],
+                context=ctx)
             if not product_ids:
                 errors_report.append(_('Product with default code %s does not exist!') % (row['default_code'],))
                 continue
@@ -105,13 +110,26 @@ class StockItInventoryImport(osv.osv_memory):
         inventory_rows = []
         for row in rows:
             try:
-                product_ids = product_obj.search(cr, uid,
-                    [('default_code', '=', row['default_code'])])
+                ctx = context.copy()
+                ctx.update({'active_test': False})
+                product_ids = product_obj.search(
+                    cr, uid,
+                    [('default_code', '=', row['default_code'])],
+                    context=ctx
+                )
+                
                 if not product_ids:
                     raise Exception('ImportError', "Product code %s not found !" %
                                                    (row['default_code'],))
                 product_id = product_ids[0]
-                product_uom = product_obj.browse(cr, uid, product_id).uom_id
+                product = product_obj.browse(cr, uid, product_id)
+                if not product.active:
+                    logger.notifyChannel(_("Stockit inventory import"),
+                                         netsvc.LOG_WARNING,
+                                         _("Product %s is deactivated. Skipped." % (product.default_code,)))
+                    continue
+
+                product_uom = product.uom_id
 
                 inventory_row = {'product_id': product_id,
                                  'product_qty': row['quantity'],
