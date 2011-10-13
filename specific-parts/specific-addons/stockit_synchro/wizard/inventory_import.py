@@ -47,6 +47,8 @@ class StockItInventoryImport(osv.osv_memory):
         """ Import inventories according to the Stock it file
         and returns the created inventory id
         """
+        if context is None:
+            context = {}
         if isinstance(ids, list):
             ids = ids[0]
 
