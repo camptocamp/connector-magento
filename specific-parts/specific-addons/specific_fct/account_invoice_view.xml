@@ -20,5 +20,11 @@
                 </data>
             </field>
         </record>
+        
+        <!-- For security -->
+        <menuitem action="account.action_invoice_tree2" id="account.menu_action_invoice_tree2" 
+            groups="account.group_account_user,purchase.group_purchase_user"
+            parent="account.menu_finance_invoice"/>
+        
     </data>
 </openerp>
