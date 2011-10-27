@@ -29,7 +29,7 @@
                  'poweremail',
                  'c2c_magento_set_and_pack_product',
                  'c2c_magento_product_components',
-                 'sale_margin',
+                 'sale_markup',
                  'account_statement_import',
                  'c2c_pack_product_chg',
                  'c2c_magento_equivalences',
