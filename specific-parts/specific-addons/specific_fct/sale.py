@@ -62,7 +62,7 @@ class sale_order(magerp_osv.magerp_osv):
         return res
 
     def oe_create(self, cr, uid, vals, data, external_referential_id, defaults, context):
-        """call sale_margin's module on_change to compute margin when order's created from magento"""
+        """call sale_markup's module on_change to compute margin when order's created from magento"""
         order_id = super(sale_order, self).oe_create(cr, uid, vals, data, external_referential_id, defaults, context)
         order_line_obj = self.pool.get('sale.order.line')
         order = self.browse(cr, uid, order_id, context)

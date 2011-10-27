@@ -3,7 +3,7 @@
     <data>
 
 
-        <record id="view_order_form_margin" model="ir.ui.view">
+        <!-- <record id="view_order_form_margin" model="ir.ui.view">
             <field name="name">sale.order.form.margin</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
@@ -17,7 +17,7 @@
                     </xpath>
                 </data>
             </field>
-        </record>
+        </record> -->
 
         <record model="ir.ui.view" id="base_sale_multichannels_view_shop_form_inherit">
             <field name="name">base_sale_multichannels_view_shop_form_inherit</field>
