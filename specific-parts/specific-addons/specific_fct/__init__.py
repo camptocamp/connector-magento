@@ -23,3 +23,4 @@ import magerp_core
 import sale
 import wizard
 import stock
+import statement

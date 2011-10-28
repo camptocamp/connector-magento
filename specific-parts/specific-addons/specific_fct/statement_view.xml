@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="id_in_statement_line">
+            <field name="name">account.bank.statement.line.inherit</field>
+            <field name="model">account.bank.statement</field>
+            <field name="inherit_id" ref="account.view_bank_statement_form"/>
+            <field name="priority" eval="30"/>
+            <field name="arch" type="xml">
+                    <xpath expr="/form/notebook/page[@string='Entry encoding']/field/tree/field[@name='ref']" position="before">
+                        <field name="id" />
+                    </xpath>
+            </field>
+        </record>
+    </data>
+</openerp>
