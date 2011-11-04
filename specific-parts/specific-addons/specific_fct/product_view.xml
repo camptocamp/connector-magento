@@ -82,6 +82,14 @@
                     <separator string="Base Prices" colspan="4"/>
                     <field name="standard_price"/>
                     <field name="list_price"/>
+                    <field name="markup_rate"
+                           groups="sale.group_sale_manager"/>
+                    <field name="cost_price"
+                           groups="sale.group_sale_manager"/>
+                    <field name="commercial_margin"
+                           groups="sale.group_sale_manager"/>
+                    <field groups="sale.group_sale_manager" 
+                           name="floor_price_limit"/>
                     <field name="price_margin" select="1"/>
                     <field name="price_extra" select="1"/>
                     <field groups="base.group_extended" name="cost_method"/>
