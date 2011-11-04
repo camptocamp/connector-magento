@@ -2,23 +2,6 @@
 <openerp>
     <data>
 
-
-        <record id="view_order_form_margin" model="ir.ui.view">
-            <field name="name">sale.order.form.margin</field>
-            <field name="model">sale.order</field>
-            <field name="inherit_id" ref="sale.view_order_form"/>
-            <field name="type">form</field>
-            <field name="arch" type="xml">
-                <data>
-                    <xpath expr="/form/notebook/page[@string='Sale Order']/field[@name='order_line']/tree/field[@name='discount']" position="after">
-                        <field name="purchase_price"/>
-                        <field name="margin"/>
-                        <field name="marginpourcent"/>
-                    </xpath>
-                </data>
-            </field>
-        </record>
-
         <record model="ir.ui.view" id="base_sale_multichannels_view_shop_form_inherit">
             <field name="name">base_sale_multichannels_view_shop_form_inherit</field>
             <field name="model">sale.shop</field>
