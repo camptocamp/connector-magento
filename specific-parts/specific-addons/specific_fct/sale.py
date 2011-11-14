@@ -68,7 +68,7 @@ class sale_order(magerp_osv.magerp_osv):
         order = self.browse(cr, uid, order_id, context)
         for line in order.order_line:
             # Call line oin_change to record margin
-            line_changes = order_line_obj.onchange_price_unit(cr, uid, line.id, line.price_unit, line.product_id.id, line.discount, line.product_uom.id, line.pricelist.id, line.properties, override_unit_price = False)
+            line_changes = order_line_obj.onchange_price_unit(cr, uid, line.id, line.price_unit, line.product_id.id, line.discount, line.product_uom.id, order.pricelist_id.id, line.properties, override_unit_price = False)
             # Always keep the price from Magento
             line_changes['value']['price_unit'] = line.price_unit
             line_changes = order_line_obj.price_unit_change(cr, uid, line.id, line.purchase_price,
