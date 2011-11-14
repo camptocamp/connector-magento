@@ -71,10 +71,6 @@ class sale_order(magerp_osv.magerp_osv):
             line_changes = order_line_obj.onchange_price_unit(cr, uid, line.id, line.price_unit, line.product_id.id, line.discount, line.product_uom.id, order.pricelist_id.id, line.property_ids, override_unit_price = False)
             # Always keep the price from Magento
             line_changes['value']['price_unit'] = line.price_unit
-            line_changes = order_line_obj.price_unit_change(cr, uid, line.id, line.purchase_price,
-                                                            line.product_uom_qty, line.product_uos_qty,
-                                                            line.price_unit, line.product_id.id, line.discount,
-                                                            order.pricelist_id.id)
             order_line_obj.write(cr, uid, line.id, line_changes['value'], context=context)
 
         return order_id
