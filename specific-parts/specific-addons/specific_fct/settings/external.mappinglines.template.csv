@@ -25,7 +25,7 @@ else:
         title_obj.create(cr, uid, {'name': ifield,
                                    'shortcut': ifield,
                                    'domain': 'contact'})
-    result = [('title', ifield)]",""
+    result = [('title', ifield)]",
 "c2c_magento_products_components.prd_custom_components","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_sku_coffrets","in_out","str",,"# Modify components_list to the name of your Magento attribute's name
 result=[('zdbx_default_sku_coffrets', record['components_lists'])]"
 "c2c_magento_set_and_pack_product.prd_custom_set_or_pack","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_set_pack","in_out","str",," # Modify x_magerp_set_or_pack and set_or_pack to the name of your Magento attribute's name
@@ -40,7 +40,7 @@ if record.get('simple_set_or_pack', False):
     result = [('zdbx_default_set_pack', debonix_option.get(record['simple_set_or_pack'], '0'))]
 else:
     result = [('zdbx_default_set_pack', '0')]"
-"mag_partner_client_code","magentoerpconnect.magento1324","base.model_res_partner","code_client_openerp","in_out","str","result = [('ref',ifield)]",""
+"mag_partner_client_code","magentoerpconnect.magento1324","base.model_res_partner","code_client_openerp","in_out","str","result = [('ref',ifield)]",
 "prd_custom_activer_ventes_flash","magentoerpconnect.magento1324","product.model_product_product","activer_ventes_flash","in_out","str","if ifield:
     attribute_id = self.pool.get('magerp.product_attributes').search(cr,uid,[('attribute_code','=','activer_ventes_flash')])[0]
     if attribute:
@@ -140,3 +140,9 @@ if record['x_magerp_pixmania_new']:
     result = [('zdbx_default_sku_secours', equiv_sku)]"
 "prd_custom_vf_date_debut","magentoerpconnect.magento1324","product.model_product_product","vf_date_debut","in_out","str","result =[('x_magerp_special_from_date',ifield)]","result=[('vf_date_debut',record['x_magerp_special_from_date'])]"
 "prd_custom_vf_date_fin","magentoerpconnect.magento1324","product.model_product_product","vf_date_fin","in_out","str","result =[('x_magerp_special_to_date',ifield)]","result=[('vf_date_fin',record['x_magerp_special_to_date'])]"
+"prd_custom_attr_include_in_soldes","magentoerpconnect.magento1324","product.model_product_product","include_in_soldes","in_out","str","if ifield:
+    option_id = self.pool.get('magerp.product_attribute_options').search(cr,uid,[('attribute_id','=',309),('value','=',ifield)])
+    if option_id:
+        result = [('x_magerp_include_in_soldes',option_id[0])]","result = result=[('include_in_soldes', False)]
+if record['x_magerp_include_in_soldes']:
+    result=[('include_in_soldes', True)]"
