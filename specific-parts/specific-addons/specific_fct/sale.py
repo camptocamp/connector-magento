@@ -154,32 +154,28 @@ class sale_shop(magerp_osv.magerp_osv):
         self.export_inventory(cr, uid, ids, context)
         return False
 
-    def update_shop_orders(self, cr, uid, order, ext_id, ctx):
-        conn = ctx.get('conn_obj', False)
+    # method overriden from magentoerpconnect for 1 thing only:
+    # pass False to magento methods for sending emails
+    def update_shop_orders(self, cr, uid, order, ext_id, context):
+        conn = context.get('conn_obj', False)
         status = ORDER_STATUS_MAPPING.get(order.state, False)
         result = {}
 
         #status update:
         if status:
             result['status_change'] = conn.call('sales_order.addComment', [ext_id, status, '', False])
-            # If status has changed into OERP and the order need_to_update, then we consider the update is done
-            # remove the 'need_to_update': True
-            if order.need_to_update:
-                self.pool.get('sale.order').write(cr, uid, order.id, {'need_to_update': False})
-                cr.commit()
 
         #creation of Magento invoice eventually:
-        # remove invoice creation for debonix
-#        cr.execute("select account_invoice.id from account_invoice inner join sale_order_invoice_rel on invoice_id = account_invoice.id where order_id = %s" % order.id)
-#        resultset = cr.fetchone()
-#        if resultset and len(resultset) == 1:
-#            invoice = self.pool.get("account.invoice").browse(cr, uid, resultset[0])
-#            if invoice.amount_total == order.amount_total and not invoice.magento_ref:
-#                try:
-#                    result['magento_invoice_ref'] = conn.call('sales_order_invoice.create', [order.magento_incrementid, [], _("Invoice Created"), True, True])
-#                    self.pool.get("account.invoice").write(cr, uid, invoice.id, {'magento_ref': result['magento_invoice_ref'], 'origin': result['magento_invoice_ref']})
-#                except Exception, e:
-#                    pass #TODO make sure that's because Magento invoice already exists and then re-attach it!
+        cr.execute("select account_invoice.id from account_invoice inner join sale_order_invoice_rel on invoice_id = account_invoice.id where order_id = %s" % order.id)
+        resultset = cr.fetchone()
+        if resultset and len(resultset) == 1:
+            invoice = self.pool.get("account.invoice").browse(cr, uid, resultset[0])
+            if invoice.amount_total == order.amount_total and not invoice.magento_ref:
+                try:
+                    result['magento_invoice_ref'] = conn.call('sales_order_invoice.create', [order.magento_incrementid, [], _("Invoice Created"), False, False])
+                    self.pool.get("account.invoice").write(cr, uid, invoice.id, {'magento_ref': result['magento_invoice_ref'], 'origin': result['magento_invoice_ref']})
+                except Exception, e:
+                    pass #TODO make sure that's because Magento invoice already exists and then re-attach it!
 
         return result
 
