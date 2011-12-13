@@ -22,18 +22,25 @@
 
 import wizard
 import time
+import pooler
 
 from tools.translate import _
 
 def _action_open_window(self, cr, uid, data, context):
-    cr.execute('select id, name from ir_ui_view where model=%s and type=%s', ('stock.location', 'tree'))
-    view_res = cr.fetchone()
+    view_name = 'view_location_tree_3'
+    model_data_obj = pooler.get_pool(cr.dbname).get('ir.model.data')
+    model_data_ids = model_data_obj.search(cr, uid,
+                                           [('module', '=', 'stock'),
+                                            ('model', '=', 'ir.ui.view'),
+                                            ('name', '=', view_name)],
+                                           context=context)
+    view_id = model_data_obj.read(cr, uid, model_data_ids[0], ['res_id'], context=context)['res_id']
     name = _("Locations's Values to %s") % (data['form']['to_date'] or time.strftime('%Y-%m-%d %H:%M:%S'),)
     if data['form']['to_date']:
         name += ''
     return {
         'name': name,
-        'view_id': view_res,
+        'view_id': (view_id, view_name),
         'view_type': 'form',
         "view_mode": 'tree',
         'res_model': 'stock.location',
