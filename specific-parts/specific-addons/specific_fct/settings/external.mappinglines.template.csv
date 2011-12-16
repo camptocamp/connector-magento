@@ -25,10 +25,10 @@ else:
         title_obj.create(cr, uid, {'name': ifield,
                                    'shortcut': ifield,
                                    'domain': 'contact'})
-    result = [('title', ifield)]",
-"c2c_magento_products_components.prd_custom_components","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_sku_coffrets","in_out","str",,"# Modify components_list to the name of your Magento attribute's name
+    result = [('title', ifield)]",""
+"c2c_magento_products_components.prd_custom_components","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_sku_coffrets","in_out","str","result = []","# Modify components_list to the name of your Magento attribute's name
 result=[('zdbx_default_sku_coffrets', record['components_lists'])]"
-"c2c_magento_set_and_pack_product.prd_custom_set_or_pack","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_set_pack","in_out","str",," # Modify x_magerp_set_or_pack and set_or_pack to the name of your Magento attribute's name
+"c2c_magento_set_and_pack_product.prd_custom_set_or_pack","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_set_pack","in_out","str","result = []"," # Modify x_magerp_set_or_pack and set_or_pack to the name of your Magento attribute's name
 if record.get('simple_set_or_pack', False):
     # mapping between module values and debonix website attribute options
     # 1 and 2 values are for backward compatibility with previous version module. Can be removed as soon as all simple_set_or_pack values contains only set or pack.
@@ -40,10 +40,10 @@ if record.get('simple_set_or_pack', False):
     result = [('zdbx_default_set_pack', debonix_option.get(record['simple_set_or_pack'], '0'))]
 else:
     result = [('zdbx_default_set_pack', '0')]"
-"mag_partner_client_code","magentoerpconnect.magento1324","base.model_res_partner","code_client_openerp","in_out","str","result = [('ref',ifield)]",
+"mag_partner_client_code","magentoerpconnect.magento1324","base.model_res_partner","code_client_openerp","in_out","str","result = [('ref',ifield)]",""
 "prd_custom_activer_ventes_flash","magentoerpconnect.magento1324","product.model_product_product","activer_ventes_flash","in_out","str","if ifield:
     attribute_id = self.pool.get('magerp.product_attributes').search(cr,uid,[('attribute_code','=','activer_ventes_flash')])[0]
-    if attribute:
+    if attribute_id:
         option_id = self.pool.get('magerp.product_attribute_options').search(cr,uid,[('attribute_id','=',attribute_id),('value','=',ifield)])
         if option_id:
             result = [('x_magerp_activer_ventes_flash',option_id[0])]","res = 0
@@ -135,7 +135,7 @@ if record['x_magerp_pixmania_price_stock']:
 if record['x_magerp_pixmania_new']:
     result=[('pixmania_new', True)]"
 "mag_erp_so_trans_id","magentoerpconnect.magento1324","sale.model_sale_order","payment_transaction_id","in","str","result=[('transaction_id', ifield)]",
-"c2c_magento_equivalences.prd_equivalence","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_sku_secours","out","int",,"if record.get('c2c_debonix_equiv',False):
+"c2c_magento_equivalences.prd_equivalence","magentoerpconnect.magento1324","product.model_product_product","zdbx_default_sku_secours","out","int","result = []","if record.get('c2c_debonix_equiv',False):
     equiv_sku = self.pool.get('product.product').read(cr, uid, record.get('c2c_debonix_equiv')[0], ['magento_sku'], context=context)['magento_sku']
     result = [('zdbx_default_sku_secours', equiv_sku)]"
 "prd_custom_vf_date_debut","magentoerpconnect.magento1324","product.model_product_product","vf_date_debut","in_out","str","result =[('x_magerp_special_from_date',ifield)]","result=[('vf_date_debut',record['x_magerp_special_from_date'])]"
