@@ -29,7 +29,7 @@ class AccountAccount(osv.osv):
     _inherit = 'account.account'
 
     _columns = {
-        'be_follow_up': fields.boolean('Part of follow Up', help="If checked, it will be display in report of customer/supplier follow up"),
+        'be_follow_up': fields.boolean('Do not chase payments on this account', help="If checked, this account will be not part of the chasing payment report "),
     }
 
 AccountAccount()
