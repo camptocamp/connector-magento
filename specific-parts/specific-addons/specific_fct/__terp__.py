@@ -54,7 +54,8 @@
                    'wizard.xml',
                    'stock_view.xml',
                    'security/security.xml',
-                   'statement_view.xml'
+                   'statement_view.xml',
+                   'account_view.xml'
                   ],
     'demo_xml': [],
     'installable': True,

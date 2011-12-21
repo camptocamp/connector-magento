@@ -35,6 +35,13 @@
             <field name="report_webkit">specific_report/report/template/bank_statement_report.mako</field>
             <field name="webkit_header" ref="bank_statement_landscape_header"/>
         </record> 
+        
+        <report auto="False" 
+        	id="account_overdue"
+        	model="res.partner"
+        	name="account.overdue.c2c"
+        	rml="specific_report/report/overdue.rml" string="Overdue Payments"/>
+
 
 
 	</data>
