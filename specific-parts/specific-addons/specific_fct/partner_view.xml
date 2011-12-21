@@ -14,6 +14,37 @@
                 </data>
             </field>
         </record>
+		<!-- Add siret on partner view -->
+        <record id="view_partner_form_custom" model="ir.ui.view">
+            <field name="name">res.partner.form.custom</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <data>
+                    <field name="website" widget="url" position="after">
+                        <field name="siret"/>
+                    </field>
+                </data>
+            </field>
+        </record>
+
+		<!-- Add siret on partner view -->
+        <record id="view_partner_tree_custom" model="ir.ui.view">
+            <field name="name">res.partner.tree.custom</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_tree"/>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <data>
+                    <field name="name" position="after">
+                        <field name="siret"/>
+                    </field>
+                </data>
+            </field>
+        </record>
+
+
         </data>
 </openerp>
 

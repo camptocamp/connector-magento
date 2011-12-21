@@ -31,6 +31,10 @@ class ResPartner(osv.osv):
     _defaults = {
         'lang': lambda *a: 'fr_FR',
     }
+    _columns = {
+        'siret': fields.char('Siret',size=14),
+    }
+
 
     def copy(self, cr, uid, id, default=None, context=None):
         if context == None:
