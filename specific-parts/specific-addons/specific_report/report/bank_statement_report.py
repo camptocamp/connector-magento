@@ -39,14 +39,14 @@ class BankStatementWebkit(report_sxw.rml_parse):
         self.cursor = self.cr
         
         company = self.pool.get('res.users').browse(self.cr, uid, uid, context=context).company_id
-        header_report_name = ' - '.join((_('Bordereau de remise de chèques'), company.name, company.currency_id.name))
+        header_report_name = ' - '.join((_('BORDEREAU DE REMISE DE CHEQUES'), company.name, company.currency_id.name))
         statement = self.pool.get('account.bank.statement').browse(cursor,uid,context['active_id']);
         footer_date_time = self.formatLang(str(datetime.today())[:19], date_time=True)
         self.localcontext.update({
             'cr': cursor,
             'uid': uid,
             'get_bank_statement' : self._get_bank_statement_data,
-            'report_name': _('Bordereau de remise de chèques'),
+            'report_name': _('BORDEREAU DE REMISE DE CHEQUES'),
             'additional_args': [
                 ('--header-font-name', 'Helvetica'),
                 ('--footer-font-name', 'Helvetica'),
