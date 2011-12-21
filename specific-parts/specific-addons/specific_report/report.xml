@@ -26,5 +26,16 @@
             rml="specific_report/report/shipping.rml" 
             string="Delivery order"/>
 
+       <record id="specific_report_report_bank_statement_webkit" model="ir.actions.report.xml">
+            <field name="report_type">webkit</field>
+            <field name="report_name">specific_report.report_bank_statement_webkit</field>
+            <field name="model">account.bank.statement</field>
+            <field name="name">Bank Statement</field>
+            <field eval="0" name="header"/>
+            <field name="report_webkit">specific_report/report/template/bank_statement_report.mako</field>
+            <field name="webkit_header" ref="bank_statement_landscape_header"/>
+        </record> 
+
+
 	</data>
 </openerp>

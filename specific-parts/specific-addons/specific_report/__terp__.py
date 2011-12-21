@@ -46,6 +46,7 @@
 	"init_xml" : [],
 	"demo_xml" : [ ],
 	"update_xml" : [
+					'report/data/bank_statement_webkit_header.xml',
 					'report.xml',
                     'company_view.xml',
 					],
