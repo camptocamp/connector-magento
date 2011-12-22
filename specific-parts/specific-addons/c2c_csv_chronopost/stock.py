@@ -24,6 +24,8 @@ import csv
 
 from osv import fields, osv
 from tools.translate import _
+from datetime import date
+
 
 class ChronopostLine(object):
     fields = (('subaccount', 3),
@@ -128,6 +130,8 @@ class StockCsvColissimo(osv.osv):
                 line.weight = "%.2f" % self._get_packing_weight(cr, uid, packing)
                 line.chrono_product = packing.carrier_id and packing.carrier_id.chronopost_code and packing.carrier_id.chronopost_code or ''
                 line.saturday_delivery = 'L'
+                if date(2011, 12, 22) <= date.today() <= date(2011, 12, 23):
+                    line.saturday_delivery = 'S'
                 line.insurance_amount = '0.00'
                 amount = self._get_n_update_amount_cash_by_delivery(cr, uid, company, packing)
                 line.rep_amount = amount['taxed'] and "%.2f" % amount['taxed'] or '0.00'
