@@ -87,7 +87,7 @@ class StockCsvColissimo(osv.osv):
             writer.writerow([field.encode("utf-8") for field in row.get_fields()])
         fid.close()
         # chronopost needs to drop the file so we have to put the write permission on the group
-        os.chmod(filename, 0664)
+        os.chmod(filename, 0666)
         return True
 
     def create_chronopost_file(self, cr, uid, ids, context=None):
