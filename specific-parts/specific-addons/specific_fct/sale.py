@@ -154,8 +154,9 @@ class sale_shop(magerp_osv.magerp_osv):
         self.export_inventory(cr, uid, ids, context)
         return False
 
-    # method overriden from magentoerpconnect for 1 thing only:
-    # pass False to magento methods for sending emails
+    # method overriden from magentoerpconnect for 2 things only:
+    #  - pass False to magento methods for sending emails
+    #  - do not write the magento invoice number in the invoice origin
     def update_shop_orders(self, cr, uid, order, ext_id, context):
         conn = context.get('conn_obj', False)
         status = ORDER_STATUS_MAPPING.get(order.state, False)
@@ -173,7 +174,7 @@ class sale_shop(magerp_osv.magerp_osv):
             if invoice.amount_total == order.amount_total and not invoice.magento_ref:
                 try:
                     result['magento_invoice_ref'] = conn.call('sales_order_invoice.create', [order.magento_incrementid, [], _("Invoice Created"), False, False])
-                    self.pool.get("account.invoice").write(cr, uid, invoice.id, {'magento_ref': result['magento_invoice_ref'], 'origin': result['magento_invoice_ref']})
+                    self.pool.get("account.invoice").write(cr, uid, invoice.id, {'magento_ref': result['magento_invoice_ref']})
                 except Exception, e:
                     pass #TODO make sure that's because Magento invoice already exists and then re-attach it!
 
