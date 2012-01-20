@@ -96,7 +96,6 @@ class magerp_product_attributes(magerp_osv.magerp_osv):
                                     'zdbx_default_sku_coffrets',
                                     'fupid',
                                     'mpid',
-                                    'rdcategories', # replaced by magento_rdc_category on product.category
                                     'soldes_qty',
                                     'cdiscount_sku',
                                     ])
