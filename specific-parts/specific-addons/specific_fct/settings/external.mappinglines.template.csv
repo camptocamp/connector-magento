@@ -146,3 +146,10 @@ if record['x_magerp_pixmania_new']:
         result = [('x_magerp_include_in_soldes',option_id[0])]","result = result=[('include_in_soldes', False)]
 if record['x_magerp_include_in_soldes']:
     result=[('include_in_soldes', True)]"
+"custom_product_omcategories","magentoerpconnect.magento1324","product.model_product_product","omcategories","in_out","int","# no import -> configured on categories for Debonix (specific)","category = self.pool.get('product.category').browse(cr, uid, record['categ_id'][0])
+res = False
+if category.magento_omcategory_default_id:
+    option=self.pool.get('magerp.product_attribute_options').browse(cr, uid, category.magento_omcategory_default_id.id)
+    if option:
+        res = option.value
+result=[('omcategories', res)]"

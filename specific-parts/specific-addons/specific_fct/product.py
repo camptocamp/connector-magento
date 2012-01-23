@@ -107,23 +107,29 @@ class ProductCategory(magerp_osv.magerp_osv):
     """Modify the available magento sorting options."""
     _inherit = "product.category"
 
-    def _recursive_rdc_category_id(self, cr, uid, id, context=None):
-        """ Return the Rue Du Commerce Category of the category.
+    def _recursive_category_ids(self, cr, uid, id, field_names, context=None):
+        """ Return the Rue Du Commerce / Outilmania Categories of the category.
         Search recursively from the bottom of the tree"""
         category = self.browse(cr, uid, id, context=context)
-        if category.magento_rdc_category:
-            res = category.magento_rdc_category.id
-        else:
+        res = {}
+        if category.magento_rdc_category and 'magento_rdc_category_default' in field_names:
+            res['magento_rdc_category_default'] = category.magento_rdc_category.id
+            field_names.remove('magento_rdc_category_default')
+        if category.magento_omcategory_id and 'magento_omcategory_default_id' in field_names:
+            res['magento_omcategory_default_id'] = category.magento_omcategory_id.id
+            field_names.remove('magento_omcategory_default_id')
+
+        if field_names:
             if category.parent_id:
-                res = self._recursive_rdc_category_id(cr, uid, category.parent_id.id, context)
-            else:
-                res = False
+                res.update(self._recursive_category_ids(cr, uid, category.parent_id.id, field_names, context))
         return res
 
-    def _get_magento_rdc_category_id(self, cr, uid, ids, field_name, arg, context):
+    def _get_magento_category_ids(self, cr, uid, ids, field_name, arg, context):
         res = {}
         for id in ids:
-            res[id] = self._recursive_rdc_category_id(cr, uid, id, context)
+            res_id = dict((field, False) for field in field_name)
+            res_id.update(self._recursive_category_ids(cr, uid, id, field_name[:], context))
+            res[id] = res_id
         return res
 
     SORT_BY_OPTIONS = (
@@ -144,10 +150,13 @@ class ProductCategory(magerp_osv.magerp_osv):
                             'Default Product Listing Sort (Sort By)',
                             size=32),
         'magento_rdc_category': fields.many2one('magerp.product_attribute_options', 'Rue Du Commerce Category', domain="[('attribute_id','=',268)]", ondelete="set null", help="Rue Du Commerce category applied on products of this category."),
-        'magento_rdc_category_default': fields.function(_get_magento_rdc_category_id, type='many2one', obj='magerp.product_attribute_options', method=True, string='Rue Du Commerce Parent Category')
-    }
+        'magento_omcategory_id': fields.many2one('magerp.product_attribute_options', 'Outilmania category', domain="[('attribute_id','=',302)]", ondelete="set null",
+                                                         help="Outilmania category applied on products of this category."),
+        'magento_rdc_category_default': fields.function(_get_magento_category_ids, type='many2one', obj='magerp.product_attribute_options', method=True, string='Rue Du Commerce Parent Category', multi='magento_categories'),
+        'magento_omcategory_default_id': fields.function(_get_magento_category_ids, type='many2one', obj='magerp.product_attribute_options', method=True, string='OutilMania Parent Category', multi='magento_categories'),
+        }
 
-    def write_now_on_category_products(self, cr, uid, ids, magento_rdc_category_id, context=None):
+    def write_now_on_category_products(self, cr, uid, ids, magento_rdc_category_id, magento_omcategory_id, context=None):
         """ We have to update the products on Magento. So we put the write_date to now() on products which are in or below the
          category. To limit the number of products to update, we select only the products of the child categories which have the same
          Rue du commerce category (so the ones that have been impacted)."""
@@ -157,7 +166,8 @@ class ProductCategory(magerp_osv.magerp_osv):
         # It's a bit expensive in term of performance but the most products we can exclude from the export catalog of magento, the
         # better it is, so we have advantage of loss some time here but gain in export catalog
         for product in self.pool.get('product.product').browse(cr, uid, cat_products_ids, context):
-            if product.categ_id.magento_rdc_category_default.id == magento_rdc_category_id:
+            if (product.categ_id.magento_rdc_category_default and product.categ_id.magento_rdc_category_default.id == magento_rdc_category_id or
+                product.categ_id.magento_omcategory_default_id and product.categ_id.magento_omcategory_default_id.id == magento_omcategory_id):
                 product_ids_to_update.append(product.id)
 
         if product_ids_to_update:
@@ -166,14 +176,14 @@ class ProductCategory(magerp_osv.magerp_osv):
 
     def create(self, cr, uid, vals, context=None):
         category_id = super(ProductCategory, self).create(cr, uid, vals, context)
-        if 'magento_rdc_category' in vals:
-            self.write_now_on_category_products(cr, uid, category_id, vals['magento_rdc_category'], context)
+        if 'magento_rdc_category' in vals or 'magento_omcategory_id' in vals:
+            self.write_now_on_category_products(cr, uid, category_id, vals.get('magento_rdc_category'), vals.get('magento_omcategory_id'), context)
         return category_id
 
     def write(self, cr, uid, ids, vals, context=None):
         res = super(ProductCategory, self).write(cr, uid, ids, vals, context)
-        if 'magento_rdc_category' in vals:
-            self.write_now_on_category_products(cr, uid, ids, vals['magento_rdc_category'], context)
+        if 'magento_rdc_category' in vals or 'magento_omcategory_id' in vals:
+            self.write_now_on_category_products(cr, uid, ids, vals.get('magento_rdc_category'), vals.get('magento_omcategory_id'), context)
         return res
 
 ProductCategory()

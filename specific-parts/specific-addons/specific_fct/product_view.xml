@@ -42,6 +42,8 @@
                         <separator string="Products Attributes" colspan="4" />
                         <field name="magento_rdc_category" />
                         <field name="magento_rdc_category_default" />
+                        <field name="magento_omcategory_id" />
+                        <field name="magento_omcategory_default_id" />
                     </page>
                  </page>
             </data>
