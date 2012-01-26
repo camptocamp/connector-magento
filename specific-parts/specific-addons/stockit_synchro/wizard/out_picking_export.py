@@ -94,7 +94,7 @@ class StockItOutPickingExport(osv.osv_memory):
             mycursor.close()
         return True
 
-    def get_data(self, cr, uid, ids, add_picking_ids=None, context=None):
+    def get_data(self, cr, uid, ids, add_picking_ids=None, only_new=True, context=None):
         """Export outgoing pickings in Stock iT format"""
         picking_obj = self.pool.get('stock.picking')
         add_picking_ids = add_picking_ids or []
@@ -111,13 +111,17 @@ class StockItOutPickingExport(osv.osv_memory):
         priority_mapping = {'1': 'BASSE', '2': 'NORMALE', '3': 'HAUTE', '9': 'SHOP'}
         rows = []
 
+        query = ("SELECT id FROM stock_picking "
+                 " WHERE type = 'out' "
+                 "   AND state = 'assigned' "
+                 "   AND active = true")
+
+        if only_new:
+            query += ("   AND (stockit_export_date ISNULL "
+                      "        OR write_date > stockit_export_date)")
+
         # use cr.execute because we cannot compare 2 fields using orm search
-        cr.execute("SELECT id FROM stock_picking "
-                   " WHERE type = 'out' "
-                   "   AND state = 'assigned' "
-                   "   AND (stockit_export_date ISNULL "
-                   "        OR write_date > stockit_export_date)"
-                   "   AND active = true")
+        cr.execute(query)
 
         picking_ids = [pick_id[0] for pick_id in cr.fetchall()]
 
@@ -177,10 +181,13 @@ StockItOutPickingExport()
 
 FORM = """<?xml version="1.0"?>
 <form string="Stockit export">
-<separator string="Export selected picking to stockit. File will be automatically put in stockit folder"/>
+    <separator string="Export selected picking to stockit. File will be automatically put in stockit folder"/>
+    <field name="only_new"/>
 </form>
 """
-FIELDS = {}
+FIELDS = {'only_new':
+           {'string': 'Only not yet exported',
+            'type': 'boolean',}}
 
 FORM1 = """<?xml version="1.0"?>
 <form string="Stockit exported file">
@@ -213,7 +220,7 @@ def _compute_export(self, cr, uid, data, context):
     filepath = os.path.join(company.stockit_base_path,
                            company.stockit_out_picking_export,
                            filename)
-    rows = exp_obj.get_data(cr, uid, [], ids, context)
+    rows = exp_obj.get_data(cr, uid, [], add_picking_ids=ids, only_new=bool(data['form']['only_new']), context=context)
     if not rows:
         raise wizard.except_wizard(_('No row exported'),
                                    _('Only out and assigned rows will be exported'
