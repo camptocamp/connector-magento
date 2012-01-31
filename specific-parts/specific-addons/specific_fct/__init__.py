@@ -25,3 +25,4 @@ import wizard
 import stock
 import statement
 import account
+import magerp_attributes

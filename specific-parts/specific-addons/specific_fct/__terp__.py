@@ -24,6 +24,7 @@
                  'account', 
                  'product',
                  'purchase',
+                 'base_sale_multichannels',
                  'magentoerpconnect', 
                  'stock', 
                  'c2c_bom_stock',
