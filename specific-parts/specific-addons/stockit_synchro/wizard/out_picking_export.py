@@ -187,7 +187,8 @@ FORM = """<?xml version="1.0"?>
 """
 FIELDS = {'only_new':
            {'string': 'Only not yet exported',
-            'type': 'boolean',}}
+            'type': 'boolean',
+            'default': lambda *a: True}}
 
 FORM1 = """<?xml version="1.0"?>
 <form string="Stockit exported file">
