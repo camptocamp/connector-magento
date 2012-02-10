@@ -42,7 +42,7 @@
             <field name="name">Envoi de mail avec facture au client</field>
             <field name="object_name" model="ir.model" search="[('model', '=', 'account.invoice')]"/>
             <field name="model_int_name">account.invoice</field>
-            <field name="def_to">${object.address_invoice_id.email or object.partner_id.emailid)}</field>
+            <field name="def_to">${object.address_invoice_id.email or object.partner_id.emailid}</field>
             <field name="lang">${object.partner_id.lang or 'fr_FR'}</field>
             <field name="def_subject">Your invoice (reference: ${object.name})</field>
             <field name="def_body_text">Dear ${object.partner_id.name},
