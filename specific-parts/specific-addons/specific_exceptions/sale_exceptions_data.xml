@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="excep_customer_blocked" model="sale.exception">
+            <field name="name">Error: the customer is blocked</field>
+        </record>
+
+        <record id="excep_not_in_production" model="sale.exception">
+            <field name="name">Error: an ordered product is not in production</field>
+        </record>
+
+    </data>
+</openerp>
