@@ -27,7 +27,8 @@
     'description': """Code customisation module""",
     'website': 'http://www.camptocamp.com',
     'init_xml': [],
-    'update_xml': ['sale_exceptions_data.xml'
+    'update_xml': ['sale_exceptions_data.xml',
+                   'sale_view.xml'
                   ],
     'demo_xml': [],
     'installable': True,

@@ -27,7 +27,7 @@
 #
 ##############################################################################
 
-from osv import osv
+from osv import osv, fields
 
 
 class sale_order(osv.osv):
@@ -35,7 +35,13 @@ class sale_order(osv.osv):
 
     LOW_MARKUP_RATE = 5.0
 
+    _columns = {
+        'skip_exceptions': fields.boolean('Bypass Exceptions')
+    }
+
     def add_custom_order_exception(self, cr, uid, ids, order, exceptions, *args):
+        if order.skip_exceptions:
+            return False
         self.detect_customer_blocked(cr, uid, order, exceptions)
         self.detect_markup_rate_too_low(cr, uid, order, exceptions)
         for order_line in order.order_line:
