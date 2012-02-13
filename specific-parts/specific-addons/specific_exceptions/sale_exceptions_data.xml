@@ -9,5 +9,9 @@
             <field name="name">Error: an ordered product is not in production</field>
         </record>
 
+        <record id="excep_markup_rate_too_low" model="sale.exception">
+            <field name="name">Error: the markup rate is too low</field>
+        </record>
+
     </data>
 </openerp>

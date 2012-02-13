@@ -33,11 +33,22 @@ from osv import osv
 class sale_order(osv.osv):
     _inherit = "sale.order"
 
+    LOW_MARKUP_RATE = 5.0
+
     def add_custom_order_exception(self, cr, uid, ids, order, exceptions, *args):
         self.detect_customer_blocked(cr, uid, order, exceptions)
+        self.detect_markup_rate_too_low(cr, uid, order, exceptions)
         for order_line in order.order_line:
             self.detect_not_in_production(cr, uid, order_line, exceptions)
         return exceptions
+
+    def detect_not_in_production(self, cr, uid, order_line, exceptions):
+        if order_line.product_id and order_line.product_id.state != 'sellable':
+            self.__add_exception(cr, uid, exceptions, 'excep_not_in_production')
+
+    def detect_markup_rate_too_low(self, cr, uid, order, exceptions):
+        if order.markup_rate <= self.LOW_MARKUP_RATE:
+            self.__add_exception(cr, uid, exceptions, 'excep_markup_rate_too_low')
 
     # glue with module c2c_block_customer
     # the workflow modification of the module c2c_block_customer is replaced
@@ -46,9 +57,5 @@ class sale_order(osv.osv):
     def detect_customer_blocked(self, cr, uid, order, exceptions):
         if not self.test_blocked(cr, uid, [order.id]):
             self.__add_exception(cr, uid, exceptions, 'excep_customer_blocked')
-
-    def detect_not_in_production(self, cr, uid, order_line, exceptions):
-        if order_line.product_id and order_line.product_id.state != 'sellable':
-            self.__add_exception(cr, uid, exceptions, 'excep_not_in_production')
 
 sale_order()

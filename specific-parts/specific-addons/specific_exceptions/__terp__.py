@@ -22,7 +22,7 @@
     'version' : '1.0',
     'depends' : ['sale_exceptions',
                  'c2c_block_customer_sale',
-                 ],
+                 'sale_markup',],
     'author' : 'Camptocamp',
     'description': """Code customisation module""",
     'website': 'http://www.camptocamp.com',
