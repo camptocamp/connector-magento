@@ -41,7 +41,7 @@ class sale_order(osv.osv):
 
     def add_custom_order_exception(self, cr, uid, ids, order, exceptions, *args):
         if order.skip_exceptions:
-            return False
+            return []
         self.detect_customer_blocked(cr, uid, order, exceptions)
         self.detect_markup_rate_too_low(cr, uid, order, exceptions)
         for order_line in order.order_line:

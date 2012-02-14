@@ -28,7 +28,8 @@
     'website': 'http://www.camptocamp.com',
     'init_xml': [],
     'update_xml': ['sale_exceptions_data.xml',
-                   'sale_view.xml'
+                   'sale_view.xml',
+                   'sale_workflow.xml'
                   ],
     'demo_xml': [],
     'installable': True,
