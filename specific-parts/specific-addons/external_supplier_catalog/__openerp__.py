@@ -18,7 +18,7 @@
 #
 ##############################################################################
 {
-    'name' : 'c2c_external_supplier_catalog',
+    'name' : 'external_supplier_catalog',
     'version' : '1.0',
     'depends' : ['base',
                  'product',
