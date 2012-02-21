@@ -18,9 +18,9 @@
 #
 ##############################################################################
 {
-    'name' : 'c2c_magento_set_and_pack_product',
+    'name' : 'magento_set_and_pack_product',
     'version' : '1',
-    'depends' : ['base', 'product', 'magentoerpconnect', 'c2c_magento_product_components'],
+    'depends' : ['base', 'product', 'magentoerpconnect', 'magento_product_components'],
     'author' : 'Camptocamp',
     'description': """Management of products for Magento: 
 Define in a Magento's attribute if the product is : 
