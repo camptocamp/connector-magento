@@ -6,7 +6,7 @@
         <field name="name">product.normal.form.custom.inherit</field>
         <field name="model">product.product</field>
         <!--parent python entity -->
-        <field name="inherit_id" ref="c2c_magento_product_components.product_custom_product_components"/>
+        <field name="inherit_id" ref="magento_product_components.product_custom_product_components"/>
         <!-- modulename.view -->
         <field name="type">form</field>
         <field name="arch" type="xml">
