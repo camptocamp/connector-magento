@@ -20,7 +20,7 @@
 {
     'name' : 'magento_product_components',
     'version' : '1',
-    'depends' : ['base','magentoerpconnect','product'],
+    'depends' : ['base','magentoerpconnect','product','mrp'],
     'author' : 'Camptocamp',
     'description': """Create a list of components of products based on BoM
     Only supports one level of components.
