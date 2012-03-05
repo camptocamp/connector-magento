@@ -19,4 +19,15 @@
 #
 ##############################################################################
 
-import res_partner
+from osv import osv, fields
+
+
+class res_partner(osv.osv):
+
+    _inherit = 'res.partner'
+
+    _columns = {
+        'block_sales': fields.boolean("Block this customer sales")
+    }
+
+res_partner()

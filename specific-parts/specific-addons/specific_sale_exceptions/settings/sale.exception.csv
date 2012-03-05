@@ -1,0 +1,11 @@
+"id","name","description","sequence","model","code","active"
+"excep_not_sellable","Error: an ordered product is not in production",,50,"sale.order.line","if line.product_id and line.product_id.state != 'sellable':
+    failed = True",True
+"excep_no_product","Error: a line of the sale order has no product",,50,"sale.order.line","if not line.product_id:
+    failed = True",True
+"excep_customer_blocked","Error: the customer is blocked",,50,"sale.order","if order.partner_id.block_sales:
+    failed = True",True
+"excep_too_low_markup_rate","Error: the markup rate is too low",,50,"sale.order","if order.markup_rate <= 5.0:
+    failed = True", True
+"sale_exceptions.excep_no_zip",,,,,,False
+"sale_exceptions.excep_no_stock",,,,,,False
