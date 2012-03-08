@@ -31,36 +31,6 @@ ORDER_STATUS_MAPPING = {'draft': 'processing', 'progress': 'processing', 'shippi
 class sale_order(magerp_osv.magerp_osv):
     _inherit = "sale.order"
     
-
-    def get_order_cash_on_delivery(self, cr, uid, res, external_referential_id, data_record, key_field, mapping_lines, defaults, context):
-        """Get cash on delivery amounts on orders imported from magento"""
-        if data_record.get('cod_fee', False) and float(data_record.get('cod_fee', False)) > 0:
-            cod_product_id = self.pool.get('product.product').search(cr, uid, [('default_code', '=', 'CASH ON DELIVERY MAGENTO')])[0]
-            cod_product = self.pool.get('product.product').browse(cr, uid, cod_product_id, context)
-
-            # simple VAT tax on cash on delivery
-            tax_id = []
-            if data_record['cod_tax_amount'] and float(data_record['cod_tax_amount']) != 0:
-                cod_tax_vat = float(data_record['cod_tax_amount'])/float(data_record['cod_fee'])
-                cod_tax_ids = self.pool.get('account.tax').search(cr, uid, [('type_tax_use', '=', 'sale'), ('amount', '>=', cod_tax_vat - 0.001), ('amount', '<=', cod_tax_vat + 0.001)])
-                if cod_tax_ids and len(cod_tax_ids) > 0:
-                    tax_id = [(6, 0, [cod_tax_ids[0]])]
-            res['order_line'].append((0, 0, {
-                                        'product_id': cod_product.id,
-                                        'name': cod_product.name,
-                                        'product_uom': cod_product.uom_id.id,
-                                        'product_uom_qty': 1,
-                                        'price_unit': float(data_record['cod_fee']),
-                                        'tax_id': tax_id
-                                    }))
-        return res
-
-    def get_order_lines(self, cr, uid, res, external_referential_id, data_record, key_field, mapping_lines, defaults, context):
-        """Add cash on delivery on orders imported from magento"""
-        res = super(sale_order, self).get_order_lines(cr, uid, res, external_referential_id, data_record, key_field, mapping_lines, defaults, context)
-        res = self.get_order_cash_on_delivery(cr, uid, res, external_referential_id, data_record, key_field, mapping_lines, defaults, context)
-        return res
-
     def oe_create(self, cr, uid, vals, data, external_referential_id, defaults, context):
         """call sale_markup's module on_change to compute margin when order's created from magento"""
         order_id = super(sale_order, self).oe_create(cr, uid, vals, data, external_referential_id, defaults, context)
