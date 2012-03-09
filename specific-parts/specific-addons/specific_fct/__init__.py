@@ -1,4 +1,4 @@
-!# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    Author Nicolas Bessi. Copyright Camptocamp SA
@@ -19,7 +19,6 @@
 ##############################################################################
 import product
 import partner
-import magerp_core
 import sale
 import wizard
 import stock
