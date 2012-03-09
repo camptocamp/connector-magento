@@ -1,7 +1,7 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author Guewen Baconnier. Copyright 2011 Camptocamp SA
+#    Author Yannick Vaucher. Copyright 2011 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,12 +24,16 @@ import time
 from osv import fields, osv
 from tools.translate import _
 
+
 class AccountAccount(osv.osv):
     "Inherit account to add can be part of followup"
     _inherit = 'account.account'
 
     _columns = {
-        'be_follow_up': fields.boolean('Do not chase payments on this account', help="If checked, this account will be not part of the chasing payment report "),
+        'be_follow_up':
+            fields.boolean('Do not chase payments on this account',
+                           help="If checked, this account will be not "
+                                "part of the chasing payment report "),
     }
 
 AccountAccount()
