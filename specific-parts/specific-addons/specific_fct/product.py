@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    Author Nicolas Bessi. Copyright Camptocamp SA
@@ -25,23 +25,31 @@ from osv import fields, osv
 from tools.translate import _
 from magentoerpconnect import magerp_osv
 
+
 class Product(magerp_osv.magerp_osv):
     " Inherit product for small customisations"
+
     _inherit = 'product.product'
 
     _columns = {
-        'to_deactivate': fields.boolean('To deactivate', help="If checked, on the next Export catalog, the product will be deactivated on Magento and then on OpenERP. If an open picking using this product exists on OpenERP, the product will not be deactivated before the next Export catalog."),
-        'bom_ids': fields.one2many('mrp.bom','product_id','BoMs'),
+        'to_deactivate': fields.boolean(
+            'To deactivate',
+            help="If checked, on the next Export catalog, the product will be "
+            "deactivated on Magento and then on OpenERP. If an open picking "
+            "using this product exists on OpenERP, the product will not be "
+            "deactivated before the next Export catalog."),
+        'bom_ids': fields.one2many(
+            'mrp.bom', 'product_id', 'BoMs'),
     }
 
     _defaults = {
-        'product_type':lambda * a:'simple'
+        'product_type': lambda * a: 'simple'
     }
 
     def copy(self, cr, uid, id, default=None, context=None):
-        if not context:
+        if context is None:
             context = {}
-        if not default:
+        if default is None:
             default = {}
             
         # reset the osc_oldid -> it represents the id of the product in the old

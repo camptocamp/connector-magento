@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    Author Guewen Baconnier. Copyright 2011 Camptocamp SA
@@ -18,11 +18,9 @@
 #
 ##############################################################################
 
-import netsvc
-import time
 
 from osv import fields, osv
-from tools.translate import _
+
 
 class ResPartner(osv.osv):
     "Inherit partner for small customisations"
@@ -32,20 +30,18 @@ class ResPartner(osv.osv):
         'lang': lambda *a: 'fr_FR',
     }
     _columns = {
-        'siret': fields.char('Siret',size=14),
+        'siret': fields.char('Siret', size=14),
     }
 
-
     def copy(self, cr, uid, id, default=None, context=None):
-        if context == None:
+        if context is None:
             context = {}
-        if default == None:
+        if default is None:
             default = {}
-            
-        default['ref'] = False
-        
-        return super(ResPartner, self).copy(cr, uid, id, default=default, context=context)   
 
-    
+        default['ref'] = False
+
+        return super(ResPartner, self).copy(
+            cr, uid, id, default=default, context=context)
 
 ResPartner()
