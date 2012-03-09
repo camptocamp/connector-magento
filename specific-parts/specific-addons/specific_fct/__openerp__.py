@@ -50,7 +50,6 @@
                    'poweremail_data.xml',
                    'sale_view.xml',
                    'account_invoice_view.xml',
-                   'magerp_data.xml',
                    'partner_view.xml',
                    'wizard.xml',
                    'stock_view.xml',
