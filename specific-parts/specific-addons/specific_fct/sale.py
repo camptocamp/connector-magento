@@ -16,34 +16,15 @@
 #
 ##############################################################################
 
-import time
 import netsvc
 import c2c_pack_product_chg
 
-from magentoerpconnect import magerp_osv
 from tools.translate import _
-from osv import osv
-from osv import fields
-
-ORDER_STATUS_MAPPING = {'draft': 'processing', 'progress': 'processing', 'shipping_except': 'complete', 'invoice_except': 'complete', 'done': 'closed', 'cancel': 'canceled', 'waiting_date': 'holded'}
+from osv import osv, fields
 
 
-class sale_order(magerp_osv.magerp_osv):
+class sale_order(osv.osv):
     _inherit = "sale.order"
-
-    def oe_create(self, cr, uid, vals, data, external_referential_id, defaults, context):
-        """call sale_markup's module on_change to compute margin when order's created from magento"""
-        order_id = super(sale_order, self).oe_create(cr, uid, vals, data, external_referential_id, defaults, context)
-        order_line_obj = self.pool.get('sale.order.line')
-        order = self.browse(cr, uid, order_id, context)
-        for line in order.order_line:
-            # Call line oin_change to record margin
-            line_changes = order_line_obj.onchange_price_unit(cr, uid, line.id, line.price_unit, line.product_id.id, line.discount, line.product_uom.id, order.pricelist_id.id, line.property_ids, override_unit_price = False)
-            # Always keep the price from Magento
-            line_changes['value']['price_unit'] = line.price_unit
-            order_line_obj.write(cr, uid, line.id, line_changes['value'], context=context)
-
-        return order_id
 
     def action_invoice_create(self, cr, uid, ids, grouped=False, states=['confirmed', 'done', 'exception']):
         """ open invoices directly (bypass draft) when created from an order"""
@@ -90,66 +71,6 @@ class sale_order(magerp_osv.magerp_osv):
     }
 
 sale_order()
-
-
-class sale_shop(magerp_osv.magerp_osv):
-
-    _inherit = 'sale.shop'
-
-    def deactivate_products(self, cr, uid, context=None):
-        """
-        Deactivate all products planned to deactivation on OpenERP
-        Only if no picking uses the product
-        """
-
-        product_ids = self.pool.get('product.product').search(
-            cr, uid, [('to_deactivate', '=', True)])
-        self.pool.get('product.product').try_deactivate_product(
-            cr, uid, product_ids, context=context)
-        return True
-
-    def export_catalog(self, cr, uid, ids, context=None):
-        res = super(sale_shop, self).export_catalog(
-            cr, uid, ids, context=context)
-        self.deactivate_products(cr, uid, context=context)
-        return res
-
-    def _create_magento_invoice(self, cr, uid, order, conn, ext_id, context=None):
-        """ Creation of an invoice on Magento.
-        Inherited to not write the invoice ref"""
-        cr.execute("select account_invoice.id "
-                   "from account_invoice "
-                   "inner join sale_order_invoice_rel "
-                   "on invoice_id = account_invoice.id "
-                   "where order_id = %s" % order.id)
-        resultset = cr.fetchone()
-        created = False
-        if resultset and len(resultset) == 1:
-            invoice = self.pool.get("account.invoice").browse(
-                cr, uid, resultset[0], context=context)
-            if (invoice.amount_total == order.amount_total and
-                not invoice.magento_ref):
-                try:
-                    conn.call(
-                        'sales_order_invoice.create',
-                        [order.magento_incrementid,
-                         [],
-                         _("Invoice Created"),
-                         True,
-                         order.shop_id.allow_magento_notification])
-                    self.log(cr, uid, order.id,
-                             "created Magento invoice for order %s" %
-                             (order.id,))
-                    created = True
-                except Exception, e:
-                    self.log(cr, uid, order.id,
-                             "failed to create Magento invoice for order %s" %
-                             (order.id,))
-                    # TODO make sure that's because Magento invoice already
-                    # exists and then re-attach it!
-        return created
-
-sale_shop()
 
 
 c2c_pack_product_chg.sale.sale_order_line.BASE_TEXT_FOR_PRD_REPLACE = _("""This product replaces partially or completely the ordered product :
