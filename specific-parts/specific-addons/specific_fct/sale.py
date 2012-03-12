@@ -30,7 +30,7 @@ ORDER_STATUS_MAPPING = {'draft': 'processing', 'progress': 'processing', 'shippi
 
 class sale_order(magerp_osv.magerp_osv):
     _inherit = "sale.order"
-    
+
     def oe_create(self, cr, uid, vals, data, external_referential_id, defaults, context):
         """call sale_markup's module on_change to compute margin when order's created from magento"""
         order_id = super(sale_order, self).oe_create(cr, uid, vals, data, external_referential_id, defaults, context)
@@ -55,7 +55,7 @@ class sale_order(magerp_osv.magerp_osv):
                 wf_service.trg_validate(uid, 'account.invoice',
                                         invoice_id, 'invoice_open', cr)
         return invoice_id
-        
+
     def _invoice_date_get(self, cr, uid, ids, field_name, arg, context):
         res={}
         for id in ids:
@@ -83,13 +83,14 @@ class sale_order(magerp_osv.magerp_osv):
         if ids:
             new_args.append( ('id','in',ids) )
         return new_args
-                
+
     _columns = {
         'date_invoiced': fields.function(_invoice_date_get, method=True, fnct_search=_invoiced_date_search,
             type='date', string='Invoice Date', help="Date of the first invoice generated for this SO"),
     }
 
 sale_order()
+
 
 class sale_shop(magerp_osv.magerp_osv):
 
@@ -113,41 +114,40 @@ class sale_shop(magerp_osv.magerp_osv):
         self.deactivate_products(cr, uid, context=context)
         return res
 
-    # method overriden from magentoerpconnect in order to
-    #  - pass False to magento methods for sending
-    def  update_shop_orders(self, cr, uid, order, ext_id, context=None):
-        if context is None: context = {}
-        result = {}
-
-        if order.shop_id.allow_magento_order_status_push:
-            #status update:
-            conn = context.get('conn_obj', False)
-            logger = netsvc.Logger()
-            status = ORDER_STATUS_MAPPING.get(order.state, False)
-            if status:
-                result['status_change'] = conn.call('sales_order.addComment', [ext_id, status, '', order.shop_id.allow_magento_notification])
-                # If status has changed into OERP and the order need_to_update, then we consider the update is done
-                # remove the 'need_to_update': True
-                if order.need_to_update:
-                    self.pool.get('sale.order').write(cr, uid, order.id, {'need_to_update': False})
-
-            #creation of Magento invoice eventually:
-            cr.execute("select account_invoice.id from account_invoice inner join sale_order_invoice_rel on invoice_id = account_invoice.id where order_id = %s" % order.id)
-            resultset = cr.fetchone()
-            if resultset and len(resultset) == 1:
-                invoice = self.pool.get("account.invoice").browse(cr, uid, resultset[0])
-                if invoice.amount_total == order.amount_total and not invoice.magento_ref:
-                    try:
-                        result['magento_invoice_ref'] = conn.call('sales_order_invoice.create', [order.magento_incrementid, [], _("Invoice Created"), True, order.shop_id.allow_magento_notification])
-                        # commented out for debonix
-                        # self.pool.get("account.invoice").write(cr, uid, invoice.id, {'magento_ref': result['magento_invoice_ref'], 'origin': result['magento_invoice_ref']})
-                        self.log(cr, uid, order.id, "created Magento invoice for order %s" % (order.id,))
-                    except Exception, e:
-                        self.log(cr, uid, order.id, "failed to create Magento invoice for order %s" % (order.id,))
-                        logger.notifyChannel('ext synchro', netsvc.LOG_DEBUG, "failed to create Magento invoice for order %s" % (order.id,))
-                        #TODO make sure that's because Magento invoice already exists and then re-attach it!
-
-        return result
+    def _create_magento_invoice(self, cr, uid, order, conn, ext_id, context=None):
+        """ Creation of an invoice on Magento.
+        Inherited to not write the invoice ref"""
+        cr.execute("select account_invoice.id "
+                   "from account_invoice "
+                   "inner join sale_order_invoice_rel "
+                   "on invoice_id = account_invoice.id "
+                   "where order_id = %s" % order.id)
+        resultset = cr.fetchone()
+        created = False
+        if resultset and len(resultset) == 1:
+            invoice = self.pool.get("account.invoice").browse(
+                cr, uid, resultset[0], context=context)
+            if (invoice.amount_total == order.amount_total and
+                not invoice.magento_ref):
+                try:
+                    conn.call(
+                        'sales_order_invoice.create',
+                        [order.magento_incrementid,
+                         [],
+                         _("Invoice Created"),
+                         True,
+                         order.shop_id.allow_magento_notification])
+                    self.log(cr, uid, order.id,
+                             "created Magento invoice for order %s" %
+                             (order.id,))
+                    created = True
+                except Exception, e:
+                    self.log(cr, uid, order.id,
+                             "failed to create Magento invoice for order %s" %
+                             (order.id,))
+                    # TODO make sure that's because Magento invoice already
+                    # exists and then re-attach it!
+        return created
 
 sale_shop()
 
