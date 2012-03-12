@@ -101,28 +101,17 @@ class sale_shop(magerp_osv.magerp_osv):
         Only if no picking uses the product
         """
 
-        product_ids = self.pool.get('product.product').search(cr, uid, [('to_deactivate', '=', True)])
-        self.pool.get('product.product').try_deactivate_product(cr, uid, product_ids, context=context)
+        product_ids = self.pool.get('product.product').search(
+            cr, uid, [('to_deactivate', '=', True)])
+        self.pool.get('product.product').try_deactivate_product(
+            cr, uid, product_ids, context=context)
         return True
 
     def export_catalog(self, cr, uid, ids, context=None):
-        """
-            Changes from magentoerpconnect : add the auto deactivation of products at the end of the export
-        """
-
-        if context is None:
-            context = {}
-        for shop in self.browse(cr, uid, ids):
-            context['shop_id'] = shop.id
-            context['conn_obj'] = self.external_connection(cr, uid, shop.referential_id)
-            self.export_categories(cr, uid, shop, context)
-            self.export_products(cr, uid, shop, context)
-            shop.write({'last_products_export_date': time.strftime('%Y-%m-%d %H:%M:%S')})
-
-        cr.commit()
+        res = super(sale_shop, self).export_catalog(
+            cr, uid, ids, context=context)
         self.deactivate_products(cr, uid, context=context)
-        self.export_inventory(cr, uid, ids, context)
-        return False
+        return res
 
     # method overriden from magentoerpconnect in order to
     #  - pass False to magento methods for sending
@@ -130,7 +119,7 @@ class sale_shop(magerp_osv.magerp_osv):
         if context is None: context = {}
         result = {}
 
-        if order.shop_id.allow_magento_order_status_push:        
+        if order.shop_id.allow_magento_order_status_push:
             #status update:
             conn = context.get('conn_obj', False)
             logger = netsvc.Logger()
@@ -141,7 +130,7 @@ class sale_shop(magerp_osv.magerp_osv):
                 # remove the 'need_to_update': True
                 if order.need_to_update:
                     self.pool.get('sale.order').write(cr, uid, order.id, {'need_to_update': False})
-        
+
             #creation of Magento invoice eventually:
             cr.execute("select account_invoice.id from account_invoice inner join sale_order_invoice_rel on invoice_id = account_invoice.id where order_id = %s" % order.id)
             resultset = cr.fetchone()
