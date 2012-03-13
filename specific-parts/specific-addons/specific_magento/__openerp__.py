@@ -35,7 +35,10 @@ All the specific customisations which concerns the magento connector
                   ],
      "init_xml" : [],
      "demo_xml" : [],
-     "update_xml" : ['settings/external.mappinglines.template.csv',
+     "update_xml" : [
+        'product_view.xml',
+        'sale_view.xml',
+        'settings/external.mappinglines.template.csv',
                     ],
      "active": False,
      "installable": True

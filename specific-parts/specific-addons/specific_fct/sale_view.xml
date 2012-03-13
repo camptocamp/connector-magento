@@ -1,90 +1,35 @@
 <?xml version="1.0"?>
 <openerp>
-    <data>
+  <data>
 
-        <record model="ir.ui.view" id="base_sale_multichannels_view_shop_form_inherit">
-            <field name="name">base_sale_multichannels_view_shop_form_inherit</field>
-            <field name="model">sale.shop</field>
-            <field name="inherit_id" ref="base_sale_multichannels.base_sale_multichannels_view_shop_form" />
-            <field name="type">form</field>
-            <field name="arch" type="xml">
-                <data>
-                    <page string="Exportable Products" position="replace" />
-                </data>
-            </field>
-        </record>
+    <record model="ir.ui.view" id="view_order_tree">
+      <field name="name">sale.order.tree.magento</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="sale.view_order_tree" />
+      <field name="type">tree</field>
+      <field name="arch" type="xml">
+        <field name="invoiced_rate" widget="progressbar" position="after">
+          <field name="date_invoiced" select="1"/>
+        </field>
+      </field>
+    </record>
 
-        <record model="ir.ui.view" id="view_order_tree">
-			<field name="name">sale.order.tree.magento</field>
-			<field name="model">sale.order</field>
-			<field name="inherit_id" ref="sale.view_order_tree" />
-			<field name="type">tree</field>
-			<field name="arch" type="xml">
-                <field name="invoiced_rate" widget="progressbar" position="after">
-                    <field name="date_invoiced" select="1"/>
-                </field>
-			</field>
-		</record>
+    <record model="ir.ui.view" id="view_order_form">
+      <field name="name">sale.order.form.magento</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="sale.view_order_form" />
+      <field name="type">form</field>
+      <field name="arch" type="xml">
+	<field name="payment_term" position="after">
+	  <field name="date_invoiced" select="1"/>
+	</field>
+      </field>
+    </record>
 
-		<record model="ir.ui.view" id="view_order_form">
-			<field name="name">sale.order.form.magento</field>
-			<field name="model">sale.order</field>
-			<field name="inherit_id" ref="sale.view_order_form" />
-			<field name="type">form</field>
-			<field name="arch" type="xml">
-			    <field name="payment_term" position="after">
-			        <field name="date_invoiced" select="1"/>
-				</field>
-			</field>
-		</record>
+    <!-- Remove autrefresh -->
+    <record model="ir.actions.act_window" id="sale.action_order_form">
+      <field name="auto_refresh" eval="0"/>
+    </record>
 
-        <!-- Remove autrefresh -->
-        <record model="ir.actions.act_window" id="sale.action_order_form">
-    		<field name="auto_refresh" eval="0"/>
-    	</record>
-        
-        <record id="action_order_tree_cheque" model="ir.actions.act_window">
-            <field name="name">Sales Order Waiting Cheque</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="res_model">sale.order</field>
-            <field name="view_type">form</field>
-            <field name="domain">[('state','=','draft'),('ext_payment_method','in',['checkmo','chequethreetimes','chequefivetimes'])]</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-        </record>
-        <menuitem action="action_order_tree_cheque" id="menu_action_order_tree_cheque" parent="sale.menu_sale_root"/>
-        
-        <record id="action_order_tree_vir" model="ir.actions.act_window">
-            <field name="name">Sales Order Waiting Transfer</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="res_model">sale.order</field>
-            <field name="view_type">form</field>
-            <field name="domain">[('state','=','draft'),('ext_payment_method','in',['oney_oney4x','receiveandpay_cb',
-                'receiveandpay_cr','amazon','oney_oney3x'])]</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-        </record>
-        <menuitem action="action_order_tree_vir" id="menu_action_order_tree_vir" parent="sale.menu_sale_root"/>
-        
-        <record id="action_order_tree_cash" model="ir.actions.act_window">
-            <field name="name">Sales Order Cash On Delivery</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="res_model">sale.order</field>
-            <field name="view_type">form</field>
-            <field name="domain">[('state','not in',['cancel','done']),('ext_payment_method','=','cashondelivery')]</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-        </record>
-        <menuitem action="action_order_tree_cash" id="menu_action_order_tree_cash" parent="sale.menu_sale_root"/>
-        
-        <record id="action_order_tree_1000" model="ir.actions.act_window">
-            <field name="name">Sales Order &gt;1000 EUR HT (cybermut,atos_several,cashondelivery)</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="res_model">sale.order</field>
-            <field name="view_type">form</field>
-            <field name="domain">[('state','not in',['cancel','done']),('amount_untaxed','&gt;',1000),
-                ('ext_payment_method','in',['cybermut_payment','atos_several','cashondelivery'])]</field>
-            <field name="view_mode">tree,form,calendar,graph</field>
-        </record>
-        <menuitem action="action_order_tree_1000" id="menu_action_order_tree_1000" parent="sale.menu_sale_root"/>
-        
-        
-    </data>
-</openerp>            
+  </data>
+</openerp>
