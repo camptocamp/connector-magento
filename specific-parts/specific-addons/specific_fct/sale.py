@@ -26,21 +26,10 @@ from osv import osv, fields
 class sale_order(osv.osv):
     _inherit = "sale.order"
 
-    def action_invoice_create(self, cr, uid, ids, grouped=False, states=['confirmed', 'done', 'exception']):
-        """ open invoices directly (bypass draft) when created from an order"""
-        invoice_id = super(sale_order, self).action_invoice_create(cr, uid, ids, grouped, states)
-        if invoice_id:
-            invoice = self.pool.get('account.invoice').browse(cr, uid, invoice_id)
-            if invoice.state == 'draft':
-                wf_service = netsvc.LocalService("workflow")
-                wf_service.trg_validate(uid, 'account.invoice',
-                                        invoice_id, 'invoice_open', cr)
-        return invoice_id
-
     def _invoice_date_get(self, cr, uid, ids, field_name, arg, context):
-        res={}
+        res = {}
         for id in ids:
-            res[id]=False
+            res[id] = False
         cr.execute("SELECT rel.order_id,MIN(inv.date_invoice) FROM sale_order_invoice_rel rel \
         JOIN account_invoice inv ON (rel.invoice_id=inv.id) WHERE rel.order_id IN %s \
         GROUP BY rel.order_id", (tuple(ids),))
@@ -52,17 +41,17 @@ class sale_order(osv.osv):
         if not len(args):
             return []
         new_args = []
-        ids=[]
+        ids = []
         for argument in args:
             operator = argument[1]
             value = argument[2]
             cr.execute("SELECT rel.order_id FROM sale_order_invoice_rel rel \
             JOIN account_invoice inv ON (rel.invoice_id=inv.id) WHERE inv.date_invoice IS NOT NULL AND \
-            inv.date_invoice "+operator+" %s", (str(value),))
+            inv.date_invoice " + operator + " %s", (str(value),))
             for line in cr.fetchall():
                 ids.append(line[0])
         if ids:
-            new_args.append( ('id','in',ids) )
+            new_args.append(('id', 'in', ids))
         return new_args
 
     _columns = {
@@ -70,63 +59,143 @@ class sale_order(osv.osv):
             type='date', string='Invoice Date', help="Date of the first invoice generated for this SO"),
     }
 
+    def _skip_draft_invoice(self, cr, uid, invoice):
+        """
+        Open invoices directly (bypass draft) when created from an order
+        Specific customisation to avoid the manual confirmation of the invoice
+        when the invoice is created from the order.
+        """
+        if invoice.state == 'draft':
+            wf_service = netsvc.LocalService("workflow")
+            wf_service.trg_validate(uid, 'account.invoice',
+                                    invoice, 'invoice_open', cr)
+
+    def _add_extra_picking_lines(self, cr, uid, ids, invoice, grouped=False):
+        """
+        Lines in pickings which are not in the sale order are considered
+        as gift. They have to be added on the invoice with a 0 price unit.
+        """
+        picking_obj = self.pool.get('stock.picking')
+        invoice_line_obj = self.pool.get('account.invoice.line')
+
+        # when there are new gift products in a picking,
+        # they have to be added on the invoice with 0 price unit
+        if invoice.type == 'out_invoice':
+            for so in self.browse(cr, uid, ids):
+                # products in sale orders
+                so_products = []
+                for line in so.order_line:
+                    if line.product_id:
+                        so_products.append(line.product_id.id)
+
+                # products in stock pickings
+                for picking in so.picking_ids:
+
+                    partner = picking.address_id and \
+                              picking.address_id.partner_id
+
+                    for move_line in picking.move_lines:
+                        if move_line.state == 'cancel':
+                            continue
+                        product = move_line.old_product_id or \
+                                  move_line.product_id
+
+                        # filter out products of the sale order
+                        if product.id in so_products:
+                            continue
+
+                        origin = 'GIFT:' + picking.name
+
+                        if grouped:
+                            name = (picking.name or '') + '-' + move_line.name
+                        else:
+                            name = move_line.name
+
+                        account_id = move_line.product_id.product_tmpl_id.\
+                                property_account_income.id
+                        if not account_id:
+                            account_id = move_line.product_id.categ_id.\
+                                    property_account_income_categ.id
+
+                        tax_ids = picking_obj._get_taxes_invoice(
+                            cr, uid, move_line, invoice.type)
+                        account_analytic_id = \
+                            picking_obj._get_account_analytic_invoice(
+                                cr, uid, picking, move_line)
+
+                        uos_id = move_line.product_uos and \
+                                 move_line.product_uos.id or False
+                        if not uos_id:
+                            uos_id = move_line.product_uom.id
+                        fisc_pos_obj = self.pool.get('account.fiscal.position')
+                        account_id = fisc_pos_obj.map_account(
+                            cr, uid,
+                            partner.property_account_position,
+                            account_id)
+                        note = _("This product has been "
+                                 "added in the delivery order %s") % \
+                               (picking.name,)
+                        invoice_line_id = invoice_line_obj.create(cr, uid,
+                            {'name': name,
+                             'origin': origin,
+                             'invoice_id': invoice.id,
+                             'uos_id': uos_id,
+                             'product_id': move_line.product_id.id,
+                             'account_id': account_id,
+                             'price_unit': 0.0,
+                             'discount': 0.0,
+                             'quantity': move_line.product_uos_qty or
+                                         move_line.product_qty,
+                             'invoice_line_tax_id': [(6, 0, tax_ids)],
+                             'account_analytic_id': account_analytic_id,
+                             'note': note,
+                            })
+                        picking_obj._invoice_line_hook(
+                            cr, uid, move_line, invoice_line_id)
+
+    def action_invoice_create(self, cr, uid, ids, grouped=False,
+                              states=['confirmed', 'done', 'exception']):
+        """
+        Inherit legacy method to :
+         - skip the draft state on the invoices created from the order
+         - add pickings lines not in the so as gifts on the invoice
+        """
+        invoice_id = super(sale_order, self).action_invoice_create(
+            cr, uid, ids, grouped, states)
+        if invoice_id:
+            invoice = self.pool.get('account.invoice').browse(
+                cr, uid, invoice_id)
+
+            self._skip_draft_invoice(cr, uid, invoice)
+
+            self._add_extra_picking_lines(cr, uid, invoice, grouped=grouped)
+
+        return invoice_id
+
+    def _prepare_order_line_invoice_line(self, cr, uid, line,
+                                         account_id=False, context=None):
+        """Prepare the dict of values to create the new invoice line for a
+           sale order line. This method may be overridden to implement custom
+           invoice generation (making sure to call super() to establish
+           a clean extension chain).
+
+           Override the method to add an invoice line with the replaced
+           product in the related packing
+           Keep the price of the original product but use the accounts of the
+           replacement product
+           Add a comment which indicates the modification
+
+           Override of the method in order to:
+           Empty the "note" field
+
+           :param browse_record line: sale.order.line record to invoice
+           :param int account_id: optional ID of a G/L account to force
+               (this is used for returning products including service)
+           :return: dict of values to create() the invoice line
+        """
+        vals = super(sale_order, self)._prepare_order_line_invoice_line(
+            cr, uid, line, account_id=account_id, context=context)
+        vals['note'] = False
+        return vals
+
 sale_order()
-
-
-c2c_pack_product_chg.sale.sale_order_line.BASE_TEXT_FOR_PRD_REPLACE = _("""This product replaces partially or completely the ordered product :
-""")
-
-def invoice_line_create(self, cr, uid, ids, context={}):
-    """Override this method to add a create the line with the replaced product in the related packing
-    (but same price as original product). Add a comment which indicates the modification
-
-    CHANGE FROM C2C_PACK_PRODUCT_CHG: DELETE NOTE BEFORE UPDATE LINE"""
-    inv_created_ids = super(c2c_pack_product_chg.sale.sale_order_line, self).invoice_line_create(cr, uid, ids, context)
-
-    prod_obj = self.pool.get('product.product')
-    partner_obj = self.pool.get('res.partner')
-    inv_line_obj = self.pool.get('account.invoice.line')
-
-    inv_line_obj.write(cr, uid, inv_created_ids, {'note': ''})
-    for so_line in self.browse(cr, uid, ids):
-        product_changed_id = False
-        # If one of the stock move generated by the SO lines has
-        # a product replaced
-        for move in so_line.move_ids:
-            if move.old_product_id:
-                product_changed_id = move.product_id.id
-                break
-        # we replace the product on the invoice
-        # but keep the price of the original product
-        if product_changed_id:
-            if so_line.invoice_lines:
-                # We add a comment into all related invoices lines
-                inv_line_ids_to_change = [inv_line.id for inv_line in so_line.invoice_lines]
-                lang = partner_obj.browse(cr, uid, so_line.order_id.partner_id.id).lang
-                context = {'lang': lang}
-                for inv_line in inv_line_obj.browse(cr, uid, inv_line_ids_to_change):
-                    note = ''
-                    product_note = inv_line.name
-                    product_name = prod_obj.name_get(cr, uid, [product_changed_id], context=context)[0][1]
-                    result = inv_line_obj.product_id_change(cr, uid,
-                                                            inv_line.id,
-                                                            product_changed_id,
-                                                            inv_line.uos_id.id,
-                                                            qty=inv_line.quantity,
-                                                            name=product_name,
-                                                            type='out_invoice',
-                                                            partner_id=so_line.order_id.partner_id.id,
-                                                            fposition_id=so_line.order_id.partner_id.property_account_position.id,
-                                                            price_unit=inv_line.price_unit,
-                                                            context=context)
-
-                    new_note = note + self.BASE_TEXT_FOR_PRD_REPLACE + product_note
-                    inv_line_obj.write(cr, uid, inv_line.id, {'note': new_note,
-                                                              'account_id': result['value']['account_id'],
-                                                              'invoice_line_tax_id': result['value']['invoice_line_tax_id'],
-                                                              'uos_id': result['value']['uos_id'],
-                                                              'name': product_name,
-                                                              'product_id': product_changed_id})
-    return inv_created_ids
-
-c2c_pack_product_chg.sale.sale_order_line.invoice_line_create = invoice_line_create
