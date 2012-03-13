@@ -17,7 +17,6 @@
 ##############################################################################
 
 import netsvc
-import c2c_pack_product_chg
 
 from tools.translate import _
 from osv import osv, fields
@@ -172,6 +171,13 @@ class sale_order(osv.osv):
 
         return invoice_id
 
+sale_order()
+
+
+class sale_order_line(osv.osv):
+
+    _inherit = 'sale.order.line'
+
     def _prepare_order_line_invoice_line(self, cr, uid, line,
                                          account_id=False, context=None):
         """Prepare the dict of values to create the new invoice line for a
@@ -193,9 +199,9 @@ class sale_order(osv.osv):
                (this is used for returning products including service)
            :return: dict of values to create() the invoice line
         """
-        vals = super(sale_order, self)._prepare_order_line_invoice_line(
+        vals = super(sale_order_line, self)._prepare_order_line_invoice_line(
             cr, uid, line, account_id=account_id, context=context)
         vals['note'] = False
         return vals
 
-sale_order()
+sale_order_line()
