@@ -13,8 +13,9 @@
             <page string="Information" position="inside">
                 <group colspan="2" col="2" name="magento">
                     <separator string="Magento Inventory Options" colspan="2"/>
+                    <field name="magento_manage_stock"/>
                     <field name="magento_backorders" />
-                 </group>            
+                 </group>
             </page>
         </field>
     </record>

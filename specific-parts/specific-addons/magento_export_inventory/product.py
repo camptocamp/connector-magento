@@ -35,14 +35,18 @@ class Product(osv.osv):
              ('1', 'Negative Stock Allowed'),
              ('2', 'Negative Stock Allowed (but warn customer)')],
              'Magento Backorder',
-             help="A backorder the strategy to use for an item "
-                  "that was in stock previously "
-                  "but is temporarily out of stock. "
-                  "Choose the Magento behavior here."),
+            help="A backorder the strategy to use for an item "
+                 "that was in stock previously "
+                 "but is temporarily out of stock. "
+                 "Choose the Magento behavior here."),
+        'magento_manage_stock': fields.boolean(
+            'Magento Manage Stock',
+            help='Magento option "Manage Stock" in "Inventory" tab.')
         }
 
     _defaults = {
         'magento_backorders': lambda *a: '1',
+        'magento_manage_stock': True,
         }
 
     def _prepare_inventory_magento_vals(self, cr, uid, product, stock, shop,
@@ -57,6 +61,8 @@ class Product(osv.osv):
 
         Always put "is_in_stock" to True
 
+        Option "do not manage stock".
+
         :param browse_record product: browseable product
         :param browse_record stock: browseable stock location
         :param browse_record shop: browseable shop
@@ -66,13 +72,19 @@ class Product(osv.osv):
         # force the bom_stock field to be used to compute the qty
         vals = super(Product, self)._prepare_inventory_magento_vals(
             cr, uid, product, stock, shop, context=context)
-        vals.update({
-            'backorders': product.magento_backorders,
-            'is_in_stock': True,
-            'use_config_manage_stock': True,
-            'manage_stock': True,
-            'use_config_min_sale_qty': True,
-            'use_config_max_sale_qty': True, })
+        if product.magento_manage_stock:
+            vals.update({
+                'backorders': product.magento_backorders,
+                'is_in_stock': True,
+                'use_config_manage_stock': True,
+                'manage_stock': True,
+                'use_config_min_sale_qty': True,
+                'use_config_max_sale_qty': True, })
+        else:
+            vals = {
+                'manage_stock': False,
+                'use_config_manage_stock': False,
+            }
         return vals
 
 Product()
