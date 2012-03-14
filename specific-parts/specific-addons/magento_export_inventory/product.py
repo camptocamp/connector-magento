@@ -45,8 +45,7 @@ class Product(osv.osv):
         'magento_backorders': lambda *a: '1',
         }
 
-    def _prepare_inventory_magento_vals(self, cr, uid, product, stock,
-                                        stock_field, referential,
+    def _prepare_inventory_magento_vals(self, cr, uid, product, stock, shop,
                                         context=None):
         """
         Prepare the values to send to Magento (message product_stock.update).
@@ -60,15 +59,13 @@ class Product(osv.osv):
 
         :param browse_record product: browseable product
         :param browse_record stock: browseable stock location
-        :param str stock_field: name of the product's field which hold
-        the stock quantity
-        :param browse_record referential: browseable external referential
+        :param browse_record shop: browseable shop
         :return: a dict of values to send to Magento with a call to :
         product_stock.update
         """
         # force the bom_stock field to be used to compute the qty
         vals = super(Product, self)._prepare_inventory_magento_vals(
-            cr, uid, product, stock, 'bom_stock', referential, context=context)
+            cr, uid, product, stock, shop, context=context)
         vals.update({
             'backorders': product.magento_backorders,
             'is_in_stock': True,
