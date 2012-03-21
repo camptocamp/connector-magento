@@ -22,7 +22,7 @@ from osv import fields, osv
 
 
 class Product(osv.osv):
-    " Inherit product for small customisations"
+    """ Inherit product for small customisations"""
 
     _inherit = 'product.product'
 
