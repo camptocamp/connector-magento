@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author:  Author Guewen Baconnier
+#    Author:  Author Nicolas Bessi
 #    Copyright 2012 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -18,26 +18,24 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{'name' : 'Multiple EAN13 on products',
- 'version' : '1.1',
- 'author' : 'Camptocamp',
- 'maintainer': 'Camptocamp',
- 'category': 'Warehouse',
- 'complexity': "normal",  # easy, normal, expert
- 'depends' : ['base', 'product'],
- 'description': """"Multiple EAN13 for one product.
-Product EAN13 field is replaced by a function which returns the first EAN13 found.
-WARNING !!! THIS WILL DROP ALL YOUR CURRENT EAN13 AS OPENERP DROP THE COLUMN.
-PLEASE BE SURE TO EXPORT THEM BEFORE INSTALLATION OF THE MODULE AND RESTORE THEM WITH AN IMPORT.
-""",
- 'website': 'http://www.camptocamp.com',
- 'init_xml': [],
- 'update_xml': ['product_view.xml',
-                'security/ir.model.access.csv'],
- 'demo_xml': [],
- 'tests': [],
- 'installable': True,
- 'images' : ['/static/src/images/image'],
- 'auto_install': False,
- 'license': 'AGPL-3',
- 'application': True}
+
+from osv import osv
+
+class SaleOrderLine(osv.osv):
+    _inherit = 'sale.order.line'
+
+
+    def onchange_price_unit(self, cr, uid, ids, price_unit, product_id, discount, product_uom, pricelist, **kwargs):
+        '''
+        Place holder function for onchange unit price
+        '''
+        res = {}
+        return res
+
+    def onchange_discount(self, cr, uid, ids, price_unit, product_id, discount, product_uom, pricelist, **kwargs):
+        '''
+        Place holder function for onchange discount
+        '''
+        res = {}
+        return res
+

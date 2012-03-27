@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author:  Author Guewen Baconnier
+#    Author: Joël Grand-Guillaume
 #    Copyright 2012 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -18,26 +18,15 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{'name' : 'Multiple EAN13 on products',
- 'version' : '1.1',
- 'author' : 'Camptocamp',
- 'maintainer': 'Camptocamp',
- 'category': 'Warehouse',
- 'complexity': "normal",  # easy, normal, expert
- 'depends' : ['base', 'product'],
- 'description': """"Multiple EAN13 for one product.
-Product EAN13 field is replaced by a function which returns the first EAN13 found.
-WARNING !!! THIS WILL DROP ALL YOUR CURRENT EAN13 AS OPENERP DROP THE COLUMN.
-PLEASE BE SURE TO EXPORT THEM BEFORE INSTALLATION OF THE MODULE AND RESTORE THEM WITH AN IMPORT.
-""",
- 'website': 'http://www.camptocamp.com',
- 'init_xml': [],
- 'update_xml': ['product_view.xml',
-                'security/ir.model.access.csv'],
- 'demo_xml': [],
- 'tests': [],
- 'installable': True,
- 'images' : ['/static/src/images/image'],
- 'auto_install': False,
- 'license': 'AGPL-3',
- 'application': True}
+
+from osv import fields, osv
+import decimal_precision as dp
+
+class Product(osv.osv):
+    """Add floor price to product"""
+    _inherit = 'product.product'
+    _columns = {'floor_price_limit': fields.float('Floor Price',
+                                                  digits_compute=dp.get_precision('Sale Price'),
+                                                  help=("Floor price for this product:"
+                                                        "salesmen will not be able to make"
+                                                        "a discount in SO below that price."))}
