@@ -119,24 +119,7 @@ class ProductCategory(osv.osv):
             res[id] = res_id
         return res
 
-    SORT_BY_OPTIONS = (
-        ('None', 'Use Config Settings'),
-        ('position', 'Position'),
-        ('price', 'Price'),
-        ('zdbx_default_marque', 'Manufacturer'),
-        ('pyksel_rdc_availability', 'Availability'),
-    )
-
     _columns = {
-        # TODO : clean, puts options in magerp_product_category_attribute_options
-        # 'available_sort_by': fields.selection(
-        #                     SORT_BY_OPTIONS,
-        #                     'Available Product Listing (Sort By)',
-        #                     size=32),
-        # 'default_sort_by': fields.selection(
-        #                     SORT_BY_OPTIONS,
-        #                     'Default Product Listing Sort (Sort By)',
-        #                     size=32),
         'magento_rdc_category':
             fields.many2one('magerp.product_attribute_options',
                             'Rue Du Commerce Category',
