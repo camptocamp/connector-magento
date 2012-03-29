@@ -100,11 +100,12 @@ class ProductProduct(Model):
         prod_supplier_obj = self.pool.get('product.supplierinfo')
         pricelist_obj = self.pool.get('pricelist.partnerinfo')
         res_obj = self.pool.get('res.partner')
-        prod_supplier_ids = prod_supplier_obj.search(cr, uid, [('product_id', '=', product_id), ('name.ref', '=', values['Supplier Code'])])
+        prod_supplier_ids = prod_supplier_obj.search(cr, uid, [('product_id', '=', product_id),
+                                                               ('name.ref', '=', values['Supplier Code'])])
         if prod_supplier_ids:
             for prod_supplier in prod_supplier_obj.browse(cr, uid, prod_supplier_ids):
                 prod_supplier_obj.write(cr, uid, prod_supplier.id, {'delay': values['Supplier Delay'],
-                                                                    'qty': values['Supplier Min. Qty'],
+                                                                    'min_qty': values['Supplier Min. Qty'],
                                                                     'product_code': values['Supplier Product Code'],
                                                                     'product_name': values['Supplier Product Name']})
 
@@ -211,7 +212,8 @@ class ProductProduct(Model):
                 imported_prod_ids.append(prod_id)
             else:
                 prod_id = prod_obj.create(cr,uid,product_data)
-                prices_not_to_delete = self._update_supplier_infos(cr,uid,prod_id,values,prices_not_to_delete)
+                prices_not_to_delete = self._update_supplier_infos(cr ,uid, prod_id,
+                                                                   values, prices_not_to_delete)
                 imported_prod_ids.append(prod_id)
             if imported_prod_ids.count(prod_id) == 1:
                 inv_line_obj.create(cr,uid,{
@@ -221,6 +223,7 @@ class ProductProduct(Model):
                         'product_uom' : default_dict['uom_id'],
                         'product_qty' : values['Stock Level'],
                     })
+        inv_obj.action_confirm(cr,uid,[inventory_id])
         inv_obj.action_done(cr,uid,[inventory_id])
         imported_prod_ids=list(set(imported_prod_ids))
         return imported_prod_ids
