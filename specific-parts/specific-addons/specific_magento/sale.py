@@ -71,39 +71,4 @@ class sale_shop(osv.osv):
         self.deactivate_products(cr, uid, context=context)
         return res
 
-    def _create_magento_invoice(self, cr, uid, order, conn, ext_id, context=None):
-        """ Creation of an invoice on Magento.
-        Inherited to not write the invoice ref"""
-        cr.execute("select account_invoice.id "
-                   "from account_invoice "
-                   "inner join sale_order_invoice_rel "
-                   "on invoice_id = account_invoice.id "
-                   "where order_id = %s" % order.id)
-        resultset = cr.fetchone()
-        created = False
-        if resultset and len(resultset) == 1:
-            invoice = self.pool.get("account.invoice").browse(
-                cr, uid, resultset[0], context=context)
-            if (invoice.amount_total == order.amount_total and
-                not invoice.magento_ref):
-                try:
-                    conn.call(
-                        'sales_order_invoice.create',
-                        [order.magento_incrementid,
-                         [],
-                         _("Invoice Created"),
-                         True,
-                         order.shop_id.allow_magento_notification])
-                    self.log(cr, uid, order.id,
-                             "created Magento invoice for order %s" %
-                             (order.id,))
-                    created = True
-                except Exception, e:
-                    self.log(cr, uid, order.id,
-                             "failed to create Magento invoice for order %s" %
-                             (order.id,))
-                    # TODO make sure that's because Magento invoice already
-                    # exists and then re-attach it!
-        return created
-
 sale_shop()
