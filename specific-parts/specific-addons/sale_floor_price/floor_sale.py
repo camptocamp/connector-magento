@@ -59,15 +59,16 @@ class SaleOrderLine(osv.osv):
 
 
     def onchange_price_unit(self, cr, uid, ids, price_unit, product_id, discount, product_uom,
-                            pricelist, override_unit_price = True):
+                            pricelist, **kwargs):
         '''
         If price unit change, check that it is not < floor_price_limit of related product.
         If override_unit_price is True, we put in price_unit the min possible value, otherwise
         we leave it empty...
         '''
+        override_unit_price = kwargs.pop('override_unit_price', True)
         res = super(SaleOrderLine, self).onchange_price_unit(cr, uid, ids, price_unit,
                                                              product_id, discount, product_uom,
-                                                             pricelist, override_unit_price=override_unit_price)
+                                                             pricelist, **kwargs)
         res['value'] = res.get('value', {})
 
         if product_id and price_unit > 0.0:
