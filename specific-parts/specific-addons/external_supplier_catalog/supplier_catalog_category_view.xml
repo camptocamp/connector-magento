@@ -37,7 +37,7 @@
             <field name="view_type">form</field>
             <field name="view_id" ref="supplier_catalog_category_tree"/>
         </record>
-        <menuitem action="supplier_catalog_category_form_action" id="menu_supplier_catalog_category" parent="product.menu_config_product"/>
+        <menuitem action="supplier_catalog_category_form_action" id="menu_supplier_catalog_category" parent="product.prod_config_main"/>
 
         <!-- Product Category -->
 
