@@ -96,7 +96,7 @@ class SaleOrderLine(osv.osv):
         '''
         res = super(SaleOrderLine, self).onchange_discount(cr, uid, ids, price_unit, product_id,
                                                            discount, product_uom, pricelist)
-        
+
         res['value'] = res.get('value', {})
 
         if product_id and price_unit > 0.0:

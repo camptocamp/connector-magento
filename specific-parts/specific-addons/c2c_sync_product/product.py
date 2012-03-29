@@ -18,16 +18,18 @@
 #
 ##############################################################################
 
-from osv import osv, fields
-import netsvc
+
 import cStringIO
-import StringIO
+import time
 import base64
 import csv
-import time
+
+
+from openerp.osv.orm import Model
+from openerp.osv.osv import except_osv
 from tools.translate import _
 
-class product_product(osv.osv):
+class ProductProduct(Model):
     _inherit = "product.product"
   
     def _convert_to_type(self, chain, to_type):
@@ -38,18 +40,18 @@ class product_product(osv.osv):
         try:
             ret = to_type(ret)
         except ValueError:
-            raise osv.except_osv(_("Error during import"), _("Value \"%s\" cannot be converted to %s." % (ret, to_type.__name__)))
+            raise except_osv(_("Error during import"),
+                             _("Value \"%s\" cannot be converted to %s.") % (ret, to_type.__name__))
         return ret
         
     def csvfile_to_dict(self,cr,uid,data,name):
         """Return a dict of value read from CSV, converted in the good type."""
         if not data:
-            raise osv.except_osv(_('UserError'), _("You need to select a file!"))
+            raise except_osv(_('UserError'), _("You need to select a file!"))
         # Decode the file data
         data = base64.b64decode(data)
         input=cStringIO.StringIO(data)
         input.seek(0)
-        filename = name
         reader_info = []
         dialect = csv.Sniffer().sniff(input.read(1024))
         input.seek(0)
@@ -58,17 +60,15 @@ class product_product(osv.osv):
         origin_header = reader_info[0]
         del reader_info[0]
         # header of the csv
-        keys= [
-            # Basic product infos
-            'EAN13', 'Company Code', 'Name','Magento SKU','Category', 'Sale Price', 'Export To Magento', 'Standard Price', 'Cost Method',
-            # Supplier infos parts
-            'Supplier Code', 'Supplier Delay', 'Supplier Min. Qty','Supplier Product Code', 'Supplier Product Name', 'Quantity', 'Price',
-            'Stock Level',
-        ]
+        keys= ['EAN13', 'Company Code', 'Name','Magento SKU','Category', 'Sale Price', 'Export To Magento', 'Standard Price', 'Cost Method',
+               'Supplier Code', 'Supplier Delay', 'Supplier Min. Qty','Supplier Product Code', 'Supplier Product Name', 'Quantity', 'Price',
+               'Stock Level']
         
         values= {}
         if len(origin_header) <> len(keys):
-            raise osv.except_osv(_('UserError'), _("Your file hasn't the right number of column (%s VS %s) ! Expected %s, found %s" %(len(keys),len(origin_header),keys,origin_header)))
+            raise except_osv(_('UserError'),
+                             _("Your file hasn't the right number of column (%s VS %s) ! Expected %s, found %s") %
+                               (len(keys), len(origin_header), keys,origin_header))
         res = []
         for i in range(len(reader_info)):
             field = reader_info[i]
@@ -82,14 +82,13 @@ class product_product(osv.osv):
                           ['Standard Price', float],
                           ['Sale Price', float],
                           ['Stock Level', int],
-                          ['Export To Magento', bool],
-                          ]
+                          ['Export To Magento', bool]]
             for item in to_convert:
                 values[item[0]] = self._convert_to_type(values[item[0]], item[1])
             res.append(values)
         return res
     
-    def _update_supplier_infos(self,cr,uid,product_id,values,prices_not_to_delete):
+    def _update_supplier_infos(self, cr, uid, product_id, values, prices_not_to_delete):
         """
         Suppliers update. Create or modify suppliers. Delete all lines of prices for a supplier and import new prices
         Args: 
@@ -101,7 +100,7 @@ class product_product(osv.osv):
         prod_supplier_obj = self.pool.get('product.supplierinfo')
         pricelist_obj = self.pool.get('pricelist.partnerinfo')
         res_obj = self.pool.get('res.partner')
-        prod_supplier_ids = prod_supplier_obj.search(cr, uid, [('product_id','=', product_id), ('name.ref', '=', values['Supplier Code'])])
+        prod_supplier_ids = prod_supplier_obj.search(cr, uid, [('product_id', '=', product_id), ('name.ref', '=', values['Supplier Code'])])
         if prod_supplier_ids:
             for prod_supplier in prod_supplier_obj.browse(cr, uid, prod_supplier_ids):
                 prod_supplier_obj.write(cr, uid, prod_supplier.id, {'delay': values['Supplier Delay'],
@@ -124,9 +123,14 @@ class product_product(osv.osv):
                                           'suppinfo_id': prod_supplier.id})
 
         else:
-            partner_ids = res_obj.name_search(cr, uid, values['Supplier Code'], args=[('supplier', '=', True)], operator='ilike', context=None, limit=80)
+            partner_ids = res_obj.name_search(cr, uid, values['Supplier Code'],
+                                              args=[('supplier', '=', True)],
+                                              operator='ilike', context=None, limit=80)
             if not partner_ids:
-                raise osv.except_osv(_('Error'), _('The supplier code %s has not been found (verify it is define as a supplier with the checkbox ticked)!'%(values['Supplier Code'])))
+                raise except_osv(_('Error'),
+                                 _('The supplier code %s has not been found'
+                                   '(verify it is define as a supplier with the checkbox ticked)!') %
+                                   (values['Supplier Code']))
             new_supplier_ids = prod_supplier_obj.create(cr, uid ,
                     {'name':  partner_ids[0][0],
                      'delay': values['Supplier Delay'],
@@ -165,9 +169,10 @@ class product_product(osv.osv):
             product_data.update({'default_code': values['Company Code']})
 
         if values['Category'].strip() != '' :
-            cat_id=self.pool.get('product.category').search(cr,uid,[('name','=',values['Category'])])[0]
+            cat_id=self.pool.get('product.category').search(cr, uid, [('name', '=', values['Category'])])[0]
             if not cat_id:
-                raise osv.except_osv(_('Error'), _('The category %s has not been found !'%(values['Category'])))
+                raise except_osv(_('Error'),
+                                 _('The category %s has not been found !') % (values['Category']))
             product_data.update({'categ_id': cat_id})
         
         # May be something wrong if not using "False" and "True" in the file
@@ -186,25 +191,22 @@ class product_product(osv.osv):
         imported_prod_ids = []
         prices_not_to_delete = []
         prod_obj = self.pool.get('product.product')
-        prod_supplier_obj = self.pool.get('product.supplierinfo')
-        pricelist_obj = self.pool.get('pricelist.partnerinfo')
-        model_obj  = self.pool.get('ir.model.data')
-        res_obj = self.pool.get('res.partner')
         inv_line_obj = self.pool.get('stock.inventory.line')
         inv_obj = self.pool.get('stock.inventory')
-        inventory_id = inv_obj.create(cr,uid,{'name':'SYNC INVENTORY '+time.strftime('%Y-%m-%d %H:%M:%S')})
+        inventory_id = inv_obj.create(cr, uid, {'name':'SYNC INVENTORY '+time.strftime('%Y-%m-%d %H:%M:%S')})
         
         for values in products_dict:
-            prod_ids = prod_obj.search(cr, uid, [('default_code','=',values['Company Code'])])
+            prod_ids = prod_obj.search(cr, uid, [('default_code', '=' ,values['Company Code'])])
             if len(prod_ids) > 1:
-                raise osv.except_osv(_('Error'), _('More than one product has the code %s !'%(values['Company Code'])))
-            product_data = self._build_product_dict(cr,uid,values,default_dict)
+                raise except_osv(_('Error'),
+                                 _('More than one product has the code %s !') % (values['Company Code']))
+            product_data = self._build_product_dict(cr, uid, values, default_dict)
             if prod_ids:
                 prod_id=prod_ids[0]
-                updated = False
                 prod = prod_obj.browse(cr, uid, prod_id)
                 if values['Supplier Code'] != '':
-                    prices_not_to_delete = self._update_supplier_infos(cr,uid,prod.id,values,prices_not_to_delete)
+                    prices_not_to_delete = self._update_supplier_infos(cr, uid, prod.id,
+                                                                       values, prices_not_to_delete)
                 prod_obj.write(cr, uid, prod.id, product_data)
                 imported_prod_ids.append(prod_id)
             else:
@@ -222,5 +224,3 @@ class product_product(osv.osv):
         inv_obj.action_done(cr,uid,[inventory_id])
         imported_prod_ids=list(set(imported_prod_ids))
         return imported_prod_ids
-        
-product_product()

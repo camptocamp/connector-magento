@@ -38,7 +38,7 @@ class SaleOrder(Model):
         context = context or {}
         res = {}
         res = super(SaleOrder, self)._amount_all(cursor, user, ids, field_name, arg, context)
-        
+
         for sale_order in self.browse(cursor, user, ids):
             cost_sum = 0.0
             sale_sum = 0.0
@@ -151,7 +151,7 @@ class SaleOrderLine(Model):
 
     def product_id_change(self, cursor, uid, ids, pricelist, product, qty=0,
                           uom=False, qty_uos=0, uos=False, name='', partner_id=False,
-                          lang=False, update_tax=True, date_order=False, packaging=False, 
+                          lang=False, update_tax=True, date_order=False, packaging=False,
                           fiscal_position=False, flag=False, discount=None, price_unit=None, context=None):
         '''
         Overload method
@@ -165,7 +165,7 @@ class SaleOrderLine(Model):
         res = {}
         res = super(SaleOrderLine, self).product_id_change(cursor, uid, ids, pricelist, product, qty,
                                                            uom, qty_uos, uos, name, partner_id,
-                                                           lang, update_tax, date_order, packaging, 
+                                                           lang, update_tax, date_order, packaging,
                                                            fiscal_position, flag, context)
 
         if product:
@@ -183,7 +183,7 @@ class SaleOrderLine(Model):
             res['value']['commercial_margin'] = round(markup_res['commercial_margin'],  _prec(self, cursor, uid))
             res['value']['markup_rate'] = round(int(markup_res['markup_rate'] * 100) / 100.0, _prec(self, cursor, uid))
             res['value']['cost_price'] = round(markup_res['cost_price'],  _prec(self, cursor, uid))
-            
+
         return res
 
 
