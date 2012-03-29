@@ -36,6 +36,7 @@ Otherwise, its coefficient is never updated.
     'init_xml': [],
     'update_xml': ['product_view.xml',
                    'supplier_catalog_category_view.xml',
+                   'security/ir.model.access.csv',
                   ],
     'demo_xml': [],
     'installable': True,
