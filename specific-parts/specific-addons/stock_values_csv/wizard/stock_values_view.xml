@@ -1,37 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data>
+  <data>
+    <record id="stock_values_export_view" model="ir.ui.view">
+      <field name="name">Export Locations' Values Details</field>
+      <field name="model">stock.values.detail.export</field>
+      <field name="type">form</field>
+      <field name="arch" type="xml">
+        <form string="Export Stock Values Details">
+          <group colspan="4" >
+            <field name="location_id"/>
+            <field name="stop_date"/>
+            <field name="data"/>
+          </group>
+          <separator string ="" colspan="4"/>
+          <group colspan="4" col="2">
+            <button special="cancel" string="Cancel" icon="gtk-cancel"/>
+            <button name="action_manual_export" string="Create file" type="object" icon="gtk-execute"/>
+          </group>
+        </form>
+      </field>
+    </record>
 
-        <record id="stock_values_export_view" model="ir.ui.view">
-             <field name="name">Export Locations' Values Details</field>
-             <field name="model">stock.values.detail.export</field>
-             <field name="type">form</field>
-             <field name="arch" type="xml">
-                <form string="Export Stock Values Details">
-                    <group colspan="4" >
-                        <field name="location_id"/>
-                        <field name="stop_date"/>
-                        <field name="data"/>
-                    </group>
-                    <separator string ="" colspan="4"/>
-                    <group colspan="4" col="2">
-                        <button special="cancel" string="Cancel" icon="gtk-cancel"/>
-                        <button name="action_manual_export" string="Create file" type="object" icon="gtk-execute"/>
-                     </group>
-                </form>
-             </field>
-         </record>
 
-        <record id="action_stock_values_export" model="ir.actions.act_window">
-             <field name="name">Export Locations' Values Details</field>
-             <field name="res_model">stock.values.detail.export</field>
-             <field name="type">ir.actions.act_window</field>
-             <field name="view_type">form</field>
-             <field name="view_mode">tree,form</field>
-             <field name="view_id" ref="stock_values_export_view"/>
-             <field name="context">{'record_id':active_id}</field>
-             <field name="target">new</field>
-       </record>
+    <record id="action_stock_values_export2" model="ir.actions.act_window">
+      <field name="name">Export Locations' Values Details</field>
+      <field name="res_model">stock.values.detail.export</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">form</field>
+      <field name="view_id" ref="stock_values_export_view"/>
+      <field name="target">new</field>
+    </record>
 
-    </data>
+    <menuitem
+        icon="STOCK_EXECUTE"
+        name="Locations' Values Details as CSV"
+        action="action_stock_values_export2"
+        id="menu_stock_values_export"
+        parent="stock.next_id_61"
+        sequence="110"
+        />
+
+  </data>
 </openerp>

@@ -1,38 +1,40 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    Author Guewen Baconnier. Copyright Camptocamp SA
+#    Copyright 2012 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#    GNU Affero General Public License for more details.
 #
-#    You should have received a copy of the GNU General Public License
+#    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-##############################################################################
+###############################################################################
 
 import time
 import StringIO
 import base64
 
-from osv import osv, fields
+from openerp.osv.orm import TransientModel, fields
 from stock_values_csv.unicode_csv.writer import UnicodeWriter
 
 
-class StockValuesExport(osv.osv_memory):
+class StockValuesExport(TransientModel):
     _name = 'stock.values.detail.export'
     _description = 'Export Stock values details for a location'
 
-    _columns = {
-        'location_id': fields.many2one('stock.location', 'Location', required=True),
-        'stop_date': fields.datetime('Date', help="Keep empty to export details at current date."),
+    _columns = {'location_id': fields.many2one('stock.location', 'Location', required=True),
+                'stop_date': fields.datetime('Date',
+                                             help="Keep empty to export details at "
+                                                   "current date."),
         'data': fields.binary('CSV', readonly=True),
     }
 
@@ -66,7 +68,7 @@ class StockValuesExport(osv.osv_memory):
                                      WHERE location_id != %(location_id)s
                                        AND location_dest_id = %(location_id)s
                                        AND state = 'done'
-                                       AND date_planned <= %(stop_date)s
+                                       AND date_expected <= %(stop_date)s
                                      GROUP BY product_id) AS s_in
                              INNER JOIN product_product p
                                 ON p.id = s_in.product_id
@@ -82,7 +84,7 @@ class StockValuesExport(osv.osv_memory):
                                      WHERE location_id = %(location_id)s
                                        AND location_dest_id != %(location_id)s
                                        AND state = 'done'
-                                       AND date_planned <= %(stop_date)s
+                                       AND date_expected <= %(stop_date)s
                                      GROUP BY product_id) AS s_out
                              INNER JOIN product_product p
                                 ON p.id = s_out.product_id
@@ -158,5 +160,3 @@ class StockValuesExport(osv.osv_memory):
         rows.extend(self._get_rows(cr, uid, ids, products_qty, context=context))
 
         return rows
-
-StockValuesExport()
