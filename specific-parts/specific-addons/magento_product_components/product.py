@@ -1,30 +1,25 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author Joël Grand-Guillaume and Guewen Baconnier. Copyright Camptocamp SA
-#
+#    Author Joël Grand-Guillaume and Guewen Baconnier
+#    Copyright 2012 Camptocamp SA
+
 #    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#    GNU Affero General Public License for more details.
 #
-#    You should have received a copy of the GNU General Public License
+#    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-import netsvc
-import time
-
-from osv import fields, osv
-from tools.translate import _
-
-class Product(osv.osv):
+from openerp.osv.orm import Model, fields
+class Product(Model):
     " Inherit product to manage components on products"
     _inherit = 'product.product'
 
@@ -58,7 +53,9 @@ class Product(osv.osv):
         for bom in self.pool.get('mrp.bom').browse(cr, uid, ids):
             product_ids.append(bom.product_id.id)
         if product_ids:
-            cr.execute("update product_product set write_date = now() where id in (%s)"%(','.join(map(str,product_ids))))
+            cr.execute("update product_product"
+                          " set write_date = now()"
+                          " where id in %s", (tuple(product_ids),))
         return product_ids
 
     _columns = {'components_lists': 
@@ -78,7 +75,7 @@ class Product(osv.osv):
                 
 Product()
 
-class MrpBom(osv.osv):
+class MrpBom(Model):
     "Inherit mrp.bom to reset the components infos on product when a BoM is deleted"
     _inherit = "mrp.bom"
     

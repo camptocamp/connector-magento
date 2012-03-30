@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author Joël Grand-Guillaume and Guewen Baconnier. Copyright Camptocamp SA
-#
+#    Author Joël Grand-Guillaume and Guewen Baconnier
+#    Copyright 2012 Camptocamp SA
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
 #    published by the Free Software Foundation, either version 3 of the
