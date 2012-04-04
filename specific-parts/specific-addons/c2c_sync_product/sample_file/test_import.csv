@@ -1,4 +1,0 @@
-'EAN13','Company Code','Name','Magento SKU','Category','Sale Price','Export To Magento','Standard Price','Cost Method','Supplier Code','Supplier Delay','Supplier Min. Qty','Supplier Product Code','Supplier Product Name','Quantity','Price','Stock Level'
-5035048141687,'toto','Mon produit','testsku','REGUL CB',100,'True',80,'average',6593,1,1,'supp_code_1',,1,75,15
-5035048141687,'toto','Mon produit','testsku','REGUL CB',100,'True',80,'average',6593,1,1,'supp_code_1',,10,70,15
-5035048141687,'tutu','Mon second produit','autresku','REGUL CB',250,'True',150,'average',6593,2,1,'supp_code_2',,1,140,80
