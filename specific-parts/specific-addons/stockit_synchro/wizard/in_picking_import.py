@@ -232,13 +232,13 @@ class StockItInPickingImport(osv.osv_memory):
 
         if too_few:
             # create a backorder
+            # force name in default in order to keep origin
+            # (super copy reset the origin unless a name is in default...)
+            seq_name = self.pool.get('ir.sequence').get(cr, uid, 'stock.picking')
             new_picking = pick_obj.copy(cr, uid, picking.id,
-                    {
-                        'name': self.pool.get('ir.sequence').\
-                                 get(cr, uid, 'stock.picking'),
-                        'move_lines': [],
-                        'state': 'draft',
-                    })
+                    {'name': seq_name,
+                     'move_lines': [],
+                     'state': 'draft', })
 
         for move_dict in too_few:
             move = move_dict['move']
