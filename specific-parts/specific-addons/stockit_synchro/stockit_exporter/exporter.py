@@ -20,10 +20,13 @@ class StockitExporter(object):
         return file_value
 
     def _write_file(self, data):
-        file = open(self.filename, 'w')
-        file.write(data)
-        file.close()
-        # stockit needs to drop the file so we have to put the write permission on the group
+        dirpath = os.path.dirname(self.filename)
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+        with open(self.filename, 'w') as wf:
+            wf.write(data)
+        # stockit needs to drop the file so we have
+        # to put the write permission on the group
         os.chmod(self.filename, 0664)
 
     def export_file(self, csv_data):
