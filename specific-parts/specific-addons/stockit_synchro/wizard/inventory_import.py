@@ -84,8 +84,7 @@ class StockItInventoryImport(osv.osv_memory):
 
         errors_report = []
         for row in rows:
-            ctx = context.copy()
-            ctx.update({'active_test': False})
+            ctx = dict(context, active_test=False)
             product_ids = product_obj.search(
                 cr, uid,
                 [('default_code', '=', row['default_code'])],
@@ -113,14 +112,13 @@ class StockItInventoryImport(osv.osv_memory):
         inventory_rows = []
         for row in rows:
             try:
-                ctx = context.copy()
-                ctx.update({'active_test': False})
+                ctx = dict(context, active_test=False)
                 product_ids = product_obj.search(
                     cr, uid,
                     [('default_code', '=', row['default_code'])],
                     context=ctx
                 )
-                
+
                 if not product_ids:
                     raise Exception('ImportError', "Product code %s not found !" %
                                                    (row['default_code'],))
@@ -137,7 +135,7 @@ class StockItInventoryImport(osv.osv_memory):
                 inventory_row = {'product_id': product_id,
                                  'product_qty': row['quantity'],
                                  'product_uom': product_uom.id,
-                                 'location_id': default_location_id.id,  # FIXME check if the location is in the file
+                                 'location_id': default_location_id.id,
                                  }
                 inventory_rows.append(inventory_row)
             except osv.except_osv, e:
@@ -145,7 +143,7 @@ class StockItInventoryImport(osv.osv_memory):
             except Exception, e:
                 errors_report.append(_('Processing error append: %s') % (str(e)))
         if errors_report:
-             raise osv.except_osv(_('ImportError'), "\n".join(errors_report))    
+            raise osv.except_osv(_('ImportError'), "\n".join(errors_report))
         if inventory_rows:
             inventory_id = inventory_obj.create(cr, uid,
                     {'name': _('Stockit inventory'),
@@ -153,7 +151,7 @@ class StockItInventoryImport(osv.osv_memory):
                      'inventory_line_id': [(0, 0, row)
                                             for row
                                             in inventory_rows]})
-            
+            inventory_obj.action_confirm(cr, uid, [inventory_id], context=context)
             inventory_obj.action_done(cr, uid, [inventory_id], context=context)
 
         return inventory_id
@@ -244,4 +242,3 @@ class StockItInventoryImport(osv.osv_memory):
         return True
 
 StockItInventoryImport()
-
