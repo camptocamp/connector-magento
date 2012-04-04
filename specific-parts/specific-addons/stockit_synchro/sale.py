@@ -23,6 +23,7 @@ from osv import osv, fields
 
 
 class base_sale_payment_type(osv.osv):
+
     _inherit = 'base.sale.payment.type'
 
     def get_priority_selection(self, cr, uid, context=None):

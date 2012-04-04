@@ -23,13 +23,14 @@ from osv import osv, fields
 
 
 class stock_picking(osv.osv):
+
     _inherit = "stock.picking"
 
     def __init__(self, pool, cr):
         """ Add the stockit status in the available states """
         super(stock_picking, self).__init__(pool, cr)
         stockit_state = ('stockit_confirm', 'Confirmed by Stock-it')
-        if stockit_state not in self._columns['state'].selection :
+        if stockit_state not in self._columns['state'].selection:
             self._columns['state'].selection.append(stockit_state)
 
     _columns = {
@@ -43,4 +44,5 @@ class stock_picking(osv.osv):
             if pick.stockit_export_date:
                 pick.write({'stockit_outdated': True})
         return res
+
 stock_picking()

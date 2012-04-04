@@ -76,7 +76,7 @@ class StockItOutPickingExport(osv.osv_memory):
         company = user.company_id
         if not company.stockit_base_path or not company.stockit_out_picking_export:
             raise osv.except_osv(_('Error'), _('Stockit path is not configured on company.'))
-        filename = "out_picking_export_with_id_%s.csv" % (datetime.now().isoformat().replace(':','_'),)
+        filename = "out_picking_export_with_id_%s.csv" % (datetime.now().isoformat().replace(':', '_'),)
         filepath = os.path.join(company.stockit_base_path,
                                 company.stockit_out_picking_export,
                                 filename)
@@ -105,7 +105,7 @@ class StockItOutPickingExport(osv.osv_memory):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
         if not company.stockit_out_pick_exp_location_id:
-            raise osv.except_osv(_('Error'), _('Location to export is not configured on the company.'))
+            raise osv.except_osv(_('Error'), _('Stock Location to export is not configured on the company.'))
 
         only_from_location = company.stockit_out_pick_exp_location_id
 
@@ -129,7 +129,7 @@ class StockItOutPickingExport(osv.osv_memory):
         # we look for outdated
         search = [('type', '=', 'out'),
                   ('stockit_outdated', '=', True),
-                  ('state', '=', 'cancel'),]
+                  ('state', '=', 'cancel'), ]
 
         picking_ids += picking_obj.search(cr,
                                           uid,
@@ -141,13 +141,13 @@ class StockItOutPickingExport(osv.osv_memory):
         for picking in picking_obj.browse(cr, uid, picking_ids, context=context):
             name = picking.name
             if picking.state == 'cancel':
-                row=['S',  # type
-                     str(picking.id),  # unique id
-                     name[:18],  # ref/name
-                     '',  # expected date
-                     '',  # product code
-                     0.0,  # quantity
-                     '']  # priority
+                row = ['S',  # type
+                       str(picking.id),  # unique id
+                       name[:18],  # ref/name
+                       '',  # expected date
+                       '',  # product code
+                       0.0,  # quantity
+                       '']  # priority
                 rows.append(row)
             else:
                 for line in picking.move_lines:
@@ -164,7 +164,7 @@ class StockItOutPickingExport(osv.osv_memory):
                            str(qty),  # quantity
                            picking.priority and
                            priority_mapping[picking.priority] or
-                           picking.priority['2'],]  # priority
+                           picking.priority['2'], ]  # priority
                     rows.append(row)
             picking_obj.write(cr,
                               uid,
@@ -200,7 +200,7 @@ FORM1 = """<?xml version="1.0"?>
 FIELDS1 = {'export':
            {'string': 'stockit file',
             'type': 'binary',
-            'readonly': True,}}
+            'readonly': True, }}
 
 
 def _compute_export(self, cr, uid, data, context):
@@ -218,7 +218,7 @@ def _compute_export(self, cr, uid, data, context):
         raise wizard.except_wizard(_('Error'),
                                    _('Stockit path is not configured on company.'))
 
-    filename = "out_picking_export_with_id_%s.csv" % (datetime.now().isoformat().replace(':','_'),)
+    filename = "out_picking_export_with_id_%s.csv" % (datetime.now().isoformat().replace(':', '_'),)
     filepath = os.path.join(company.stockit_base_path,
                            company.stockit_out_picking_export,
                            filename)
@@ -237,25 +237,23 @@ def _compute_export(self, cr, uid, data, context):
     return {'export': base64.encodestring(data)}
 
 
-
 class SelectedOutPickExporter(wizard.interface):
-    
-    
+
     states = {
-        'init' : {
-            'actions' : [],
-            'result' : {'type' : 'form',
-                'arch' : FORM,
-                'fields' : FIELDS,
-                'state' : [('end','Cancel'),('export', 'OK')]
+        'init': {
+            'actions': [],
+            'result': {'type': 'form',
+                'arch': FORM,
+                'fields': FIELDS,
+                'state': [('end', 'Cancel'), ('export', 'OK')]
             }
         },
-        'export' : {
-            'actions' : [_compute_export],
-            'result' : {'type' : 'form',
-                'arch' : FORM1,
-                'fields' : FIELDS1,
-                'state' : [('end', 'OK', 'gtk-ok', True)]
+        'export': {
+            'actions': [_compute_export],
+            'result': {'type': 'form',
+                'arch': FORM1,
+                'fields': FIELDS1,
+                'state': [('end', 'OK', 'gtk-ok', True)]
             }
         }
     }
