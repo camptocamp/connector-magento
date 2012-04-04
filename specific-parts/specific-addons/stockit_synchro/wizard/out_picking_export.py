@@ -130,26 +130,29 @@ class StockItOutPickingExport(osv.osv_memory):
         priority_mapping = {'1': 'BASSE', '2': 'NORMALE', '3': 'HAUTE', '9': 'SHOP'}
         rows = []
 
-        auto = True
+        force_pickings = False
+        domain = [('type', '=', 'out'),
+                  ('state', '=', 'assigned')]
         if picking_ids:
-            auto = False
-
-        if auto:
-            picking_ids = picking_obj.search(
-                cr, uid, [('type', '=', 'out'), ('state', '=', 'assigned')], context=context)
+            force_pickings = True
+            domain.append(('ids', 'in', picking_ids))
+        picking_ids = picking_obj.search(
+            cr, uid, domain, context=context)
 
         if only_new:
+            # use a cr.execute query because
+            # we cannot compare 2 fields using orm search
             query = ("SELECT id "
                      "FROM   stock_picking "
                      "WHERE  id in %s "
                      "AND (stockit_export_date ISNULL "
                      "     OR write_date > stockit_export_date)")
-            # use cr.execute because we cannot compare 2 fields using orm search
             cr.execute(query, (tuple(picking_ids), ))
 
             picking_ids = [pick_id[0] for pick_id in cr.fetchall()]
 
-        if auto:
+        # when we force picking ids we do want only those one
+        if not force_pickings:
             # we look for outdated
             search = [('type', '=', 'out'),
                       ('stockit_outdated', '=', True),
@@ -159,9 +162,6 @@ class StockItOutPickingExport(osv.osv_memory):
                                               uid,
                                               search,
                                               context=context)
-
-        if not picking_ids:
-            return rows
 
         picking_ids = list(set(picking_ids))
         for picking in picking_obj.browse(cr, uid, picking_ids, context=context):
