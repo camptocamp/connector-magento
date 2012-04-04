@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2011-2012 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -22,19 +22,17 @@
 {
     "name": "Stock-it synchro",
     "version": "1.0",
-    "depends": ['base',
-                'product',
+    "depends": ['product',
                 'stock',
                 'delivery',
                 'product_multi_ean',
-                'packing_priority_on_payment_type',
-                ],
+                'packing_priority_on_payment_type', ],
     "author": "Camptocamp",
     "license": 'AGPL-3',
     "description": """Synchro with stock-it (stock management)
     """,
     "website": "http://www.camptocamp.com",
-    "category": "Synchronisation",
+    "category": "Others",
     "init_xml": [],
     "demo_xml": [],
     "update_xml": ['stockit_data.xml',

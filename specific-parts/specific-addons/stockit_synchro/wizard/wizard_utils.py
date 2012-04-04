@@ -9,5 +9,5 @@ def archive_file(filepath):
     now = datetime.now()
     date_str = now.strftime('%Y%m%d%H%M%S')
     new_filename = "%s_%s%s" % (basename, date_str, extension)
-    archive_path =  os.path.join(path, 'Archive', new_filename)
+    archive_path = os.path.join(path, 'Archive', new_filename)
     return os.renames(filepath, archive_path)
