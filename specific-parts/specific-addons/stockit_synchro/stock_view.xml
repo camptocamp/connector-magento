@@ -40,6 +40,7 @@
             <field name="arch" type="xml">
                 <data>
                     <filter name="to_invoice" position="after">
+                        <separator orientation="vertical" />
                         <filter string="Stock-It Confirmed" name="stockit_confirmed" icon="terp-accessories-archiver-minus" domain="[('state','=','stockit_confirm')]"/>
                     </filter>
                 </data>
