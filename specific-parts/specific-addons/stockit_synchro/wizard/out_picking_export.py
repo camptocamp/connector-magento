@@ -41,7 +41,7 @@ class StockItOutPickingExport(osv.osv_memory):
     }
 
     def action_manual_export(self, cr, uid, ids, context=None):
-        rows = self.get_data(cr, uid, [], context=context)
+        rows = self._get_data(cr, uid, [], context=context)
         exporter = StockitExporter()
         data = exporter.get_csv_data(rows)
         result = self.write(cr,
@@ -71,34 +71,52 @@ class StockItOutPickingExport(osv.osv_memory):
                         })
         return True
 
-    def run_background_export(self, cr, uid, context=None):
+    def background_export(self, cr, uid, picking_ids, only_new=True, context=None):
+        """
+        Export the pickings in background and store them in a file
+        """
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
-        if not company.stockit_base_path or not company.stockit_out_picking_export:
-            raise osv.except_osv(_('Error'), _('Stockit path is not configured on company.'))
-        filename = "out_picking_export_with_id_%s.csv" % (datetime.now().isoformat().replace(':', '_'),)
+        if not company.stockit_base_path or not \
+            company.stockit_out_picking_export:
+            raise osv.except_osv(
+                _('Error'),
+                _('Stockit path is not configured on company.'))
+        filename = "out_picking_export_with_id_%s.csv" % \
+            (datetime.now().isoformat().replace(':', '_'),)
         filepath = os.path.join(company.stockit_base_path,
                                 company.stockit_out_picking_export,
                                 filename)
         db, pool = pooler.get_db_and_pool(cr.dbname)
         mycursor = db.cursor()
+        data = False
         try:
-            rows = self.get_data(mycursor, uid, [], context=context)
+            rows = self._get_data(
+                mycursor, uid, picking_ids, only_new=only_new, context=context)
             exporter = StockitExporter(filepath)
             data = exporter.get_csv_data(rows)
             exporter.export_file(data)
         except Exception, e:
             mycursor.rollback()
             self.create_request_error(cr, uid, str(e), context)
+            raise
         finally:
             mycursor.commit()
             mycursor.close()
-        return True
+        return data
 
-    def get_data(self, cr, uid, ids, add_picking_ids=None, only_new=True, context=None):
-        """Export outgoing pickings in Stock iT format"""
+    def run_background_export(self, cr, uid, context=None):
+        """ export all packings, according to filters, in background"""
+        return self.background_export(cr, uid, [], context=context)
+
+    def _get_data(self, cr, uid, picking_ids=None, only_new=True, context=None):
+        """Export outgoing pickings in Stock iT format
+        When no picking_ids are provided,
+        it means that the normal, auto mode (cron)
+        otherwise, that's the manuel mode and we export only
+        what has been selected on the manual wizard
+        (excluding the ones which are outside of the domain)"""
         picking_obj = self.pool.get('stock.picking')
-        add_picking_ids = add_picking_ids or []
         context = context or {}
         context['lang'] = 'fr_FR'
 
@@ -112,30 +130,39 @@ class StockItOutPickingExport(osv.osv_memory):
         priority_mapping = {'1': 'BASSE', '2': 'NORMALE', '3': 'HAUTE', '9': 'SHOP'}
         rows = []
 
-        query = ("SELECT id FROM stock_picking "
-                 " WHERE type = 'out' "
-                 "   AND state = 'assigned' ")
+        auto = True
+        if picking_ids:
+            auto = False
+
+        if auto:
+            picking_ids = picking_obj.search(
+                cr, uid, [('type', '=', 'out'), ('state', '=', 'assigned')], context=context)
 
         if only_new:
-            query += ("   AND (stockit_export_date ISNULL "
-                      "        OR write_date > stockit_export_date)")
+            query = ("SELECT id "
+                     "FROM   stock_picking "
+                     "WHERE  id in %s "
+                     "AND (stockit_export_date ISNULL "
+                     "     OR write_date > stockit_export_date)")
+            # use cr.execute because we cannot compare 2 fields using orm search
+            cr.execute(query, (tuple(picking_ids), ))
 
-        # use cr.execute because we cannot compare 2 fields using orm search
-        cr.execute(query)
+            picking_ids = [pick_id[0] for pick_id in cr.fetchall()]
 
-        picking_ids = [pick_id[0] for pick_id in cr.fetchall()]
+        if auto:
+            # we look for outdated
+            search = [('type', '=', 'out'),
+                      ('stockit_outdated', '=', True),
+                      ('state', '=', 'cancel'), ]
 
-        # we look for outdated
-        search = [('type', '=', 'out'),
-                  ('stockit_outdated', '=', True),
-                  ('state', '=', 'cancel'), ]
+            picking_ids += picking_obj.search(cr,
+                                              uid,
+                                              search,
+                                              context=context)
 
-        picking_ids += picking_obj.search(cr,
-                                          uid,
-                                          search,
-                                          context=context)
+        if not picking_ids:
+            return rows
 
-        picking_ids += add_picking_ids
         picking_ids = list(set(picking_ids))
         for picking in picking_obj.browse(cr, uid, picking_ids, context=context):
             name = picking.name
@@ -174,87 +201,52 @@ class StockItOutPickingExport(osv.osv_memory):
 
 StockItOutPickingExport()
 
-## We make a wizard as the customer want to be able to export directly selected
-## picking into list form mode.
-## in V5 active_ids support does not work well We do a wizard to be ported in next migration to V6.x.x
-## this wizard shoul inherit StockItOutPickingExport
 
-FORM = """<?xml version="1.0"?>
-<form string="Stockit export">
-    <separator string="Export selected picking to stockit. File will be automatically put in stockit folder"/>
-    <field name="only_new"/>
-</form>
-"""
-FIELDS = {'only_new':
-           {'string': 'Only not yet exported',
-            'type': 'boolean',
-            'default': lambda *a: True}}
+class StockItOutPickingManualExport(osv.TransientModel):
+    """Export the selected outgoing packings directly
+    in the configured path
+    """
 
-FORM1 = """<?xml version="1.0"?>
-<form string="Stockit exported file">
-<separator colspan="4" string="Clic on 'Save as' to save the CSV file :" />
-    <field name="export"/>
-</form>
-"""
-FIELDS1 = {'export':
-           {'string': 'stockit file',
-            'type': 'binary',
-            'readonly': True, }}
+    _name = 'stockit.manual.export.out.picking'
+    _description = 'Export selected outgoing pickings'
 
+    def _get_picking_ids(self, cr, uid, context=None):
+        if context is None:
+            context = {}
+        res = False
+        if (context.get('active_model') == 'stock.picking' and
+            context.get('active_ids')):
+            res = context['active_ids']
+        return res
 
-def _compute_export(self, cr, uid, data, context):
-    ids = data['ids']
-    if not ids:
-        raise wizard.except_wizard(_('Impossible Action'),
-                                   _('No picking selected'))
-    if ids and not isinstance(ids, list):
-        ids = [ids]
-    self.pool = pooler.get_pool(cr.dbname)
-    exp_obj = self.pool.get('stockit.export.out.picking')
-    user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
-    company = user.company_id
-    if not company.stockit_base_path or not company.stockit_out_picking_export:
-        raise wizard.except_wizard(_('Error'),
-                                   _('Stockit path is not configured on company.'))
-
-    filename = "out_picking_export_with_id_%s.csv" % (datetime.now().isoformat().replace(':', '_'),)
-    filepath = os.path.join(company.stockit_base_path,
-                           company.stockit_out_picking_export,
-                           filename)
-    rows = exp_obj.get_data(cr, uid, [], add_picking_ids=ids, only_new=bool(data['form']['only_new']), context=context)
-    if not rows:
-        raise wizard.except_wizard(_('No row exported'),
-                                   _('Only out and assigned rows will be exported'
-                                     ' or exported once and canceled'))
-    try:
-        exporter = StockitExporter(filepath)
-        data = exporter.get_csv_data(rows)
-        exporter.export_file(data)
-    except Exception, e:
-        raise wizard.except_wizard(_('Stockit export'), str(e))
-
-    return {'export': base64.encodestring(data)}
-
-
-class SelectedOutPickExporter(wizard.interface):
-
-    states = {
-        'init': {
-            'actions': [],
-            'result': {'type': 'form',
-                'arch': FORM,
-                'fields': FIELDS,
-                'state': [('end', 'Cancel'), ('export', 'OK')]
-            }
-        },
-        'export': {
-            'actions': [_compute_export],
-            'result': {'type': 'form',
-                'arch': FORM1,
-                'fields': FIELDS1,
-                'state': [('end', 'OK', 'gtk-ok', True)]
-            }
-        }
+    _columns = {
+        'picking_ids':
+            fields.many2many(
+                'stock.picking',
+                string='Delivery Orders',
+                domain=[('type', '=', 'out'), ('state', '=', 'assigned')]),
+        'only_new': fields.boolean('Only not yet exported'),
+        'data': fields.binary('File', readonly=True),
     }
 
-SelectedOutPickExporter('stockit.export.selected')
+    _defaults = {
+        'only_new': True,
+        'picking_ids': _get_picking_ids,
+    }
+
+    def export(self, cr, uid, ids, context=None):
+        form = self.browse(cr, uid, ids[0], context=context)
+
+        picking_ids = [p.id for p in form.picking_ids]
+        exp_obj = self.pool.get('stockit.export.out.picking')
+        data = exp_obj.background_export(
+            cr, uid, picking_ids, only_new=form.only_new, context=context)
+
+        if not data:
+            raise osv.except_osv(_('Error'), _('Nothing has been exported'))
+
+        self.write(cr, uid, form.id, {'data': base64.encodestring(data)})
+
+        return True
+
+StockItOutPickingManualExport()
