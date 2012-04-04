@@ -8,12 +8,11 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <data>
-                    <button name="%(stock.partial_picking)d" states="assigned" string="Products Received" type="action" position="replace">
-                        <button name="%(stock.partial_picking)d" states="assigned,stockit_confirm" string="Products Received" type="action"/>
+                    <button name="action_process" position="replace">
+                        <button name="action_process" states="assigned,stockit_confirm" string="Process" type="object" icon="gtk-go-forward"/>
                     </button>
-
-                    <button name="button_cancel" states="assigned,confirmed,draft" string="Cancel" position="replace">
-                        <button name="button_cancel" states="assigned,confirmed,draft,stockit_confirm" string="Cancel"/>
+                    <button name="button_cancel" position="replace">
+                        <button name="button_cancel" states="assigned,confirmed,draft,stockit_confirm" string="_Cancel" icon="gtk-cancel"/>
                     </button>
                 </data>
             </field>
@@ -26,12 +25,25 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <data>
-
-                    <page string="Others info" position="inside">
+                    <page string="Additional info" position="inside">
                         <field name="stockit_export_date"/>
                     </page>
                 </data>
             </field>
         </record>
+
+        <record model="ir.ui.view" id="view_picking_in_search_stockit">
+            <field name="name">stock.picking.in.search,stockit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_in_search"/>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <data>
+                    <filter name="to_invoice" position="after">
+                        <filter string="Stock-It Confirmed" name="stockit_confirmed" icon="terp-accessories-archiver-minus" domain="[('state','=','stockit_confirm')]"/>
+                    </filter>
+                </data>
+            </field>
+        </record>        
     </data>
 </openerp>
