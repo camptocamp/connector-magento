@@ -98,15 +98,16 @@ class StockItInPickingExport(osv.osv_memory):
         context['lang'] = 'fr_FR'
 
         rows = []
-        # FIXME: check domain
         picking_ids = picking_obj.search(cr, uid,
                                          [('type', '=', 'in'),
                                           ('state', '=', 'assigned')],
                                          context=context)
         for picking in picking_obj.browse(cr, uid, picking_ids):
-            partner_name = picking.address_id.partner_id \
-                           and picking.address_id.partner_id.name \
-                           or picking.address_id.name
+            partner_name = picking.address_id.partner_id and \
+                           picking.address_id.partner_id.name or \
+                           picking.address_id.name or \
+                           ''
+
             name = picking.name
             if picking.origin:
                 name += '-' + picking.origin
@@ -118,7 +119,7 @@ class StockItInPickingExport(osv.osv_memory):
                     'E',  # type
                     str(picking.id),  # unique id
                     name[:18],  # ref/name
-                    line.date_planned,  # expected date
+                    line.date,  # expected date
                     line.product_id.default_code,  # product code
                     partner_name[:20],  # product supplier name
                     str(line.product_qty),  # quantity

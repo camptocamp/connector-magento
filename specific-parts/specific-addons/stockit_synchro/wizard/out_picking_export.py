@@ -114,8 +114,7 @@ class StockItOutPickingExport(osv.osv_memory):
 
         query = ("SELECT id FROM stock_picking "
                  " WHERE type = 'out' "
-                 "   AND state = 'assigned' "
-                 "   AND active = true")
+                 "   AND state = 'assigned' ")
 
         if only_new:
             query += ("   AND (stockit_export_date ISNULL "
@@ -159,7 +158,7 @@ class StockItOutPickingExport(osv.osv_memory):
                     row = ['S',  # type
                            str(picking.id),  # unique id
                            name[:18],  # ref/name
-                           line.date_planned,  # expected date
+                           line.date,  # scheduled date / move date
                            line.product_id.default_code,  # product code
                            str(qty),  # quantity
                            picking.priority and
