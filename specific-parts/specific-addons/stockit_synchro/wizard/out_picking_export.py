@@ -135,7 +135,7 @@ class StockItOutPickingExport(osv.osv_memory):
                   ('state', '=', 'assigned')]
         if picking_ids:
             force_pickings = True
-            domain.append(('ids', 'in', picking_ids))
+            domain.append(('id', 'in', picking_ids))
         picking_ids = picking_obj.search(
             cr, uid, domain, context=context)
 
