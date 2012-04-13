@@ -39,6 +39,7 @@ class magerp_product_attributes(osv.osv):
                                     'mpid',
                                     'soldes_qty',
                                     'cdiscount_sku',
+                                    'destockage_qty',
                                     ])
 
 magerp_product_attributes()
