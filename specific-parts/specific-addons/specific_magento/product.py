@@ -30,6 +30,7 @@ class magerp_product_attributes(osv.osv):
     def __init__(self, pool, cr):
         """ Add attribute codes in the list of hidden attributes """
         super(magerp_product_attributes, self).__init__(pool, cr)
+        # attributes which are not synchronized with openerp
         self._no_create_list.extend([
                                     'zdbx_default_ean13',
                                     'zdbx_default_code',
@@ -41,6 +42,11 @@ class magerp_product_attributes(osv.osv):
                                     'cdiscount_sku',
                                     'destockage_qty',
                                     ])
+        # attributes which have to be stored
+        # in regular fields
+        self._not_store_in_json.extend([
+            'zdbx_default_marque',
+        ])
 
 magerp_product_attributes()
 
