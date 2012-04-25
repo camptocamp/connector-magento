@@ -18,6 +18,7 @@
 #
 ##############################################################################
 
+from tools.translate import _
 from osv import osv
 
 
@@ -39,14 +40,25 @@ class Product(osv.osv):
 
         return super(Product, self).copy(cr, uid, id, default=default, context=context)
 
+    def _fix_default_code(self, cr, uid, default_code, context=None):
+        if not default_code:
+            return default_code
+        default_code = default_code.strip()
+        if ',' in default_code:
+            raise osv.except_osv(
+                _('Error'),
+                _("""The comma character "," in the
+                reference is forbidden (%s)""" % default_code))
+        return default_code
+
     def create(self, cr, uid, vals, context=None):
-        if vals.get('default_code', False):
-            vals['default_code'] = vals['default_code'].strip()
+        vals['default_code'] = self._fix_default_code(
+            cr, uid, vals.get('default_code', False), context=context)
         return super(Product, self).create(cr, uid, vals, context=context)
 
     def write(self, cr, uid, ids, vals, context=None):
-        if vals.get('default_code', False):
-            vals['default_code'] = vals['default_code'].strip()
+        vals['default_code'] = self._fix_default_code(
+            cr, uid, vals.get('default_code', False), context=context)
         return super(Product, self).write(cr, uid, ids, vals, context=context)
 
 Product()
