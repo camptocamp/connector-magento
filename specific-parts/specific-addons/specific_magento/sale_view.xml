@@ -2,6 +2,20 @@
 <openerp>
   <data>
 
+    <!-- weird thing, cannot open sale.shop if no search
+    view exists, but this problem does not occurs on other
+    magentoerpconnect installations -->
+    <record id="view_sale_shop_magento_search" model="ir.ui.view">
+        <field name="name">sale.shop.magento.search</field>
+        <field name="model">sale.shop</field>
+        <field name="type">search</field>
+        <field name="arch" type="xml">
+            <search string="Sale Shop">
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+
     <record id="action_order_tree_cheque" model="ir.actions.act_window">
       <field name="name">Sales Order Waiting Cheque</field>
       <field name="type">ir.actions.act_window</field>
