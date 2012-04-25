@@ -27,7 +27,6 @@
         'sale',
         # 'sale_markup',
         # 'sale_floor_price',
-        #'account_statement_import',
         'packing_product_change',
         'product_images_olbs',
     ],
@@ -42,8 +41,7 @@
                    'wizard.xml',
                    'stock_view.xml',
                    'security/security.xml',
-                   # TODO
-                   #'statement_view.xml',
+                   'statement_view.xml',
                   ],
     'demo_xml': [],
     'installable': True,
