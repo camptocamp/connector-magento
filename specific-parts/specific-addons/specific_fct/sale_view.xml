@@ -3,32 +3,27 @@
   <data>
 
     <record model="ir.ui.view" id="view_order_tree">
-      <field name="name">sale.order.tree.magento</field>
+      <field name="name">sale.order.tree.invoiced</field>
       <field name="model">sale.order</field>
       <field name="inherit_id" ref="sale.view_order_tree" />
       <field name="type">tree</field>
       <field name="arch" type="xml">
-        <field name="invoiced_rate" widget="progressbar" position="after">
+        <field name="invoiced_rate" position="after">
           <field name="date_invoiced" select="1"/>
         </field>
       </field>
     </record>
 
     <record model="ir.ui.view" id="view_order_form">
-      <field name="name">sale.order.form.magento</field>
+      <field name="name">sale.order.form.invoiced</field>
       <field name="model">sale.order</field>
       <field name="inherit_id" ref="sale.view_order_form" />
       <field name="type">form</field>
       <field name="arch" type="xml">
-	<field name="payment_term" position="after">
-	  <field name="date_invoiced" select="1"/>
-	</field>
+        <field name="payment_term" position="after">
+          <field name="date_invoiced" select="1"/>
+        </field>
       </field>
-    </record>
-
-    <!-- Remove autrefresh -->
-    <record model="ir.actions.act_window" id="sale.action_order_form">
-      <field name="auto_refresh" eval="0"/>
     </record>
 
   </data>

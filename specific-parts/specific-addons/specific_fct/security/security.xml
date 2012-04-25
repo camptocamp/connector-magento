@@ -63,7 +63,7 @@
 			<field eval="1" name="perm_unlink"/>
 			<field eval="1" name="perm_write"/>
 			<field eval="1" name="perm_create"/>
-			<field name="group_id" ref="sale.group_sale_manager"/>
+			<field name="group_id" ref="base.group_sale_manager"/>
 		</record>
 	</data>
 	<data>

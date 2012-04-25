@@ -22,5 +22,6 @@ import partner
 import sale
 import wizard
 import stock
-import statement
-import account
+# TODO
+# import statement
+import product_images

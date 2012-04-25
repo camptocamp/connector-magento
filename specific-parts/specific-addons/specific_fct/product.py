@@ -18,22 +18,13 @@
 #
 ##############################################################################
 
-from osv import fields, osv
+from osv import osv
 
 
 class Product(osv.osv):
     """ Inherit product for small customisations"""
 
     _inherit = 'product.product'
-
-    _columns = {
-        'bom_ids': fields.one2many(
-            'mrp.bom', 'product_id', 'BoMs'),
-    }
-
-    _defaults = {
-        'product_type': lambda * a: 'simple'
-    }
 
     def copy(self, cr, uid, id, default=None, context=None):
         if context is None:

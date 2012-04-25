@@ -8,23 +8,21 @@
             <field name="inherit_id" ref="account.invoice_supplier_form"/>
             <field name="arch" type="xml">
                 <data>
-                    <field name="date_due" select="1" position="replace">
-                        <field name="date_due" select="1" required="True"/>
+                    <field name="date_due" select="1" position="attributes">
+                        <attribute name="required">True</attribute>
                     </field>
-                    <field name="reference" nolabel="1" select="1" position="replace">
-                        <field name="reference" nolabel="1" select="1" required="True"/>
+                    <field name="reference" nolabel="1" select="1" position="attributes">
+                        <attribute name="required">True</attribute>
                     </field>
-                    <field name="date_invoice" position="replace">
-                        <field name="date_invoice" required="True"/>
+                    <field name="date_invoice" position="attributes">
+                        <attribute name="required">True</attribute>
                     </field>
                 </data>
             </field>
         </record>
-        
+
         <!-- For security -->
-        <menuitem action="account.action_invoice_tree2" id="account.menu_action_invoice_tree2" 
-            groups="account.group_account_user,purchase.group_purchase_user"
-            parent="account.menu_finance_invoice"/>
-        
+        <menuitem id="account.menu_finance_payables"
+            groups="account.group_account_user,purchase.group_purchase_user"/>
     </data>
 </openerp>

@@ -9,11 +9,11 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <data>
-                    <xpath expr="/form/notebook/page[@string='General Information']/group[2]/button[@name='force_assign']" position="replace">
-                        <button name="force_assign" states="confirmed" string="Force Availability" type="object" groups="stock.group_stock_manager"/>
+                    <xpath expr="/form/notebook/page[@string='General Information']/group[2]/button[@name='force_assign']" position="attributes">
+                        <attribute name="groups">stock.group_stock_manager</attribute>
                     </xpath>
-                    <xpath expr="/form/notebook/page[@string='General Information']/field[@name='move_lines']/form[@string='Stock Moves']/group[1]/button[@name='force_assign']" position="replace">
-                        <button name="force_assign" states="confirmed" string="Force Availability" type="object" groups="stock.group_stock_manager"/>
+                    <xpath expr="/form/notebook/page[@string='General Information']/field[@name='move_lines']/form[@string='Stock Moves']/group[1]/button[@name='force_assign']" position="attributes">
+                        <attribute name="groups">stock.group_stock_manager</attribute>
                     </xpath>
                 </data>
             </field>

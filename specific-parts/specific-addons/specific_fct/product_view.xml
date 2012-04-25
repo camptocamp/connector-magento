@@ -3,53 +3,26 @@
     <data>
 
     <!-- For security purpose : add groups on page -->
-    <record id="account.product_normal_form_view" model="ir.ui.view">
+    <record id="product_normal_form_view_account" model="ir.ui.view">
         <field name="name">product.normal.form.inherit</field>
         <field name="model">product.product</field>
         <field name="type">form</field>
-        <!-- <field name="inherit_id" ref="product.product_normal_form_view"/> -->
+        <field name="inherit_id" ref="account.product_normal_form_view"/>
         <field name="arch" type="xml">
-            <notebook position="inside">
-                <page string="Accounting" groups="account.group_account_user,product.group_product_manager">
-                    <separator string="Sales Properties" colspan="2"/>
-                    <separator string="Purchase Properties" colspan="2"/>
-                    <field name="property_account_income" domain="[('type','&lt;&gt;','view'),('type','&lt;&gt;','consolidation')]" attrs="{'readonly':[('sale_ok','=',0)]}" />
-                    <field name="property_account_expense" domain="[('type','&lt;&gt;','view'),('type','&lt;&gt;','consolidation')]" attrs="{'readonly':[('purchase_ok','=',0)]}" />
-
-                    <separator string="Sale Taxes" colspan="2"/>
-                    <separator string="Purchase Taxes" colspan="2"/>
-                    <field name="taxes_id" nolabel="1" colspan="2" attrs="{'readonly':[('sale_ok','=',0)]}"/>
-                    <field name="supplier_taxes_id" nolabel="1" colspan="2" attrs="{'readonly':[('purchase_ok','=',0)]}"/>
-                </page>
-            </notebook>
+            <page string="Accounting" position="attributes">
+                <attribute name="groups">account.group_account_user,product.group_product_manager</attribute>
+            </page>
         </field>
     </record>
-    <record id="product_normal_form_view" model="ir.ui.view">
+    <record id="product_normal_form_view_supplier" model="ir.ui.view">
         <field name="name">product.normal.form</field>
         <field name="model">product.product</field>
         <field name="type">form</field>
         <field name="inherit_id" ref="product.product_normal_form_view" />
          <field name="priority" eval="20"/>
         <field name="arch" type="xml">
-            <xpath expr="/form/notebook/page[@string='Prices &amp; Suppliers']" position="replace">
-                 <page string="Prices &amp; Suppliers" groups="product.group_product_manager">
-                    <separator string="Base Prices" colspan="4"/>
-                    <field name="standard_price"/>
-                    <field name="list_price"/>
-                    <field name="markup_rate"
-                           groups="sale.group_sale_manager"/>
-                    <field name="cost_price"
-                           groups="sale.group_sale_manager"/>
-                    <field name="commercial_margin"
-                           groups="sale.group_sale_manager"/>
-                    <field groups="sale.group_sale_manager"
-                           name="floor_price_limit"/>
-                    <field name="price_margin" select="1"/>
-                    <field name="price_extra" select="1"/>
-                    <field groups="base.group_extended" name="cost_method"/>
-                    <newline/>
-                    <field colspan="4" name="seller_ids" nolabel="1"/>
-                </page>
+            <xpath expr="/form/notebook/page[@string='Suppliers']" position="attributes">
+                <attribute name="groups">product.group_product_manager</attribute>
             </xpath>
         </field>
     </record>
