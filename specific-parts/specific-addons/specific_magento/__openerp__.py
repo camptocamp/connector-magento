@@ -38,7 +38,7 @@ All the specific customisations which concerns the magento connector
      "update_xml" : [
         'product_view.xml',
         'sale_view.xml',
-#        'settings/external.mappinglines.template.csv',
+        'settings/external.mappinglines.template.csv',
         'settings/magerp.product_category_attribute_options.csv',
                     ],
      "active": False,
