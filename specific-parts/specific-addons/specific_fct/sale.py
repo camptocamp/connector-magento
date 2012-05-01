@@ -67,7 +67,7 @@ class sale_order(osv.osv):
         if invoice.state == 'draft':
             wf_service = netsvc.LocalService("workflow")
             wf_service.trg_validate(uid, 'account.invoice',
-                                    invoice, 'invoice_open', cr)
+                                    invoice.id, 'invoice_open', cr)
 
     def _add_extra_picking_lines(self, cr, uid, ids, invoice, grouped=False):
         """
@@ -167,7 +167,7 @@ class sale_order(osv.osv):
 
             self._skip_draft_invoice(cr, uid, invoice)
 
-            self._add_extra_picking_lines(cr, uid, invoice, grouped=grouped)
+            self._add_extra_picking_lines(cr, uid, ids, invoice, grouped=grouped)
 
         return invoice_id
 
