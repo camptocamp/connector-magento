@@ -62,7 +62,7 @@ Debonix</field>
             <field name="value">Bonjour,
 Nous vous remercions pour votre achat.
 Votre commande vient d'être expédiée, vous devriez la réceptionner sous un délai maximum de 48h.
-Veuillez trouver ci-joint votRe facture ${object.name}.
+Veuillez trouver ci-joint votre facture ${object.name}.
 
 Cordialement,
 
