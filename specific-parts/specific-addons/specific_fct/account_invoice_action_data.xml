@@ -35,7 +35,7 @@ Please find enclosed your invoice with reference ${object.name}.
 Best Regards,
 Debonix</field>
             <field name="report_template" ref="account.account_invoices"/>
-            <field name="report_name">facture_${object.number}</field>
+            <field name="report_name">invoice_${object.number}</field>
         </record>
 
         <!-- French translation -->
@@ -73,6 +73,15 @@ Avenue du Pont de Tasset
 74960 MEYTHET Tel: 04.50.09.46.87
 Fax: 04.82.53.13.88
 Email: contact@debonix.fr</field>
+        </record>
+
+        <record model="ir.translation" id="trans_email_template_customer_invoice_fr_report_name">
+            <field name="name">email.template,report_name</field>
+            <field name="lang">fr_FR</field>
+            <field name="type">model</field>
+            <field name="res_id" ref="email_template_customer_invoice"/>
+            <field name="src">invoice_${object.number}</field>
+            <field name="value">facture_${object.number}</field>
         </record>
 
     </data>
