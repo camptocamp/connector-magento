@@ -13,7 +13,7 @@
     </data>
     <!-- Mail template and workflow bindings are done in a NOUPDATE block
          so users can freely customize/delete them -->
-    <data noupdate="1">
+    <data noupdate="0">
 
         <record id="account.act_open" model="workflow.activity">
             <field name="action_id" ref="specific_fct.send_invoice_mail"/>
@@ -35,7 +35,7 @@ Please find enclosed your invoice with reference ${object.name}.
 Best Regards,
 Debonix</field>
             <field name="report_template" ref="account.account_invoices"/>
-            <field name="report_name">facture_${object.name}</field>
+            <field name="report_name">facture_${object.number}</field>
         </record>
 
         <!-- French translation -->
