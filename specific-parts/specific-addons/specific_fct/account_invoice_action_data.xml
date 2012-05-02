@@ -2,7 +2,9 @@
 <openerp>
     <data>
         <record id="send_invoice_mail" model="ir.actions.server">
-            <field name="code">if object.type in ('out_invoice') and not object.partner_id.opt_out: object.edi_export_and_email(template_ext_id='specific_fct.email_template_customer_invoice', context=context)</field>
+            <field name="code">if object.type in ('out_invoice') and not object.partner_id.opt_out:
+    template_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'specific_fct', 'email_template_customer_invoice')[1]
+    self.pool.get('email.template').send_mail(cr, uid, template_id, object.id)</field>
             <field name="state">code</field>
             <field name="type">ir.actions.server</field>
             <field name="model_id" ref="account.model_account_invoice"/>
@@ -13,7 +15,7 @@
     </data>
     <!-- Mail template and workflow bindings are done in a NOUPDATE block
          so users can freely customize/delete them -->
-    <data noupdate="0">
+    <data noupdate="1">
 
         <record id="account.act_open" model="workflow.activity">
             <field name="action_id" ref="specific_fct.send_invoice_mail"/>
