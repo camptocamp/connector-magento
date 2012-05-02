@@ -2,7 +2,7 @@
 <openerp>
     <data>
         <record id="send_invoice_mail" model="ir.actions.server">
-            <field name="code">if (object.type in ('out_invoice', 'out_refund')) and not object.partner_id.opt_out: object.edi_export_and_email(template_ext_id='specific_fct.email_template_customer_invoice', context=context)</field>
+            <field name="code">if (object.type in ('out_invoice') and not object.partner_id.opt_out: object.edi_export_and_email(template_ext_id='specific_fct.email_template_customer_invoice', context=context)</field>
             <field name="state">code</field>
             <field name="type">ir.actions.server</field>
             <field name="model_id" ref="account.model_account_invoice"/>
@@ -21,9 +21,9 @@
         <!--Email template -->
         <record id="email_template_customer_invoice" model="email.template">
             <field name="name">Envoi de mail avec facture au client</field>
-            <field name="email_from">${object.user_id.user_email or object.user_id.user_email or 'noreply@debonix.fr'}</field>
+            <field name="email_from">contact@debonix.fr</field>
             <field name="subject">Votre facture (reference:${object.number})</field>
-            <field name="email_to">${object.address_invoice_id.email or ''}</field>
+            <field name="email_to">${object.address_invoice_id.email or object.partner_id.email}</field>
             <field name="model_id" ref="account.model_account_invoice"/>
             <field name="auto_delete" eval="True"/>
             <field name="lang">${object.partner_id.lang or 'fr_FR'}</field>
