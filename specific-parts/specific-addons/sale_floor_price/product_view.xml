@@ -11,6 +11,6 @@
                     <field groups="base.group_sale_manage" name="floor_price_limit"/>
                 </field>
             </field>
-        </record>                      
+        </record>
     </data>
 </openerp>
