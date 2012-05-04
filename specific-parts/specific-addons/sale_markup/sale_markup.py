@@ -44,7 +44,7 @@ class SaleOrder(Model):
             sale_sum = 0.0
             for line in sale_order.order_line:
                 cost_sum += line.cost_price
-                sale_sum += line.price_unit * (100 - line.discount) / 100
+                sale_sum += line.price_unit * (100 - line.discount) / 100.0
             res[sale_order.id]['markup_rate'] = sale_sum and (sale_sum - cost_sum) / sale_sum * 100 or 0.0
         return res
 
@@ -104,7 +104,7 @@ class SaleOrderLine(Model):
             product_obj = self.pool.get('product.product')
             if res['value'].has_key('price_unit'):
                 price_unit = res['value']['price_unit']
-            sale_price = price_unit * (100 - discount) / 100
+            sale_price = price_unit * (100 - discount) / 100.0
             markup_res = product_obj.compute_markup(cursor, uid,
                                                     product_id,
                                                     product_uom,
@@ -136,7 +136,7 @@ class SaleOrderLine(Model):
                 price_unit = res['value']['price_unit']
             if res['value'].has_key('discount'):
                 discount = res['value']['discount']
-            sale_price = price_unit * (100 - discount) / 100
+            sale_price = price_unit * (100 - discount) / 100.0
             markup_res = product_obj.compute_markup(cursor, uid,
                                                     product_id,
                                                     product_uom,
@@ -171,7 +171,7 @@ class SaleOrderLine(Model):
         if product:
             if res['value'].has_key('price_unit'):
                 price_unit = res['value']['price_unit']
-            sale_price = price_unit * (100 - discount) / 100
+            sale_price = price_unit * (100 - discount) / 100.0
 
             product_obj = self.pool.get('product.product')
             markup_res = product_obj.compute_markup(cursor, uid,
@@ -191,8 +191,9 @@ class SaleOrderLine(Model):
                              markup, cost_price, price_unit):
         ''' If markup rate change compute the discount '''
         res = {}
+        import pdb; pdb.set_trace()
         res['value'] = {}
-        markup = markup / 100
+        markup = markup / 100.0
         if not price_unit or markup == 1: return {'value': {}}
         discount = 1 + cost_price / (markup - 1) / price_unit
         sale_price = price_unit * (1 - discount)
