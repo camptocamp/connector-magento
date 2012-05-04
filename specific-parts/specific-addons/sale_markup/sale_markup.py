@@ -84,6 +84,7 @@ class SaleOrderLine(Model):
                                                'cost_price',
                                                type ='float',
                                                string='Cost Price (incl. BOM)',
+                                               readonly=True,
                                                help ="The cost is the standard price unless the product is composed,"
                                                     " in that case it compute the price from its components" )}
 
