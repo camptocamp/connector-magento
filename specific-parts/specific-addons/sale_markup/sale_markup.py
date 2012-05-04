@@ -191,7 +191,6 @@ class SaleOrderLine(Model):
                              markup, cost_price, price_unit):
         ''' If markup rate change compute the discount '''
         res = {}
-        import pdb; pdb.set_trace()
         res['value'] = {}
         markup = markup / 100.0
         if not price_unit or markup == 1: return {'value': {}}
