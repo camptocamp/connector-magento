@@ -31,7 +31,7 @@ class product_images(Model):
     def _image_path(self, cr, uid, image, context=None):
         full_path = False
         local_media_repository = self.pool.get('res.company').\
-             get_local_media_repository(cr, uid, context=context)
+             get_local_media_repository(cr, uid)
         if local_media_repository:
             full_path = os.path.join(
                 local_media_repository,
