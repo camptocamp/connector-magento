@@ -46,7 +46,7 @@ class StockPicking(osv.Model):
         picking_ids = self.search(
             cr, uid, domain, context=context, order='priority desc')
         canceled_ids = self.cancel_assign(cr, uid, picking_ids)
-        assigned_ids = self.action_assign(cr, uid, picking_ids)
+        assigned_ids = self.retry_assign(cr, uid, picking_ids, context=context)
 
         # exclude picking ids because we have already
         # tried to assign them
@@ -56,9 +56,24 @@ class StockPicking(osv.Model):
                       ('id', 'not in', picking_ids)]
             confirmed_ids = self.search(
                 cr, uid, domain, context=context, order='priority desc')
-            self.action_assign(cr, uid, confirmed_ids)
+            self.retry_assign(cr, uid, confirmed_ids, context=context)
 
         return canceled_ids, assigned_ids
+
+    def retry_assign(self, cr, uid, ids, context=None):
+        assigned_ids = []
+        for picking_id in ids:
+            try:
+                self.action_assign(cr, uid, [picking_id])
+                assigned_ids.append(picking_id)
+            except osv.except_osv:
+                # the action_assign may raise an osv.except
+                # when there is no confirmed move line
+                # the silent exception is intended
+                # as we do not have to assign the picking
+                # in such case
+                pass
+        return assigned_ids
 
 StockPicking()
 
