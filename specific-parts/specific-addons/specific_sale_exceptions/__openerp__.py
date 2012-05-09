@@ -26,7 +26,8 @@
  'license': 'AGPL-3',
  'category': 'Generic Modules/Sale',
  'complexity': "easy",
- 'depends' : ['sale_exceptions', ], # TODO add 'sale_markup'
+ 'depends' : ['sale_exceptions', 
+              'base_sale_multichannels'], # TODO add 'sale_markup'
  'description': """Custom and specific exceptions for the sale workflow""",
  'website': 'http://www.camptocamp.com',
  'init_xml': [],

@@ -12,3 +12,8 @@ if partner.credit_limit and (partner.credit - partner.debit + order.amount_total
    failed = True",True
 "sale_exceptions.excep_no_zip",,,,,,False
 "sale_exceptions.excep_no_stock",,,,,,False
+"base_sale_multichannels.excep_wrong_total_amount","Total Amount differs from external system","The amount computed doesn't match with the external amount because the taxes have not been configured properly (maybe some fiscal positions have changed the final price).
+Please fix it manually and check your taxes rules.
+
+NB : This check have being applied because you have checked the option \"check total amount\" on the shop of this sale order",30,"sale.order","if abs(order.amount_total - order.ext_total_amount) >= 0.0:
+    failed = True",True
