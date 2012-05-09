@@ -22,7 +22,6 @@
 
 import time
 
-import ir
 from osv import osv
 from report import report_sxw
 import pooler
@@ -52,10 +51,14 @@ class Overdue(report_sxw.rml_parse):
                   'country_id' : False,
                  }
         if adr_id:
-            result = res_partner_address.read(self.cr, self.uid, [adr_id],context=self.context.copy())
+            result = res_partner_address.read(
+                    self.cr,
+                    self.uid,
+                    [adr_id],
+                    context=self.context.copy())
             result[0]['country_id'] = result[0]['country_id'] and result[0]['country_id'][1] or False
-            return result   
-         
+            return result
+
         res.append(result)
         return res
 
@@ -76,21 +79,24 @@ class Overdue(report_sxw.rml_parse):
     def _lines_get(self, partner):
         moveline_obj = pooler.get_pool(self.cr.dbname).get('account.move.line')
         movelines = moveline_obj.search(self.cr, self.uid,
-                [('partner_id', '=', partner.id),
+                   [('partner_id', '=', partner.id),
                     ('account_id.type', 'in', ['receivable', 'payable']),
-                    ('account_id.be_follow_up','=', False),
+                    #('account_id.be_follow_up','=', False),
                     ('state', '<>', 'draft'), ('reconcile_id', '=', False)])
         movelines = moveline_obj.browse(self.cr, self.uid, movelines)
         return movelines
-        
+
     def _message(self, obj, company):
         company_pool = pooler.get_pool(self.cr.dbname).get('res.company')
-        message = company_pool.browse(self.cr, self.uid, company.id, {'lang':obj.lang}).overdue_msg 
+        message = company_pool.browse(
+                self.cr,
+                self.uid,
+                company.id,
+                {'lang':obj.lang}).overdue_msg 
         return message
-        
+
 report_sxw.report_sxw('report.account.overdue.c2c', 'res.partner',
         'addons/specific_report/report/overdue.rml', parser=Overdue)
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
-

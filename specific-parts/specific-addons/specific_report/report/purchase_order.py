@@ -27,7 +27,7 @@ import pooler
 
 class order(report_sxw.rml_parse):
     _name = 'report.purchase.order_custom'
-    
+
     def __init__(self, cr, uid, name, context):
         super(order, self).__init__(cr, uid, name, context=context)
         self.localcontext.update({
@@ -37,7 +37,7 @@ class order(report_sxw.rml_parse):
             'get_product_code': self._get_product_code,
             'hide_partner_name': self._hide_partner_name,
         })
-        
+
     def _get_line_tax(self, line_obj):
         self.cr.execute("SELECT tax_id FROM purchase_order_taxe WHERE order_line_id=%s", (line_obj.id))
         res = self.cr.fetchall() or None
@@ -47,9 +47,11 @@ class order(report_sxw.rml_parse):
             tax_ids = [t[0] for t in res]
         else:
             tax_ids = res[0]
-        res = [tax.name for tax in pooler.get_pool(cr.dbname).get('account.tax').browse(self.cr, self.uid, tax_ids)]
+        taxes = pooler.get_pool(
+                cr.dbname).get('account.tax').browse(self.cr, self.uid, tax_ids)
+        res = [tax.name for tax in taxes]
         return ",\n ".join(res)
-    
+
     def _get_tax(self, order_obj):
         self.cr.execute("SELECT DISTINCT tax_id FROM purchase_order_taxe, purchase_order_line, purchase_order \
             WHERE (purchase_order_line.order_id=purchase_order.id) AND (purchase_order.id=%s)", (order_obj.id))
@@ -72,16 +74,25 @@ class order(report_sxw.rml_parse):
                 else:
                     line_ids = lines[0]
                 base = 0
-                for line in pooler.get_pool(cr.dbname).get('purchase.order.line').browse(self.cr, self.uid, line_ids):
+                po_lines = pooler.get_pool(
+                        cr.dbname).get(
+                                'purchase.order.line').browse(
+                                        self.cr, self.uid, line_ids)
+                for line in po_lines:
                     base += line.price_subtotal
                 res.append({'code':tax.name,
                     'base':base,
                     'amount':base*tax.amount})
         return res
-        
+
     def _get_product_code(self, product_id, partner_id):
         product_obj=pooler.get_pool(self.cr.dbname).get('product.product')
-        return product_obj._product_code(self.cr, self.uid, [product_id], name=None, arg=None, context={'partner_id': partner_id})[product_id]
+        return product_obj._product_code(
+                self.cr, self.uid,
+                [product_id],
+                name=None,
+                arg=None,
+                context={'partner_id': partner_id})[product_id]
 
     def _hide_partner_name(self, partner_obj):
         """ Define if the partner name must be displayed according to the
@@ -93,8 +104,11 @@ class order(report_sxw.rml_parse):
         if partner_obj.title and partner_obj.title in [x.shortcut for x in company.report_hide_partner_title_ids]:
             return True
         return False
-        
-report_sxw.report_sxw('report.purchase.order_custom','purchase.order','addons/specific_report/report/purchase_order.rml',parser=order)
+
+report_sxw.report_sxw('report.purchase.order_custom',
+                      'purchase.order',
+                      'addons/specific_report/report/purchase_order.rml',
+                      parser=order)
+
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
-

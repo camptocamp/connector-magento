@@ -1,32 +1,44 @@
 <?xml version="1.0" ?>
 <openerp>
-	<data>
+    <data>
+
         <report id="purchase.report_purchase_quotation"
-                model="purchase.order"
-                name="purchase.quotation_custom"
-                rml="specific_report/report/purchase_request_quotation.rml"
-                string="Request for Quotation"/>
+            model="purchase.order"
+            name="purchase.quotation_custom"
+            rml="specific_report/report/purchase_request_quotation.rml"
+            string="Request for Quotation"/>
 
         <report id="purchase.report_purchase_order"
-                model="purchase.order"
-                name="purchase.order_custom"
-                rml="specific_report/report/purchase_order.rml"
-                string="Purchase Order"/>
+            model="purchase.order"
+            name="purchase.order_custom"
+            rml="specific_report/report/purchase_order.rml"
+            string="Purchase Order"/>
 
         <report id="sale.report_sale_order"
-                model="sale.order"
-                name="sale.order_custom"
-                rml="specific_report/report/sale_order.rml"
-                string="Quotation / Order"/>
+            model="sale.order"
+            name="sale.order_custom"
+            rml="specific_report/report/sale_order.rml"
+            string="Quotation / Order"/>
 
         <report
-            id="sale_delivery_report.report_shipping"
+            id="delivery.report_shipping"
             model="stock.picking"
             name="sale.shipping_custom"
-            rml="specific_report/report/shipping.rml" 
+            rml="specific_report/report/shipping.rml"
             string="Delivery order"/>
 
-       <record id="specific_report_report_bank_statement_webkit" model="ir.actions.report.xml">
+        <report auto="False"
+            id="specific_report_report_bank_statement_webkit"
+            model="account.bank.statement"
+            name="specific_report.report_bank_statement_webkit"
+            file="specific_report/report/template/bank_statement_report.mako"
+            string="Bank Statement"
+            report_type="webkit"
+            header="0"
+            webkit_header="bank_statement_landscape_header"/>
+
+<!--
+        <record id="specific_report_report_bank_statement_webkit" model="ir.actions.report.xml">
             <field name="report_type">webkit</field>
             <field name="report_name">specific_report.report_bank_statement_webkit</field>
             <field name="model">account.bank.statement</field>
@@ -34,15 +46,23 @@
             <field eval="0" name="header"/>
             <field name="report_webkit">specific_report/report/template/bank_statement_report.mako</field>
             <field name="webkit_header" ref="bank_statement_landscape_header"/>
-        </record> 
-        
-        <report auto="False" 
-        	id="account_overdue"
-        	model="res.partner"
-        	name="account.overdue.c2c"
-        	rml="specific_report/report/overdue.rml" string="Overdue Payments"/>
+        </record>
+-->
+        <record id="action_print_bank_statement_webkit" model="ir.values">
+            <field name="name">Bank Statement</field>
+            <field name="key2">client_print_multi</field>
+            <field name="value_unpickle"
+                eval="'ir.actions.report.xml,' +str(ref('specific_report_report_bank_statement_webkit'))"/>
+            <field name="key">action</field>
+            <field name="model">account.bank.statement</field>
+        </record>
 
 
+        <report auto="False"
+            id="account_overdue"
+            model="res.partner"
+            name="account.overdue.c2c"
+            rml="specific_report/report/overdue.rml" string="Overdue Payments"/>
 
-	</data>
+    </data>
 </openerp>

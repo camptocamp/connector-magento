@@ -29,7 +29,7 @@ from itertools import groupby
 from datetime import datetime
 
 #from common_report_header_webkit import CommonReportHeaderWebkit
-from c2c_webkit_report import webkit_report
+from report_webkit import webkit_report
 
 class BankStatementWebkit(report_sxw.rml_parse):
 
@@ -37,7 +37,7 @@ class BankStatementWebkit(report_sxw.rml_parse):
         super(BankStatementWebkit, self).__init__(cursor, uid, name, context=context)
         self.pool = pooler.get_pool(self.cr.dbname)
         self.cursor = self.cr
-        
+
         company = self.pool.get('res.users').browse(self.cr, uid, uid, context=context).company_id
         header_report_name = ' - '.join((_('BORDEREAU DE REMISE DE CHEQUES'), company.name, company.currency_id.name))
         statement = self.pool.get('account.bank.statement').browse(cursor,uid,context['active_id']);
@@ -63,7 +63,7 @@ class BankStatementWebkit(report_sxw.rml_parse):
         statement_line_ids = self.pool.get('account.bank.statement.line').search(self.cr,self.uid,[['statement_id','=',statement.id]])
         statement_lines = self.pool.get('account.bank.statement.line').browse(self.cr,self.uid,statement_line_ids)
         return statement_lines
-        
+
 webkit_report.WebKitParser('report.specific_report.report_bank_statement_webkit',
                            'account.bank.statement',
                            'addons/specific_report/report/templates/bank_statement_report.mako',

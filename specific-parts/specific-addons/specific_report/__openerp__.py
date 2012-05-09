@@ -30,26 +30,25 @@
 
 
 {
-	"name" : "Parametrisation project",
-	"version" : "1.0",
-	"depends" : [
-					"base",
-					"sale",
-                    "purchase",
-                    "sale_delivery_report",
-                    "c2c_pack_product_chg"
-					],
-	"author" : "Camptocamp",
-	"description": """Generic parametrisation plugin""",
-	"website" : "http://tinyerp.com/module_account.html",
-	"category" : "Generic Modules/Accounting",
-	"init_xml" : [],
-	"demo_xml" : [ ],
-	"update_xml" : [
-					'report/data/bank_statement_webkit_header.xml',
-					'report.xml',
+    "name" : "Parametrisation project",
+    "version" : "1.0",
+    "depends" : ["base",
+                 "sale",
+                 "purchase",
+                 "report_webkit",
+                 "packing_product_change"
+                ],
+    "author" : "Camptocamp",
+    "description": """Generic parametrisation plugin""",
+    "website" : "http://tinyerp.com/module_account.html",
+    "category" : "Generic Modules/Accounting",
+    "init_xml" : [],
+    "demo_xml" : [],
+    "update_xml" : [
+                    'report/data/bank_statement_webkit_header.xml',
+                    'report.xml',
                     'company_view.xml',
-					],
-	"active": False,
-	"installable": True
+                    ],
+    "active": False,
+    "installable": True
 }
