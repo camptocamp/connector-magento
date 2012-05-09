@@ -48,6 +48,7 @@
                     'report/data/bank_statement_webkit_header.xml',
                     'report.xml',
                     'company_view.xml',
+                    'account_view.xml',
                     ],
     "active": False,
     "installable": True
