@@ -20,7 +20,7 @@
 
 from tools.translate import _
 from osv.orm import Model
-from osv import except_osv
+from osv.osv import except_osv
 
 
 class Product(Model):
