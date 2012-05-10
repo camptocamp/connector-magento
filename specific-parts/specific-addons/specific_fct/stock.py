@@ -38,9 +38,7 @@ class StockPicking(osv.osv):
 
         picking_ids = self.search(cr, uid, domain, order='priority desc')
 
-        assigned_ids = self.action_assign(cr, uid, picking_ids)
-
-        return assigned_ids
+        return self.retry_assign(cr, uid, picking_ids)
 
     def do_partial(self, cr, uid, ids, partial_datas, context=None):
         """ Makes partial picking and moves done.
