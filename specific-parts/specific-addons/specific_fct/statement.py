@@ -17,12 +17,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from osv import osv, fields
+from osv import fields, except_osv
+from osv.orm import Model
 from tools.translate import _
 import netsvc
 logger = netsvc.Logger()
 
-class AccountBankStatement(osv.osv):
+
+class AccountBankStatement(Model):
 
     _inherit = "account.bank.statement"
 
@@ -45,7 +47,7 @@ class AccountBankStatement(osv.osv):
             self.balance_check(cr, uid, st.id, journal_type=j_type, context=context)
             if (not st.journal_id.default_credit_account_id) \
                     or (not st.journal_id.default_debit_account_id):
-                raise osv.except_osv(_('Configuration Error !'),
+                raise except_osv(_('Configuration Error !'),
                         _('Please verify that an account is defined in the journal.'))
 
             if not st.name == '/':
@@ -59,7 +61,7 @@ class AccountBankStatement(osv.osv):
 
             for line in st.move_line_ids:
                 if line.state <> 'valid':
-                    raise osv.except_osv(_('Error !'),
+                    raise except_osv(_('Error !'),
                             _('The account entries lines are not in valid state.'))
 
             errors_stack = []
@@ -67,12 +69,12 @@ class AccountBankStatement(osv.osv):
                 try:
                     if st_line.analytic_account_id:
                         if not st.journal_id.analytic_journal_id:
-                            raise osv.except_osv(_('No Analytic Journal !'),_("You have to assign an analytic journal on the '%s' journal!") % (st.journal_id.name,))
+                            raise except_osv(_('No Analytic Journal !'),_("You have to assign an analytic journal on the '%s' journal!") % (st.journal_id.name,))
                     if not st_line.amount:
                         continue
                     st_line_number = self.get_next_st_line_number(cr, uid, st_number, st_line, context)
                     self.create_move_from_st_line(cr, uid, st_line.id, company_currency_id, st_line_number, context)
-                except osv.except_osv, exc:
+                except except_osv, exc:
                     msg = "%s had following error %s" % (move.id, exc.value)
                     error_stack.append(msg)
                 except Exception, exc:
@@ -80,7 +82,7 @@ class AccountBankStatement(osv.osv):
                     error_stack.append(msg)
             if error_stack:
                 msg = u"\n".join(error_stack)
-                raise osv.except_osv(_('Error'), msg)
+                raise except_osv(_('Error'), msg)
 
             self.write(cr, uid, [st.id], {
                     'name': st_number,
@@ -89,4 +91,3 @@ class AccountBankStatement(osv.osv):
             self.log(cr, uid, st.id, _('Statement %s is confirmed, journal items are created.') % (st_number,))
         return self.write(cr, uid, ids, {'state':'confirm'}, context=context)
 
-AccountBankStatement()

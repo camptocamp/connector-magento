@@ -19,11 +19,12 @@
 import netsvc
 
 from tools.translate import _
-from osv import osv
+from osv.orm import Model
 from osv import fields
 
 
-class StockPicking(osv.osv):
+class StockPicking(Model):
+
     _inherit = "stock.picking"
 
     def try_action_assign_all(self, cr, uid, ids, context=None):
@@ -216,4 +217,3 @@ class StockPicking(osv.osv):
 
         return res
 
-StockPicking()

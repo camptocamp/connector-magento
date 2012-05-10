@@ -19,10 +19,12 @@
 import netsvc
 
 from tools.translate import _
-from osv import osv, fields
+from osv.orm import Model
+from osv import fields
 
 
-class sale_order(osv.osv):
+class sale_order(Model):
+
     _inherit = "sale.order"
 
     def _invoice_date_get(self, cr, uid, ids, field_name, arg, context):
@@ -171,10 +173,8 @@ class sale_order(osv.osv):
 
         return invoice_id
 
-sale_order()
 
-
-class sale_order_line(osv.osv):
+class sale_order_line(Model):
 
     _inherit = 'sale.order.line'
 
@@ -204,4 +204,3 @@ class sale_order_line(osv.osv):
         vals['note'] = False
         return vals
 
-sale_order_line()

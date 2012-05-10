@@ -19,10 +19,11 @@
 ##############################################################################
 
 
-from osv import fields, osv
+from osv import fields
+from osv.orm import Model
 
 
-class ResPartner(osv.osv):
+class ResPartner(Model):
     "Inherit partner for small customisations"
     _inherit = 'res.partner'
 
@@ -44,4 +45,3 @@ class ResPartner(osv.osv):
         return super(ResPartner, self).copy(
             cr, uid, id, default=default, context=context)
 
-ResPartner()

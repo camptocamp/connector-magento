@@ -19,10 +19,11 @@
 ##############################################################################
 
 from tools.translate import _
-from osv import osv
+from osv.orm import Model
+from osv import except_osv
 
 
-class Product(osv.osv):
+class Product(Model):
     """ Inherit product for small customisations"""
 
     _inherit = 'product.product'
@@ -45,7 +46,7 @@ class Product(osv.osv):
             return default_code
         default_code = default_code.strip()
         if ',' in default_code:
-            raise osv.except_osv(
+            raise except_osv(
                 _('Error'),
                 _("""The comma character "," in the
                 reference is forbidden (%s)""" % default_code))
