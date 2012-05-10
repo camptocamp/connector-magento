@@ -64,3 +64,5 @@ if category.magento_omcategory_default_id:
     if option:
         res = option.value
 result=[('omcategories', res)]"
+magentoerpconnect.mag_1500_erp_procat_9,magentoerpconnect.magento1500,product.model_product_category,url_key,,in_out,function,unicode,,"result=[('url_key',ifield)]","# skip export"
+magentoerpconnect.mag_1500_erp_prd_1,magentoerpconnect.magento1500,product.model_product_product,url_key,,in_out,function,unicode,,"result=[('x_magerp_url_key',ifield)]","# skip export"
