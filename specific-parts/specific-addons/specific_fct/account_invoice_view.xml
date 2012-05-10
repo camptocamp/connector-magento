@@ -21,8 +21,11 @@
             </field>
         </record>
 
-        <!-- For security -->
+        <!-- Add security group-->
         <menuitem id="account.menu_finance_payables"
+            name="Suppliers"
+            parent="account.menu_finance"
+            sequence="3"
             groups="account.group_account_user,purchase.group_purchase_user"/>
     </data>
 </openerp>
