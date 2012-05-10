@@ -53,13 +53,14 @@ class Product(Model):
         return default_code
 
     def create(self, cr, uid, vals, context=None):
-        vals['default_code'] = self._fix_default_code(
-            cr, uid, vals.get('default_code', False), context=context)
+        if 'default_code' in vals:
+            vals['default_code'] = self._fix_default_code(
+                cr, uid, vals['default_code'], context=context)
         return super(Product, self).create(cr, uid, vals, context=context)
 
     def write(self, cr, uid, ids, vals, context=None):
-        vals['default_code'] = self._fix_default_code(
-            cr, uid, vals.get('default_code', False), context=context)
+        if 'default_code' in vals:
+            vals['default_code'] = self._fix_default_code(
+                cr, uid, vals['default_code'], context=context)
         return super(Product, self).write(cr, uid, ids, vals, context=context)
 
-Product()
