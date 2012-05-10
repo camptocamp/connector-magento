@@ -44,7 +44,7 @@ result=[('activer_ventes_flash',res)]"
     result =[('mag_birthday',ifield[:10])]
 else:
     result=[]",
-"custom_product_status","magentoerpconnect.magento1500","product.model_product_product","status",,"in_out",function,"int",,,"if ifield:
+"custom_product_status","magentoerpconnect.magento1500","product.model_product_product","status",,"in_out",function,"int",,"if ifield:
     option_id = self.pool.get('magerp.product_attribute_options').search(cr,uid,[('attribute_id','=',145),('value','=',ifield)])
     if option_id:
         result = [('x_magerp_status',option_id[0])]","if record['to_deactivate']:
