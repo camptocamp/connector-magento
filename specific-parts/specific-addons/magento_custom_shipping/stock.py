@@ -38,7 +38,7 @@ class Stock(osv.osv):
 
     def _create_custom_shipping(self, cr, uid, picking_id,
                                 external_referential_id,
-                                magento_incrementid, context=None):
+                                magento_incrementid, mail_notification=True, context=None):
         """Create a shipment in magento. The normal behavior of the
         magentoerpconnect methods has been overrided to handle the case
         of the modified products in a packing.
@@ -78,17 +78,17 @@ class Stock(osv.osv):
                                     magento_incrementid,
                                     skus,
                                     _("Shipping Created"),
-                                    True,
+                                    mail_notification,
                                     True,
                                     last_packing
                                     ])
 
         return ext_shipping_id
 
-    def create_ext_complete_shipping(self, cr, uid, id, external_referential_id, magento_incrementid, context=None):
-        return self._create_custom_shipping(cr, uid, id, external_referential_id, magento_incrementid, context)
+    def create_ext_complete_shipping(self, cr, uid, id, external_referential_id, magento_incrementid, mail_notification=True, context=None):
+        return self._create_custom_shipping(cr, uid, id, external_referential_id, magento_incrementid, mail_notification=True, context=context)
 
-    def create_ext_partial_shipping(self, cr, uid, id, external_referential_id, magento_incrementid, context=None):
-        return self._create_custom_shipping(cr, uid, id, external_referential_id, magento_incrementid, context)
+    def create_ext_partial_shipping(self, cr, uid, id, external_referential_id, magento_incrementid, mail_notification=True, context=None):
+        return self._create_custom_shipping(cr, uid, id, external_referential_id, magento_incrementid, mail_notification=True, context=context)
 
 Stock()
