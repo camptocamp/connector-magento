@@ -2,7 +2,7 @@ id,type_id:id,model_id:id,external_field,field_id:id,type,evaluation_type,extern
 magentoerpconnect.mag_erp_prd_custom_1,magentoerpconnect.magento1500,product.model_product_product,zdbx_default_ean13,,in_out,function,unicode,,"result =[('ean13',ifield)]","result=[('zdbx_default_ean13', record['ean13'])]"
 magentoerpconnect.magento_1500_prt_adr_4,magentoerpconnect.magento1500,base.model_res_partner_address,firstname,,in_out,function,unicode,,"name = ' '.join([ f for f in (data['firstname'], data['lastname']) if f])
 result = [('name', name), ('firstname', ifield), ('lastname', data['lastname'])]",
-magentoerpconnect.magento_prt_adr_custom_1,magentoerpconnect.magento1500,base.model_res_partner_address,company,,in_out,function,unicode,,"if ifield and data['address_type'] == 'billing':
+magentoerpconnect.magento_prt_adr_custom_1,magentoerpconnect.magento1500,base.model_res_partner_address,company,,in_out,function,unicode,,"if ifield and data.get('default_billing'):
     partner_obj = self.pool.get('res.partner')
     partner_id = partner_obj.extid_to_oeid(cr, uid, data['customer_id'], external_referential_id)
     if partner_id:
