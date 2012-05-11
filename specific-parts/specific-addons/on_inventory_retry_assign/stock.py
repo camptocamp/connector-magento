@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+import pooler
 from osv import osv
 
 
@@ -62,9 +63,12 @@ class StockPicking(osv.Model):
 
     def retry_assign(self, cr, uid, ids, context=None):
         assigned_ids = []
+        # commit the transaction after each assign
+        # otherwise it uses too much locks (_product_reserve)
+        local_cr = pooler.get_db(cr.dbname).cursor()
         for picking_id in ids:
             try:
-                self.action_assign(cr, uid, [picking_id])
+                self.action_assign(local_cr, uid, [picking_id])
                 assigned_ids.append(picking_id)
             except osv.except_osv:
                 # the action_assign may raise an osv.except
@@ -72,7 +76,14 @@ class StockPicking(osv.Model):
                 # the silent exception is intended
                 # as we do not have to assign the picking
                 # in such case
-                pass
+                local_cr.rollback()
+            else:
+                local_cr.commit()
+
+        try:
+            local_cr.close()
+        except Exception, e:
+            pass
         return assigned_ids
 
 StockPicking()
