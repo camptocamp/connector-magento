@@ -155,7 +155,8 @@ class sale_order(Model):
                             cr, uid, move_line, invoice_line_id)
 
     def action_invoice_create(self, cr, uid, ids, grouped=False,
-                              states=['confirmed', 'done', 'exception']):
+                              states=['confirmed', 'done', 'exception'],
+                              date_inv=False, context=None):
         """
         Inherit legacy method to :
          - skip the draft state on the invoices created from the order
