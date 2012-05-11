@@ -70,16 +70,17 @@ class AccountBankStatement(Model):
                 try:
                     if st_line.analytic_account_id:
                         if not st.journal_id.analytic_journal_id:
-                            raise except_osv(_('No Analytic Journal !'),_("You have to assign an analytic journal on the '%s' journal!") % (st.journal_id.name,))
+                            raise except_osv(_('No Analytic Journal !'),
+                                             _("You have to assign an analytic journal on the '%s' journal!") % (st.journal_id.name,))
                     if not st_line.amount:
                         continue
                     st_line_number = self.get_next_st_line_number(cr, uid, st_number, st_line, context)
                     self.create_move_from_st_line(cr, uid, st_line.id, company_currency_id, st_line_number, context)
                 except except_osv, exc:
-                    msg = "%s had following error %s" % (move.id, exc.value)
+                    msg = "%s had following error %s" % (st_line, exc.value)
                     error_stack.append(msg)
                 except Exception, exc:
-                    msg = "%s had following error %s" % (move.id, str(exc))
+                    msg = "%s had following error %s" % (st_line, str(exc))
                     error_stack.append(msg)
             if error_stack:
                 msg = u"\n".join(error_stack)
