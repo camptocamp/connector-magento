@@ -78,11 +78,11 @@ class AccountBankStatement(Model):
                     self.create_move_from_st_line(cr, uid, st_line.id, company_currency_id, st_line_number, context)
                 except except_osv, exc:
                     msg = "%s had following error %s" % (st_line, exc.value)
-                    error_stack.append(msg)
+                    errors_stack.append(msg)
                 except Exception, exc:
                     msg = "%s had following error %s" % (st_line, str(exc))
-                    error_stack.append(msg)
-            if error_stack:
+                    errors_stack.append(msg)
+            if errors_stack:
                 msg = u"\n".join(error_stack)
                 raise except_osv(_('Error'), msg)
 
