@@ -163,10 +163,11 @@ class sale_order(Model):
          - add pickings lines not in the so as gifts on the invoice
         """
         invoice_id = super(sale_order, self).action_invoice_create(
-            cr, uid, ids, grouped, states)
+            cr, uid, ids, grouped=grouped, states=states,
+            date_inv=date_inv, context=context)
         if invoice_id:
             invoice = self.pool.get('account.invoice').browse(
-                cr, uid, invoice_id)
+                cr, uid, invoice_id, context=context)
 
             self._skip_draft_invoice(cr, uid, invoice)
 
