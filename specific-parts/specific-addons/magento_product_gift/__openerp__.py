@@ -36,6 +36,6 @@ Find it at : url""",
  'installable': True,
  'auto_install': False,
  'license': 'AGPL-3',
- 'application': True,}
+ 'application': False,}
 
 

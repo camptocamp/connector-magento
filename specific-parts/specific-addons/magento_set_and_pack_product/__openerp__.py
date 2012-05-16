@@ -40,7 +40,7 @@ Needs customization in Magento which define how to handle each type of product. 
  'installable': True,
  'auto_install': True,
  'license': 'AGPL-3',
- 'application': True,
+ 'application': False,
  'web': False}
 
 
