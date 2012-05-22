@@ -40,7 +40,7 @@
                    'partner_view.xml',
                    'stock_view.xml',
                    'security/security.xml',
-                   'statement_view.xml',
+                   # 'statement_view.xml',
                    'wizard/stock_partial_picking_view.xml',
                   ],
     'demo_xml': [],

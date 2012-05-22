@@ -22,5 +22,5 @@ import partner
 import sale
 import wizard
 import stock
-import statement
+# import statement
 import product_images
