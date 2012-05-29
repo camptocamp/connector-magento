@@ -41,6 +41,12 @@ class magerp_product_attributes(osv.osv):
                                     'soldes_qty',
                                     'cdiscount_sku',
                                     'destockage_qty',
+                                    'pyksel_rdc_deliverytype',
+                                    'pyksel_rdc_expeditiondelay',
+                                    'pyksel_rdc_expeditiondelay_unit',
+                                    'pyksel_rdc_availability',
+                                    'pyksel_rdc_gender',
+                                    'pyksel_rdc_cancellation',
                                     ])
         # attributes which have to be stored
         # in regular fields
