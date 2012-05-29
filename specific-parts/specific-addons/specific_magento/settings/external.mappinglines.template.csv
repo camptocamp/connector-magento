@@ -67,3 +67,8 @@ result=[('omcategories', res)]"
 magentoerpconnect.mag_1500_erp_procat_9,magentoerpconnect.magento1500,product.model_product_category,url_key,,in_out,function,unicode,,"result=[('url_key',ifield)]","# skip export"
 magentoerpconnect.mag_1500_erp_prd_1,magentoerpconnect.magento1500,product.model_product_product,url_key,,in_out,function,unicode,,"result=[('x_magerp_url_key',ifield)]","# skip export"
 magentoerpconnect.mag_erp_prd_9,magentoerpconnect.magento1500,product.model_product_product,cost,,in_out,function,float,,"# skip","result = [('cost', record['cost_price'] or record['standard_price'] or 0)]"
+prd_custom_attr_rdc_active,magentoerpconnect.magento1500,product.model_product_product,rdc_active,,in_out,function,unicode,,"result = [('magerp_rdc_active', 'no')]
+if ifield and ifield == '1':
+    result = [('magerp_rdc_active', 'yes')]","result = [('rdc_active', False)]
+if record['magerp_rdc_active'] == 'yes':
+    result=[('rdc_active', True)]"
