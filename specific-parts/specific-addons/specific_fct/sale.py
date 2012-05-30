@@ -31,6 +31,8 @@ class sale_order(Model):
         res = {}
         for id in ids:
             res[id] = False
+        if not ids:
+            return res
         cr.execute("SELECT rel.order_id,MIN(inv.date_invoice) FROM sale_order_invoice_rel rel \
         JOIN account_invoice inv ON (rel.invoice_id=inv.id) WHERE rel.order_id IN %s \
         GROUP BY rel.order_id", (tuple(ids),))
