@@ -23,31 +23,33 @@ from osv import osv
 from tools.translate import _
 
 
-class sale_order(osv.osv):
-    _inherit = "sale.order"
-
-    def oe_create(self, cr, uid, vals, external_referential_id,
-                  defaults=None, context=None):
-        """call sale_markup's module on_change to compute margin
-        when order's created from magento"""
-        order_id = super(sale_order, self).oe_create(
-            cr, uid, vals, external_referential_id,
-            defaults=defaults, context=context)
-        order_line_obj = self.pool.get('sale.order.line')
-        order = self.browse(cr, uid, order_id, context)
-        for line in order.order_line:
-            # Call line oin_change to record margin
-            line_changes = order_line_obj.onchange_price_unit(
-                cr, uid, line.id, line.price_unit, line.product_id.id,
-                line.discount, line.product_uom.id, order.pricelist_id.id)
-            # Always keep the price from Magento
-            line_changes['value']['price_unit'] = line.price_unit
-            order_line_obj.write(
-                cr, uid, line.id, line_changes['value'], context=context)
-
-        return order_id
-
-sale_order()
+#TODO reimplement after implementation of the new markup module
+#   in the project
+#class sale_order(osv.osv):
+#    _inherit = "sale.order"
+#
+#    def oe_create(self, cr, uid, vals, external_referential_id,
+#                  defaults=None, context=None):
+#        """call sale_markup's module on_change to compute margin
+#        when order's created from magento"""
+#        order_id = super(sale_order, self).oe_create(
+#            cr, uid, vals, external_referential_id,
+#            defaults=defaults, context=context)
+#        order_line_obj = self.pool.get('sale.order.line')
+#        order = self.browse(cr, uid, order_id, context)
+#        for line in order.order_line:
+#            # Call line oin_change to record margin
+#            line_changes = order_line_obj.onchange_price_unit(
+#                cr, uid, line.id, line.price_unit, line.product_id.id,
+#                line.discount, line.product_uom.id, order.pricelist_id.id)
+#            # Always keep the price from Magento
+#            line_changes['value']['price_unit'] = line.price_unit
+#            order_line_obj.write(
+#                cr, uid, line.id, line_changes['value'], context=context)
+#
+#        return order_id
+#
+#sale_order()
 
 
 class sale_shop(osv.osv):

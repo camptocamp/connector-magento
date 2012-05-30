@@ -40,6 +40,7 @@ All the specific customisations which concerns the magento connector
         'sale_view.xml',
         'settings/external.mappinglines.template.csv',
         'settings/magerp.product_category_attribute_options.csv',
+        'magento_data.xml',
                     ],
      "active": False,
      "installable": True

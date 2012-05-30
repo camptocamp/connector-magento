@@ -26,6 +26,9 @@
           <field name="active" select="2" position="after">
             <field name="to_deactivate"/>
           </field>
+          <field name="purchase_ok" position="after">
+            <field name="magerp_rdc_active"/>
+          </field>
         </data>
       </field>
     </record>

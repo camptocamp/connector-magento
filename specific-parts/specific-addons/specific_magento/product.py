@@ -41,6 +41,13 @@ class magerp_product_attributes(osv.osv):
                                     'soldes_qty',
                                     'cdiscount_sku',
                                     'destockage_qty',
+                                    'pyksel_rdc_deliverytype',
+                                    'pyksel_rdc_expeditiondelay',
+                                    'pyksel_rdc_expeditiondelay_unit',
+                                    'pyksel_rdc_availability',
+                                    'pyksel_rdc_gender',
+                                    'pyksel_rdc_cancellation',
+                                    'rdc_active',
                                     ])
         # attributes which have to be stored
         # in regular fields
@@ -63,6 +70,13 @@ class Product(osv.osv):
             "deactivated on Magento and then on OpenERP. If an open picking "
             "using this product exists on OpenERP, the product will not be "
             "deactivated before the next Export catalog."),
+        # boolean not used because user input is really mandatory
+        # and for a boolean, no selected value = false => no error
+        # if not filled
+        'magerp_rdc_active': fields.selection(
+            (('no', 'No'), ('yes', 'Yes')),
+            'Autoriser l\'export vers la galerie marchande',
+            required=True)
     }
 
     def try_deactivate_product(self, cr, uid, ids, context):

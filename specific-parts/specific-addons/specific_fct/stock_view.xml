@@ -12,7 +12,8 @@
                     <xpath expr="/form/notebook/page[@string='Products']/group[1]/button[@name='force_assign']" position="attributes">
                         <attribute name="groups">stock.group_stock_manager</attribute>
                     </xpath>
-                    <xpath expr="/form/notebook/page[@string='Products']/field[@name='move_lines']/form[@string='Stock Moves']/group[5]/button[@name='force_assign']" position="attributes">
+                    <!-- group is 6 and no 5 because stock.picking view in packing_product_change intercalates a group -->
+                    <xpath expr="/form/notebook/page[@string='Products']/field[@name='move_lines']/form[@string='Stock Moves']/group[6]/button[@name='force_assign']" position="attributes">
                         <attribute name="groups">stock.group_stock_manager</attribute>
                     </xpath>
                 </data>
