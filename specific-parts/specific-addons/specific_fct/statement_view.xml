@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <record model="ir.ui.view" id="id_in_statement_line">
+        <!-- <record model="ir.ui.view" id="id_in_statement_line">
             <field name="name">account.bank.statement.line.inherit</field>
             <field name="model">account.bank.statement</field>
             <field name="inherit_id" ref="account.view_bank_statement_periodic_form"/>
@@ -11,6 +11,6 @@
                         <field name="id" />
                     </xpath>
             </field>
-        </record>
+        </record> -->
     </data>
 </openerp>
