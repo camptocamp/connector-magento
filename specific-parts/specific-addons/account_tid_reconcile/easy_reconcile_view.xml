@@ -8,10 +8,12 @@
           <field name="inherit_id" ref="account_advanced_reconcile.view_easy_reconcile_form"/>
           <field name="arch" type="xml">
               <page name="information" position="inside">
-                <separator colspan="4" string="Advanced. Partner and Ref with TID"/>
-                <label string="Match multiple debit vs multiple credit entries. Allow partial reconcilation.
+                  <group colspan="2" col="2">
+                      <separator colspan="4" string="Advanced. Partner and Ref with TID"/>
+                      <label string="Match multiple debit vs multiple credit entries. Allow partial reconcilation.
 The lines should have the partner, the credit entry ref. is matched vs the debit entry ref. or name.
 The credit entry ref is searched exactly, or prefixed with tid_ or tid_mag_." colspan="4"/>
+                  </group>
               </page>
           </field>
       </record>
