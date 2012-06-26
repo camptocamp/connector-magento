@@ -75,7 +75,7 @@ class AccountStatementCompletionRule(Model):
                 st_vals = st_obj.get_values_for_line(cursor, uid, profile_id = st_line.statement_id.profile_id.id,
                     partner_id = res.get('partner_id',False), line_type = st_line.type, amount = st_line.amount, context = context)
                 res.update(st_vals)
-            # Try with prefix now
+            # Try with prefix now, if found update the reference of the line with mag_ !
             else:
                 so_id = so_obj.search(cursor, uid, [('name', '=', 'mag_' + st_line.ref)])
                 if so_id:
@@ -84,6 +84,7 @@ class AccountStatementCompletionRule(Model):
                         res['partner_id'] = so.partner_id.id
                     elif so_id and len(so_id) > 1:
                         raise ErrorTooManyPartner(_('Line named "%s" (Ref:%s) was matched by more than one partner.')%(st_line.name,st_line.ref))
+                    res.update({'ref':'mag_' + st_line.ref})
                     st_vals = st_obj.get_values_for_line(cursor, uid, profile_id = st_line.statement_id.profile_id.id,
                         partner_id = res.get('partner_id',False), line_type = st_line.type, amount = st_line.amount, context = context)
                     res.update(st_vals)
