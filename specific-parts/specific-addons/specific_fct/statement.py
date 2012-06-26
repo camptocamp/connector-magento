@@ -24,72 +24,68 @@ from tools.translate import _
 import netsvc
 logger = netsvc.Logger()
 
+class AccountStatementCompletionRule(Model):
+    """
+    Redifine a rule that will match SO number with AND without the prefix
+    _mag that is added by OpeneRP cause the bank/office doesn't know it, so
+    we have most of the time not the exact number in that case.
+    """
+    
+    _inherit = "account.statement.completion.rule"
+    
+    def _get_functions(self, cr, uid, context=None):
+        res = super (AccountStatementCompletionRule, self)._get_functions(
+                cr, uid, context=context)
+        res.append(('get_from_ref_and_so_with_prefix', 'From line reference (based on SO number with or without mag_)'))
+        return res
 
-class AccountBankStatement(Model):
+    _columns={
+        'function_to_call': fields.selection(_get_functions, 'Method'),
+    }
+    
+    
+    def get_from_ref_and_so_with_prefix(self, cursor, uid, line_id, context=None):
+        """
+        Match the partner based on the SO number (with and without '_mag' as prefix) 
+        and the reference of the statement 
+        line. Then, call the generic get_values_for_line method to complete other values. 
+        If more than one partner matched, raise the ErrorTooManyPartner error.
 
-    _inherit = "account.bank.statement"
-
-    def button_confirm_bank(self, cr, uid, ids, context=None):
-        """Completely override the method in order to have
-           an error message which displays all the messages
-           instead of having them pop one by one.
-           We have to copy paste a big block of code, the only
-           thing modified is the error stack"""
-        obj_seq = self.pool.get('ir.sequence')
-        if context is None:
-            context = {}
-
-        for st in self.browse(cr, uid, ids, context=context):
-            j_type = st.journal_id.type
-            company_currency_id = st.journal_id.company_id.currency_id.id
-            if not self.check_status_condition(cr, uid, st.state, journal_type=j_type):
-                continue
-
-            self.balance_check(cr, uid, st.id, journal_type=j_type, context=context)
-            if (not st.journal_id.default_credit_account_id) \
-                    or (not st.journal_id.default_debit_account_id):
-                raise except_osv(_('Configuration Error !'),
-                        _('Please verify that an account is defined in the journal.'))
-
-            if not st.name == '/':
-                st_number = st.name
+        :param int/long line_id: id of the concerned account.bank.statement.line
+        :return:
+            A dict of value that can be passed directly to the write method of
+            the statement line or {}
+           {'partner_id': value,
+            'account_id' : value,
+            
+            ...}
+        """
+        st_obj = self.pool.get('account.bank.statement.line')
+        st_line = st_obj.browse(cursor,uid,line_id)
+        res = {}
+        if st_line:
+            so_obj = self.pool.get('sale.order')
+            so_id = so_obj.search(cursor, uid, [('name', '=', st_line.ref)])
+            if so_id:
+                if so_id and len(so_id) == 1:
+                    so = so_obj.browse(cursor, uid, so_id[0])
+                    res['partner_id'] = so.partner_id.id
+                elif so_id and len(so_id) > 1:
+                    raise ErrorTooManyPartner(_('Line named "%s" (Ref:%s) was matched by more than one partner.')%(st_line.name,st_line.ref))
+                st_vals = st_obj.get_values_for_line(cursor, uid, profile_id = st_line.statement_id.profile_id.id,
+                    partner_id = res.get('partner_id',False), line_type = st_line.type, amount = st_line.amount, context = context)
+                res.update(st_vals)
+            # Try with prefix now
             else:
-                c = {'fiscalyear_id': st.period_id.fiscalyear_id.id}
-                if st.journal_id.sequence_id:
-                    st_number = obj_seq.next_by_id(cr, uid, st.journal_id.sequence_id.id, context=c)
-                else:
-                    st_number = obj_seq.next_by_code(cr, uid, 'account.bank.statement', context=c)
-
-            for line in st.move_line_ids:
-                if line.state <> 'valid':
-                    raise except_osv(_('Error !'),
-                            _('The account entries lines are not in valid state.'))
-
-            errors_stack = []
-            for st_line in st.line_ids:
-                try:
-                    if st_line.analytic_account_id:
-                        if not st.journal_id.analytic_journal_id:
-                            raise except_osv(_('No Analytic Journal !'),
-                                             _("You have to assign an analytic journal on the '%s' journal!") % (st.journal_id.name,))
-                    if not st_line.amount:
-                        continue
-                    st_line_number = self.get_next_st_line_number(cr, uid, st_number, st_line, context)
-                    self.create_move_from_st_line(cr, uid, st_line.id, company_currency_id, st_line_number, context)
-                except except_osv, exc:
-                    msg = "%s had following error %s" % (st_line, exc.value)
-                    errors_stack.append(msg)
-                except Exception, exc:
-                    msg = "%s had following error %s" % (st_line, str(exc))
-                    errors_stack.append(msg)
-            if errors_stack:
-                msg = u"\n".join(error_stack)
-                raise except_osv(_('Error'), msg)
-
-            self.write(cr, uid, [st.id], {
-                    'name': st_number,
-                    'balance_end_real': st.balance_end
-            }, context=context)
-            self.log(cr, uid, st.id, _('Statement %s is confirmed, journal items are created.') % (st_number,))
-        return self.write(cr, uid, ids, {'state':'confirm'}, context=context)
-
+                so_id = so_obj.search(cursor, uid, [('name', '=', 'mag_' + st_line.ref)])
+                if so_id:
+                    if so_id and len(so_id) == 1:
+                        so = so_obj.browse(cursor, uid, so_id[0])
+                        res['partner_id'] = so.partner_id.id
+                    elif so_id and len(so_id) > 1:
+                        raise ErrorTooManyPartner(_('Line named "%s" (Ref:%s) was matched by more than one partner.')%(st_line.name,st_line.ref))
+                    st_vals = st_obj.get_values_for_line(cursor, uid, profile_id = st_line.statement_id.profile_id.id,
+                        partner_id = res.get('partner_id',False), line_type = st_line.type, amount = st_line.amount, context = context)
+                    res.update(st_vals)
+        return res
+    
