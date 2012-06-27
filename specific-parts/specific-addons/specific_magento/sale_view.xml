@@ -16,6 +16,18 @@
         </field>
     </record>
 
+    <record model="ir.ui.view" id="base_sale_multichannel_view_order_form">
+        <field name="name">base_sale_multichannel_view_order_form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="base_sale_multichannels.base_sale_multichannel_view_order_form" />
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <field name="ext_payment_method" position="attributes">
+                <attribute name="groups">base.group_sale_manager</attribute>
+            </field>
+        </field>
+    </record>
+
     <menuitem id="menu_sale_order_filters" parent="base.menu_sales" name="Sales Orders Filters"/>
 
     <record id="action_order_tree_cheque" model="ir.actions.act_window">
