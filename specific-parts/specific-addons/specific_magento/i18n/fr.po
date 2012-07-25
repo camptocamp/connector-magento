@@ -1,0 +1,167 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* specific_magento
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 6.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-07-25 15:17+0000\n"
+"PO-Revision-Date: 2012-07-25 15:17+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: specific_magento
+#: selection:product.product,magerp_rdc_active:0
+msgid "No"
+msgstr "No"
+
+#. module: specific_magento
+#: help:product.product,to_deactivate:0
+msgid "If checked, on the next Export catalog, the product will be deactivated on Magento and then on OpenERP. If an open picking using this product exists on OpenERP, the product will not be deactivated before the next Export catalog."
+msgstr "If checked, on the next Export catalog, the product will be deactivated on Magento and then on OpenERP. If an open picking using this product exists on OpenERP, the product will not be deactivated before the next Export catalog."
+
+#. module: specific_magento
+#: model:ir.actions.act_window,name:specific_magento.action_order_tree_1000
+#: model:ir.ui.menu,name:specific_magento.menu_action_order_tree_1000
+msgid "Sales Order >1000 EUR HT (cybermut,atos_several,cashondelivery)"
+msgstr "Sales Order >1000 EUR HT (cybermut,atos_several,cashondelivery)"
+
+#. module: specific_magento
+#: model:ir.ui.menu,name:specific_magento.menu_sale_order_filters
+msgid "Sales Orders Filters"
+msgstr "Sales Orders Filters"
+
+#. module: specific_magento
+#: field:product.product,magerp_rdc_active:0
+msgid "Autoriser l'export vers la galerie marchande"
+msgstr "Autoriser l'export vers la galerie marchande"
+
+#. module: specific_magento
+#: help:product.category,magento_rdc_category:0
+msgid "Rue Du Commerce category applied on products of this category."
+msgstr "Rue Du Commerce category applied on products of this category."
+
+#. module: specific_magento
+#: sql_constraint:product.product:0
+msgid "Default code should be uniq"
+msgstr "Default code should be uniq"
+
+#. module: specific_magento
+#: model:ir.model,name:specific_magento.model_product_category
+msgid "Product Category"
+msgstr "Catégorie de produit"
+
+#. module: specific_magento
+#: model:ir.actions.act_window,name:specific_magento.action_order_tree_cheque
+#: model:ir.ui.menu,name:specific_magento.menu_action_order_tree_cheque
+msgid "Sales Order Waiting Cheque"
+msgstr "Sales Order Waiting Cheque"
+
+#. module: specific_magento
+#: field:product.product,to_deactivate:0
+msgid "To deactivate"
+msgstr "To deactivate"
+
+#. module: specific_magento
+#: field:product.category,magento_omcategory_default_id:0
+msgid "OutilMania Parent Category"
+msgstr "OutilMania Parent Category"
+
+#. module: specific_magento
+#: model:ir.model,name:specific_magento.model_magerp_product_attribute_options
+msgid "Options  of selected attributes"
+msgstr "Options  of selected attributes"
+
+#. module: specific_magento
+#: field:product.category,magento_omcategory_id:0
+msgid "Outilmania category"
+msgstr "Outilmania category"
+
+#. module: specific_magento
+#: view:product.category:0
+msgid "Products Attributes"
+msgstr "Products Attributes"
+
+#. module: specific_magento
+#: model:ir.model,name:specific_magento.model_product_product
+msgid "Product"
+msgstr "Produit"
+
+#. module: specific_magento
+#: field:product.category,magento_rdc_category:0
+msgid "Rue Du Commerce Category"
+msgstr "Rue Du Commerce Category"
+
+#. module: specific_magento
+#: view:product.category:0
+msgid "Products Configuration"
+msgstr "Products Configuration"
+
+#. module: specific_magento
+#: view:product.category:0
+msgid "Display Settings"
+msgstr "Display Settings"
+
+#. module: specific_magento
+#: model:ir.actions.act_window,name:specific_magento.action_order_tree_vir
+#: model:ir.ui.menu,name:specific_magento.menu_action_order_tree_vir
+msgid "Sales Order Waiting Transfer"
+msgstr "Sales Order Waiting Transfer"
+
+#. module: specific_magento
+#: help:product.category,magento_omcategory_id:0
+msgid "Outilmania category applied on products of this category."
+msgstr "Outilmania category applied on products of this category."
+
+#. module: specific_magento
+#: sql_constraint:product.product:0
+msgid "The code must be unique"
+msgstr "The code must be unique"
+
+#. module: specific_magento
+#: constraint:product.category:0
+msgid "Error ! You cannot create recursive categories."
+msgstr "Erreur! Vous ne pouvez pas créer de catégories récursives"
+
+#. module: specific_magento
+#: sql_constraint:product.product:0
+msgid "The Magento SKU should be uniq!"
+msgstr "The Magento SKU should be uniq!"
+
+#. module: specific_magento
+#: model:ir.actions.act_window,name:specific_magento.action_order_tree_cash
+#: model:ir.ui.menu,name:specific_magento.menu_action_order_tree_cash
+msgid "Sales Order Cash On Delivery"
+msgstr "Sales Order Cash On Delivery"
+
+#. module: specific_magento
+#: field:product.category,magento_rdc_category_default:0
+msgid "Rue Du Commerce Parent Category"
+msgstr "Rue Du Commerce Parent Category"
+
+#. module: specific_magento
+#: constraint:product.product:0
+msgid "Error: Invalid ean code"
+msgstr "Erreur: code EAN invalide"
+
+#. module: specific_magento
+#: model:ir.model,name:specific_magento.model_sale_shop
+#: view:sale.shop:0
+msgid "Sale Shop"
+msgstr "Point de vente"
+
+#. module: specific_magento
+#: selection:product.product,magerp_rdc_active:0
+msgid "Yes"
+msgstr "Yes"
+
+#. module: specific_magento
+#: model:ir.model,name:specific_magento.model_magerp_product_attributes
+msgid "Attributes of products"
+msgstr "Attributes of products"
+

@@ -1,0 +1,201 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* specific_fct
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 6.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-07-25 15:17+0000\n"
+"PO-Revision-Date: 2012-07-25 15:17+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: specific_fct
+#: sql_constraint:sale.order:0
+msgid "Order Reference must be unique per Company!"
+msgstr "La référence de commande doit être unique par société!"
+
+#. module: specific_fct
+#: view:stock.picking:0
+msgid "More..."
+msgstr "More..."
+
+#. module: specific_fct
+#: sql_constraint:product.product:0
+msgid "The Magento SKU should be uniq!"
+msgstr "The Magento SKU should be uniq!"
+
+#. module: specific_fct
+#: view:product.product:0
+msgid "Accounting"
+msgstr "Comptabilité"
+
+#. module: specific_fct
+#: field:res.partner,siret:0
+msgid "Siret"
+msgstr "Siret"
+
+#. module: specific_fct
+#: model:ir.model,name:specific_fct.model_product_product
+msgid "Product"
+msgstr "Produit"
+
+#. module: specific_fct
+#: constraint:res.partner:0
+msgid "Error msg in raise"
+msgstr "Error msg in raise"
+
+#. module: specific_fct
+#: field:sale.order,date_invoiced:0
+msgid "Invoice Date"
+msgstr "Invoice Date"
+
+#. module: specific_fct
+#: sql_constraint:res.partner:0
+msgid "A partner already exists with this email address on the selected website."
+msgstr "A partner already exists with this email address on the selected website."
+
+#. module: specific_fct
+#: model:ir.model,name:specific_fct.model_stock_partial_picking
+msgid "Partial Picking"
+msgstr "Traitement partiel"
+
+#. module: specific_fct
+#: model:ir.model,name:specific_fct.model_product_images
+msgid "Products Image gallery"
+msgstr "Products Image gallery"
+
+#. module: specific_fct
+#: code:addons/specific_fct/statement.py:74
+#: code:addons/specific_fct/statement.py:86
+#, python-format
+msgid "Line named \"%s\" (Ref:%s) was matched by more than one partner."
+msgstr "Line named \"%s\" (Ref:%s) was matched by more than one partner."
+
+#. module: specific_fct
+#: sql_constraint:product.images:0
+msgid "A product can have only one image with the same name"
+msgstr "A product can have only one image with the same name"
+
+#. module: specific_fct
+#: model:ir.model,name:specific_fct.model_sale_order
+msgid "Sale Order"
+msgstr "Commande client"
+
+#. module: specific_fct
+#: model:email.template,subject:specific_fct.email_template_customer_invoice
+msgid "Your invoice (reference: ${object.number})"
+msgstr "Votre facture (reference: ${object.number})"
+
+#. module: specific_fct
+#: sql_constraint:product.product:0
+msgid "Default code should be uniq"
+msgstr "Default code should be uniq"
+
+#. module: specific_fct
+#: model:ir.model,name:specific_fct.model_account_statement_completion_rule
+msgid "account.statement.completion.rule"
+msgstr "account.statement.completion.rule"
+
+#. module: specific_fct
+#: view:stock.picking:0
+msgid "With carrier"
+msgstr "With carrier"
+
+#. module: specific_fct
+#: model:email.template,report_name:specific_fct.email_template_customer_invoice
+msgid "invoice_${object.number}"
+msgstr "facture_${object.number}"
+
+#. module: specific_fct
+#: sql_constraint:stock.picking:0
+msgid "Reference must be unique per Company!"
+msgstr "La référence doit être unique par société !"
+
+#. module: specific_fct
+#: code:addons/specific_fct/product.py:50
+#, python-format
+msgid "Error"
+msgstr "Error"
+
+#. module: specific_fct
+#: code:addons/specific_fct/sale.py:138
+#, python-format
+msgid "This product has been added in the delivery order %s"
+msgstr "This product has been added in the delivery order %s"
+
+#. module: specific_fct
+#: field:stock.partial.picking,no_confirm:0
+msgid "Split only.\n"
+"            Leave the Delivery Orders in \"Ready to Process\" state."
+msgstr "Split only.\n"
+"            Leave the Delivery Orders in \"Ready to Process\" state."
+
+#. module: specific_fct
+#: model:email.template,body_text:specific_fct.email_template_customer_invoice
+msgid "Dear ${object.partner_id.name},\n"
+"Thank you for purchasing.\n"
+"Please find enclosed your invoice with reference ${object.name}.\n"
+"\n"
+"Best Regards,\n"
+"Debonix"
+msgstr "Bonjour,\n"
+"Nous vous remercions pour votre achat.\n"
+"Votre commande vient d'être expédiée, vous devriez la réceptionner sous un délai maximum de 48h.\n"
+"Veuillez trouver ci-joint votre facture ${object.name}.\n"
+"\n"
+"Cordialement,\n"
+"\n"
+"Merci et à bientôt sur www.debonix.fr \n"
+"\n"
+"DEBONIX 25,\n"
+"Avenue du Pont de Tasset\n"
+"74960 MEYTHET Tel: 04.50.09.46.87\n"
+"Fax: 04.82.53.13.88\n"
+"Email: contact@debonix.fr"
+
+#. module: specific_fct
+#: view:stock.picking:0
+msgid "Without carrier"
+msgstr "Without carrier"
+
+#. module: specific_fct
+#: help:sale.order,date_invoiced:0
+msgid "Date of the first invoice generated for this SO"
+msgstr "Date of the first invoice generated for this SO"
+
+#. module: specific_fct
+#: model:ir.actions.server,name:specific_fct.send_invoice_mail
+msgid "Send an email with invoice after delivery"
+msgstr "Send an email with invoice after delivery"
+
+#. module: specific_fct
+#: sql_constraint:product.product:0
+msgid "The code must be unique"
+msgstr "The code must be unique"
+
+#. module: specific_fct
+#: model:ir.model,name:specific_fct.model_stock_picking
+msgid "Packing List"
+msgstr "Liste de colisage"
+
+#. module: specific_fct
+#: constraint:product.product:0
+msgid "Error: Invalid ean code"
+msgstr "Erreur: code EAN invalide"
+
+#. module: specific_fct
+#: model:ir.model,name:specific_fct.model_res_partner
+msgid "Partner"
+msgstr "Partenaire"
+
+#. module: specific_fct
+#: model:ir.model,name:specific_fct.model_sale_order_line
+msgid "Sale Order line"
+msgstr "Ligne de commande"
+
