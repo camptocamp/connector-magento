@@ -53,7 +53,7 @@ class StockItProductExport(osv.osv_memory):
         logger.notifyChannel(
                              _("Stockit Product Export"),
                              netsvc.LOG_ERROR,
-                             _("Error exporting product file : %s" % (err_msg,)))
+                             _("Error exporting product file : %s") % (err_msg,))
 
         request = self.pool.get('res.request')
         summary = _("Stock-it product export failed\n"

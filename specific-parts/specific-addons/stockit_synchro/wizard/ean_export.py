@@ -54,7 +54,7 @@ class StockItProductEANExport(osv.osv_memory):
         logger.notifyChannel(
                              _("Stockit Product EAN13 Export"),
                              netsvc.LOG_ERROR,
-                             _("Error exporting product ean13 file : %s" % (err_msg,)))
+                             _("Error exporting product ean13 file : %s") % (err_msg,))
 
         request = self.pool.get('res.request')
         summary = _("Stock-it product export EAN13 failed\n"

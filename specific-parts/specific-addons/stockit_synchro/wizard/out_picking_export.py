@@ -56,7 +56,7 @@ class StockItOutPickingExport(osv.osv_memory):
         logger.notifyChannel(
                              _("Stockit Outgoing Picking Export"),
                              netsvc.LOG_ERROR,
-                             _("Error exporting outgoing pickings file : %s" % (err_msg,)))
+                             _("Error exporting outgoing pickings file : %s") % (err_msg,))
 
         request = self.pool.get('res.request')
         summary = _("Stock-it outgoing pickings failed\n"

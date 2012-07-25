@@ -333,7 +333,7 @@ class StockItInPickingImport(osv.osv_memory):
         logger.notifyChannel(
                              _("Stockit ingoing picking import"),
                              netsvc.LOG_ERROR,
-                             _("Error importing ingoing picking file %s : %s" % (file, err_msg)))
+                             _("Error importing ingoing picking file %s : %s") % (file, err_msg))
 
         request = self.pool.get('res.request')
         summary = _("Stock-it ingoing picking import failed on file : %s\n"

@@ -191,7 +191,7 @@ class StockItInventoryImport(osv.osv_memory):
         logger.notifyChannel(
                              _("Stockit inventory import"),
                              netsvc.LOG_ERROR,
-                             _("Error importing inventory file %s : %s" % (file, err_msg)))
+                             _("Error importing inventory file %s : %s") % (file, err_msg))
 
         request = self.pool.get('res.request')
         summary = _("Stock-it inventory import failed on file : %s\n"
