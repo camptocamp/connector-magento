@@ -22,7 +22,8 @@ from osv.osv import except_osv
 from osv.orm import Model
 from tools.translate import _
 import netsvc
-logger = netsvc.Logger()
+
+from openerp.addons.account_statement_base_completion.statement import ErrorTooManyPartner
 
 class AccountStatementCompletionRule(Model):
     """
@@ -30,9 +31,9 @@ class AccountStatementCompletionRule(Model):
     _mag that is added by OpeneRP cause the bank/office doesn't know it, so
     we have most of the time not the exact number in that case.
     """
-    
+
     _inherit = "account.statement.completion.rule"
-    
+
     def _get_functions(self, cr, uid, context=None):
         res = super (AccountStatementCompletionRule, self)._get_functions(
                 cr, uid, context=context)
@@ -42,13 +43,13 @@ class AccountStatementCompletionRule(Model):
     _columns={
         'function_to_call': fields.selection(_get_functions, 'Method'),
     }
-    
-    
+
+
     def get_from_ref_and_so_with_prefix(self, cursor, uid, line_id, context=None):
         """
-        Match the partner based on the SO number (with and without '_mag' as prefix) 
-        and the reference of the statement 
-        line. Then, call the generic get_values_for_line method to complete other values. 
+        Match the partner based on the SO number (with and without '_mag' as prefix)
+        and the reference of the statement
+        line. Then, call the generic get_values_for_line method to complete other values.
         If more than one partner matched, raise the ErrorTooManyPartner error.
 
         :param int/long line_id: id of the concerned account.bank.statement.line
@@ -57,7 +58,7 @@ class AccountStatementCompletionRule(Model):
             the statement line or {}
            {'partner_id': value,
             'account_id' : value,
-            
+
             ...}
         """
         st_obj = self.pool.get('account.bank.statement.line')
@@ -89,4 +90,4 @@ class AccountStatementCompletionRule(Model):
                         partner_id = res.get('partner_id',False), line_type = st_line.type, amount = st_line.amount, context = context)
                     res.update(st_vals)
         return res
-    
+
