@@ -33,7 +33,7 @@
  'update_xml': ['wizard/stock_values_view.xml'],
  'demo_xml': [],
  'tests': [],
- 'installable': True,
+ 'installable': False,
  'auto_install': False,
  'license': 'AGPL-3',
  'application': True}

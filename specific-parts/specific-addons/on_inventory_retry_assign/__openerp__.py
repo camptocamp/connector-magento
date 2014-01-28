@@ -36,6 +36,6 @@ This naive wizard cancel availability of all packings and retry to assign them.
     "update_xml": [
                    'wizard/retry_availability_view.xml',
                    ],
-    "installable": True,
+    'installable': False,
     "active": False,
 }

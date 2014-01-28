@@ -43,5 +43,5 @@ All the specific customisations which concerns the magento connector
         'magento_data.xml',
                     ],
      "active": False,
-     "installable": True
+     'installable': False
 }

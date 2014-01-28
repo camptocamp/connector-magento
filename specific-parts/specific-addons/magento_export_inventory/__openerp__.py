@@ -48,6 +48,6 @@ And set the value of some additional fields.
     'update_xml': ['product_view.xml', 
                   ],
     'demo_xml': [],
-    'installable': True,
+    'installable': False,
     'active': False,
 }

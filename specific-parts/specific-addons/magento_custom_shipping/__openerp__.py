@@ -40,6 +40,6 @@ The magento method sales_order_shipment.create is modified to handle the product
     'init_xml': [],
     'update_xml': [],
     'demo_xml': [],
-    'installable': True,
+    'installable': False,
     'active': False,
 }

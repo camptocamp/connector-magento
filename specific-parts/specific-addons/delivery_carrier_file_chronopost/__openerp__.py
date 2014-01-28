@@ -40,6 +40,6 @@ Definition of the delivery carrier file for "Chronopost".
     'demo_xml': [],
     'test': [],
     'images': [],
-    'installable': True,
+    'installable': False,
     'auto_install': False,
 }

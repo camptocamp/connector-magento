@@ -28,6 +28,6 @@
     'update_xml': ['accounts.xml'],
     'category':'Account Charts',
     'demo_xml': [],
-    'installable': True,
+    'installable': False,
     'active': False,
 }

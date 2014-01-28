@@ -39,6 +39,6 @@ Otherwise, its coefficient is never updated.
                    'security/ir.model.access.csv',
                   ],
     'demo_xml': [],
-    'installable': True,
+    'installable': False,
     'active': False,
 }

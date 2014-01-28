@@ -47,6 +47,6 @@
                    'company_view.xml',
                    'stock_view.xml',
                    ],
-    "installable": True,
+    'installable': False,
     "active": False,
 }

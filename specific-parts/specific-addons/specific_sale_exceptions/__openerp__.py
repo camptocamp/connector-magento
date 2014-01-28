@@ -36,6 +36,6 @@
                 'res_partner_view.xml'],
  'demo_xml': [],
  'tests': [],
- 'installable': True,
+ 'installable': False,
  'auto_install': False,
  }

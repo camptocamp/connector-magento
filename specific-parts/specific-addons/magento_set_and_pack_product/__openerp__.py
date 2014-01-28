@@ -37,7 +37,7 @@ Needs customization in Magento which define how to handle each type of product. 
                 'settings/external.mappinglines.template.csv'],
  'demo_xml': [],
  'tests': [],
- 'installable': True,
+ 'installable': False,
  'auto_install': True,
  'license': 'AGPL-3',
  'application': False,

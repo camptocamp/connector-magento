@@ -45,6 +45,6 @@
                    'wizard/stock_partial_picking_view.xml',
                   ],
     'demo_xml': [],
-    'installable': True,
+    'installable': False,
     'active': False,
 }
