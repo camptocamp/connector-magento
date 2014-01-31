@@ -31,6 +31,7 @@ def impl(ctx, model_name):
         ir.ui.view
         ir.ui.menu
         ir.act_window
+        ir.actions.act_window
         ir.actions.act_window.view
         ir.act.report.xml
         ir.actions.todo
@@ -53,7 +54,12 @@ def impl(ctx, model_name):
                                              ('model', '=', model_name)])
 
     with newcr(ctx) as cr:
-        table = model_name.replace('.', '_')
+        if model_name == 'ir.actions.act_window':
+            table = 'ir_act_window'
+        elif model_name == 'ir.actions.wizard':
+            table = 'ir_act_wizard'
+        else:
+            table = model_name.replace('.', '_')
         table_delete_ids = set()
         entry_delete_ids = set()
         for entry in entries:
@@ -62,7 +68,27 @@ def impl(ctx, model_name):
             if cr.fetchone()[0]:  # the table exists
                 table_delete_ids.add(entry.res_id)
             entry_delete_ids.add(entry.id)
+        ir_values = ['%s,%d' % (model_name, tid) for tid in table_delete_ids]
+        cr.execute("DELETE FROM ir_values WHERE value in %s",
+                   (tuple(ir_values),))
         cr.execute("DELETE FROM %s WHERE id IN %%s" % table,
                    (tuple(table_delete_ids),))
         cr.execute("DELETE FROM ir_model_data WHERE id IN %s",
                    (tuple(entry_delete_ids),))
+
+
+@step('I delete the broken ir.values')
+def impl(ctx):
+    """ Remove ir.values referring to not existing actions """
+    with newcr(ctx) as cr:
+        # we'll maybe need to remove other types than
+        # ir.actions.act_window
+        cr.execute(
+            "DELETE "
+            "FROM ir_values v "
+            "WHERE NOT EXISTS ( "
+            " SELECT id FROM ir_act_window "
+            " WHERE id = replace(v.value, 'ir.actions.act_window,', '')::int) "
+            "AND key = 'action' "
+            "AND value LIKE 'ir.actions.act_window,%' "
+        )

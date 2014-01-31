@@ -13,7 +13,9 @@ Feature: Migrate the database after the OpenERP migration
     Given I delete all the ir.ui.view records created by uninstalled modules
     And I delete all the ir.ui.menu records created by uninstalled modules
     And I delete all the ir.act_window records created by uninstalled modules
+    And I delete all the ir.actions.act_window records created by uninstalled modules
     And I delete all the ir.actions.act_window.view records created by uninstalled modules
+    And I delete all the ir.actions.wizard records created by uninstalled modules
     And I delete all the ir.act.report.xml records created by uninstalled modules
     And I delete all the ir.actions.todo records created by uninstalled modules
     And I delete all the ir.cron records created by uninstalled modules
@@ -24,6 +26,7 @@ Feature: Migrate the database after the OpenERP migration
     And I delete all the ir.values records created by uninstalled modules
     And I delete all the ir.rule records created by uninstalled modules
     And I delete all the ir.rule.group records created by uninstalled modules
+    And I delete the broken ir.values
 
   Scenario: install main addons
     Given I install the required modules with dependencies:
