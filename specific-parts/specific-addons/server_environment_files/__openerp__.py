@@ -29,9 +29,6 @@
     """,
     "website": "http://www.camptocamp.com",
     "category": "Tools",
-    "init_xml": [],
-    "demo_xml": [],
-    "update_xml": [],
-    'installable': False,
-    "active": False,
+    "data": [],
+    'installable': True,
 }
