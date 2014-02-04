@@ -6,14 +6,9 @@
 "excep_customer_blocked","Error: the customer is blocked",,50,"sale.order","if order.partner_id.block_sales:
     failed = True",True
 "excep_too_low_markup_rate","Error: the markup rate is too low",,50,"sale.order","if order.markup_rate <= 20.0:
-    failed = True",True
+    failed = True",False
 "excep_credit_limit","Error: the credit limit of the customer has been reached",,50,"sale.order","partner = order.partner_id
 if partner.credit_limit and (partner.credit - partner.debit + order.amount_total) > partner.credit_limit:
    failed = True",True
 "sale_exceptions.excep_no_zip",,,,,,False
 "sale_exceptions.excep_no_stock",,,,,,False
-"base_sale_multichannels.excep_wrong_total_amount","Total Amount differs from external system","The amount computed doesn't match with the external amount because the taxes have not been configured properly (maybe some fiscal positions have changed the final price).
-Please fix it manually and check your taxes rules.
-
-NB : This check have being applied because you have checked the option ""check total amount"" on the shop of this sale order",30,"sale.order","if order.shop_id.check_total_amount and abs(order.amount_total - order.ext_total_amount) > 0.0:
-    failed = True",True

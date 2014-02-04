@@ -22,33 +22,33 @@ msgstr "A partner already exists with this email address on the selected website
 
 #. module: specific_sale_exceptions
 #: field:res.partner,block_sales:0
-msgid "Block this customer sales"
-msgstr "Block this customer sales"
+msgid "Block this customer's sales"
+msgstr "Bloquer les commandes de ce client"
 
 #. module: specific_sale_exceptions
 #: constraint:res.partner:0
 msgid "Error msg in raise"
-msgstr "Error msg in raise"
+msgstr "Message d'erreur"
 
 #. module: specific_sale_exceptions
 #: model:sale.exception,name:specific_sale_exceptions.excep_customer_blocked
 msgid "Error: the customer is blocked"
-msgstr "Erreur: le client est bloqué"
+msgstr "Erreur : le client est bloqué"
 
 #. module: specific_sale_exceptions
 #: model:sale.exception,name:specific_sale_exceptions.excep_no_product
 msgid "Error: a line of the sale order has no product"
-msgstr "Error: a line of the sale order has no product"
+msgstr "Erreur : une ligne de commande n'a pas de produit"
 
 #. module: specific_sale_exceptions
 #: model:sale.exception,name:specific_sale_exceptions.excep_credit_limit
 msgid "Error: the credit limit of the customer has been reached"
-msgstr "Error: the credit limit of the customer has been reached"
+msgstr "Erreur : la limite de crédit de ce client est atteinte"
 
 #. module: specific_sale_exceptions
 #: model:sale.exception,name:specific_sale_exceptions.excep_not_sellable
 msgid "Error: an ordered product is not in production"
-msgstr "Erreur: un produit commandé n'est pas en production"
+msgstr "Erreur : un produit commandé n'est pas en production"
 
 #. module: specific_sale_exceptions
 #: model:ir.model,name:specific_sale_exceptions.model_res_partner
@@ -58,5 +58,5 @@ msgstr "Partenaire"
 #. module: specific_sale_exceptions
 #: model:sale.exception,name:specific_sale_exceptions.excep_too_low_markup_rate
 msgid "Error: the markup rate is too low"
-msgstr "Erreur: le taux de marque est trop bas"
+msgstr "Erreur : le taux de marque est trop bas"
 

@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2012-2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -27,15 +27,15 @@
  'category': 'Generic Modules/Sale',
  'complexity': "easy",
  'depends' : ['sale_exceptions',
-              'base_sale_multichannels',
-              'sale_markup',],
+              # 'sale_markup',  TODO reactivate once migrated (and
+              # reactivate the according rule)
+              ],
  'description': """Custom and specific exceptions for the sale workflow""",
  'website': 'http://www.camptocamp.com',
- 'init_xml': [],
- 'update_xml': ['settings/sale.exception.csv',
-                'res_partner_view.xml'],
- 'demo_xml': [],
- 'tests': [],
- 'installable': False,
+ 'data': ['settings/sale.exception.csv',
+          'res_partner_view.xml',
+          ],
+ 'test': [],
+ 'installable': True,
  'auto_install': False,
  }

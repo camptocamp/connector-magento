@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2012-2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,15 +19,12 @@
 #
 ##############################################################################
 
-from osv import osv, fields
+from openerp.osv import orm, fields
 
 
-class res_partner(osv.osv):
-
+class res_partner(orm.Model):
     _inherit = 'res.partner'
 
     _columns = {
-        'block_sales': fields.boolean("Block this customer sales")
+        'block_sales': fields.boolean("Block this customer's sales"),
     }
-
-res_partner()
