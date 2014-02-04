@@ -20,19 +20,19 @@
 ##############################################################################
 
 {'name' : 'Specific Sale Exceptions',
- 'version' : '1.0',
- 'author' : 'Camptocamp',
+ 'version': '1.0',
+ 'author': 'Camptocamp',
  'maintainer': 'Camptocamp',
  'license': 'AGPL-3',
  'category': 'Generic Modules/Sale',
  'complexity': "easy",
- 'depends' : ['sale_exceptions',
-              # 'sale_markup',  TODO reactivate once migrated (and
-              # reactivate the according rule)
-              ],
+ 'depends': ['sale_exceptions',
+             # 'sale_markup',  TODO reactivate once migrated (and
+             # reactivate the according rule)
+             ],
  'description': """Custom and specific exceptions for the sale workflow""",
  'website': 'http://www.camptocamp.com',
- 'data': ['settings/sale.exception.csv',
+ 'data': ['sale_exception_data.xml',
           'res_partner_view.xml',
           ],
  'test': [],
