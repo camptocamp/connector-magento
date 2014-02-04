@@ -1,7 +1,5 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-        <delete model="base.sale.payment.type" id="magentoerpconnect.payment_type1"/>
-        <delete model="base.sale.payment.type" id="magentoerpconnect.payment_type2"/>
     </data>
 </openerp>

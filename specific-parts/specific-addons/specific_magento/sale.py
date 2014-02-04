@@ -19,8 +19,8 @@
 #
 ##############################################################################
 
-from osv import osv
-from tools.translate import _
+# from osv import osv
+# from tools.translate import _
 
 
 #TODO reimplement after implementation of the new markup module
@@ -52,25 +52,25 @@ from tools.translate import _
 #sale_order()
 
 
-class sale_shop(osv.osv):
+# class sale_shop(osv.osv):
 
-    _inherit = 'sale.shop'
+#     _inherit = 'sale.shop'
 
-    def deactivate_products(self, cr, uid, context=None):
-        """
-        Deactivate all products planned to deactivation on OpenERP
-        Only if no picking uses the product
-        """
-        product_ids = self.pool.get('product.product').search(
-            cr, uid, [('to_deactivate', '=', True)])
-        self.pool.get('product.product').try_deactivate_product(
-            cr, uid, product_ids, context=context)
-        return True
+#     def deactivate_products(self, cr, uid, context=None):
+#         """
+#         Deactivate all products planned to deactivation on OpenERP
+#         Only if no picking uses the product
+#         """
+#         product_ids = self.pool.get('product.product').search(
+#             cr, uid, [('to_deactivate', '=', True)])
+#         self.pool.get('product.product').try_deactivate_product(
+#             cr, uid, product_ids, context=context)
+#         return True
 
-    def export_catalog(self, cr, uid, ids, context=None):
-        res = super(sale_shop, self).export_catalog(
-            cr, uid, ids, context=context)
-        self.deactivate_products(cr, uid, context=context)
-        return res
+#     def export_catalog(self, cr, uid, ids, context=None):
+#         res = super(sale_shop, self).export_catalog(
+#             cr, uid, ids, context=context)
+#         self.deactivate_products(cr, uid, context=context)
+#         return res
 
-sale_shop()
+# sale_shop()

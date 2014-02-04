@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,21 +19,18 @@
 #
 ##############################################################################
 
-{'name' : 'Magento Connector Customization',
- 'version' : '1.0',
- 'author' : 'Camptocamp',
- 'license': 'AGPL-3',
- 'category': 'Connector',
- 'depends' : ['magentoerpconnect',
-              ],
- 'description': """
-Magento Connector Customization
-===============================
+from openerp.osv import orm
 
- """,
- 'website': 'http://www.camptocamp.com',
- 'data': [],
- 'test': [],
- 'installable': True,
- 'auto_install': False,
-}
+
+class magento_backend(orm.Model):
+    _inherit = 'magento.backend'
+
+    def select_versions(self, cr, uid, context=None):
+        """ Available versions in the backend.
+
+        Can be inherited to add custom versions.
+        """
+        versions = super(magento_backend, self).\
+            select_versions(cr, uid, context=context)
+        versions.append(('1.7-debonix', '1.7 - Debonix'))
+        return versions

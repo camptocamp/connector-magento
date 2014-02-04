@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,21 +19,9 @@
 #
 ##############################################################################
 
-{'name' : 'Magento Connector Customization',
- 'version' : '1.0',
- 'author' : 'Camptocamp',
- 'license': 'AGPL-3',
- 'category': 'Connector',
- 'depends' : ['magentoerpconnect',
-              ],
- 'description': """
-Magento Connector Customization
-===============================
+import openerp.addons.connector.backend as backend
+import openerp.addons.magentoerpconnect.backend as magento_backend
 
- """,
- 'website': 'http://www.camptocamp.com',
- 'data': [],
- 'test': [],
- 'installable': True,
- 'auto_install': False,
-}
+
+magento_debonix = backend.Backend(parent=magento_backend.magento1700,
+                                  version='1.7-debonix')

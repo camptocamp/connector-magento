@@ -5,72 +5,72 @@
     <!-- weird thing, cannot open sale.shop if no search
     view exists, but this problem does not occurs on other
     magentoerpconnect installations -->
-    <record id="view_sale_shop_magento_search" model="ir.ui.view">
-        <field name="name">sale.shop.magento.search</field>
-        <field name="model">sale.shop</field>
-        <field name="type">search</field>
-        <field name="arch" type="xml">
-            <search string="Sale Shop">
-                <field name="name"/>
-            </search>
-        </field>
-    </record>
+    <!-- <record id="view_sale_shop_magento_search" model="ir.ui.view"> -->
+    <!--     <field name="name">sale.shop.magento.search</field> -->
+    <!--     <field name="model">sale.shop</field> -->
+    <!--     <field name="type">search</field> -->
+    <!--     <field name="arch" type="xml"> -->
+    <!--         <search string="Sale Shop"> -->
+    <!--             <field name="name"/> -->
+    <!--         </search> -->
+    <!--     </field> -->
+    <!-- </record> -->
 
-    <record model="ir.ui.view" id="base_sale_multichannel_view_order_form">
-        <field name="name">base_sale_multichannel_view_order_form</field>
-        <field name="model">sale.order</field>
-        <field name="inherit_id" ref="base_sale_multichannels.base_sale_multichannel_view_order_form" />
-        <field name="type">form</field>
-        <field name="arch" type="xml">
-            <field name="ext_payment_method" position="attributes">
-                <attribute name="groups">base.group_sale_manager</attribute>
-            </field>
-        </field>
-    </record>
+    <!-- <record model="ir.ui.view" id="base_sale_multichannel_view_order_form"> -->
+    <!--     <field name="name">base_sale_multichannel_view_order_form</field> -->
+    <!--     <field name="model">sale.order</field> -->
+    <!--     <field name="inherit_id" ref="base_sale_multichannels.base_sale_multichannel_view_order_form" /> -->
+    <!--     <field name="type">form</field> -->
+    <!--     <field name="arch" type="xml"> -->
+    <!--         <field name="ext_payment_method" position="attributes"> -->
+    <!--             <attribute name="groups">base.group_sale_manager</attribute> -->
+    <!--         </field> -->
+    <!--     </field> -->
+    <!-- </record> -->
 
-    <menuitem id="menu_sale_order_filters" parent="base.menu_sales" name="Sales Orders Filters"/>
+    <!-- <menuitem id="menu_sale_order_filters" parent="base.menu_sales" name="Sales Orders Filters"/> -->
 
-    <record id="action_order_tree_cheque" model="ir.actions.act_window">
-      <field name="name">Sales Order Waiting Cheque</field>
-      <field name="type">ir.actions.act_window</field>
-      <field name="res_model">sale.order</field>
-      <field name="view_type">form</field>
-      <field name="domain">[('state','=','draft'),('ext_payment_method','in',['checkmo','chequethreetimes','chequefivetimes'])]</field>
-      <field name="view_mode">tree,form,calendar,graph</field>
-    </record>
-    <menuitem action="action_order_tree_cheque" id="menu_action_order_tree_cheque" parent="menu_sale_order_filters"/>
+    <!-- <record id="action_order_tree_cheque" model="ir.actions.act_window"> -->
+    <!--   <field name="name">Sales Order Waiting Cheque</field> -->
+    <!--   <field name="type">ir.actions.act_window</field> -->
+    <!--   <field name="res_model">sale.order</field> -->
+    <!--   <field name="view_type">form</field> -->
+    <!--   <field name="domain">[('state','=','draft'),('ext_payment_method','in',['checkmo','chequethreetimes','chequefivetimes'])]</field> -->
+    <!--   <field name="view_mode">tree,form,calendar,graph</field> -->
+    <!-- </record> -->
+    <!-- <menuitem action="action_order_tree_cheque" id="menu_action_order_tree_cheque" parent="menu_sale_order_filters"/> -->
 
-    <record id="action_order_tree_vir" model="ir.actions.act_window">
-      <field name="name">Sales Order Waiting Transfer</field>
-      <field name="type">ir.actions.act_window</field>
-      <field name="res_model">sale.order</field>
-      <field name="view_type">form</field>
-      <field name="domain">[('state','=','draft'),('ext_payment_method','in',['oney_oney4x','receiveandpay_cb',
-        'receiveandpay_cr','amazon','oney_oney3x'])]</field>
-      <field name="view_mode">tree,form,calendar,graph</field>
-    </record>
-    <menuitem action="action_order_tree_vir" id="menu_action_order_tree_vir" parent="menu_sale_order_filters"/>
+    <!-- <record id="action_order_tree_vir" model="ir.actions.act_window"> -->
+    <!--   <field name="name">Sales Order Waiting Transfer</field> -->
+    <!--   <field name="type">ir.actions.act_window</field> -->
+    <!--   <field name="res_model">sale.order</field> -->
+    <!--   <field name="view_type">form</field> -->
+    <!--   <field name="domain">[('state','=','draft'),('ext_payment_method','in',['oney_oney4x','receiveandpay_cb', -->
+    <!--     'receiveandpay_cr','amazon','oney_oney3x'])]</field> -->
+    <!--   <field name="view_mode">tree,form,calendar,graph</field> -->
+    <!-- </record> -->
+    <!-- <menuitem action="action_order_tree_vir" id="menu_action_order_tree_vir" parent="menu_sale_order_filters"/> -->
 
-    <record id="action_order_tree_cash" model="ir.actions.act_window">
-      <field name="name">Sales Order Cash On Delivery</field>
-      <field name="type">ir.actions.act_window</field>
-      <field name="res_model">sale.order</field>
-      <field name="view_type">form</field>
-      <field name="domain">[('state','not in',['cancel','done']),('ext_payment_method','=','cashondelivery')]</field>
-      <field name="view_mode">tree,form,calendar,graph</field>
-    </record>
-    <menuitem action="action_order_tree_cash" id="menu_action_order_tree_cash" parent="menu_sale_order_filters"/>
+    <!-- <record id="action_order_tree_cash" model="ir.actions.act_window"> -->
+    <!--   <field name="name">Sales Order Cash On Delivery</field> -->
+    <!--   <field name="type">ir.actions.act_window</field> -->
+    <!--   <field name="res_model">sale.order</field> -->
+    <!--   <field name="view_type">form</field> -->
+    <!--   <field name="domain">[('state','not in',['cancel','done']),('ext_payment_method','=','cashondelivery')]</field> -->
+    <!--   <field name="view_mode">tree,form,calendar,graph</field> -->
+    <!-- </record> -->
+    <!-- <menuitem action="action_order_tree_cash" id="menu_action_order_tree_cash" parent="menu_sale_order_filters"/> -->
 
-    <record id="action_order_tree_1000" model="ir.actions.act_window">
-      <field name="name">Sales Order &gt;1000 EUR HT (cybermut,atos_several,cashondelivery)</field>
-      <field name="type">ir.actions.act_window</field>
-      <field name="res_model">sale.order</field>
-      <field name="view_type">form</field>
-      <field name="domain">[('state','not in',['cancel','done']),('amount_untaxed','&gt;',1000),
-        ('ext_payment_method','in',['cybermut_payment','atos_several','cashondelivery'])]</field>
-      <field name="view_mode">tree,form,calendar,graph</field>
-    </record>
-    <menuitem action="action_order_tree_1000" id="menu_action_order_tree_1000" parent="menu_sale_order_filters"/>
+    <!-- <record id="action_order_tree_1000" model="ir.actions.act_window"> -->
+    <!--   <field name="name">Sales Order &gt;1000 EUR HT (cybermut,atos_several,cashondelivery)</field> -->
+    <!--   <field name="type">ir.actions.act_window</field> -->
+    <!--   <field name="res_model">sale.order</field> -->
+    <!--   <field name="view_type">form</field> -->
+    <!--   <field name="domain">[('state','not in',['cancel','done']),('amount_untaxed','&gt;',1000), -->
+    <!--     ('ext_payment_method','in',['cybermut_payment','atos_several','cashondelivery'])]</field> -->
+    <!--   <field name="view_mode">tree,form,calendar,graph</field> -->
+    <!-- </record> -->
+    <!-- <menuitem action="action_order_tree_1000" id="menu_action_order_tree_1000" parent="menu_sale_order_filters"/> -->
 
 
   </data>

@@ -2,56 +2,56 @@
 <openerp>
   <data>
 
-    <record id="product_product_tree_view_add_search_marque" model="ir.ui.view">
-      <field name="name">product.product.tree</field>
-      <field name="model">product.product</field>
-      <field name="inherit_id" ref="product.product_product_tree_view" />
-      <field name="type">tree</field>
-      <field name="arch" type="xml">
-        <data>
-          <field name="state" position="after">
-            <field name="x_magerp_zdbx_default_marque" select="1" invisible="1"/>
-          </field>
-        </data>
-      </field>
-    </record>
+<!--     <record id="product_product_tree_view_add_search_marque" model="ir.ui.view"> -->
+<!--       <field name="name">product.product.tree</field> -->
+<!--       <field name="model">product.product</field> -->
+<!--       <field name="inherit_id" ref="product.product_product_tree_view" /> -->
+<!--       <field name="type">tree</field> -->
+<!--       <field name="arch" type="xml"> -->
+<!--         <data> -->
+<!--           <field name="state" position="after"> -->
+<!--             <field name="x_magerp_zdbx_default_marque" select="1" invisible="1"/> -->
+<!--           </field> -->
+<!--         </data> -->
+<!--       </field> -->
+<!--     </record> -->
 
-    <record id="product_normal_form_view_to_deactivate" model="ir.ui.view">
-      <field name="name">product.product.form.to_deactivate</field>
-      <field name="model">product.product</field>
-      <field name="inherit_id" ref="product.product_normal_form_view" />
-      <field name="type">form</field>
-      <field name="arch" type="xml">
-        <data>
-          <field name="active" select="2" position="after">
-            <field name="to_deactivate"/>
-          </field>
-          <field name="purchase_ok" position="after">
-            <field name="magerp_rdc_active"/>
-          </field>
-        </data>
-      </field>
-    </record>
+<!--     <record id="product_normal_form_view_to_deactivate" model="ir.ui.view"> -->
+<!--       <field name="name">product.product.form.to_deactivate</field> -->
+<!--       <field name="model">product.product</field> -->
+<!--       <field name="inherit_id" ref="product.product_normal_form_view" /> -->
+<!--       <field name="type">form</field> -->
+<!--       <field name="arch" type="xml"> -->
+<!--         <data> -->
+<!--           <field name="active" select="2" position="after"> -->
+<!--             <field name="to_deactivate"/> -->
+<!--           </field> -->
+<!--           <field name="purchase_ok" position="after"> -->
+<!--             <field name="magerp_rdc_active"/> -->
+<!--           </field> -->
+<!--         </data> -->
+<!--       </field> -->
+<!--     </record> -->
 
-    <record id="product_category_form_view_magerp2_specific" model="ir.ui.view">
-      <field name="name">product.category.form_view_magerp2.specific</field>
-      <field name="model">product.category</field>
-      <field name="inherit_id" ref="magentoerpconnect.product_category_form_view_magerp2" />
-      <field name="type">form</field>
-      <field name="arch" type="xml">
-        <data>
-          <page string="Display Settings" position="after">
-            <page string="Products Configuration">
-              <separator string="Products Attributes" colspan="4" />
-              <field name="magento_rdc_category" />
-              <field name="magento_rdc_category_default" />
-              <field name="magento_omcategory_id" />
-              <field name="magento_omcategory_default_id" />
-            </page>
-          </page>
-        </data>
-      </field>
-    </record>
+<!--     <record id="product_category_form_view_magerp2_specific" model="ir.ui.view"> -->
+<!--       <field name="name">product.category.form_view_magerp2.specific</field> -->
+<!--       <field name="model">product.category</field> -->
+<!--       <field name="inherit_id" ref="magentoerpconnect.product_category_form_view_magerp2" /> -->
+<!--       <field name="type">form</field> -->
+<!--       <field name="arch" type="xml"> -->
+<!--         <data> -->
+<!--           <page string="Display Settings" position="after"> -->
+<!--             <page string="Products Configuration"> -->
+<!--               <separator string="Products Attributes" colspan="4" /> -->
+<!--               <field name="magento_rdc_category" /> -->
+<!--               <field name="magento_rdc_category_default" /> -->
+<!--               <field name="magento_omcategory_id" /> -->
+<!--               <field name="magento_omcategory_default_id" /> -->
+<!--             </page> -->
+<!--           </page> -->
+<!--         </data> -->
+<!--       </field> -->
+<!--     </record> -->
 
   </data>
 </openerp>
