@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2011-2012 Camptocamp SA
+#    Copyright 2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,28 +19,19 @@
 #
 ##############################################################################
 
-from osv import osv, fields
+from openerp.osv import orm, fields
 
 
-class base_sale_payment_type(osv.osv):
+class payment_method(orm.Model):
+    _inherit = 'payment.method'
 
-    _inherit = 'base.sale.payment.type'
-
-    def get_priority_selection(self, cr, uid, context=None):
-        """
-        Add a special priority "9" in the packing priorities for stockit
-        """
-        res = super(base_sale_payment_type, self).get_priority_selection(
-            cr, uid, context=context)
-        new_selection = list(res)
-        # special priority used for stockit,
-        # stockit has no other mean to now the product is for a shop
-        new_selection.append(('9', 'SHOP'))
-        return tuple(new_selection)
+    def __selection_priority(self, cr, uid, context=None):
+        picking_obj = self.pool['stock.picking']
+        return picking_obj.get_selection_priority(cr, uid, context=context)
 
     _columns = {
-        'packing_priority':
-            fields.selection(get_priority_selection, 'Packing Priority')
+        'picking_priority': fields.selection(
+            __selection_priority,
+            'Delivery Orders Priority',
+            help='The priority of the picking'),
     }
-
-base_sale_payment_type()

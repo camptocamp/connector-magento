@@ -127,7 +127,7 @@ class StockItOutPickingExport(osv.osv_memory):
 
         only_from_location = company.stockit_out_pick_exp_location_id
 
-        priority_mapping = {'1': 'BASSE', '2': 'NORMALE', '3': 'HAUTE', '9': 'SHOP'}
+        priority_mapping = {'0': 'BASSE', '1': 'NORMALE', '2': 'HAUTE', '9': 'SHOP'}
         rows = []
 
         force_pickings = False
@@ -190,7 +190,7 @@ class StockItOutPickingExport(osv.osv_memory):
                            str(qty),  # quantity
                            picking.priority and
                            priority_mapping[picking.priority] or
-                           picking.priority['2'], ]  # priority
+                           picking.priority['1'], ]  # priority
                     rows.append(row)
             picking_obj.write(cr,
                               uid,

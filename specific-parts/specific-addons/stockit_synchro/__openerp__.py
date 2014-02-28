@@ -26,7 +26,8 @@
                 'stock',
                 'delivery',
                 'product_multi_ean',
-                'packing_priority_on_payment_type', ],
+                'picking_priority_on_payment_method',
+                ],
     "author": "Camptocamp",
     "license": 'AGPL-3',
     "description": """Synchro with stock-it (stock management)
@@ -48,5 +49,4 @@
                    'stock_view.xml',
                    ],
     'installable': False,
-    "active": False,
 }

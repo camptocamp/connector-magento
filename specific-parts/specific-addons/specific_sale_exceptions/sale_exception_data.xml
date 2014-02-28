@@ -58,7 +58,7 @@
 
     <record id="excep_not_sellable" model="sale.exception">
       <field name="code">if line.product_id and line.product_id.state != 'sellable':
-failed = True</field>
+    failed = True</field>
     </record>
 
     <record id="excep_no_product" model="sale.exception">
@@ -79,7 +79,7 @@ failed = True</field>
    <record id="excep_credit_limit" model="sale.exception">
       <field name="code">partner = order.partner_id
 if partner.credit_limit and (partner.credit - partner.debit + order.amount_total) > partner.credit_limit:
-   failed = True</field>
+    failed = True</field>
     </record>
 
   </data>

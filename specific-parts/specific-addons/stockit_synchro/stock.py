@@ -26,12 +26,16 @@ class stock_picking(osv.osv):
 
     _inherit = "stock.picking"
 
-    def __init__(self, pool, cr):
-        """ Add the stockit status in the available states """
-        super(stock_picking, self).__init__(pool, cr)
-        stockit_state = ('stockit_confirm', 'Confirmed by Stock-it')
-        if stockit_state not in self._columns['state'].selection:
-            self._columns['state'].selection.append(stockit_state)
+    def get_selection_priority(self, cr, uid, context=None):
+        """ Add a Shop priority.
+
+        This is a special priority for Stockit
+
+        """
+        selection = super(stock_picking, self).get_selection_priority(
+            cr, uid, context=context)
+        selection.append(('9', 'Shop'))
+        return selection
 
     _columns = {
         'stockit_outdated': fields.boolean('Stockit outdated'),
