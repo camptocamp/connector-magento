@@ -17,6 +17,7 @@ def newcr(ctx):
             yield cr
         except:
             cr.rollback()
+            raise
         else:
             cr.commit()
 
@@ -65,7 +66,7 @@ def impl(ctx, model_name):
         for entry in entries:
             cr.execute("SELECT * FROM information_schema.tables "
                        "WHERE table_name = %s", (table,))
-            if cr.fetchone()[0]:  # the table exists
+            if cr.fetchone():  # the table exists
                 table_delete_ids.add(entry.res_id)
             entry_delete_ids.add(entry.id)
         ir_values = ['%s,%d' % (model_name, tid) for tid in table_delete_ids]

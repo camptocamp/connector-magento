@@ -19,6 +19,8 @@ Feature: install and configure the modules related to the magento connector
          | version             | 1.7-debonix                                                                      |
          | warehouse_id        | by oid: stock.warehouse0                                                         |
          | default_lang_id     | by code: fr_FR                                                                   |
+         # TODO set to immediately usable
+         # | product_stock_field_id | by oid: 
     And I press the button "synchronize_metadata"
 
   Scenario: migrate the products categories external ids
