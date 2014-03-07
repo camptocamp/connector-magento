@@ -5,7 +5,6 @@
             <field name="name">stock.picking.in.form.stockit</field>
             <field name="model">stock.picking</field>
             <field name="inherit_id" ref="stock.view_picking_in_form"/>
-            <field name="type">form</field>
             <field name="arch" type="xml">
                 <data>
                     <button name="action_process" position="replace">
@@ -22,7 +21,6 @@
             <field name="name">stock.picking.out.form.stockit</field>
             <field name="model">stock.picking</field>
             <field name="inherit_id" ref="stock.view_picking_out_form"/>
-            <field name="type">form</field>
             <field name="arch" type="xml">
                 <data>
                     <page string="Additional info" position="inside">
@@ -36,7 +34,6 @@
             <field name="name">stock.picking.in.search,stockit</field>
             <field name="model">stock.picking</field>
             <field name="inherit_id" ref="stock.view_picking_in_search"/>
-            <field name="type">form</field>
             <field name="arch" type="xml">
                 <data>
                     <filter name="to_invoice" position="after">
@@ -45,6 +42,6 @@
                     </filter>
                 </data>
             </field>
-        </record>        
+        </record>
     </data>
 </openerp>

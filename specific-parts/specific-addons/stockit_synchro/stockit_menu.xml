@@ -6,7 +6,7 @@
             name="Stock-it"
             id="menu_stockit_main"
             parent="stock.menu_stock_root"
-            sequence="200"
+            sequence="90"
             />
 
         <menuitem

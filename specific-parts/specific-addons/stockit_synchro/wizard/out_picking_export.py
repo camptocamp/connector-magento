@@ -19,20 +19,23 @@
 #
 ##############################################################################
 
-import os
-from datetime import datetime
 import base64
+import logging
+import os
 
-import netsvc
-import wizard
-import pooler
+from datetime import datetime
 
-from osv import osv, fields
-from tools.translate import _
-from stockit_synchro.stockit_exporter.exporter import StockitExporter
+from openerp import pooler
+
+from openerp.osv import orm, fields
+from openerp.tools.translate import _
+from ..stockit_exporter.exporter import StockitExporter
 
 
-class StockItOutPickingExport(osv.osv_memory):
+_logger = logging.getLogger(__name__)
+
+
+class StockItOutPickingExport(orm.TransientModel):
     _name = 'stockit.export.out.picking'
     _description = 'Export outgoing pickings in Stock iT format'
 
@@ -41,6 +44,7 @@ class StockItOutPickingExport(osv.osv_memory):
     }
 
     def action_manual_export(self, cr, uid, ids, context=None):
+        assert len(ids) == 1
         rows = self._get_data(cr, uid, [], context=context)
         exporter = StockitExporter()
         data = exporter.get_csv_data(rows)
@@ -49,15 +53,20 @@ class StockItOutPickingExport(osv.osv_memory):
                             ids,
                             {'data': base64.encodestring(data)},
                             context=context)
-        return result
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'view_mode': 'form',
+            'view_type': 'form',
+            'res_id': ids[0],
+            'views': [(False, 'form')],
+            'target': 'new',
+        }
 
     def create_request_error(self, cr, uid, err_msg, context=None):
-        logger = netsvc.Logger()
-        logger.notifyChannel(
-                             _("Stockit Outgoing Picking Export"),
-                             netsvc.LOG_ERROR,
-                             _("Error exporting outgoing pickings file : %s") % (err_msg,))
+        _logger.error("Error exporting outgoing pickings file: %s", err_msg)
 
+        # TODO post a message
         request = self.pool.get('res.request')
         summary = _("Stock-it outgoing pickings failed\n"
                     "With error:\n"
@@ -77,9 +86,9 @@ class StockItOutPickingExport(osv.osv_memory):
         """
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
-        if not company.stockit_base_path or not \
-            company.stockit_out_picking_export:
-            raise osv.except_osv(
+        if (not company.stockit_base_path or not
+                company.stockit_out_picking_export):
+            raise orm.except_orm(
                 _('Error'),
                 _('Stockit path is not configured on company.'))
         filename = "out_picking_export_with_id_%s.csv" % \
@@ -96,7 +105,7 @@ class StockItOutPickingExport(osv.osv_memory):
             exporter = StockitExporter(filepath)
             data = exporter.get_csv_data(rows)
             exporter.export_file(data)
-        except Exception, e:
+        except Exception as e:
             mycursor.rollback()
             self.create_request_error(cr, uid, str(e), context)
             raise
@@ -123,7 +132,9 @@ class StockItOutPickingExport(osv.osv_memory):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
         if not company.stockit_out_pick_exp_location_id:
-            raise osv.except_osv(_('Error'), _('Stock Location to export is not configured on the company.'))
+            raise orm.except_orm(
+                _('Error'),
+                _('Stock Location to export is not configured on the company.'))
 
         only_from_location = company.stockit_out_pick_exp_location_id
 
@@ -182,15 +193,15 @@ class StockItOutPickingExport(osv.osv_memory):
                     if only_from_location and line.location_id.id != only_from_location.id:
                         continue  # skip line if stock location is not the one to export
                     qty = line.state != 'cancel' and line.product_qty or 0.0
+                    priority = (priority_mapping[picking.priority]
+                                if picking.priority else picking.priority['1'])
                     row = ['S',  # type
                            str(picking.id),  # unique id
                            name[:18],  # ref/name
                            line.date,  # scheduled date / move date
                            line.product_id.default_code,  # product code
                            str(qty),  # quantity
-                           picking.priority and
-                           priority_mapping[picking.priority] or
-                           picking.priority['1'], ]  # priority
+                           priority]
                     rows.append(row)
             picking_obj.write(cr,
                               uid,
@@ -199,10 +210,8 @@ class StockItOutPickingExport(osv.osv_memory):
                                'stockit_outdated': False})
         return rows
 
-StockItOutPickingExport()
 
-
-class StockItOutPickingManualExport(osv.TransientModel):
+class StockItOutPickingManualExport(orm.TransientModel):
     """Export the selected outgoing packings directly
     in the configured path
     """
@@ -243,10 +252,8 @@ class StockItOutPickingManualExport(osv.TransientModel):
             cr, uid, picking_ids, only_new=form.only_new, context=context)
 
         if not data:
-            raise osv.except_osv(_('Error'), _('Nothing has been exported'))
+            raise orm.except_orm(_('Error'), _('Nothing has been exported'))
 
         self.write(cr, uid, form.id, {'data': base64.encodestring(data)})
 
         return True
-
-StockItOutPickingManualExport()

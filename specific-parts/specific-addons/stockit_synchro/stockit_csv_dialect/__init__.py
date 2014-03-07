@@ -1,1 +1,1 @@
-import stockit_csv_dialect
+from . import stockit_csv_dialect

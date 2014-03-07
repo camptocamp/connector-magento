@@ -19,20 +19,24 @@
 #
 ##############################################################################
 
-import time
 import os
 import glob
-import netsvc
-import pooler
+import logging
+import time
 
-from osv import osv, fields
-from tools.translate import _
 from operator import itemgetter
-from stockit_synchro.stockit_importer.importer import StockitImporter
-from wizard_utils import archive_file
+
+from openerp import pooler
+from openerp.osv import orm, fields
+from openerp.tools.translate import _
+from ..stockit_importer.importer import StockitImporter
+from .wizard_utils import archive_file
 
 
-class StockItInventoryImport(osv.osv_memory):
+_logger = logging.getLogger(__name__)
+
+
+class StockItInventoryImport(orm.TransientModel):
     _name = 'stockit.import.inventory'
     _description = 'Import inventories in Stock iT format'
 
@@ -50,17 +54,17 @@ class StockItInventoryImport(osv.osv_memory):
         """
         if context is None:
             context = {}
-        if isinstance(ids, list):
+        if isinstance(ids, (list, tuple)):
+            assert len(ids) == 1, "1 ID expected, got: %s" % ids
             ids = ids[0]
 
-        logger = netsvc.Logger()
         inventory_id = False
         inventory_obj = self.pool.get('stock.inventory')
         product_obj = self.pool.get('product.product')
 
         wizard = self.browse(cr, uid, ids, context)
         if not wizard.data:
-            raise osv.except_osv(_('UserError'),
+            raise orm.except_orm(_('UserError'),
                                  _("You need to select a file!"))
 
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
@@ -95,7 +99,7 @@ class StockItInventoryImport(osv.osv_memory):
             product_id = product_ids[0]
 
         if errors_report:
-            raise osv.except_osv(_('ImportError'), "\n".join(errors_report))
+            raise orm.except_orm(_('ImportError'), "\n".join(errors_report))
 
         # sum quantities of duplicate products and remove them
         rows = sorted(rows, key=itemgetter('default_code'))
@@ -125,9 +129,8 @@ class StockItInventoryImport(osv.osv_memory):
                 product_id = product_ids[0]
                 product = product_obj.browse(cr, uid, product_id)
                 if not product.active:
-                    logger.notifyChannel(_("Stockit inventory import"),
-                                         netsvc.LOG_WARNING,
-                                         _("Product %s is deactivated. Skipped." % (product.default_code,)))
+                    _logger.info("Product %s is deactivated. Skipped.",
+                                 product.default_code)
                     continue
 
                 product_uom = product.uom_id
@@ -138,12 +141,12 @@ class StockItInventoryImport(osv.osv_memory):
                                  'location_id': default_location_id.id,
                                  }
                 inventory_rows.append(inventory_row)
-            except osv.except_osv, e:
+            except orm.except_orm as e:
                 errors_report.append(_('Processing error append: %s') % (e.value, ))
-            except Exception, e:
+            except Exception as e:
                 errors_report.append(_('Processing error append: %s') % (str(e)))
         if errors_report:
-            raise osv.except_osv(_('ImportError'), "\n".join(errors_report))
+            raise orm.except_orm(_('ImportError'), "\n".join(errors_report))
         if inventory_rows:
             inventory_id = inventory_obj.create(cr, uid,
                     {'name': _('Stockit inventory'),
@@ -187,12 +190,9 @@ class StockItInventoryImport(osv.osv_memory):
         return res
 
     def create_request_error(self, cr, uid, file, err_msg, context=None):
-        logger = netsvc.Logger()
-        logger.notifyChannel(
-                             _("Stockit inventory import"),
-                             netsvc.LOG_ERROR,
-                             _("Error importing inventory file %s : %s") % (file, err_msg))
+        _logger.error("Error importing inventory file %s: %s", file, err_msg)
 
+        # TODO post a message
         request = self.pool.get('res.request')
         summary = _("Stock-it inventory import failed on file : %s\n"
                     "With error:\n"
@@ -210,7 +210,9 @@ class StockItInventoryImport(osv.osv_memory):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
         if not company.stockit_base_path or not company.stockit_inventory_import:
-            raise osv.except_osv(_('Error'), _('Stockit path is not configured on company.'))
+            raise orm.except_orm(
+                _('Error'),
+                _('Stockit path is not configured on company.'))
 
         files_folder = os.path.join(company.stockit_base_path,
                                     company.stockit_inventory_import)
@@ -221,24 +223,22 @@ class StockItInventoryImport(osv.osv_memory):
             try:
                 data = data_file.read().encode("base64")
                 wizard = self.create(cr, uid, {'data': data}, context=context)
+                db, pool = pooler.get_db_and_pool(cr.dbname)
+                mycursor = db.cursor()
                 try:
-                    db, pool = pooler.get_db_and_pool(cr.dbname)
-                    mycursor = db.cursor()
                     inventory_id = self.import_inventory(mycursor, uid, [wizard], context)
                     mycursor.commit()
-                except Exception, e:
+                except Exception as e:
                     mycursor.rollback()
-                    raise e
+                    raise
                 finally:
                     mycursor.close()
-            except osv.except_osv, e:
+            except orm.except_orm as e:
                 self.create_request_error(cr, uid, file, e.value, context)
-            except Exception, e:
+            except Exception as e:
                 self.create_request_error(cr, uid, file, str(e), context)
             finally:
                 data_file.close()
             if inventory_id:
                 archive_file(file)
         return True
-
-StockItInventoryImport()

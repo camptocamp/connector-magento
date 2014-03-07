@@ -21,16 +21,19 @@
 
 import base64
 import os
-import netsvc
+import logging
 
-from osv import osv, fields
-from tools.translate import _
 from datetime import datetime
-from tools import flatten
-from stockit_synchro.stockit_exporter.exporter import StockitExporter
+
+from openerp.osv import orm, fields
+from openerp.tools.translate import _
+from openerp.tools import flatten
+from ..stockit_exporter.exporter import StockitExporter
+
+_logger = logging.getLogger(__name__)
 
 
-class StockItProductEANExport(osv.osv_memory):
+class StockItProductEANExport(orm.TransientModel):
     _name = 'stockit.export.product.ean13'
     _description = 'Export product EAN in Stock iT format'
 
@@ -39,6 +42,7 @@ class StockItProductEANExport(osv.osv_memory):
     }
 
     def action_manual_export(self, cr, uid, ids, context=None):
+        assert len(ids) == 1
         rows = self.get_data(cr, uid, ids, context)
         exporter = StockitExporter()
         data = exporter.get_csv_data(rows)
@@ -47,15 +51,20 @@ class StockItProductEANExport(osv.osv_memory):
                             ids,
                             {'data': base64.encodestring(data)},
                             context=context)
-        return result
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'view_mode': 'form',
+            'view_type': 'form',
+            'res_id': ids[0],
+            'views': [(False, 'form')],
+            'target': 'new',
+        }
 
     def create_request_error(self, cr, uid, err_msg, context=None):
-        logger = netsvc.Logger()
-        logger.notifyChannel(
-                             _("Stockit Product EAN13 Export"),
-                             netsvc.LOG_ERROR,
-                             _("Error exporting product ean13 file : %s") % (err_msg,))
+        _logger.error("Error exporting product ean13 file: %s", err_msg)
 
+        # TODO post a message
         request = self.pool.get('res.request')
         summary = _("Stock-it product export EAN13 failed\n"
                     "With error:\n"
@@ -73,7 +82,9 @@ class StockItProductEANExport(osv.osv_memory):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
         if not company.stockit_base_path or not company.stockit_product_ean_export:
-            raise osv.except_osv(_('Error'), _('Stockit path is not configured on company.'))
+            raise orm.except_orm(
+                _('Error'),
+                _('Stockit path is not configured on company.'))
         now = datetime.now()
         date_str = now.strftime('%Y%m%d%H%M%S')
         filename = "product_ean_export_%s.csv" % (date_str,)
@@ -85,7 +96,7 @@ class StockItProductEANExport(osv.osv_memory):
             exporter = StockitExporter(filepath)
             data = exporter.get_csv_data(rows)
             exporter.export_file(data)
-        except Exception, e:
+        except Exception as e:
             self.create_request_error(cr, uid, str(e), context)
         return True
 
@@ -104,5 +115,3 @@ class StockItProductEANExport(osv.osv_memory):
             ])
             rows.append(row)
         return rows
-
-StockItProductEANExport()

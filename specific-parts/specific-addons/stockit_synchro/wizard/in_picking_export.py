@@ -21,12 +21,15 @@
 
 import base64
 import os
-import netsvc
+import logging
 import string
 
-from osv import osv, fields
-from tools.translate import _
-from stockit_synchro.stockit_exporter.exporter import StockitExporter
+from openerp.osv import orm, fields
+from openerp.tools.translate import _
+from ..stockit_exporter.exporter import StockitExporter
+
+
+_logger = logging.getLogger()
 
 
 def make_string_valid_filename(name):
@@ -34,7 +37,7 @@ def make_string_valid_filename(name):
     return ''.join(c for c in name if c in valid_chars)
 
 
-class StockItInPickingExport(osv.osv_memory):
+class StockItInPickingExport(orm.TransientModel):
     _name = 'stockit.export.in.picking'
     _description = 'Export incoming pickings in Stock iT format'
 
@@ -43,6 +46,7 @@ class StockItInPickingExport(osv.osv_memory):
     }
 
     def action_manual_export(self, cr, uid, ids, context=None):
+        assert len(ids) == 1
         rows = self.get_data(cr, uid, ids, context)
         exporter = StockitExporter()
         data = exporter.get_csv_data(rows)
@@ -51,15 +55,20 @@ class StockItInPickingExport(osv.osv_memory):
                             ids,
                             {'data': base64.encodestring(data)},
                             context=context)
-        return result
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'view_mode': 'form',
+            'view_type': 'form',
+            'res_id': ids[0],
+            'views': [(False, 'form')],
+            'target': 'new',
+        }
 
     def create_request_error(self, cr, uid, err_msg, context=None):
-        logger = netsvc.Logger()
-        logger.notifyChannel(
-                             _("Stockit Ingoing Picking Export"),
-                             netsvc.LOG_ERROR,
-                             _("Error exporting ingoing pickings file : %s") % (err_msg,))
+        _logger.info("Error exporting ingoing pickings file: %s", err_msg)
 
+        # TODO post a message
         request = self.pool.get('res.request')
         summary = _("Stock-it ingoing pickings failed\n"
                     "With error:\n"
@@ -77,7 +86,9 @@ class StockItInPickingExport(osv.osv_memory):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
         if not company.stockit_base_path or not company.stockit_in_picking_export:
-            raise osv.except_osv(_('Error'), _('Stockit path is not configured on company.'))
+            raise orm.except_orm(
+                _('Error'),
+                _('Stockit path is not configured on company.'))
         filename = "in_picking_export_with_id.csv"
         filepath = os.path.join(company.stockit_base_path,
                                 company.stockit_in_picking_export,
@@ -87,7 +98,7 @@ class StockItInPickingExport(osv.osv_memory):
             exporter = StockitExporter(filepath)
             data = exporter.get_csv_data(rows)
             exporter.export_file(data)
-        except Exception, e:
+        except Exception as e:
             self.create_request_error(cr, uid, str(e), context)
         return True
 
@@ -102,11 +113,12 @@ class StockItInPickingExport(osv.osv_memory):
                                          [('type', '=', 'in'),
                                           ('state', '=', 'assigned')],
                                          context=context)
-        for picking in picking_obj.browse(cr, uid, picking_ids):
-            partner_name = picking.address_id.partner_id and \
-                           picking.address_id.partner_id.name or \
-                           picking.address_id.name or \
-                           ''
+        for picking in picking_obj.browse(cr, uid, picking_ids, context=context):
+            address = picking.address_id
+            if address.partner_id:
+                partner_name = address.partner_id.name
+            else:
+                partner_name = address.name or ''
 
             name = picking.name
             if picking.origin:
@@ -132,5 +144,3 @@ class StockItInPickingExport(osv.osv_memory):
                 ]
                 rows.append(row)
         return rows
-
-StockItInPickingExport()

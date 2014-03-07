@@ -2,7 +2,8 @@ import csv
 import base64
 import datetime
 import tempfile
-from stockit_synchro.unicode_csv.reader import UnicodeReader
+from ..unicode_csv.reader import UnicodeReader
+
 
 class StockitImporter(object):
     """

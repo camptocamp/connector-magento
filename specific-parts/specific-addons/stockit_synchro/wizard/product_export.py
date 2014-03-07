@@ -21,15 +21,19 @@
 
 import base64
 import os
-import netsvc
+import logging
 
-from osv import osv, fields
-from tools.translate import _
 from datetime import datetime
-from stockit_synchro.stockit_exporter.exporter import StockitExporter
+
+from openerp.osv import orm, fields
+from openerp.tools.translate import _
+from ..stockit_exporter.exporter import StockitExporter
 
 
-class StockItProductExport(osv.osv_memory):
+_logger = logging.getLogger(__name__)
+
+
+class StockItProductExport(orm.TransientModel):
     _name = 'stockit.export.product'
     _description = 'Export product in Stock iT format'
 
@@ -38,6 +42,7 @@ class StockItProductExport(osv.osv_memory):
     }
 
     def action_manual_export(self, cr, uid, ids, context=None):
+        assert len(ids) == 1
         rows = self.get_data(cr, uid, ids, context)
         exporter = StockitExporter()
         data = exporter.get_csv_data(rows)
@@ -46,15 +51,20 @@ class StockItProductExport(osv.osv_memory):
                             ids,
                             {'data': base64.encodestring(data)},
                             context=context)
-        return result
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'view_mode': 'form',
+            'view_type': 'form',
+            'res_id': ids[0],
+            'views': [(False, 'form')],
+            'target': 'new',
+        }
 
     def create_request_error(self, cr, uid, err_msg, context=None):
-        logger = netsvc.Logger()
-        logger.notifyChannel(
-                             _("Stockit Product Export"),
-                             netsvc.LOG_ERROR,
-                             _("Error exporting product file : %s") % (err_msg,))
+        _logger.error("Error exporting product file : %s", err_msg)
 
+        # todo use a message
         request = self.pool.get('res.request')
         summary = _("Stock-it product export failed\n"
                     "With error:\n"
@@ -72,7 +82,9 @@ class StockItProductExport(osv.osv_memory):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
         if not company.stockit_base_path or not company.stockit_product_export:
-            raise osv.except_osv(_('Error'), _('Stockit path is not configured on company.'))
+            raise orm.except_orm(
+                _('Error'),
+                _('Stockit path is not configured on company.'))
         now = datetime.now()
         date_str = now.strftime('%Y%m%d%H%M%S')
         filename = "product_export_%s.csv" % (date_str,)
@@ -106,6 +118,7 @@ class StockItProductExport(osv.osv_memory):
                 product.weight_net and str(product.weight_net) or '0',
                 product.weight and str(product.weight) or '0',
                 product.categ_id.complete_name,  # Stock IT class A
+                # TODO which field for the brand?
                 product.x_magerp_zdbx_default_marque and
                 product.x_magerp_zdbx_default_marque.label or
                 '',  # Stock IT class B
@@ -114,5 +127,3 @@ class StockItProductExport(osv.osv_memory):
             ]
             rows.append(row)
         return rows
-
-StockItProductExport()

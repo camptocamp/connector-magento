@@ -1,6 +1,6 @@
 import StringIO
 import os
-from stockit_synchro.unicode_csv.writer import UnicodeWriter
+from ..unicode_csv.writer import UnicodeWriter
 
 
 class StockitExporter(object):

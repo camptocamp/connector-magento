@@ -22,19 +22,20 @@
 import datetime
 import os
 import glob
-import netsvc
-import pooler
 
 from collections import defaultdict
-from osv import osv, fields
-from tools.translate import _
 from operator import itemgetter
 from itertools import groupby
-from stockit_synchro.stockit_importer.importer import StockitImporter
-from wizard_utils import archive_file
+
+from openerp.osv import orm, fields
+from openerp import pooler
+from openerp import netsvc
+from openerp.tools.translate import _
+from ..stockit_importer.importer import StockitImporter
+from .wizard_utils import archive_file
 
 
-class StockItInPickingImport(osv.osv_memory):
+class StockItInPickingImport(orm.TransientModel):
     _name = 'stockit.import.in.picking'
     _description = 'Import incoming pickings in Stock iT format'
 
@@ -48,7 +49,8 @@ class StockItInPickingImport(osv.osv_memory):
         """ Import incoming pickings according to the Stock it file
         and returns the updated picking ids
         """
-        if isinstance(ids, list):
+        if isinstance(ids, (list, tuple)):
+            assert len(ids) == 1, "1 ID expected, got %s" % ids
             ids = ids[0]
 
         picking_obj = self.pool.get('stock.picking')
@@ -58,7 +60,7 @@ class StockItInPickingImport(osv.osv_memory):
 
         wizard = self.browse(cr, uid, ids, context)
         if not wizard.data:
-            raise osv.except_osv(_('UserError'),
+            raise orm.except_orm(_('UserError'),
                                  _("You need to select a file!"))
 
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
@@ -100,8 +102,10 @@ class StockItInPickingImport(osv.osv_memory):
         product_ean_list = defaultdict(list)
         errors_report = []
         for row in rows:
-            product_ids = product_obj.search(cr, uid,
-                [('default_code', '=', row['default_code'])])
+            product_ids = product_obj.search(
+                cr, uid,
+                [('default_code', '=', row['default_code'])],
+                context=context)
             if not product_ids:
                 errors_report.append(_('Product with default code %s does not exist!') % (row['default_code'],))
                 continue
@@ -115,13 +119,13 @@ class StockItInPickingImport(osv.osv_memory):
                                                   product_id,
                                                   product_ean_list[product_id],
                                                   context)
-            except Exception, e:
+            except Exception as e:
                 errors_report.append(_('Can not create new ean for product %s'
                                      ' one of the following ean %s seems not correct.'
                                      ' You can look in the log for more details')\
                                       % (product_id, str(product_ean_list[product_id])))
         if errors_report:
-            raise osv.except_osv(_('ImportError'), "\n".join(errors_report))
+            raise orm.except_orm(_('ImportError'), "\n".join(errors_report))
 
         # sum quantities of duplicate products in a packing and remove them
         rows = sorted(rows, key=itemgetter('id', 'default_code'))
@@ -147,8 +151,9 @@ class StockItInPickingImport(osv.osv_memory):
                     [('id', '=', picking_id)])
 
                 if not picking_ids:
-                    raise osv.except_osv(_('ImportError'), _("Picking %s not found !") %
-                                                   (picking_id,))
+                    raise orm.except_orm(
+                        _('ImportError'),
+                        _("Picking %s not found !") % (picking_id,))
                 picking_id = picking_ids[0]
                 picking = picking_obj.browse(cr, uid, picking_id)
 
@@ -165,8 +170,9 @@ class StockItInPickingImport(osv.osv_memory):
                                                      [('default_code', '=',
                                                        row['default_code'])])
                     if not product_ids:
-                        raise osv.except_osv(_('ImportError'), _("Product %s not found !") %
-                                                       (row['default_code'],))
+                        raise orm.except_orm(
+                            _('ImportError'),
+                            _("Product %s not found !") % (row['default_code'],))
                     product_id = product_ids[0]
 
                     found_product = False
@@ -214,12 +220,12 @@ class StockItInPickingImport(osv.osv_memory):
                 picking_obj.write(cr, uid, backorder_id, {'state': 'stockit_confirm'})
                 wf_service.trg_write(uid, 'stock.picking', backorder_id, cr)
                 imported_picking_ids.append(backorder_id)
-            except osv.except_osv, e:
+            except osv.except_osv as e:
                 errors_report.append(_('Processing error append: %') % (e.value, ))
-            except Exception, e:
+            except Exception as e:
                 errors_report.append(_('Processing error append: %') % (str(e)))
         if errors_report:
-            raise osv.except_osv(_('ImportError'), "\n".join(errors_report))
+            raise orm.except_orm(_('ImportError'), "\n".join(errors_report))
         return imported_picking_ids
 
     def _create_backorder(self, cr, uid, picking_id, complete, too_many,
@@ -302,7 +308,7 @@ class StockItInPickingImport(osv.osv_memory):
 
         imported_picking_ids = self.import_in_picking(cr, uid, ids, context)
         if not imported_picking_ids:
-            raise osv.except_osv(_('Nothing to do'), _('Stock are OK'))
+            raise orm.except_orm(_('Nothing to do'), _('Stock are OK'))
         res = {'type': 'ir.actions.act_window_close'}
         if imported_picking_ids:
             model_obj = self.pool.get('ir.model.data')
@@ -329,12 +335,10 @@ class StockItInPickingImport(osv.osv_memory):
         return res
 
     def create_request_error(self, cr, uid, file, err_msg, context=None):
-        logger = netsvc.Logger()
-        logger.notifyChannel(
-                             _("Stockit ingoing picking import"),
-                             netsvc.LOG_ERROR,
-                             _("Error importing ingoing picking file %s : %s") % (file, err_msg))
+        _logger.error("Error importing ingoing picking file %s: %s",
+                      file, err_msg)
 
+        # TODO post a message
         request = self.pool.get('res.request')
         summary = _("Stock-it ingoing picking import failed on file : %s\n"
                     "With error:\n"
@@ -352,7 +356,9 @@ class StockItInPickingImport(osv.osv_memory):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
         if not company.stockit_base_path or not company.stockit_in_picking_import:
-            raise osv.except_osv(_('Error'), _('Stockit path is not configured on company.'))
+            raise orm.except_orm(
+                _('Error'),
+                _('Stockit path is not configured on company.'))
 
         files_folder = os.path.join(company.stockit_base_path,
                                     company.stockit_in_picking_import)
@@ -368,19 +374,17 @@ class StockItInPickingImport(osv.osv_memory):
                 try:
                     imported_picking_ids = self.import_in_picking(mycursor, uid, [wizard], context)
                     mycursor.commit()
-                except Exception, e:
+                except Exception as e:
                     mycursor.rollback()
-                    raise e
+                    raise
                 finally:
                     mycursor.close()
-            except osv.except_osv, e:
+            except osv.except_osv as e:
                 self.create_request_error(cr, uid, file, e.value, context)
-            except Exception, e:
+            except Exception as e:
                 self.create_request_error(cr, uid, file, str(e), context)
             finally:
                 data_file.close()
             if imported_picking_ids:
                 archive_file(file)
         return True
-
-StockItInPickingImport()

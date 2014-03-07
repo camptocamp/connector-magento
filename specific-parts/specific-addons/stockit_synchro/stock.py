@@ -19,10 +19,10 @@
 #
 ##############################################################################
 
-from osv import osv, fields
+from openerp.osv import orm, fields
 
 
-class stock_picking(osv.osv):
+class stock_picking(orm.Model):
 
     _inherit = "stock.picking"
 
@@ -42,11 +42,9 @@ class stock_picking(osv.osv):
         'stockit_export_date': fields.datetime('Stockit export date'),
     }
 
-    def action_cancel(self, cr, uid, ids, context={}):
+    def action_cancel(self, cr, uid, ids, context=None):
         res = super(stock_picking, self).action_cancel(cr, uid, ids, context)
-        for pick in self.browse(cr, uid, ids):
+        for pick in self.browse(cr, uid, ids, context=context):
             if pick.stockit_export_date:
                 pick.write({'stockit_outdated': True})
         return res
-
-stock_picking()

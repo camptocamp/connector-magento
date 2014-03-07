@@ -5,26 +5,26 @@
       <field name="name">res.company.form.inherit.stockit</field>
       <field name="model">res.company</field>
       <field name="inherit_id" ref="base.view_company_form"/>
-      <field name="type">form</field>
       <field name="arch" type="xml">
         <notebook position="inside">
           <page string="Stock iT">
-            <separator string="Base" colspan="4"/>
-            <field name ="stockit_base_path" colspan="4"/>
-            <separator string="Export" colspan="4"/>
-            <field name="stockit_in_picking_export"/>
-            <field name="stockit_out_picking_export"/>
-            <field name="stockit_product_export"/>
-            <field name="stockit_out_pick_exp_location_id"/>
-            <field name="stockit_product_ean_export"/>
-            <separator string="Import" colspan="4"/>
-            <field name="stockit_in_picking_import"/>
-            <newline/>
-            <field name="stockit_in_picking_location_id" domain="[('usage','&lt;&gt;','view')]"/>
-            <field name="stockit_in_picking_location_dest_id" domain="[('usage','=','internal')]"/>
-            <newline/>
-            <field name="stockit_inventory_import"/>
-            <field name="stockit_inventory_location_id" domain="[('usage','=','internal')]" />
+            <group string="Base">
+              <field name ="stockit_base_path" colspan="4"/>
+            </group>
+            <group string="Export">
+              <field name="stockit_in_picking_export"/>
+              <field name="stockit_out_picking_export"/>
+              <field name="stockit_product_export"/>
+              <field name="stockit_out_pick_exp_location_id"/>
+              <field name="stockit_product_ean_export"/>
+            </group>
+            <group string="Import">
+              <field name="stockit_in_picking_import"/>
+              <field name="stockit_in_picking_location_id" domain="[('usage','&lt;&gt;','view')]"/>
+              <field name="stockit_in_picking_location_dest_id" domain="[('usage','=','internal')]"/>
+              <field name="stockit_inventory_import"/>
+              <field name="stockit_inventory_location_id" domain="[('usage','=','internal')]" />
+            </group>
           </page>
         </notebook>
       </field>

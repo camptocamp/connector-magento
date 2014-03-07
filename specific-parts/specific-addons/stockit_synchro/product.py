@@ -19,10 +19,10 @@
 #
 ##############################################################################
 
-from osv import osv
+from openerp.osv import orm
 
 
-class ProductProduct(osv.osv):
+class ProductProduct(orm.Model):
 
     _inherit = 'product.product'
 
@@ -48,5 +48,3 @@ class ProductProduct(osv.osv):
                      'product_id': product_id},
                     context=context)
         return True
-
-ProductProduct()

@@ -19,10 +19,10 @@
 #
 ##############################################################################
 
-from osv import fields, osv
+from openerp.osv import orm, fields
 
 
-class ResCompany(osv.osv):
+class ResCompany(orm.Model):
     """override company to add config for stock it"""
     _inherit = "res.company"
 
@@ -38,7 +38,4 @@ class ResCompany(osv.osv):
         'stockit_in_picking_location_id': fields.many2one('stock.location', 'Ingoing Picking Default Source Location', required=True),
         'stockit_in_picking_location_dest_id': fields.many2one('stock.location', 'Ingoing Picking Default Dest. Location', required=True),
         'stockit_inventory_location_id': fields.many2one('stock.location', 'Inventory Default Location', required=True),
-
     }
-
-ResCompany()

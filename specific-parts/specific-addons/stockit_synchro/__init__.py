@@ -1,7 +1,7 @@
-import stockit_csv_dialect
-import stock
-import product
-import wizard
-import unicode_csv
-import stockit_exporter
-import company
+from . import stockit_csv_dialect
+from . import stock
+from . import product
+from . import wizard
+from . import unicode_csv
+from . import stockit_exporter
+from . import company

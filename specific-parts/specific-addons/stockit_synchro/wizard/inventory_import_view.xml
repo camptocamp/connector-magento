@@ -7,14 +7,16 @@
              <field name="model">stockit.import.inventory</field>
              <field name="type">form</field>
              <field name="arch" type="xml">
-                <form string="Inventory Import for Stock iT">
-                    <field name="data" filename="filename" />
-                    <field name="filename" colspan="2"/>
-                    <separator string ="" colspan="4"/>
-                    <group colspan="2" col="4">
-                         <button special="cancel" string="Cancel" icon="gtk-cancel"/>
-                        <button name="action_import" string="Import" type="object" icon="gtk-execute"/>
-                     </group>
+                <form string="Inventory Import for Stock iT" version="7.0">
+                    <group>
+                        <field name="data" filename="filename" />
+                        <field name="filename" readonly="1"/>
+                    </group>
+                    <footer>
+                        <button name="action_import" string="Import" type="object" default_focus="1" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
                 </form>
              </field>
          </record>
