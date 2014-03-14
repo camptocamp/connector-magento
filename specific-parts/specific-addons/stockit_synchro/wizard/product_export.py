@@ -39,6 +39,13 @@ class StockItProductExport(orm.TransientModel):
 
     _columns = {
         'data': fields.binary('File', readonly=True),
+        'state': fields.selection([('draft', 'Draft'),
+                                   ('done', 'Done')],
+                                  string='State'),
+    }
+
+    _defaults = {
+        'state': 'draft',
     }
 
     def action_manual_export(self, cr, uid, ids, context=None):
@@ -49,7 +56,8 @@ class StockItProductExport(orm.TransientModel):
         result = self.write(cr,
                             uid,
                             ids,
-                            {'data': base64.encodestring(data)},
+                            {'data': base64.encodestring(data),
+                             'state': 'done'},
                             context=context)
         return {
             'type': 'ir.actions.act_window',

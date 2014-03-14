@@ -7,7 +7,8 @@
              <field name="model">stockit.export.product.ean13</field>
              <field name="arch" type="xml">
                 <form string="Product Export EAN13 for Stock iT" version="7.0">
-                    <group>
+                    <field name="state" invisible="1"/>
+                    <group attrs="{'invisible': [('state', '!=', 'done')]}">
                         <field name="data"/>
                     </group>
                     <footer>

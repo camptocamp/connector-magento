@@ -43,6 +43,14 @@ class StockItInPickingExport(orm.TransientModel):
 
     _columns = {
         'data': fields.binary('File', readonly=True),
+        'state': fields.selection([('draft', 'Draft'),
+                                   ('empty', 'Empty'),
+                                   ('done', 'Done')],
+                                  string='State'),
+    }
+
+    _defaults = {
+        'state': 'draft',
     }
 
     def action_manual_export(self, cr, uid, ids, context=None):
@@ -50,11 +58,15 @@ class StockItInPickingExport(orm.TransientModel):
         rows = self.get_data(cr, uid, ids, context)
         exporter = StockitExporter()
         data = exporter.get_csv_data(rows)
-        result = self.write(cr,
-                            uid,
-                            ids,
-                            {'data': base64.encodestring(data)},
-                            context=context)
+        if data:
+            self.write(cr, uid, ids,
+                       {'data': base64.encodestring(data),
+                        'state': 'done'},
+                       context=context)
+        else:
+            self.write(cr, uid, ids,
+                       {'state': 'empty'},
+                       context=context)
         return {
             'type': 'ir.actions.act_window',
             'res_model': self._name,

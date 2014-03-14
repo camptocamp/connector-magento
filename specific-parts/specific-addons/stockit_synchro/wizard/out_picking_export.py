@@ -41,6 +41,14 @@ class StockItOutPickingExport(orm.TransientModel):
 
     _columns = {
         'data': fields.binary('File', readonly=True),
+        'state': fields.selection([('draft', 'Draft'),
+                                   ('empty', 'Empty'),
+                                   ('done', 'Done')],
+                                  string='State'),
+    }
+
+    _defaults = {
+        'state': 'draft',
     }
 
     def action_manual_export(self, cr, uid, ids, context=None):
@@ -48,11 +56,15 @@ class StockItOutPickingExport(orm.TransientModel):
         rows = self._get_data(cr, uid, [], context=context)
         exporter = StockitExporter()
         data = exporter.get_csv_data(rows)
-        result = self.write(cr,
-                            uid,
-                            ids,
-                            {'data': base64.encodestring(data)},
-                            context=context)
+        if data:
+            self.write(cr, uid, ids,
+                       {'data': base64.encodestring(data),
+                        'state': 'done'},
+                       context=context)
+        else:
+            self.write(cr, uid, ids,
+                       {'state': 'empty'},
+                       context=context)
         return {
             'type': 'ir.actions.act_window',
             'res_model': self._name,
@@ -80,7 +92,8 @@ class StockItOutPickingExport(orm.TransientModel):
                         })
         return True
 
-    def background_export(self, cr, uid, picking_ids, only_new=True, context=None):
+    def background_export(self, cr, uid, picking_ids, force_pickings=False,
+                          only_new=True, context=None):
         """
         Export the pickings in background and store them in a file
         """
@@ -101,7 +114,8 @@ class StockItOutPickingExport(orm.TransientModel):
         data = False
         try:
             rows = self._get_data(
-                mycursor, uid, picking_ids, only_new=only_new, context=context)
+                mycursor, uid, picking_ids, force_pickings=force_pickings,
+                only_new=only_new, context=context)
             exporter = StockitExporter(filepath)
             data = exporter.get_csv_data(rows)
             exporter.export_file(data)
@@ -118,7 +132,8 @@ class StockItOutPickingExport(orm.TransientModel):
         """ export all packings, according to filters, in background"""
         return self.background_export(cr, uid, [], context=context)
 
-    def _get_data(self, cr, uid, picking_ids=None, only_new=True, context=None):
+    def _get_data(self, cr, uid, picking_ids=None, force_pickings=False,
+                  only_new=True, context=None):
         """Export outgoing pickings in Stock iT format
         When no picking_ids are provided,
         it means that the normal, auto mode (cron)
@@ -141,11 +156,9 @@ class StockItOutPickingExport(orm.TransientModel):
         priority_mapping = {'0': 'BASSE', '1': 'NORMALE', '2': 'HAUTE', '9': 'SHOP'}
         rows = []
 
-        force_pickings = False
         domain = [('type', '=', 'out'),
                   ('state', '=', 'assigned')]
-        if picking_ids:
-            force_pickings = True
+        if force_pickings:
             domain.append(('id', 'in', picking_ids))
         picking_ids = picking_obj.search(
             cr, uid, domain, context=context)
@@ -223,7 +236,7 @@ class StockItOutPickingManualExport(orm.TransientModel):
         if context is None:
             context = {}
         res = False
-        if (context.get('active_model') == 'stock.picking' and
+        if (context.get('active_model') == 'stock.picking.out' and
             context.get('active_ids')):
             res = context['active_ids']
         return res
@@ -231,16 +244,20 @@ class StockItOutPickingManualExport(orm.TransientModel):
     _columns = {
         'picking_ids':
             fields.many2many(
-                'stock.picking',
+                'stock.picking.out',
                 string='Delivery Orders',
                 domain=[('type', '=', 'out'), ('state', '=', 'assigned')]),
         'only_new': fields.boolean('Only not yet exported'),
         'data': fields.binary('File', readonly=True),
+        'state': fields.selection([('draft', 'Draft'),
+                                   ('done', 'Done')],
+                                  string='State'),
     }
 
     _defaults = {
         'only_new': True,
         'picking_ids': _get_picking_ids,
+        'state': 'draft',
     }
 
     def export(self, cr, uid, ids, context=None):
@@ -249,11 +266,23 @@ class StockItOutPickingManualExport(orm.TransientModel):
         picking_ids = [p.id for p in form.picking_ids]
         exp_obj = self.pool.get('stockit.export.out.picking')
         data = exp_obj.background_export(
-            cr, uid, picking_ids, only_new=form.only_new, context=context)
+            cr, uid, picking_ids, force_pickings=True,
+            only_new=form.only_new, context=context)
 
         if not data:
             raise orm.except_orm(_('Error'), _('Nothing has been exported'))
 
-        self.write(cr, uid, form.id, {'data': base64.encodestring(data)})
+        self.write(cr, uid, form.id,
+                   {'data': base64.encodestring(data),
+                    'state': 'done'},
+                   context=context)
 
-        return True
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'view_mode': 'form',
+            'view_type': 'form',
+            'res_id': ids[0],
+            'views': [(False, 'form')],
+            'target': 'new',
+        }
