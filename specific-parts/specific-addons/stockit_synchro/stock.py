@@ -26,6 +26,13 @@ class stock_picking(orm.Model):
 
     _inherit = "stock.picking"
 
+    def __init__(self, pool, cr):
+        """ Add the stockit status in the available states """
+        super(stock_picking, self).__init__(pool, cr)
+        stockit_state = ('stockit_confirm', 'Confirmed by Stock-it')
+        if stockit_state not in self._columns['state'].selection:
+            self._columns['state'].selection.append(stockit_state)
+
     def get_selection_priority(self, cr, uid, context=None):
         """ Add a Shop priority.
 

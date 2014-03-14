@@ -126,9 +126,9 @@ class StockItInPickingExport(orm.TransientModel):
                                           ('state', '=', 'assigned')],
                                          context=context)
         for picking in picking_obj.browse(cr, uid, picking_ids, context=context):
-            address = picking.address_id
-            if address.partner_id:
-                partner_name = address.partner_id.name
+            address = picking.partner_id
+            if address.parent_id:
+                partner_name = address.parent_id.name
             else:
                 partner_name = address.name or ''
 

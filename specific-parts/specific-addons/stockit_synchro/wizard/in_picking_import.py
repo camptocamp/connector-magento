@@ -20,6 +20,7 @@
 ##############################################################################
 
 import datetime
+import logging
 import os
 import glob
 
@@ -35,14 +36,15 @@ from ..stockit_importer.importer import StockitImporter
 from .wizard_utils import archive_file
 
 
+_logger = logging.getLogger(__name__)
+
+
 class StockItInPickingImport(orm.TransientModel):
     _name = 'stockit.import.in.picking'
     _description = 'Import incoming pickings in Stock iT format'
 
     _columns = {
         'data': fields.binary('File', required=True),
-        'filename': fields.char('Filename', size=256,
-                                required=True, readonly=False),
     }
 
     def import_in_picking(self, cr, uid, ids, context=None):
@@ -120,6 +122,8 @@ class StockItInPickingImport(orm.TransientModel):
                                                   product_ean_list[product_id],
                                                   context)
             except Exception as e:
+                _logger.exception('Error when adding EAN %s for product %s' %
+                                  (product_ean_list[product_id], product_id))
                 errors_report.append(_('Can not create new ean for product %s'
                                      ' one of the following ean %s seems not correct.'
                                      ' You can look in the log for more details')\
@@ -199,7 +203,7 @@ class StockItInPickingImport(orm.TransientModel):
                             prod_id=product_id,
                             loc_id=default_location_id.id,
                             loc_dest_id=default_location_dest_id.id,
-                            address_id=picking.address_id.id
+                            partner_id=picking.partner_id.id
                         )['value']
 
                         stock_move_values.update({
@@ -220,10 +224,12 @@ class StockItInPickingImport(orm.TransientModel):
                 picking_obj.write(cr, uid, backorder_id, {'state': 'stockit_confirm'})
                 wf_service.trg_write(uid, 'stock.picking', backorder_id, cr)
                 imported_picking_ids.append(backorder_id)
-            except osv.except_osv as e:
-                errors_report.append(_('Processing error append: %') % (e.value, ))
+            except orm.except_orm as e:
+                errors_report.append(_('Processing error: %s') % e.value)
             except Exception as e:
-                errors_report.append(_('Processing error append: %') % (str(e)))
+                _logger.exception('Error when importing picking_id %s' %
+                                  picking_id)
+                errors_report.append(_('Processing error: %s') % e)
         if errors_report:
             raise orm.except_orm(_('ImportError'), "\n".join(errors_report))
         return imported_picking_ids
@@ -267,38 +273,43 @@ class StockItInPickingImport(orm.TransientModel):
 
         for move in new_moves:
             move.update({'picking_id': new_picking or picking.id})
-            move_id = move_obj.create(cr, uid, move)
-            move_obj.force_assign(cr, uid, move_id)
+            move_id = move_obj.create(cr, uid, move, context=context)
+            move_obj.force_assign(cr, uid, [move_id])
 
         if new_picking:
             # move complete moves to backorder
             move_obj.write(cr, uid, [c['move'].id for c in complete],
-                    {'picking_id': new_picking})
+                           {'picking_id': new_picking},
+                           context=context)
 
             # update qty and move "too many" moves to backorder
             for move_dict in too_many:
-                move_obj.write(cr, uid, [move_dict['move'].id],
-                        {
-                            'product_qty': move_dict['qty'],
-                            'product_uos_qty': move_dict['qty'],
-                            'picking_id': new_picking,
-                        })
+                move_obj.write(
+                    cr, uid, [move_dict['move'].id],
+                    {'product_qty': move_dict['qty'],
+                     'product_uos_qty': move_dict['qty'],
+                     'picking_id': new_picking,
+                     },
+                     context=context)
         else:
             for move_dict in too_many:
-                move_obj.write(cr, uid, [move_dict['move'].id],
-                        {
-                            'product_qty': move_dict['qty'],
-                            'product_uos_qty': move_dict['qty']
-                        })
+                move_obj.write(
+                    cr, uid, [move_dict['move'].id],
+                    {'product_qty': move_dict['qty'],
+                     'product_uos_qty': move_dict['qty']
+                     },
+                    context=context)
 
         # assign the backorder
         if new_picking:
-            pick_obj.write(cr, uid, [picking.id], {'backorder_id': new_picking})
+            pick_obj.write(cr, uid,
+                           [picking.id], {'backorder_id': new_picking},
+                           context=context)
 
         wf_service = netsvc.LocalService("workflow")
         pick_obj.force_assign(cr, uid, [new_picking or picking.id])
         wf_service.trg_validate(uid, 'stock.picking',
-                                 new_picking or picking.id, 'button_confirm', cr)
+                                new_picking or picking.id, 'button_confirm', cr)
 
         return new_picking or picking.id
 
@@ -340,7 +351,7 @@ class StockItInPickingImport(orm.TransientModel):
 
         # TODO post a message
         request = self.pool.get('res.request')
-        summary = _("Stock-it ingoing picking import failed on file : %s\n"
+        summary = _("Stock-it ingoing picking import failed on file: %s\n"
                     "With error:\n"
                     "%s") % (file, err_msg)
 
@@ -379,7 +390,7 @@ class StockItInPickingImport(orm.TransientModel):
                     raise
                 finally:
                     mycursor.close()
-            except osv.except_osv as e:
+            except orm.except_orm as e:
                 self.create_request_error(cr, uid, file, e.value, context)
             except Exception as e:
                 self.create_request_error(cr, uid, file, str(e), context)
