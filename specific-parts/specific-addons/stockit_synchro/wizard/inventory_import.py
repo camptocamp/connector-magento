@@ -42,10 +42,6 @@ class StockItInventoryImport(orm.TransientModel):
 
     _columns = {
         'data': fields.binary('File', required=True),
-        'filename': fields.char('Filename',
-                                size=256,
-                                required=True,
-                                readonly=False),
     }
 
     def import_inventory(self, cr, uid, ids, context=None):
@@ -144,7 +140,8 @@ class StockItInventoryImport(orm.TransientModel):
             except orm.except_orm as e:
                 errors_report.append(_('Processing error append: %s') % (e.value, ))
             except Exception as e:
-                errors_report.append(_('Processing error append: %s') % (str(e)))
+                _logger.exception('Error when importing inventory row %s' % (row,))
+                errors_report.append(_('Processing error append: %s') % e)
         if errors_report:
             raise orm.except_orm(_('ImportError'), "\n".join(errors_report))
         if inventory_rows:
