@@ -70,12 +70,15 @@ def impl(ctx, model_name):
                 table_delete_ids.add(entry.res_id)
             entry_delete_ids.add(entry.id)
         ir_values = ['%s,%d' % (model_name, tid) for tid in table_delete_ids]
-        cr.execute("DELETE FROM ir_values WHERE value in %s",
-                   (tuple(ir_values),))
-        cr.execute("DELETE FROM %s WHERE id IN %%s" % table,
-                   (tuple(table_delete_ids),))
-        cr.execute("DELETE FROM ir_model_data WHERE id IN %s",
-                   (tuple(entry_delete_ids),))
+        if ir_values:
+            cr.execute("DELETE FROM ir_values WHERE value in %s",
+                       (tuple(ir_values),))
+        if table_delete_ids:
+            cr.execute("DELETE FROM %s WHERE id IN %%s" % table,
+                       (tuple(table_delete_ids),))
+        if entry_delete_ids:
+            cr.execute("DELETE FROM ir_model_data WHERE id IN %s",
+                       (tuple(entry_delete_ids),))
 
 
 @step('I delete the broken ir.values')
