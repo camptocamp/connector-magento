@@ -27,6 +27,7 @@
                 'delivery',
                 'product_multi_ean',
                 'picking_priority_on_payment_method',
+                'product_brand',  # openerp-product-attributes
                 ],
     "author": "Camptocamp",
     "license": 'AGPL-3',

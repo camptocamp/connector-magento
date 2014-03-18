@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,22 +19,27 @@
 #
 ##############################################################################
 
-{'name' : 'Magento Connector Customization',
- 'version' : '1.0',
- 'author' : 'Camptocamp',
- 'license': 'AGPL-3',
- 'category': 'Connector',
- 'depends' : ['magentoerpconnect',
-              'product_brand',
-              ],
- 'description': """
-Magento Connector Customization
-===============================
+from openerp.osv import orm, fields
 
- """,
- 'website': 'http://www.camptocamp.com',
- 'data': [],
- 'test': [],
- 'installable': True,
- 'auto_install': False,
-}
+
+class product_brand(orm.Model):
+    _inherit = 'product.brand'
+
+    _columns = {
+        'name': fields.char('Name', required=True),
+        'product_ids': fields.one2many(
+            'product.template', 'brand_id',
+            string='Brand',
+            ondelete='restrict'),
+    }
+
+
+class product_template(orm.Model):
+    _inherit = 'product.template'
+
+    _columns = {
+        'brand_id': fields.many2one{
+            'product.brand',
+            string='Brand',
+            ondelete='restrict'),
+    }

@@ -117,6 +117,7 @@ class StockItProductExport(orm.TransientModel):
         prod_ids = product_obj.search(cr, uid, [('type', '!=', 'service')],
                                       context=context)
         for product in product_obj.browse(cr, uid, prod_ids):
+            brand = product.product_brand_id
             row = [
                 product.default_code,
                 product.name,
@@ -126,10 +127,7 @@ class StockItProductExport(orm.TransientModel):
                 product.weight_net and str(product.weight_net) or '0',
                 product.weight and str(product.weight) or '0',
                 product.categ_id.complete_name,  # Stock IT class A
-                # TODO which field for the brand?
-                product.x_magerp_zdbx_default_marque and
-                product.x_magerp_zdbx_default_marque.label or
-                '',  # Stock IT class B
+                brand.name if brand else '',  # Stock IT class B
                 '',  # Stock IT class C
                 '0',
             ]

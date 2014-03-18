@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,18 +19,18 @@
 #
 ##############################################################################
 
-{'name' : 'Magento Connector Customization',
- 'version' : '1.0',
- 'author' : 'Camptocamp',
+{'name': 'Product Brand',
+ 'version': '1.0',
+ 'author': 'Camptocamp',
+ 'maintainer': 'Camptocamp',
  'license': 'AGPL-3',
- 'category': 'Connector',
- 'depends' : ['magentoerpconnect',
-              'product_brand',
-              ],
+ 'category': 'category',
+ 'complexity': "easy",
+ 'depends': ['product',
+             ],
  'description': """
-Magento Connector Customization
-===============================
-
+Adds a brand on the products.
+=============================
  """,
  'website': 'http://www.camptocamp.com',
  'data': [],

@@ -137,7 +137,7 @@ class StockValuesExport(TransientModel):
             row = [
                 product.default_code,
                 product.name,
-                product.x_magerp_zdbx_default_marque.label,
+                product.product_brand_id.name,
                 str(quantity),
                 str(product.standard_price),
                 str(total),

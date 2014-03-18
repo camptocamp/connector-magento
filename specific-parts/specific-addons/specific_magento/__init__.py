@@ -22,3 +22,5 @@
 from . import connector
 from . import backend
 from . import magento_model
+from . import product_brand
+from . import unit
