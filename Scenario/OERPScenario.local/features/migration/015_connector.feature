@@ -6,6 +6,7 @@ Feature: install and configure the modules related to the magento connector
     Given I install the required modules with dependencies:
       | name                         |
       | magentoerpconnect            |
+      | product_brand                |
       | specific_magento             |
       | server_env_magentoerpconnect |
     Then my modules should have been installed and models reloaded
@@ -211,4 +212,29 @@ Feature: install and configure the modules related to the magento connector
     AND external_referential_id = 1
     AND NOT EXISTS (SELECT id FROM magento_stock_picking_out c
                     WHERE id.res_id = c.openerp_id AND replace(id.name, 'stock_picking/', '') = c.magento_id);
+    """
+
+  Scenario: migrate the brands from magento attributes to product_brand
+    Given I execute the SQL commands
+    """
+    INSERT INTO product_brand (create_uid, write_uid, create_date, write_date, name)
+    SELECT create_uid, write_uid, create_date, write_date, label FROM magerp_product_attribute_options
+    WHERE attribute_id = 193
+    AND NOT EXISTS (SELECT id FROM product_brand WHERE name = label);
+
+    INSERT INTO magento_product_brand (create_uid, write_uid, create_date, write_date, openerp_id, magento_id, sync_date, backend_id)
+    SELECT b.create_uid, b.write_uid, b.create_date, b.write_date, b.id, o.value, now(), (SELECT id FROM magento_backend LIMIT 1)
+    FROM product_brand b
+    INNER JOIN magerp_product_attribute_options o
+    ON o.label = b.name
+    WHERE o.attribute_id = 193
+    AND NOT EXISTS (SELECT id FROM magento_product_brand WHERE openerp_id = b.id);
+
+    UPDATE product_template AS t SET product_brand_id = b.id
+    FROM product_brand b, product_product p, magerp_product_attribute_options  o
+    WHERE o.label = b.name
+    AND p.product_tmpl_id = t.id
+    AND o.id = p.x_magerp_marque
+    AND o.attribute_id = 193;
+
     """
