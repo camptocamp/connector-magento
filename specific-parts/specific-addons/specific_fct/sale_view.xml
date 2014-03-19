@@ -6,9 +6,8 @@
       <field name="name">sale.order.tree.invoiced</field>
       <field name="model">sale.order</field>
       <field name="inherit_id" ref="sale.view_order_tree" />
-      <field name="type">tree</field>
       <field name="arch" type="xml">
-        <field name="invoiced_rate" position="after">
+        <field name="state" position="after">
           <field name="date_invoiced" select="1"/>
         </field>
       </field>
@@ -18,7 +17,6 @@
       <field name="name">sale.order.form.invoiced</field>
       <field name="model">sale.order</field>
       <field name="inherit_id" ref="sale.view_order_form" />
-      <field name="type">form</field>
       <field name="arch" type="xml">
         <field name="payment_term" position="after">
           <field name="date_invoiced" select="1"/>
