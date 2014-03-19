@@ -19,19 +19,19 @@
 ##############################################################################
 
 
-from osv import fields
-from osv.orm import Model
+from openerp.osv import orm, fields
 
 
-class ResPartner(Model):
+class ResPartner(orm.Model):
     "Inherit partner for small customisations"
     _inherit = 'res.partner'
 
-    _defaults = {
-        'lang': lambda *a: 'fr_FR',
-    }
     _columns = {
         'siret': fields.char('Siret', size=14),
+    }
+
+    _defaults = {
+        'lang': 'fr_FR',
     }
 
     def copy(self, cr, uid, id, default=None, context=None):

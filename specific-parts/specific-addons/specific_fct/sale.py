@@ -16,14 +16,13 @@
 #
 ##############################################################################
 
-import netsvc
+from openerp.osv import orm, fields
+from openerp.tools.translate import _
 
-from tools.translate import _
-from osv.orm import Model
-from osv import fields
+from openerp import netsvc
 
 
-class sale_order(Model):
+class sale_order(orm.Model):
 
     _inherit = "sale.order"
 
@@ -178,7 +177,7 @@ class sale_order(Model):
         return invoice_id
 
 
-class sale_order_line(Model):
+class sale_order_line(orm.Model):
 
     _inherit = 'sale.order.line'
 
@@ -207,4 +206,3 @@ class sale_order_line(Model):
             cr, uid, line, account_id=account_id, context=context)
         vals['note'] = False
         return vals
-

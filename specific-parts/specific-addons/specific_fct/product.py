@@ -18,12 +18,11 @@
 #
 ##############################################################################
 
-from tools.translate import _
-from osv.orm import Model
-from osv.osv import except_osv
+from openerp.osv import orm, fields
+from openerp.tools.translate import _
 
 
-class Product(Model):
+class Product(orm.Model):
     """ Inherit product for small customisations"""
 
     _inherit = 'product.product'
@@ -46,10 +45,10 @@ class Product(Model):
             return default_code
         default_code = default_code.strip()
         if ',' in default_code:
-            raise except_osv(
+            raise orm.except_orm(
                 _('Error'),
-                _("""The comma character "," in the
-                reference is forbidden (%s)""" % default_code))
+                _("The comma character \",\" in the "
+                  "reference is forbidden (%s) " % default_code))
         return default_code
 
     def create(self, cr, uid, vals, context=None):
@@ -63,4 +62,3 @@ class Product(Model):
             vals['default_code'] = self._fix_default_code(
                 cr, uid, vals['default_code'], context=context)
         return super(Product, self).write(cr, uid, ids, vals, context=context)
-

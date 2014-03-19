@@ -17,9 +17,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import product
-import partner
-import sale
-import wizard
-import stock
+from . import product
+from . import partner
+from . import sale
+from . import wizard
+from . import stock
 # import statement   # TODO
