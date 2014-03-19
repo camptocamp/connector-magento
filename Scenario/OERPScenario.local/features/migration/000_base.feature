@@ -5,7 +5,7 @@ Feature: Migrate the database after the OpenERP migration
   Scenario: when we receive the database from the migration service, addons are 'to upgrade', set them to uninstalled.
     Given I execute the SQL commands
     """
-    UPDATE ir_module_module set state = 'uninstalled' where state = 'to install';
+    UPDATE ir_module_module set state = 'uninstalled' where state IN ('to install', 'to upgrade');
     """
 
   @clean
