@@ -26,7 +26,7 @@
              # TODO
              # 'packing_product_change',
              # 'on_inventory_retry_assign',
-             # 'account_statement_base_completion',
+             'account_statement_base_completion',
              ],
  'author': 'Camptocamp',
  'description': """Code customisation module""",
@@ -41,7 +41,7 @@
           'stock_view.xml',
           'security/ir.model.access.csv',
           'security/security.xml',
-          # 'data_completion.xml',
+          'data_completion.xml',
           ],
  'installable': True,
 }

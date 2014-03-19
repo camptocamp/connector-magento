@@ -17,15 +17,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from osv import fields
-from osv.osv import except_osv
-from osv.orm import Model
-from tools.translate import _
-import netsvc
+from openerp.osv import orm, fields
+from openerp.tools.translate import _
+from openerp import netsvc
 
 from openerp.addons.account_statement_base_completion.statement import ErrorTooManyPartner
 
-class AccountStatementCompletionRule(Model):
+
+class AccountStatementCompletionRule(orm.Model):
     """
     Redifine a rule that will match SO number with AND without the prefix
     _mag that is added by OpeneRP cause the bank/office doesn't know it, so
@@ -37,15 +36,16 @@ class AccountStatementCompletionRule(Model):
     def _get_functions(self, cr, uid, context=None):
         res = super (AccountStatementCompletionRule, self)._get_functions(
                 cr, uid, context=context)
-        res.append(('get_from_ref_and_so_with_prefix', 'From line reference (based on SO number with or without mag_)'))
+        res.append(('get_from_ref_and_so_with_prefix',
+                    'From line reference (based on SO number '
+                    'with or without mag_)'))
         return res
 
     _columns={
         'function_to_call': fields.selection(_get_functions, 'Method'),
     }
 
-
-    def get_from_ref_and_so_with_prefix(self, cursor, uid, line_id, context=None):
+    def get_from_ref_and_so_with_prefix(self, cr, uid, line_id, context=None):
         """
         Match the partner based on the SO number (with and without '_mag' as prefix)
         and the reference of the statement
@@ -62,32 +62,47 @@ class AccountStatementCompletionRule(Model):
             ...}
         """
         st_obj = self.pool.get('account.bank.statement.line')
-        st_line = st_obj.browse(cursor,uid,line_id)
+        st_line = st_obj.browse(cr, uid, line_id, context=context)
         res = {}
         if st_line:
             so_obj = self.pool.get('sale.order')
-            so_id = so_obj.search(cursor, uid, [('name', '=', st_line.ref)])
+            so_id = so_obj.search(cr, uid, [('name', '=', st_line.ref)],
+                                  context=context)
             if so_id:
                 if so_id and len(so_id) == 1:
-                    so = so_obj.browse(cursor, uid, so_id[0])
+                    so = so_obj.browse(cr, uid, so_id[0], context=context)
                     res['partner_id'] = so.partner_id.id
                 elif so_id and len(so_id) > 1:
-                    raise ErrorTooManyPartner(_('Line named "%s" (Ref:%s) was matched by more than one partner.')%(st_line.name,st_line.ref))
-                st_vals = st_obj.get_values_for_line(cursor, uid, profile_id = st_line.statement_id.profile_id.id,
-                    partner_id = res.get('partner_id',False), line_type = st_line.type, amount = st_line.amount, context = context)
+                    raise ErrorTooManyPartner(
+                        _('Line named "%s" (Ref:%s) was matched by '
+                          'more than one partner.') % (st_line.name,
+                                                       st_line.ref))
+                st_vals = st_obj.get_values_for_line(
+                    cr, uid, profile_id=st_line.statement_id.profile_id.id,
+                    partner_id=res.get('partner_id', False),
+                    line_type=st_line.type, amount=st_line.amount,
+                    context=context)
                 res.update(st_vals)
-            # Try with prefix now, if found update the reference of the line with mag_ !
+            # Try with prefix now, if found update the reference of the
+            # line with mag_!
             else:
-                so_id = so_obj.search(cursor, uid, [('name', '=', 'mag_' + st_line.ref)])
+                so_id = so_obj.search(cr, uid,
+                                      [('name', '=', 'mag_' + st_line.ref)],
+                                      context=context)
                 if so_id:
                     if so_id and len(so_id) == 1:
-                        so = so_obj.browse(cursor, uid, so_id[0])
+                        so = so_obj.browse(cr, uid, so_id[0], context=context)
                         res['partner_id'] = so.partner_id.id
                     elif so_id and len(so_id) > 1:
-                        raise ErrorTooManyPartner(_('Line named "%s" (Ref:%s) was matched by more than one partner.')%(st_line.name,st_line.ref))
-                    res.update({'ref':'mag_' + st_line.ref})
-                    st_vals = st_obj.get_values_for_line(cursor, uid, profile_id = st_line.statement_id.profile_id.id,
-                        partner_id = res.get('partner_id',False), line_type = st_line.type, amount = st_line.amount, context = context)
+                        raise ErrorTooManyPartner(
+                            _('Line named "%s" (Ref:%s) was matched by '
+                              'more than one partner.') % (st_line.name,
+                                                           st_line.ref))
+                    res.update({'ref': 'mag_' + st_line.ref})
+                    st_vals = st_obj.get_values_for_line(
+                        cr, uid, profile_id=st_line.statement_id.profile_id.id,
+                        partner_id=res.get('partner_id', False),
+                        line_type=st_line.type, amount=st_line.amount,
+                        context=context)
                     res.update(st_vals)
         return res
-

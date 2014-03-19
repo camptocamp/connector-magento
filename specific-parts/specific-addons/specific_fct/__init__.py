@@ -21,4 +21,4 @@ from . import product
 from . import partner
 from . import sale
 from . import stock
-# import statement   # TODO
+from . import statement
