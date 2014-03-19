@@ -20,6 +20,5 @@
 from . import product
 from . import partner
 from . import sale
-from . import wizard
 from . import stock
 # import statement   # TODO

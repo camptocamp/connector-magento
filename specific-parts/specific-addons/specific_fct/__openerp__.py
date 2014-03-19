@@ -41,7 +41,6 @@
           # 'stock_view.xml',
           # 'security/security.xml',
           # 'data_completion.xml',
-          # 'wizard/stock_partial_picking_view.xml',
           ],
  'installable': True,
 }
