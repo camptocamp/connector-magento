@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data>
-        <record model="ir.ui.view" id="stock_picking_custom">
-            <!-- must be unique in this module. -->
-            <field name="name">stock.picking.form.custom.inherit</field>
-            <field name="model">stock.picking</field>
-            <!--parent python entity -->
-            <field name="inherit_id" ref="stock.view_picking_out_form"/>
-            <!-- modulename.view -->
-            <field name="type">form</field>
-            <field name="arch" type="xml">
-                <page string='Additional info' position="inside">
-                    <field name="cash_on_delivery_amount"/>
-                    <field name="cash_on_delivery_amount_untaxed"/>
-                </page>
-            </field>
-        </record>
+  <data>
 
-    </data>
+    <record model="ir.ui.view" id="stock_picking_custom">
+      <field name="name">stock.picking.out.form.chronopost</field>
+      <field name="model">stock.picking</field>
+      <field name="inherit_id" ref="stock.view_picking_out_form"/>
+      <field name="arch" type="xml">
+        <page string='Additional Info' position="inside">
+          <group>
+            <field name="cash_on_delivery_amount"/>
+            <field name="cash_on_delivery_amount_untaxed"/>
+          </group>
+        </page>
+      </field>
+    </record>
+
+  </data>
 </openerp>

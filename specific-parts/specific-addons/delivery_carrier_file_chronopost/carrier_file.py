@@ -19,13 +19,13 @@
 #
 ##############################################################################
 
-from osv import osv, fields
+from openerp.osv import orm, fields
 
 
-class carrier_file(osv.osv):
+class carrier_file(orm.Model):
     _inherit = 'delivery.carrier.file'
 
-    def get_type_selection(self, cr, uid, context=None):
+    def _get_type_selection(self, cr, uid, context=None):
         result = super(carrier_file, self).get_type_selection(
             cr, uid, context=context)
         if 'chronopost' not in result:
@@ -33,7 +33,7 @@ class carrier_file(osv.osv):
         return result
 
     _columns = {
-        'type': fields.selection(get_type_selection, 'Type', required=True),
+        'type': fields.selection(_get_type_selection, 'Type', required=True),
         'subaccount_number':
             fields.char('Sub-Account Number',
                         size=3,
@@ -58,5 +58,3 @@ class carrier_file(osv.osv):
     _defaults = {
         'saturday_delivery_code': 'L',
     }
-
-carrier_file()

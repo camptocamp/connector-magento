@@ -19,10 +19,10 @@
 #
 ##############################################################################
 
-from osv import fields, osv
+from openerp.osv import fields, orm
 
 
-class stock_picking(osv.osv):
+class stock_picking(orm.Model):
 
     _inherit = 'stock.picking'
 
@@ -45,5 +45,3 @@ class stock_picking(osv.osv):
             vals['cash_on_delivery_amount_untaxed'] = 0.0
         return super(stock_picking, self).write(
             cr, uid, ids, vals, context=context)
-
-stock_picking()
