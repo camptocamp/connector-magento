@@ -22,9 +22,9 @@
 from openerp.osv import fields, orm
 
 
-class stock_picking(orm.Model):
+class stock_picking_out(orm.Model):
 
-    _inherit = 'stock.picking'
+    _inherit = 'stock.picking.out'
 
     _columns = {
         'cash_on_delivery_amount':
@@ -43,5 +43,5 @@ class stock_picking(orm.Model):
         if 'backorder_id' in vals:
             vals['cash_on_delivery_amount'] = 0.0
             vals['cash_on_delivery_amount_untaxed'] = 0.0
-        return super(stock_picking, self).write(
+        return super(stock_picking_out, self).write(
             cr, uid, ids, vals, context=context)

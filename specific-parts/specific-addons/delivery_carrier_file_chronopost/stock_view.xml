@@ -4,7 +4,7 @@
 
     <record model="ir.ui.view" id="stock_picking_custom">
       <field name="name">stock.picking.out.form.chronopost</field>
-      <field name="model">stock.picking</field>
+      <field name="model">stock.picking.out</field>
       <field name="inherit_id" ref="stock.view_picking_out_form"/>
       <field name="arch" type="xml">
         <page string='Additional Info' position="inside">
