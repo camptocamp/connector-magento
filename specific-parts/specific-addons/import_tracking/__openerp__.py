@@ -33,10 +33,10 @@
  Custom module to import tracking references on packings
  """,
  'website': 'http://www.camptocamp.com',
- 'init_xml': [],
- 'update_xml': ['res_company_view.xml'],
- 'demo_xml': [],
+ 'data': [
+     'res_company_view.xml',
+ ],
  'tests': [],
- 'installable': False,
+ 'installable': True,
  'auto_install': False,
 }

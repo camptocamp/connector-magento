@@ -23,10 +23,10 @@ import base64
 import csv
 import os
 
-from osv import osv
+from openerp.osv import orm
 
 
-class stock_picking(osv.osv):
+class stock_picking(orm.Model):
 
     _inherit = 'stock.picking'
 
@@ -43,7 +43,7 @@ class stock_picking(osv.osv):
              ('carrier_tracking_ref', '=', False),
              ('state', '=', 'done')],
             context=context)
-        packing = self.browse(cr, uid, found_packing, context)
+        packing = self.browse(cr, uid, found_packing, context=context)
         if packing:
             self.write(cr, uid,
                        packing[0].id,
@@ -55,8 +55,8 @@ class stock_picking(osv.osv):
         """ Read the Chronopost file and update
             the stock picking with the tracking reference
         """
-        attachment_obj = self.pool.get('ir.attachment')
-        user = self.pool.get('res.users').browse(cr, uid, uid)
+        attachment_obj = self.pool['ir.attachment']
+        user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         company = user.company_id
 
         directory = company.tracking_directory_id
@@ -76,7 +76,7 @@ class stock_picking(osv.osv):
                 packing_name = line[6].strip()
                 if packing_name:
                     updated = self._update_tracking_references(
-                        cr, uid, packing_name, tracking_ref, context)
+                        cr, uid, packing_name, tracking_ref, context=context)
 
             if updated:
                 attachment_obj.unlink(cr, uid, [doc_file.id], context=context)
@@ -84,7 +84,5 @@ class stock_picking(osv.osv):
 
     def run_import_tracking_references_scheduler(self, cr, uid, context=None):
         """ Scheduler for import tracking references """
-        self.import_tracking_references(cr, uid, context)
+        self.import_tracking_references(cr, uid, context=context)
         return True
-
-stock_picking()

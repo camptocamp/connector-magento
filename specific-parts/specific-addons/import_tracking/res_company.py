@@ -19,10 +19,10 @@
 #
 ##############################################################################
 
-from osv import osv, fields
+from openerp.osv import orm, fields
 
 
-class res_company(osv.osv):
+class res_company(orm.Model):
 
     _inherit = 'res.company'
 
@@ -31,5 +31,3 @@ class res_company(osv.osv):
             fields.many2one('document.directory',
                             string="Tracking Files Directory")
     }
-
-res_company()
