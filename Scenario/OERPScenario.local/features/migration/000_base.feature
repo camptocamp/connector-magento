@@ -28,7 +28,7 @@ Feature: Migrate the database after the OpenERP migration
     And I delete all the ir.rule.group records created by uninstalled modules
     And I delete the broken ir.values
 
-  Scenario: Remove menu entry to be replaced by filters
+  Scenario: Remove stock picking menu entry to be replaced by filters
     Given I execute the SQL commands
     """
     DELETE FROM ir_ui_menu WHERE name = 'Colisage disponible Magasin';
