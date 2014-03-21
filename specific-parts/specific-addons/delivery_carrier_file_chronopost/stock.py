@@ -22,9 +22,9 @@
 from openerp.osv import fields, orm
 
 
-class stock_picking_out(orm.Model):
+class stock_picking(orm.Model):
 
-    _inherit = 'stock.picking.out'
+    _inherit = 'stock.picking'
 
     _columns = {
         'cash_on_delivery_amount':
@@ -45,3 +45,20 @@ class stock_picking_out(orm.Model):
             vals['cash_on_delivery_amount_untaxed'] = 0.0
         return super(stock_picking_out, self).write(
             cr, uid, ids, vals, context=context)
+
+
+class stock_picking_out(orm.Model):
+
+    _inherit = 'stock.picking.out'
+
+    _columns = {
+        'cash_on_delivery_amount':
+            fields.float('Cash on delivery amount',
+                         help="Put the amount to be used for the "
+                              "packing cash on delivery with chronopost."),
+        'cash_on_delivery_amount_untaxed':
+            fields.float('Cash on delivery amount untaxed',
+                         help="Put the untaxed amount to be used "
+                              "for the packing cash on delivery "
+                              "with chronopost."),
+    }
