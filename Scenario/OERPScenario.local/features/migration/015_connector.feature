@@ -24,6 +24,13 @@ Feature: install and configure the modules related to the magento connector
          # | product_stock_field_id | by oid: 
     And I press the button "synchronize_metadata"
 
+  Scenario: migrate the sale_shop
+    Given I execute the SQL commands
+    """
+    UPDATE magento_store SET openerp_id = 2 WHERE openerp_id IN (SELECT id FROM sale_shop WHERE name = 'Debonix Store Group');
+    DELETE FROM sale_shop WHERE name = 'Debonix Store Group' AND id NOT IN (SELECT openerp_id FROM magento_store);
+    """
+
   Scenario: migrate the products categories external ids
     Given I execute the SQL commands
     """
