@@ -93,8 +93,7 @@ class sale_order(orm.Model):
                 # products in stock pickings
                 for picking in so.picking_ids:
 
-                    partner = picking.address_id and \
-                              picking.address_id.partner_id
+                    partner = picking.partner_id
 
                     for move_line in picking.move_lines:
                         if move_line.state == 'cancel':
@@ -138,7 +137,7 @@ class sale_order(orm.Model):
                                  "added in the delivery order %s") % \
                                (picking.name,)
                         invoice_line_id = invoice_line_obj.create(cr, uid,
-                            {'name': name,
+                            {'name': '\n'.join([name, note]),
                              'origin': origin,
                              'invoice_id': invoice.id,
                              'uos_id': uos_id,
@@ -150,14 +149,13 @@ class sale_order(orm.Model):
                                          move_line.product_qty,
                              'invoice_line_tax_id': [(6, 0, tax_ids)],
                              'account_analytic_id': account_analytic_id,
-                             'note': note,
                             })
                         picking_obj._invoice_line_hook(
                             cr, uid, move_line, invoice_line_id)
 
     def action_invoice_create(self, cr, uid, ids, grouped=False,
                               states=['confirmed', 'done', 'exception'],
-                              date_inv=False, context=None):
+                              date_invoice=False, context=None):
         """
         Inherit legacy method to :
          - skip the draft state on the invoices created from the order
@@ -165,7 +163,7 @@ class sale_order(orm.Model):
         """
         invoice_id = super(sale_order, self).action_invoice_create(
             cr, uid, ids, grouped=grouped, states=states,
-            date_inv=date_inv, context=context)
+            date_invoice=date_invoice, context=context)
         if invoice_id:
             invoice = self.pool.get('account.invoice').browse(
                 cr, uid, invoice_id, context=context)
