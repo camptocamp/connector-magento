@@ -23,8 +23,7 @@
              'product',
              'stock',
              'sale',
-             # TODO
-             # 'packing_product_change',
+             'packing_product_change',
              # 'on_inventory_retry_assign',
              'account_statement_base_completion',
              ],

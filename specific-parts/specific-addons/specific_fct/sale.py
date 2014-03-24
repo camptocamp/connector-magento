@@ -57,8 +57,12 @@ class sale_order(orm.Model):
         return new_args
 
     _columns = {
-        'date_invoiced': fields.function(_invoice_date_get, method=True, fnct_search=_invoiced_date_search,
-            type='date', string='Invoice Date', help="Date of the first invoice generated for this SO"),
+        'date_invoiced': fields.function(
+            _invoice_date_get,
+            fnct_search=_invoiced_date_search,
+            type='date',
+            string='Invoice Date',
+            help="Date of the first invoice generated for this SO"),
     }
 
     def _skip_draft_invoice(self, cr, uid, invoice):
@@ -72,7 +76,8 @@ class sale_order(orm.Model):
             wf_service.trg_validate(uid, 'account.invoice',
                                     invoice.id, 'invoice_open', cr)
 
-    def _add_extra_picking_lines(self, cr, uid, ids, invoice, grouped=False):
+    def _add_extra_picking_lines(self, cr, uid, ids, invoice, grouped=False,
+                                 context=None):
         """
         Lines in pickings which are not in the sale order are considered
         as gift. They have to be added on the invoice with a 0 price unit.
@@ -83,7 +88,7 @@ class sale_order(orm.Model):
         # when there are new gift products in a picking,
         # they have to be added on the invoice with 0 price unit
         if invoice.type == 'out_invoice':
-            for so in self.browse(cr, uid, ids):
+            for so in self.browse(cr, uid, ids, context=context):
                 # products in sale orders
                 so_products = []
                 for line in so.order_line:
@@ -105,7 +110,7 @@ class sale_order(orm.Model):
                         if product.id in so_products:
                             continue
 
-                        origin = 'GIFT:' + picking.name
+                        origin = _('GIFT:') + picking.name
 
                         if grouped:
                             name = (picking.name or '') + '-' + move_line.name
@@ -170,37 +175,7 @@ class sale_order(orm.Model):
 
             self._skip_draft_invoice(cr, uid, invoice)
 
-            self._add_extra_picking_lines(cr, uid, ids, invoice, grouped=grouped)
+            self._add_extra_picking_lines(cr, uid, ids, invoice,
+                                          grouped=grouped, context=context)
 
         return invoice_id
-
-
-class sale_order_line(orm.Model):
-
-    _inherit = 'sale.order.line'
-
-    def _prepare_order_line_invoice_line(self, cr, uid, line,
-                                         account_id=False, context=None):
-        """Prepare the dict of values to create the new invoice line for a
-           sale order line. This method may be overridden to implement custom
-           invoice generation (making sure to call super() to establish
-           a clean extension chain).
-
-           Override the method to add an invoice line with the replaced
-           product in the related packing
-           Keep the price of the original product but use the accounts of the
-           replacement product
-           Add a comment which indicates the modification
-
-           Override of the method in order to:
-           Empty the "note" field
-
-           :param browse_record line: sale.order.line record to invoice
-           :param int account_id: optional ID of a G/L account to force
-               (this is used for returning products including service)
-           :return: dict of values to create() the invoice line
-        """
-        vals = super(sale_order_line, self)._prepare_order_line_invoice_line(
-            cr, uid, line, account_id=account_id, context=context)
-        vals['note'] = False
-        return vals
