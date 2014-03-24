@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2012-2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,39 @@
 #
 ##############################################################################
 
+from openerp.addons.connector.unit.mapper import backend_to_m2o
+from openerp.addons.magentoerpconnect.product import (
+    ProductImport,
+    ProductImportMapper,
+    )
+from .backend import magento_debonix
+
+
+@magento_debonix
+class DebonixProductImport(ProductImport):
+    _model_name = ['magento.product.product']
+
+    def _import_dependencies(self):
+        """ Import the dependencies for the record"""
+        super(DebonixProductImport, self)._import_dependencies()
+        record = self.magento_record
+        self._import_dependency(record['marque'],
+                                'magento.product.brand')
+
+
+@magento_debonix
+class DebonixProductImportMapper(ProductImportMapper):
+    _model_name = 'magento.product.product'
+
+    direct = (ProductImportMapper.direct +
+              [(backend_to_m2o('marque', binding='magento.product.brand'),
+                'product_brand_id'),
+               ])
+
+# ---- BELOW: TO REVIEW ----
+
 # from osv import osv, fields
+
 
 
 # class magerp_product_attributes(osv.osv):

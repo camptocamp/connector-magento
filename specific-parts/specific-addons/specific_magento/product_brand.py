@@ -20,10 +20,17 @@
 ##############################################################################
 
 from openerp.osv import orm, fields
+from openerp.addons.connector.unit.mapper import (mapping,
+                                                  ImportMapper,
+                                                  )
+from openerp.addons.magentoerpconnect.unit.import_synchronizer import (
+    MagentoImportSynchronizer,
+    )
+from openerp.addons.magentoerpconnect.unit.backend_adapter import (
+    MagentoCRUDAdapter,
+    )
+from .backend import magento_debonix
 
-
-# TODO : when importing a product; if brand is not known, get it from
-# API
 
 class magento_product_brand(orm.Model):
     _name = 'magento.product.brand'
@@ -60,3 +67,32 @@ class product_brand(orm.Model):
         return super(product_brand, self).copy_data(cr, uid, id,
                                                     default=default,
                                                     context=context)
+
+
+@magento_debonix
+class ProductBrandImport(MagentoImportSynchronizer):
+    """ Brand is an attribute in Magento, imported in product_brand """
+    _model_name = ['magento.product.brand']
+
+    MAGENTO_ATTRIBUTE_ID = 206
+
+    def _get_magento_data(self):
+        """ Return the raw Magento data for ``self.magento_id`` """
+        backend_adapter = self.get_connector_unit_for_model(
+            MagentoCRUDAdapter, 'magento.product.attribute')
+        options = backend_adapter.options(self.MAGENTO_ATTRIBUTE_ID)
+        for option in options:
+            if option['value'] == str(self.magento_id):
+                return option
+
+
+@magento_debonix
+class DebonixProductBrandImportMapper(ImportMapper):
+    _model_name = 'magento.product.brand'
+
+    direct = [('label', 'name'),
+              ]
+
+    @mapping
+    def backend_id(self, record):
+        return {'backend_id': self.backend_record.id}

@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,10 +19,15 @@
 #
 ##############################################################################
 
-from . import connector
-from . import backend
-from . import magento_model
-from . import product_brand
-from . import product
-from . import product_attribute
-from . import unit
+from openerp.addons.magentoerpconnect.unit.backend_adapter import GenericAdapter
+from .backend import magento_debonix
+
+
+@magento_debonix
+class AddressAdapter(GenericAdapter):
+    _model_name = 'magento.product.attribute'
+    _magento_model = 'catalog_product_attribute'
+
+    def options(self, id):
+        return self._call('%s.options' % self._magento_model,
+                          [int(id)])
