@@ -19,10 +19,10 @@
 #
 ##############################################################################
 
-from osv import osv
+from openerp.osv import orm
 
 
-class StockPickingRetryAvailability(osv.TransientModel):
+class StockPickingRetryAvailability(orm.TransientModel):
 
     _name = "stock.picking.retry.availability"
 
@@ -32,5 +32,3 @@ class StockPickingRetryAvailability(osv.TransientModel):
         pick_obj.retry_assign_all(cr, uid, [], context=None)
 
         return {'type': 'ir.actions.act_window_close'}
-
-StockPickingRetryAvailability()

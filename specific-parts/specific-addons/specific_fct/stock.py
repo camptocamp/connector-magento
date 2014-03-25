@@ -16,10 +16,10 @@
 #
 ##############################################################################
 
-from openerp import netsvc
-
-from openerp.tools.translate import _
+import logging
 from openerp.osv import orm, fields
+
+_logger = logging.getLogger(__name__)
 
 
 class StockPicking(orm.Model):
@@ -28,6 +28,34 @@ class StockPicking(orm.Model):
 
     # Debonix want them sorted in this order
     _order = 'priority desc, min_date asc, date asc'
+
+    def retry_assign_all(self, cr, uid, ids, context=None):
+        canceled_ids, assigned_ids = super(StockPicking, self).retry_assign_all(
+            cr, uid, ids, context=context)
+        # try to assign confirmed pickings (those that were not assigned
+        # before but can maybe be assigned now)
+        # exclude picking_ids because we have already
+        # tried to assign them
+        if not ids:
+            _logger.info('try to assign more pickings')
+            domain = [('type', '=', 'out'),
+                      ('state', '=', 'confirmed'),
+                      ('id', 'not in', canceled_ids + assigned_ids)]
+            confirmed_ids = self.search(
+                cr, uid, domain, context=context, order='priority desc')
+            for picking_id in confirmed_ids:
+                try:
+                    assigned_id = self.action_assign(cr, uid, [picking_id],
+                                                     context)
+                    assigned_ids.append(assigned_id)
+                except orm.except_orm as exc:
+                    # ignore error, the picking will just stay as
+                    # confirmed
+                    name = self.read(cr, uid, picking_id, ['name'],
+                                     context=context)['name']
+                    _logger.info('error in action_assign for picking %s',
+                                 name, exc_info=True)
+        return canceled_ids, assigned_ids
 
     def get_selection_priority(self, cr, uid, context=None):
         """ Rename the priorities to match what Debonix is used to.
@@ -58,17 +86,17 @@ class StockPicking(orm.Model):
         'priority': '1',  # normal priority
     }
 
-    # TODO maybe useless, see in stock_picking_priority
-    def try_action_assign_all(self, cr, uid, ids, context=None):
+    def try_action_assign_all(self, cr, uid, ids=None, context=None):
+        if not ids:
+            ids = []
         if isinstance(ids, (int, long)):
             ids = [ids]
-
         domain = [('type', '=', 'out'),
                   ('state', '=', 'confirmed')]
-
         if ids:
-            domain += [('ids', 'in', ids)]
+            domain += [('id', 'in', ids)]
 
-        picking_ids = self.search(cr, uid, domain, order='priority desc')
+        picking_ids = self.search(cr, uid, domain,
+                                  order='priority desc, min_date, date')
 
-        return self.retry_assign(cr, uid, picking_ids)
+        return self.retry_assign_all(cr, uid, picking_ids, context=context)

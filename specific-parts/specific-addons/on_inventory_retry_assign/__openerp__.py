@@ -19,23 +19,21 @@
 #
 ##############################################################################
 
-{
-    "name": "Retry to assign assigned packings on inventory",
-    "version": "1.0",
-    "depends": ['stock',
-                'packing_priority_on_payment_type'],
-    "author": "Camptocamp",
-    "description": """
-When an inventory is done, available packings stay available even if after inventory the quantities are insufficient.
-This naive wizard cancel availability of all packings and retry to assign them.
-    """,
-    "website": "http://www.camptocamp.com",
-    "category": "Others",
-    "init_xml": [],
-    "demo_xml": [],
-    "update_xml": [
-                   'wizard/retry_availability_view.xml',
-                   ],
-    'installable': False,
-    "active": False,
+{"name": "Retry to assign assigned packings on inventory",
+ "version": "1.0",
+ "depends": ['stock',
+             'stock_picking_priority',
+             'picking_priority_on_payment_method',
+             ],
+ "author": "Camptocamp",
+ "description": """
+When an inventory is done, available pickings stay available even if
+after inventory the quantities are insufficient.  This naive wizard
+cancel availability of all packings and retry to assign them.
+ """,
+ "website": "http://www.camptocamp.com",
+ "category": "Others",
+ "data": ['wizard/retry_availability_view.xml',
+          ],
+ 'installable': True,
 }
