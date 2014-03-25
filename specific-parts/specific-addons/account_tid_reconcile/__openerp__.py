@@ -34,12 +34,10 @@
 
  """,
  'website': 'http://www.camptocamp.com',
- 'init_xml': [],
- 'update_xml': ['easy_reconcile_view.xml'],
- 'demo_xml': [],
+ 'data': ['easy_reconcile_view.xml'],
  'test': [],
  'images': [],
- 'installable': False,
+ 'installable': True,
  'auto_install': False,
  'license': 'AGPL-3',
 }

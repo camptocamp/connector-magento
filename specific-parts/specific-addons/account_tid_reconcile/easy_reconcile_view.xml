@@ -4,7 +4,6 @@
       <record id="view_easy_reconcile_form" model="ir.ui.view">
           <field name="name">account.easy.reconcile.form</field>
           <field name="model">account.easy.reconcile</field>
-          <field name="type">form</field>
           <field name="inherit_id" ref="account_advanced_reconcile.view_easy_reconcile_form"/>
           <field name="arch" type="xml">
               <page name="information" position="inside">
