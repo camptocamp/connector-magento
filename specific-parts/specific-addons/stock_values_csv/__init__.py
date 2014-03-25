@@ -18,5 +18,5 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import unicode_csv
-import wizard
+from . import unicode_csv
+from . import wizard

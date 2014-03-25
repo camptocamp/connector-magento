@@ -23,18 +23,19 @@
  'author' : 'Camptocamp',
  'maintainer': 'Camptocamp',
  'category': 'Others',
- 'complexity': "normal",  # easy, normal, expert
- 'depends' : ['stock'],
+ 'complexity': "normal",
+ 'depends' : ['stock',
+              ],
  'description': """Debonix Specific.
-    Add a wizard to export the stock value for each product in a location at a given date.
-    The data is exported as a CSV file""",
+
+Add a wizard to export the stock value for each product in a location at
+a given date.  The data is exported as a CSV file
+""",
  'website': 'http://www.camptocamp.com',
- 'init_xml': [],
- 'update_xml': ['wizard/stock_values_view.xml'],
- 'demo_xml': [],
+ 'data': ['wizard/stock_values_view.xml'],
  'tests': [],
- 'installable': False,
+ 'installable': True,
  'auto_install': False,
  'license': 'AGPL-3',
- 'application': True}
-
+ 'application': True,
+}

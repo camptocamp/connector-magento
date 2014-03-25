@@ -23,19 +23,28 @@ import time
 import StringIO
 import base64
 
-from openerp.osv.orm import TransientModel, fields
-from stock_values_csv.unicode_csv.writer import UnicodeWriter
+from openerp.osv import orm, fields
+from ..unicode_csv.writer import UnicodeWriter
 
 
-class StockValuesExport(TransientModel):
+class StockValuesExport(orm.TransientModel):
     _name = 'stock.values.detail.export'
     _description = 'Export Stock values details for a location'
 
-    _columns = {'location_id': fields.many2one('stock.location', 'Location', required=True),
-                'stop_date': fields.datetime('Date',
-                                             help="Keep empty to export details at "
-                                                   "current date."),
+    _columns = {
+        'location_id': fields.many2one('stock.location', 'Location',
+                                       required=True),
+        'stop_date': fields.datetime('Date',
+                                     help="Keep empty to export details at "
+                                          "current date."),
         'data': fields.binary('CSV', readonly=True),
+        'state': fields.selection([('draft', 'Draft'),
+                                   ('done', 'Done')],
+                                  string='State'),
+    }
+
+    _defaults = {
+        'state': 'draft',
     }
 
     def action_manual_export(self, cr, uid, ids, context=None):
@@ -47,12 +56,20 @@ class StockValuesExport(TransientModel):
             writer.writerows(rows)
             file_value = file_data.getvalue()
             self.write(cr, uid, ids,
-                       {'data': base64.encodestring(file_value)},
+                       {'data': base64.encodestring(file_value),
+                        'state': 'done'},
                        context=context)
         finally:
             file_data.close()
-
-        return True
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'view_mode': 'form',
+            'view_type': 'form',
+            'res_id': ids[0],
+            'views': [(False, 'form')],
+            'target': 'new',
+        }
 
     def _get_product_qty(self, cr, uid, ids, location_id, stop_date=None, context=None):
         stop_date = stop_date or time.strftime('%Y-%m-%d %H:%M:%S')

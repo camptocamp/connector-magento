@@ -4,19 +4,22 @@
     <record id="stock_values_export_view" model="ir.ui.view">
       <field name="name">Export Locations' Values Details</field>
       <field name="model">stock.values.detail.export</field>
-      <field name="type">form</field>
       <field name="arch" type="xml">
-        <form string="Export Stock Values Details">
-          <group colspan="4" >
+        <form string="Export Stock Values Details" version="7.0">
+          <field name="state" invisible="1"/>
+          <group attrs="{'invisible': [('state', '=', 'done')]}">
             <field name="location_id"/>
             <field name="stop_date"/>
-            <field name="data"/>
           </group>
-          <separator string ="" colspan="4"/>
-          <group colspan="4" col="2">
-            <button special="cancel" string="Cancel" icon="gtk-cancel"/>
-            <button name="action_manual_export" string="Create file" type="object" icon="gtk-execute"/>
+          <group attrs="{'invisible': [('state', '!=', 'done')]}">
+              <field name="data"/>
           </group>
+          <footer>
+              <button name="action_manual_export" string="Create file"
+                type="object"  default_focus="1" class="oe_highlight"/>
+              or
+              <button string="Cancel" class="oe_link" special="cancel"/>
+          </footer>
         </form>
       </field>
     </record>
