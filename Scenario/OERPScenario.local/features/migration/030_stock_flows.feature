@@ -9,4 +9,5 @@ Feature: install and migrate the picking priorities modules
       | stock_split_picking                |
       | stockit_synchro                    |
       | stock_values_csv                   |
+      | import_tracking                    |
     Then my modules should have been installed and models reloaded
