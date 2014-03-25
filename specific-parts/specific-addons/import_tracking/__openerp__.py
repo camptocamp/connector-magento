@@ -35,6 +35,7 @@
  'website': 'http://www.camptocamp.com',
  'data': [
      'res_company_view.xml',
+     'stock_data.xml',
  ],
  'tests': [],
  'installable': True,
