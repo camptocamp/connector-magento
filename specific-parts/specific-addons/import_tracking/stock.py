@@ -84,5 +84,5 @@ class stock_picking(orm.Model):
 
     def run_import_tracking_references_scheduler(self, cr, uid, context=None):
         """ Scheduler for import tracking references """
-        self.import_tracking_references(cr, uid, context=context)
+        self.import_tracking_references(cr, uid, [], context=context)
         return True
