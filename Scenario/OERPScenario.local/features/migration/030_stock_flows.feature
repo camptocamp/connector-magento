@@ -25,7 +25,6 @@ Feature: install and migrate the picking priorities modules
       | purchase_bom_split               |
     Then my modules should have been installed and models reloaded
 
-
   Scenario: I need to create the carrier file configuration because it is now represented in carrier.file
           # I have to create the configuration for chronopost and bind each delivery method to it
     Given I need a "delivery.carrier.file" with name: Chronopost and oid: scenario.chronopost
@@ -67,3 +66,10 @@ Feature: install and migrate the picking priorities modules
     And having:
       | name                  | value                            |
       | tracking_directory_id | by oid: scenario.import_tracking |
+
+  @backend
+  Scenario: set the bom_stock field on the magento backend
+    Given I find a "magento.backend" with oid: scenario.magento_backend_debonix
+    And having:
+         | key                    | value              |
+         | product_stock_field_id | by name: bom_stock |
