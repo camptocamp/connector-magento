@@ -24,26 +24,26 @@
  'maintainer': 'Camptocamp',
  'category': 'version',
  'complexity': "normal",
- 'depends' : ['product'],
+ 'depends' : ['product',
+              ],
  'description': """
-       This module update pricelist using Import/Export wizards. This concern the update of supplier info part
-       of the product form (where we can set price / quantity). The match of the product are made on the product id.
-       It can also update the ean13 and the product code.
-       
-       This two wizard are for 
-       1) To export the current product price list
-       2) To import the new product price list and update ean13 / code
-              
-       Export/import is available in CSV or Excel. 
-       Excel needs PyExcelerator.""",
+This module update pricelist using Import/Export wizards. This concern the update of supplier info part
+of the product form (where we can set price / quantity). The match of the product are made on the product id.
+It can also update the ean13 and the product code.
+
+This two wizard are for 
+1) To export the current product price list
+2) To import the new product price list and update ean13 / code
+
+Export/import is available in CSV or Excel. 
+Excel needs xlrd.
+ """,
  'website': 'http://www.camptocamp.com',
- 'init_xml': [],
- 'update_xml': ['wizard/export_pricelist_view.xml',
+ 'data': ['wizard/export_pricelist_view.xml',
                 'wizard/import_pricelist_view.xml'],
- 'demo_xml': [],
  'tests': [],
- 'installable': False,
+ 'installable': True,
  'auto_install': False,
  'license': 'AGPL-3',
- 'application': True}
+}
 

@@ -24,19 +24,24 @@ import base64
 import tempfile
 import csv
 
-from openerp.osv.orm import TransientModel, fields
+try:
+    import xlrd
+    excel_enabled = True
+except ImportError:
+    print "xlrd python lib  not installed"
+    excel_enabled = False
+
+from openerp.osv import orm, fields
 from openerp.osv.osv import except_osv
-from tools.translate import _
+from openerp.tools.translate import _
 
 
-
-class PriceListImporter(TransientModel):
+class PriceListImporter(orm.TransientModel):
     """Import Pricelist"""
-    _name = 'c2c.import.pricelist'
+    _name = 'product.pricelist.import'
     _description = 'Import Pricelist'
     _columns = {
         'data': fields.binary('File', required=True),
-        'name': fields.char('Filename', 256, required=False),
     }
 
     def _convert_to_type(self, chain, to_type):
@@ -47,8 +52,10 @@ class PriceListImporter(TransientModel):
         try:
             ret = to_type(ret)
         except ValueError:
-            raise except_osv(_("Error during pricelist import"),
-                             _("Value \"%s\" cannot be converted to %s.")  % (ret, to_type.__name__))
+            raise orm.except_orm(
+                _("Error during pricelist import"),
+                _("Value \"%s\" cannot be converted to %s.") %
+                (ret, to_type.__name__))
         return ret
 
     def action_import(self, cr, uid, ids, context=None):
@@ -57,13 +64,13 @@ class PriceListImporter(TransientModel):
         """
         res = {}
         imported_prod_ids = []
-        prod_obj = self.pool.get('product.product')
-        prod_supplier_obj = self.pool.get('product.supplierinfo')
-        pricelist_obj = self.pool.get('pricelist.partnerinfo')
-        model_obj  = self.pool.get('ir.model.data')
-        res_obj = self.pool.get('res.partner')
+        prod_obj = self.pool['product.product']
+        prod_supplier_obj = self.pool['product.supplierinfo']
+        pricelist_obj = self.pool['pricelist.partnerinfo']
+        model_obj  = self.pool['ir.model.data']
+        res_obj = self.pool['res.partner']
 
-        for wiz in self.browse(cr, uid, ids, context):
+        for wiz in self.browse(cr, uid, ids, context=context):
             if not wiz.data:
                 raise except_osv(_('UserError'),
                                  _("You need to select a file!"))
@@ -71,18 +78,14 @@ class PriceListImporter(TransientModel):
             data = base64.b64decode(wiz.data)
             file_type = (wiz.name).split('.')
             input = cStringIO.StringIO(data)
-            #seek is deprecated
+            # seek is deprecated
             input.seek(0)
             reader_info = []
             if file_type[1] == 'xls':
-                try:
-                    import xlrd
-                except ImportError:
-                    print "xlrd python lib  not installed"
-
-                if xlrd:
+                if excel_enabled:
                     file_1 = base64.decodestring(wiz.data)
-                    # Watch out file is never deleted we should use TemporaryFile instead
+                    # Watch out file is never deleted we should use
+                    # TemporaryFile instead
                     (fileno, fp_name) = tempfile.mkstemp('.xls', 'openerp_')
                     file = open(fp_name, "w")
                     file.write(file_1)
@@ -90,15 +93,21 @@ class PriceListImporter(TransientModel):
                     #Read xls file.
                     book = xlrd.open_workbook(fp_name)
                     sheet = book.sheet_by_index(0)
-                    for counter in range(sheet.nrows-1): # Loop for number of rows
+                    for counter in range(sheet.nrows - 1):  # Loop for number of rows
                     # grab the current row
-                        rowValues = sheet.row_values(counter+1,0, end_colx=sheet.ncols)
-                        row =map(lambda x: str(x), rowValues)
+                        rowValues = sheet.row_values(counter + 1,0, end_colx=sheet.ncols)
+                        row = map(lambda x: str(x), rowValues)
                         reader_info.append(row)
+                else:
+                    raise orm.except_orm(
+                        _("Import Pricelist error"),
+                        _("Impossible to import the pricelist from an Excel file."
+                          "Please install xlrd to enable this feature."))
 
             if file_type[1] == 'csv':
                 # we should use dict reader instead
-                reader = csv.reader(input, delimiter=';', lineterminator='\r\n')
+                reader = csv.reader(input, delimiter=';',
+                                    lineterminator='\r\n')
                 reader_info.extend(reader)
                 del reader_info[0]
 
@@ -107,8 +116,10 @@ class PriceListImporter(TransientModel):
             # header of the csv
             # bad way to do it beacause odrer has now importance
             # key should be extracted from frist row and validated
-            keys= ['id', 'EAN13', 'Company Code', 'Supplier Code', 'Supplier Delay',
-                   'Supplier Min. Qty', 'Supplier Product Code', 'Supplier Product Name', 'Quantity', 'Price']
+            keys= ['id', 'EAN13', 'Company Code', 'Supplier Code',
+                   'Supplier Delay', 'Supplier Min. Qty',
+                   'Supplier Product Code', 'Supplier Product Name',
+                   'Quantity', 'Price']
 
             prices_not_to_delete = []
 
@@ -131,23 +142,33 @@ class PriceListImporter(TransientModel):
 
                 if prod_ids:
                     updated = False
-                    for prod in prod_obj.browse(cr, uid, [prod_ids]):
-                        """
-                        Suppliers update. Create or modify suppliers. Delete all lines of prices for a supplier and import new prices
-                        """
+                    for prod in prod_obj.browse(cr, uid, [prod_ids], context=context):
+                        # Suppliers update. Create or modify suppliers.
+                        # Delete all lines of prices for a supplier and
+                        # import new prices
+
                         if values['Supplier Code'] != '':
-                            prod_supplier_ids = prod_supplier_obj.search(cr, uid, [('product_id','=', prod.id),
-                                                                                   ('name.ref', '=', values['Supplier Code'])])
+                            prod_supplier_ids = prod_supplier_obj.search(
+                                cr, uid,
+                                [('product_id','=', prod.id),
+                                 ('name.ref', '=', values['Supplier Code'])],
+                                context=context)
                             if prod_supplier_ids:
                                 for prod_supplier in prod_supplier_obj.browse(cr, uid, prod_supplier_ids):
-                                    prod_supplier_obj.write(cr, uid, prod_supplier.id, {'delay': values['Supplier Delay'],
-                                                                                        'min_qty': values['Supplier Min. Qty'],
-                                                                                        'product_code': values['Supplier Product Code'],
-                                                                                        'product_name': values['Supplier Product Name']})
+                                    prod_supplier_obj.write(
+                                        cr, uid, prod_supplier.id,
+                                        {'delay': values['Supplier Delay'],
+                                         'min_qty': values['Supplier Min. Qty'],
+                                         'product_code': values['Supplier Product Code'],
+                                         'product_name': values['Supplier Product Name']})
 
                                     if values['Quantity'] > 0 and values['Price'] > 0:
                                         if prod_supplier.pricelist_ids:
-                                            # delete prices lines (only when the first new line of the supplier is found to not delete prices at each line of the csv)
+                                            # delete prices lines (only
+                                            # when the first new line of
+                                            # the supplier is found to
+                                            # not delete prices at each
+                                            # line of the csv)
                                             if (prod.id, prod_supplier.id) not in prices_not_to_delete:
                                                 # delete price lines
                                                 price_ids = pricelist_obj.search(cr, uid, [('suppinfo_id','=', prod_supplier.id)])
@@ -177,9 +198,7 @@ class PriceListImporter(TransientModel):
                                 prices_not_to_delete.append((prod.id, new_supplier_ids))
                             updated = True
 
-                        """
-                        Product update. Modify the ean13 or default_code
-                        """
+                        # Product update. Modify the ean13 or default_code
                         product_data = {}
                         if values['EAN13'].strip() != '' and prod.ean13 != values['EAN13']:
                             product_data.update({'ean13': values['EAN13']})

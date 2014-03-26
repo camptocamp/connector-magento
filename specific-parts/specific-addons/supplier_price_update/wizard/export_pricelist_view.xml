@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
   <data>
-    
+
     <!-- Export pricelist Wizard form -->
 
-    <record id="view_c2c_export_pricelist" model="ir.ui.view">
-      <field name="name">c2c.export.pricelist.form</field>
-      <field name="model">c2c.export.pricelist</field>
-      <field name="type">form</field>
+    <record id="view_product_pricelist_export_form" model="ir.ui.view">
+      <field name="name">product.pricelist.export.form</field>
+      <field name="model">product.pricelist.export</field>
       <field name="arch" type="xml">
-        <form string="Export Pricelist">
-          <group colspan="4" >
-            <separator string="" colspan="4"/>
-            <field name="data"/> 
-            <field name="name" colspan="2"/>
-            <field name="format" colspan="2"/>
+        <form string="Export Pricelist" version="7.0">
+          <field name="state" invisible="1"/>
+          <group attrs="{'invisible': [('state', '!=', 'done')]}">
+              <field name="name" invisible="1"/>
+              <field name="data" filename="name"/>
           </group>
-          <separator string="" colspan="4"/>
-          <label>Help: All the products prices are exported. Warning, you will need all the prices values on the import file because the import is destructive: ALL PRICES VALUES WILL BE UPDATED FOR ONE SUPPLIER, THOSE WHICH ARE NOT IN THE FILE WILL BE DELETED (aught the product is in the import file).</label>                    
-          <separator string="" colspan="4"/>
-          <group colspan="4" col="6">
-            <button  icon="gtk-cancel" special="cancel" string="Cancel"/>
-            <button  icon="gtk-ok" name="export_data" string="Export" type="object"/>
+          <group attrs="{'invisible': [('state', '==', 'done')]}">
+            <field name="format"/>
           </group>
+          <div>Help: All the products prices are exported. Warning, you will need all the prices values on the import file because the import is destructive: ALL PRICES VALUES WILL BE UPDATED FOR ONE SUPPLIER, THOSE WHICH ARE NOT IN THE FILE WILL BE DELETED (aught the product is in the import file).</div>
+          <footer>
+              <button name="export_data" string="Export" type="object"  default_focus="1" class="oe_highlight"/>
+              or
+              <button string="Cancel" class="oe_link" special="cancel"/>
+          </footer>
         </form>
       </field>
     </record>
 
     <!--  Action of Export Pricelist wizard -->
 
-    <record id="action_c2c_export_pricelist" model="ir.actions.act_window">
+    <record id="action_product_pricelist_export" model="ir.actions.act_window">
       <field name="name">Export Pricelist</field>
-      <field name="res_model">c2c.export.pricelist</field>
+      <field name="res_model">product.pricelist.export</field>
       <field name="view_type">form</field>
       <field name="view_mode">tree,form</field>
-      <field name="view_id" ref="view_c2c_export_pricelist"/>
+      <field name="view_id" ref="view_product_pricelist_export_form"/>
       <field name="target">new</field>
-    </record>  
-    
-    <menuitem  id="menu_export_pricelist" name="Export Pricelist" action="action_c2c_export_pricelist" parent="product.menu_product_pricelist_main"/>
-    
-    
+    </record>
+
+    <menuitem  id="menu_export_pricelist" name="Export Pricelist"
+      action="action_product_pricelist_export" parent="product.menu_product_pricelist_main"/>
+
   </data>
-</openerp>    
+</openerp>
