@@ -83,9 +83,10 @@ class purchase_order(orm.Model):
             list_key.sort()
             return tuple(list_key)
 
-    # compute what the new orders should contain
+        # Compute what the new orders should contain
 
         new_orders = {}
+
         for porder in [order for order in self.browse(cr, uid, ids, context=context) if order.state == 'draft']:
             order_key = make_key(porder, ('partner_id', 'location_id', 'pricelist_id'))
             new_order = new_orders.setdefault(order_key, ({}, []))
@@ -96,7 +97,6 @@ class purchase_order(orm.Model):
                     'origin': porder.origin,
                     'date_order': porder.date_order,
                     'partner_id': porder.partner_id.id,
-                    'partner_address_id': porder.partner_address_id.id,
                     'dest_address_id': porder.dest_address_id.id,
                     'warehouse_id': porder.warehouse_id.id,
                     'location_id': porder.location_id.id,
@@ -112,10 +112,13 @@ class purchase_order(orm.Model):
                 if porder.notes:
                     order_infos['notes'] = (order_infos['notes'] or '') + ('\n%s' % (porder.notes,))
                 if porder.origin:
-                    order_infos['origin'] = (order_infos['origin'] or '') + ' ' + porder.origin
+                    if not porder.origin in order_infos['origin'] and not order_infos['origin'] in porder.origin:
+                        order_infos['origin'] = (order_infos['origin'] or '') + ' ' + porder.origin
 
             for order_line in porder.order_line:
-                line_key = make_key(order_line, ('name', 'date_planned', 'taxes_id', 'price_unit', 'notes', 'product_id', 'move_dest_id', 'account_analytic_id', 'origin_procurement_order_id'))
+###### CHANGE
+                line_key = make_key(order_line, ('name', 'date_planned', 'taxes_id', 'price_unit', 'product_id', 'move_dest_id', 'account_analytic_id', 'origin_procurement_order_id'))
+###### END OF CHANGE
                 o_line = order_infos['order_line'].setdefault(line_key, {})
                 if o_line:
                     # merge the line with an existing line
@@ -128,7 +131,9 @@ class purchase_order(orm.Model):
                             field_val = field_val.id
                         o_line[field] = field_val
                     o_line['uom_factor'] = order_line.product_uom and order_line.product_uom.factor or 1.0
+###### CHANGE
                     o_line['origin_procurement_order_id'] = order_line.origin_procurement_order_id and order_line.origin_procurement_order_id.id or False
+###### END OF CHANGE
 
 
         allorders = []
@@ -150,6 +155,7 @@ class purchase_order(orm.Model):
             orders_info.update({neworder_id: old_ids})
             allorders.append(neworder_id)
 
+###### CHANGE
             po_line_obj = self.pool.get('purchase.order.line')
 
 
@@ -163,6 +169,7 @@ class purchase_order(orm.Model):
 
             po_line_obj.write(
                 cr, uid, old_line_ids, {'origin_procurement_order_id': False}, context=context)
+###### END OF CHANGE
 
             # make triggers pointing to the old orders point to the new order
             for old_id in old_ids:
