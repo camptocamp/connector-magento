@@ -20,6 +20,9 @@ Feature: install and migrate the picking priorities modules
       | base_delivery_carrier_files      |
       | delivery_carrier_file_chronopost |
       | import_tracking                  |
+      | bom_split                        |
+      | sale_bom_split                   |
+      | purchase_bom_split               |
     Then my modules should have been installed and models reloaded
 
 
