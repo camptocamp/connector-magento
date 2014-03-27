@@ -23,6 +23,7 @@ from openerp.addons.connector.unit.mapper import backend_to_m2o
 from openerp.addons.magentoerpconnect.product import (
     ProductImport,
     ProductImportMapper,
+    ProductInventoryExport
     )
 from .backend import magento_debonix
 
@@ -47,6 +48,32 @@ class DebonixProductImportMapper(ProductImportMapper):
               [(backend_to_m2o('marque', binding='magento.product.brand'),
                 'product_brand_id'),
                ])
+
+
+@magento_debonix
+class DebonixProductInventoryExport(ProductInventoryExport):
+    _model_name = ['magento.product.product']
+
+    def _get_data(self, product, fields):
+        data = super(DebonixProductInventoryExport, self)._get_data(
+            product, fields)
+
+        if product.manage_stock:
+            backorders = product.backorders
+            data.update({
+                'backorders': self._map_backorders[backorders],
+                'is_in_stock': True,
+                'use_config_manage_stock': True,
+                'manage_stock': True,
+                'use_config_min_sale_qty': True,
+                'use_config_max_sale_qty': True,
+            })
+        else:
+            data.update({
+                'manage_stock': False,
+                'use_config_manage_stock': False,
+            })
+        return data
 
 # ---- BELOW: TO REVIEW ----
 
