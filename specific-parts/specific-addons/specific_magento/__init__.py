@@ -26,3 +26,4 @@ from . import product_brand
 from . import product
 from . import product_attribute
 from . import unit
+from . import sale
