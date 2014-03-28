@@ -259,3 +259,15 @@ Feature: install and configure the modules related to the magento connector
     AND o.attribute_id = 193;
 
     """
+
+  @workflow
+  Scenario: Configure the workflows
+    Given I find a "sale.workflow.process" with oid: sale_automatic_workflow.manual_validation
+    And having:
+      | key               | value           |
+      | create_invoice_on | on_picking_done |
+      | validate_invoice  | True            |
+
+  @payment_method
+  Scenario: Migrate the payment methods
+    Given I migrate the payment methods
