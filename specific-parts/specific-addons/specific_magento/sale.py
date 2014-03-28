@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,69 @@
 #
 ##############################################################################
 
+from __future__ import division
+import logging
+
+from openerp.addons.connector.exception import MappingError
+from openerp.addons.connector.unit.mapper import (mapping,
+                                                  ImportMapper,
+                                                  ImportMapChild,
+                                                  )
+from ..backend import magento_debonix
+
+_logger = logging.getLogger(__name__)
+
+@magento_debonix
+class LineMapChild(ImportMapChild):
+    """ Customize the mapping of sales order lines.
+
+    Delete sale order lines where the product is a component of a BoM
+    and have a 0.0 price.
+
+    We have to do that because Magento send the pack and his components
+    in the sale order.
+
+    And we don't want the components in the sales order, they are added
+    in the delivery order with sale_bom_split.
+
+    """
+    _model_name = 'magento.sale.order.line'
+
+    def format_items(self, items_values):
+        items = items_values[:]
+        for item in items_values:
+            product_id = item['product_id']
+            if product_id:
+                # search if product is a BoM if it is, loop on other products
+                # to search for his components to drop
+                product = self.session.browse('product.product', product_id)
+
+                if not product.bom_ids:
+                    continue
+
+                # search the products components of the BoM (always one
+                # level when imported from magento)
+                bom_prod_ids = set()
+                for bom in product.bom_ids:
+                    bom_prod_ids |= set(
+                        [bom_line.product_id.id for bom_line in bom.bom_lines]
+                    )
+
+                for other_item in items[:]:
+                    if other_item['product_id'] == product_id:
+                        continue
+
+                    # remove the lines of the bom only when the price is 0.0
+                    # because we don't want to remove a component that
+                    # is ordered alone
+                    if other_item['product_id'] in bom_prod_ids and \
+                       not other_item['price_unit']:
+                        items.remove(other_item)
+
+        return [(0, 0, item) for item in items]
+
+
+# ---- BELOW: TO REVIEW ----
 # from osv import osv
 # from tools.translate import _
 
@@ -50,27 +113,3 @@
 #        return order_id
 #
 #sale_order()
-
-
-# class sale_shop(osv.osv):
-
-#     _inherit = 'sale.shop'
-
-#     def deactivate_products(self, cr, uid, context=None):
-#         """
-#         Deactivate all products planned to deactivation on OpenERP
-#         Only if no picking uses the product
-#         """
-#         product_ids = self.pool.get('product.product').search(
-#             cr, uid, [('to_deactivate', '=', True)])
-#         self.pool.get('product.product').try_deactivate_product(
-#             cr, uid, product_ids, context=context)
-#         return True
-
-#     def export_catalog(self, cr, uid, ids, context=None):
-#         res = super(sale_shop, self).export_catalog(
-#             cr, uid, ids, context=context)
-#         self.deactivate_products(cr, uid, context=context)
-#         return res
-
-# sale_shop()
