@@ -19,17 +19,13 @@
 #
 ##############################################################################
 
-from __future__ import division
 import logging
 
-from openerp.addons.connector.exception import MappingError
-from openerp.addons.connector.unit.mapper import (mapping,
-                                                  ImportMapper,
-                                                  ImportMapChild,
-                                                  )
-from ..backend import magento_debonix
+from openerp.addons.connector.unit.mapper import ImportMapChild
+from .backend import magento_debonix
 
 _logger = logging.getLogger(__name__)
+
 
 @magento_debonix
 class LineMapChild(ImportMapChild):
