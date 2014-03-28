@@ -73,3 +73,8 @@ Feature: install and migrate the picking priorities modules
     And having:
          | key                    | value              |
          | product_stock_field_id | by name: bom_stock |
+
+  @recompute_magento_qty
+  Scenario: recompute the quantity on all products
+    Given I find a "magento.backend" with oid: scenario.magento_backend_debonix
+    And I recompute the magento stock quantities without export
