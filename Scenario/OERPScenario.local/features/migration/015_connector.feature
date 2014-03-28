@@ -24,6 +24,20 @@ Feature: install and configure the modules related to the magento connector
          # | product_stock_field_id | by oid: 
     And I press the button "synchronize_metadata"
 
+  Scenario: set import dates
+    Given I execute the SQL commands
+    """
+    UPDATE magento_backend
+    SET import_categories_from_date = (SELECT last_products_export_date FROM sale_shop WHERE id = 2),
+        import_products_from_date = (SELECT last_products_export_date FROM sale_shop WHERE id = 2);
+
+    UPDATE magento_website
+    SET import_partners_from_date = now();
+
+    UPDATE magento_storeview
+    SET import_orders_from_date = (SELECT max(date_order) FROM sale_order);
+    """
+
   Scenario: migrate the sale_shop
     Given I execute the SQL commands
     """
