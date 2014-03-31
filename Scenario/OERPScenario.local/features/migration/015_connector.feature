@@ -271,3 +271,4 @@ Feature: install and configure the modules related to the magento connector
   @payment_method
   Scenario: Migrate the payment methods
     Given I migrate the payment methods
+    And I set the new payment methods on the sales orders

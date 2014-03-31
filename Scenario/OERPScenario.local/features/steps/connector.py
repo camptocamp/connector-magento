@@ -87,3 +87,29 @@ def impl(ctx):
                                             'res_id': method.id,
                                             'module': module,
                                             })
+
+
+@given('I set the new payment methods on the sales orders')
+def impl(ctx):
+    PaymentMethod = model('payment.method')
+    with newcr(ctx) as cr:
+        cr.execute("SELECT name "
+                   "FROM base_sale_payment_type ")
+        rows = cr.fetchall()
+    ptypes = []
+    for row in rows:
+        name = row[0]
+        if ';' in name:
+            for lname in name.split(';'):
+                ptypes.append(lname)
+        else:
+            ptypes.append(row[0])
+
+    with newcr(ctx) as cr:
+        for ptype in ptypes:
+            method = PaymentMethod.get([('name', '=', ptype)])
+            cr.execute("UPDATE sale_order "
+                       "SET payment_method_id = %s, "
+                       "    workflow_process_id = %s "
+                       "WHERE ext_payment_method = %s ",
+                       (method.id, method.workflow_process_id.id, ptype))
