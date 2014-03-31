@@ -53,7 +53,7 @@ Feature: install and configure the modules related to the magento connector
     SELECT res_id,
            replace(id.name, 'product_category/', ''),
            (SELECT id FROM magento_backend LIMIT 1),
-           (SELECT last_products_export_date FROM sale_shop WHERE id = 2),
+           (SELECT to_char(last_products_export_date, 'YYYY-MM-DD HH24:MI:SS')::timestamp FROM sale_shop WHERE id = 2),
            1,
            1,
            id.create_date,
@@ -76,7 +76,7 @@ Feature: install and configure the modules related to the magento connector
     SELECT res_id,
            replace(id.name, 'product_product/', ''),
            (SELECT id FROM magento_backend LIMIT 1),
-           (SELECT last_products_export_date FROM sale_shop WHERE id = 2),
+           (SELECT to_char(last_products_export_date, 'YYYY-MM-DD HH24:MI:SS')::timestamp FROM sale_shop WHERE id = 2),
            1,
            1,
            id.create_date,
@@ -104,7 +104,7 @@ Feature: install and configure the modules related to the magento connector
     SELECT res_id,
            replace(id.name, 'res_partner_category/', ''),
            (SELECT id FROM magento_backend LIMIT 1),
-           now(),
+           to_char(now(), 'YYYY-MM-DD HH24:MI:SS')::timestamp,
            1,
            1,
            id.create_date,
@@ -127,7 +127,7 @@ Feature: install and configure the modules related to the magento connector
     SELECT res_id,
            replace(id.name, 'res_partner/', ''),
            (SELECT id FROM magento_backend LIMIT 1),
-           now(),
+           to_char(now(), 'YYYY-MM-DD HH24:MI:SS')::timestamp,
            1,
            1,
            id.create_date,
@@ -161,7 +161,7 @@ Feature: install and configure the modules related to the magento connector
     SELECT pa.partner_id,
            replace(id.name, 'res_partner_address/', ''),
            (SELECT id FROM magento_backend LIMIT 1),
-           now(),
+           to_char(now(), 'YYYY-MM-DD HH24:MI:SS')::timestamp,
            1,
            1,
            id.create_date,
@@ -193,7 +193,7 @@ Feature: install and configure the modules related to the magento connector
     SELECT id.res_id,
            replace(id.name, 'sale_order/', ''),
            (SELECT id FROM magento_backend LIMIT 1),
-           now(),
+           to_char(now(), 'YYYY-MM-DD HH24:MI:SS')::timestamp,
            1,
            1,
            id.create_date,
@@ -221,7 +221,7 @@ Feature: install and configure the modules related to the magento connector
     SELECT res_id,
            replace(id.name, 'stock_picking/', ''),
            (SELECT id FROM magento_backend LIMIT 1),
-           now(),
+           to_char(now(), 'YYYY-MM-DD HH24:MI:SS')::timestamp,
            1,
            1,
            id.create_date,
@@ -247,7 +247,9 @@ Feature: install and configure the modules related to the magento connector
     AND NOT EXISTS (SELECT id FROM product_brand WHERE name = label);
 
     INSERT INTO magento_product_brand (create_uid, write_uid, create_date, write_date, openerp_id, magento_id, sync_date, backend_id)
-    SELECT b.create_uid, b.write_uid, b.create_date, b.write_date, b.id, o.value, now(), (SELECT id FROM magento_backend LIMIT 1)
+    SELECT b.create_uid, b.write_uid, b.create_date, b.write_date, b.id, o.value,
+           to_char(now(), 'YYYY-MM-DD HH24:MI:SS')::timestamp,
+           (SELECT id FROM magento_backend LIMIT 1)
     FROM product_brand b
     INNER JOIN magerp_product_attribute_options o
     ON o.label = b.name
