@@ -111,5 +111,17 @@ def impl(ctx):
             cr.execute("UPDATE sale_order "
                        "SET payment_method_id = %s, "
                        "    workflow_process_id = %s "
-                       "WHERE ext_payment_method = %s ",
+                       "WHERE ext_payment_method = %s "
+                       "AND payment_method_id IS NULL ",
                        (method.id, method.workflow_process_id.id, ptype))
+        cr.execute("UPDATE account_invoice "
+                   "SET workflow_process_id = so.workflow_process_id "
+                   "FROM sale_order so, sale_order_invoice_rel rel "
+                   "WHERE account_invoice.workflow_process_id IS NULL "
+                   "AND so.id = rel.order_id "
+                   "AND account_invoice.id = rel.invoice_id ")
+        cr.execute("UPDATE stock_picking "
+                   "SET workflow_process_id = so.workflow_process_id "
+                   "FROM sale_order so "
+                   "WHERE stock_picking.workflow_process_id IS NULL "
+                   "AND so.id = stock_picking.sale_id ")
