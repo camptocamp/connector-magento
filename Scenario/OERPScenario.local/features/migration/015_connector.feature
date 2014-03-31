@@ -275,3 +275,18 @@ Feature: install and configure the modules related to the magento connector
   Scenario: Migrate the payment methods
     Given I migrate the payment methods
     And I set the new payment methods on the sales orders
+
+  @special_products
+  Scenario Outline: Configure the special products otherwise they cannot be sold
+    Given I find a "product.product" with oid: <oid>
+    And having:
+      | key               | value           |
+      | state             | sellable        |
+
+  Examples:
+      | oid                                                  |
+      | connector_ecommerce.product_product_shipping         |
+      | connector_ecommerce.product_product_cash_on_delivery |
+      | connector_ecommerce.product_product_gift             |
+      | connector_ecommerce.product_product_discount         |
+
