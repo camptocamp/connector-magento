@@ -184,26 +184,29 @@ Feature: install and configure the modules related to the magento connector
                     WHERE id.res_id = c.openerp_id AND replace(id.name, 'res_partner_address/', '') = c.magento_id)
     """
 
+  @sale_order
   Scenario: migrate the sales orders
     Given I execute the SQL commands
     """
     INSERT INTO magento_sale_order (openerp_id, magento_id, backend_id, sync_date, create_uid, write_uid, create_date, write_date,
                                     total_amount, total_amount_tax, magento_parent_id, magento_order_id) 
-    SELECT res_id,
-           replace(name, 'sale_order/', ''),
+    SELECT id.res_id,
+           replace(id.name, 'sale_order/', ''),
            (SELECT id FROM magento_backend LIMIT 1),
            now(),
            1,
            1,
-           create_date,
-           write_date,
+           id.create_date,
+           id.write_date,
            -- \n
+           so.amount_total,
+           so.amount_tax,
            -- we do not have theses informations
-           null,
-           null,
            null,
            null
     FROM ir_model_data id
+    INNER JOIN sale_order so
+    ON so.id = id.res_id
     WHERE model = 'sale.order'
     AND external_referential_id = 1
     AND NOT EXISTS (SELECT id FROM magento_sale_order c
