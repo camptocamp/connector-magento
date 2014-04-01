@@ -22,6 +22,7 @@
 import logging
 
 from openerp.addons.connector.unit.mapper import ImportMapChild
+from openerp.addons.magentoerpconnect.sale import SaleOrderImport
 from .backend import magento_debonix
 
 _logger = logging.getLogger(__name__)
@@ -75,6 +76,20 @@ class LineMapChild(ImportMapChild):
                         items.remove(other_item)
 
         return [(0, 0, item) for item in items]
+
+
+
+@magento_debonix
+class DebonixSaleOrderImport(SaleOrderImport):
+    _model_name = ['magento.sale.order']
+
+    def _merge_sub_items(self, product_type, top_item, child_items):
+        # special type for Debonix for Magento, should be considered as
+        # configurable
+        if product_type == 'debadvancedconfigurable':
+            product_type = 'configurable'
+        return super(DebonixSaleOrderImport, self)._merge_sub_items(
+            product_type, top_item, child_items)
 
 
 # ---- BELOW: TO REVIEW ----
