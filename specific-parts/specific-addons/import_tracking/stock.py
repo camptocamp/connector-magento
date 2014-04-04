@@ -35,6 +35,10 @@ from openerp.tools.translate import _
 _logger = logging.getLogger(__name__)
 
 
+class ImportError(Exception):
+    pass
+
+
 class stock_picking(orm.Model):
 
     _inherit = 'stock.picking'
@@ -90,25 +94,44 @@ class stock_picking(orm.Model):
                         filepath = os.path.join(root, filename)
                         imported = self._import_tracking_from_file(
                             local_cr, uid, filepath, context=context)
-                        if imported:
-                            imported_files.append(filename)
-                    except:
+                    except Exception as err:
                         local_cr.rollback()
-                        _logger.exception("Tracking file %s could not be "
-                                          "imported ", filepath)
+                        _logger.exception("Tracking file %s could not be imported", filepath)
+                        message = (_("Tracking file %s could not be imported due to: %s") %
+                                   (filepath, err))
+                        self._post_import_tracking_error_message(
+                            cr, uid, message, context=context)
                         continue
                     else:
-                        from_path = os.path.join(path, filename)
-                        to_path = os.path.join(archive_path, filename)
-                        shutil.move(from_path, to_path)
-                        # commit so if next file fails we won't lose
-                        # the imported trackings
+                        if imported:
+                            from_path = os.path.join(path, filename)
+                            to_path = os.path.join(archive_path, filename)
+                            shutil.move(from_path, to_path)
+                            # commit so if next file fails we won't lose
+                            # the imported trackings
                         local_cr.commit()
 
         _logger.info('Processed %s tracking files out of %s. %s files '
                      'with errors.', len(imported_files), total,
                      total - len(imported_files))
         return True
+
+    def _post_import_tracking_error_message(self, cr, uid, message,
+                                            subtype='mail.mt_comment',
+                                            context=None):
+        data_obj = self.pool['ir.model.data']
+        mail_group_obj = self.pool['mail.group']
+        try:
+            __, mail_group_id = data_obj.get_object_reference(
+                cr, uid, 'import_tracking', 'group_import_tracking')
+            mail_group_obj.message_post(
+                cr, uid, [mail_group_id],
+                body=message,
+                subtype=subtype,
+                context=context)
+        except:
+            _logger.error('Could not post a notification about the error '
+                          'because the Import Tracking group has been deleted')
 
     def _import_tracking_from_file(self, cr, uid, filepath, context=None):
         _logger.info('Started to import tracking number file %s', filepath)
@@ -123,9 +146,12 @@ class stock_picking(orm.Model):
                     tracking_ref = line[1].strip()
                     packing_name = line[6].strip()
                 except IndexError:
-                    _logger.exception("Tracking file %s could not be read at "
-                                      "line %s. Import of file canceled.",
-                                      filepath, line)
+                    message = ("Tracking file %s could not be read at "
+                               "line %s. Import of file canceled.")
+                    _logger.exception(message, filepath, line)
+                    self._post_import_tracking_error_message(
+                        cr, uid, _(message) % (filepath, line),
+                        context=context)
                     return
                 if packing_name:
                     self._update_tracking_references(

@@ -36,6 +36,7 @@
  'data': [
      'res_company_view.xml',
      'stock_data.xml',
+     'mail_data.xml',
  ],
  'tests': [],
  'installable': True,
