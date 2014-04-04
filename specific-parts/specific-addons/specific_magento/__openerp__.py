@@ -25,6 +25,7 @@
  'license': 'AGPL-3',
  'category': 'Connector',
  'depends' : ['magentoerpconnect',
+              'magentoerpconnect_pricing',
               'product_brand',
               ],
  'description': """

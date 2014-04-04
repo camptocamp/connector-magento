@@ -20,11 +20,22 @@
 ##############################################################################
 
 from openerp.tools.translate import _
-from openerp.addons.connector.unit.mapper import backend_to_m2o
+from openerp.addons.connector.unit.mapper import backend_to_m2o, ExportMapper
+from openerp.addons.connector.event import (on_record_write,
+                                            on_record_create,
+                                            on_record_unlink
+                                            )
+from openerp.addons.magentoerpconnect.connector import get_environment
+from openerp.addons.magentoerpconnect.unit.export_synchronizer import (
+    export_record,
+    MagentoExporter,
+    )
 from openerp.addons.magentoerpconnect.product import (
     ProductImport,
-    ProductImportMapper,
     ProductInventoryExport
+    )
+from openerp.addons.magentoerpconnect_pricing.product import (
+    ProductImportMapper,
     )
 from .backend import magento_debonix
 
@@ -93,3 +104,56 @@ class DebonixProductInventoryExport(ProductInventoryExport):
                 'use_config_manage_stock': False,
             })
         return data
+
+
+@magento_debonix
+class DebonixProductExporter(MagentoExporter):
+    """ Products are created on Magento. Export only changes of
+    some fields.
+
+    """
+    _model_name = 'magento.product.product'
+
+
+@magento_debonix
+class DebonixProductExportMapper(ExportMapper):
+    _model_name = 'magento.product.product'
+
+    # TODO avoid double exports when a template field is modified
+    direct = [('standard_price', 'cost'),
+              ]
+
+
+@on_record_create(model_names='magento.product.product')
+@on_record_write(model_names='magento.product.product')
+def delay_export(session, model_name, record_id, vals):
+    if session.context.get('connector_no_export'):
+        return
+    record = session.browse(model_name, record_id)
+    env = get_environment(session, model_name, record.backend_id.id)
+    mapper = env.get_connector_unit(ExportMapper)
+    # preemptively check if we have data to export to avoid to generate
+    # useless jobs
+    map_record = mapper.map_record(record)
+    fields = vals.keys()
+    if map_record.values(fields=fields):
+        export_record.delay(session, model_name,
+                            record_id, fields=fields,
+                            description="Export product values such "
+                                        "as the cost")
+
+
+@on_record_write(model_names=['product.template', 'product.product'])
+def delay_export_all_bindings(session, model_name, record_id, vals):
+    if session.context.get('connector_no_export'):
+        return
+    if model_name == 'product.template':
+        record_ids = session.search('product.product',
+                                    [('product_tmpl_id', '=', record_id)])
+    else:
+        record_ids = [record_id]
+    binding_ids = session.search('magento.product.product',
+                                 [('openerp_id', 'in', record_ids)])
+    for binding_id in binding_ids:
+        delay_export(session, 'magento.product.product',
+                     binding_id, vals)
