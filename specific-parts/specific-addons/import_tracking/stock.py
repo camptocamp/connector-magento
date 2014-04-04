@@ -25,7 +25,10 @@ import logging
 import os
 import shutil
 
+from contextlib import closing
+
 from openerp.osv import orm
+from openerp import pooler
 from openerp.tools.translate import _
 
 
@@ -70,29 +73,38 @@ class stock_picking(orm.Model):
                 _('Error'),
                 _('Path %s for the tracking numbers does not exist') % path)
 
+        archive_path = os.path.join(path, 'archives')
+        if not os.path.exists(archive_path):
+            os.mkdir(archive_path)
+
         _logger.info('Started to import tracking number files')
         imported_files = []
         # read each file and each line in directory
         total = 0
-        for root, __dirs, files in os.walk(path, topdown=False):
-            for filename in files:
-                total += 1
-                filepath = os.path.join(root, filename)
-                imported = self._import_tracking_from_file(
-                    cr, uid, filepath, context=context)
-                if imported:
-                    imported_files.append(filename)
+        db = pooler.get_db(cr.dbname)
+        with closing(db.cursor()) as local_cr:
+            for root, __dirs, files in os.walk(path, topdown=False):
+                for filename in files:
+                    try:
+                        total += 1
+                        filepath = os.path.join(root, filename)
+                        imported = self._import_tracking_from_file(
+                            local_cr, uid, filepath, context=context)
+                        if imported:
+                            imported_files.append(filename)
+                    except:
+                        local_cr.rollback()
+                        _logger.exception("Tracking file %s could not be "
+                                          "imported ", filepath)
+                        continue
+                    else:
+                        from_path = os.path.join(path, filename)
+                        to_path = os.path.join(archive_path, filename)
+                        shutil.move(from_path, to_path)
+                        # commit so if next file fails we won't lose
+                        # the imported trackings
+                        local_cr.commit()
 
-        # delete the file if all the tracking references have been
-        # updated. only at end to not delete a file with after a
-        # rollback
-        for filename in imported_files:
-            archive_path = os.path.join(path, 'archives')
-            if not os.path.exists(archive_path):
-                os.mkdir(archive_path)
-            from_path = os.path.join(path, filename)
-            to_path = os.path.join(archive_path, filename)
-            shutil.move(from_path, to_path)
         _logger.info('Processed %s tracking files out of %s. %s files '
                      'with errors.', len(imported_files), total,
                      total - len(imported_files))
