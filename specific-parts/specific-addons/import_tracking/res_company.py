@@ -19,6 +19,8 @@
 #
 ##############################################################################
 
+import os
+
 from openerp.osv import orm, fields
 
 
@@ -27,7 +29,21 @@ class res_company(orm.Model):
     _inherit = 'res.company'
 
     _columns = {
-        'tracking_directory_id':
-            fields.many2one('document.directory',
-                            string="Tracking Files Directory")
+        'tracking_csv_path_in': fields.char(
+            'Path for tracking number files',
+            help='Absolute path where the CSV files will be read to '
+                 'update the tracking reference.'),
     }
+
+    def _check_tracking_csv_path(self, cr, uid, ids):
+        for company in self.browse(cr, uid, ids):
+            if not company.tracking_csv_path_in:
+                continue
+            if not os.path.exists(company.tracking_csv_path_in):
+                return False
+        return True
+
+    _constraints = [
+        (_check_tracking_csv_path,
+         'Error: the path for tracking number files does not exist.',
+         ['tracking_csv_path_in'])]

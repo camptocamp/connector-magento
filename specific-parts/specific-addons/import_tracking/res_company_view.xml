@@ -9,7 +9,7 @@
         <notebook  position="inside">
           <page string="Debonix Specific Configuration">
             <group string="Chronopost">
-              <field name="tracking_directory_id"/>
+                <field name="tracking_csv_path_in"/>
             </group>
           </page>
         </notebook>

@@ -28,7 +28,7 @@
  'complexity': "normal",  # easy, normal, expert
  'depends' : ['delivery',
               'stock',
-              'document'],
+              ],
  'description': """
  Custom module to import tracking references on packings
  """,
