@@ -21,9 +21,13 @@
 
 import base64
 import csv
+import logging
 import os
 
 from openerp.osv import orm
+
+
+_logger = logging.getLogger(__name__)
 
 
 class stock_picking(orm.Model):
@@ -49,7 +53,6 @@ class stock_picking(orm.Model):
                        packing[0].id,
                        {'carrier_tracking_ref': tracking_ref},
                        context=context)
-        return True
 
     def import_tracking_references(self, cr, uid, ids, context=None):
         """ Read the Chronopost file and update
@@ -63,23 +66,31 @@ class stock_picking(orm.Model):
         if not directory:
             return False
 
+        updated_files = []
         for doc_file in directory.file_ids:
             decoded_data = base64.b64decode(doc_file.datas)
             reader = csv.reader(decoded_data.split(os.linesep), delimiter=';')
 
-            updated = False
             for line in reader:
                 if not line:  # handle empty lines
                     continue
 
-                tracking_ref = line[1].strip()
-                packing_name = line[6].strip()
-                if packing_name:
-                    updated = self._update_tracking_references(
-                        cr, uid, packing_name, tracking_ref, context=context)
+                try:
+                    tracking_ref = line[1].strip()
+                    packing_name = line[6].strip()
+                except KeyError:
+                    _logger.exception('Import of tracking numbers: '
+                                      'the file %s could not be read at '
+                                      'line %s', doc_file.name, line)
+                else:
+                    if packing_name:
+                        self._update_tracking_references(
+                            cr, uid, packing_name, tracking_ref,
+                            context=context)
+                        updated_files.append(doc_file.id)
 
-            if updated:
-                attachment_obj.unlink(cr, uid, [doc_file.id], context=context)
+        for doc_file_id in updated_files:
+            attachment_obj.unlink(cr, uid, [doc_file_id], context=context)
         return True
 
     def run_import_tracking_references_scheduler(self, cr, uid, context=None):
