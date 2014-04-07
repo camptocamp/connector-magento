@@ -30,7 +30,7 @@ from openerp import pooler
 from openerp.osv import orm, fields
 from openerp.tools.translate import _
 from ..stockit_importer.importer import StockitImporter
-from .wizard_utils import archive_file
+from .wizard_utils import archive_file, post_message
 
 
 _logger = logging.getLogger(__name__)
@@ -186,21 +186,13 @@ class StockItInventoryImport(orm.TransientModel):
             }
         return res
 
-    def create_request_error(self, cr, uid, file, err_msg, context=None):
-        _logger.error("Error importing inventory file %s: %s", file, err_msg)
+    def post_error(self, cr, uid, filename, err_msg, context=None):
+        _logger.exception("Error importing inventory file %s", filename)
 
-        # TODO post a message
-        request = self.pool.get('res.request')
-        summary = _("Stock-it inventory import failed on file : %s\n"
-                    "With error:\n"
-                    "%s") % (file, err_msg)
-
-        request.create(cr, uid,
-                       {'name': _("Stock-it inventory import"),
-                        'act_from': uid,
-                        'act_to': uid,
-                        'body': summary,
-                        })
+        message = _("Stock-it inventory import failed on file: %s "
+                    "with error:<br>"
+                    "%s") % (filename, err_msg)
+        post_message(self, cr, uid, message, context=context)
         return True
 
     def run_background_import(self, cr, uid, context=None):
@@ -214,9 +206,9 @@ class StockItInventoryImport(orm.TransientModel):
         files_folder = os.path.join(company.stockit_base_path,
                                     company.stockit_inventory_import)
         files = glob.glob(os.path.join(files_folder, '*.*'))
-        for file in files:
+        for filename in files:
             inventory_id = False
-            data_file = open(file, 'r')
+            data_file = open(filename, 'r')
             try:
                 data = data_file.read().encode("base64")
                 wizard = self.create(cr, uid, {'data': data}, context=context)
@@ -231,11 +223,11 @@ class StockItInventoryImport(orm.TransientModel):
                 finally:
                     mycursor.close()
             except orm.except_orm as e:
-                self.create_request_error(cr, uid, file, e.value, context)
+                self.post_error(cr, uid, filename, e.value, context)
             except Exception as e:
-                self.create_request_error(cr, uid, file, str(e), context)
+                self.post_error(cr, uid, filename, str(e), context)
             finally:
                 data_file.close()
             if inventory_id:
-                archive_file(file)
+                archive_file(filename)
         return True

@@ -27,6 +27,7 @@ import string
 from openerp.osv import orm, fields
 from openerp.tools.translate import _
 from ..stockit_exporter.exporter import StockitExporter
+from .wizard_utils import post_message
 
 
 _logger = logging.getLogger()
@@ -77,23 +78,6 @@ class StockItInPickingExport(orm.TransientModel):
             'target': 'new',
         }
 
-    def create_request_error(self, cr, uid, err_msg, context=None):
-        _logger.info("Error exporting ingoing pickings file: %s", err_msg)
-
-        # TODO post a message
-        request = self.pool.get('res.request')
-        summary = _("Stock-it ingoing pickings failed\n"
-                    "With error:\n"
-                    "%s") % (err_msg,)
-
-        request.create(cr, uid,
-                       {'name': _("Stock-it ingoing pickings export"),
-                        'act_from': uid,
-                        'act_to': uid,
-                        'body': summary,
-                        })
-        return True
-
     def run_background_export(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
@@ -111,7 +95,11 @@ class StockItInPickingExport(orm.TransientModel):
             data = exporter.get_csv_data(rows)
             exporter.export_file(data)
         except Exception as e:
-            self.create_request_error(cr, uid, str(e), context)
+            _logger.exception("Error exporting ingoing pickings file")
+            message = _("Stock-it ingoing pickings failed "
+                        "with error:<br>"
+                        "%s") % e
+            post_message(self, cr, uid, message, context=context)
         return True
 
     def get_data(self, cr, uid, ids, context=None):

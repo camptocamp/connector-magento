@@ -28,6 +28,7 @@ from datetime import datetime
 from openerp.osv import orm, fields
 from openerp.tools.translate import _
 from ..stockit_exporter.exporter import StockitExporter
+from .wizard_utils import post_message
 
 
 _logger = logging.getLogger(__name__)
@@ -69,23 +70,6 @@ class StockItProductExport(orm.TransientModel):
             'target': 'new',
         }
 
-    def create_request_error(self, cr, uid, err_msg, context=None):
-        _logger.error("Error exporting product file : %s", err_msg)
-
-        # todo use a message
-        request = self.pool.get('res.request')
-        summary = _("Stock-it product export failed\n"
-                    "With error:\n"
-                    "%s") % (err_msg,)
-
-        request.create(cr, uid,
-                       {'name': _("Stock-it product export"),
-                        'act_from': uid,
-                        'act_to': uid,
-                        'body': summary,
-                        })
-        return True
-
     def run_background_export(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
@@ -104,8 +88,12 @@ class StockItProductExport(orm.TransientModel):
             exporter = StockitExporter(filepath)
             data = exporter.get_csv_data(rows)
             exporter.export_file(data)
-        except Exception, e:
-            self.create_request_error(cr, uid, str(e), context)
+        except Exception as e:
+            _logger.exception("Error exporting products file")
+            message = _("Stock-it products export failed "
+                        "with error:<br>"
+                        "%s") % e
+            post_message(self, cr, uid, message, context=context)
         return True
 
     def get_data(self, cr, uid, ids, context=None):

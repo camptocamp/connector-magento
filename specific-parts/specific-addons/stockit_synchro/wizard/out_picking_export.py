@@ -30,7 +30,7 @@ from openerp import pooler
 from openerp.osv import orm, fields
 from openerp.tools.translate import _
 from ..stockit_exporter.exporter import StockitExporter
-
+from .wizard_utils import post_message
 
 _logger = logging.getLogger(__name__)
 
@@ -75,23 +75,6 @@ class StockItOutPickingExport(orm.TransientModel):
             'target': 'new',
         }
 
-    def create_request_error(self, cr, uid, err_msg, context=None):
-        _logger.error("Error exporting outgoing pickings file: %s", err_msg)
-
-        # TODO post a message
-        request = self.pool.get('res.request')
-        summary = _("Stock-it outgoing pickings failed\n"
-                    "With error:\n"
-                    "%s") % (err_msg,)
-
-        request.create(cr, uid,
-                       {'name': _("Stock-it outgoing pickings export"),
-                        'act_from': uid,
-                        'act_to': uid,
-                        'body': summary,
-                        })
-        return True
-
     def background_export(self, cr, uid, picking_ids, force_pickings=False,
                           only_new=True, context=None):
         """
@@ -109,7 +92,7 @@ class StockItOutPickingExport(orm.TransientModel):
         filepath = os.path.join(company.stockit_base_path,
                                 company.stockit_out_picking_export,
                                 filename)
-        db, pool = pooler.get_db_and_pool(cr.dbname)
+        db = pooler.get_db(cr.dbname)
         mycursor = db.cursor()
         data = False
         try:
@@ -121,10 +104,24 @@ class StockItOutPickingExport(orm.TransientModel):
             exporter.export_file(data)
         except Exception as e:
             mycursor.rollback()
-            self.create_request_error(cr, uid, str(e), context)
+            _logger.exception("Error exporting outgoing pickings file")
+            message = _("Stock-it outgoing pickings export failed "
+                        "with error:<br>"
+                        "%s") % e
+            err_cr = db.cursor()
+            try:
+                post_message(self, err_cr, uid, message, context=context)
+            except:
+                err_cr.rollback()
+                raise
+            else:
+                err_cr.commit()
+            finally:
+                err_cr.close()
             raise
-        finally:
+        else:
             mycursor.commit()
+        finally:
             mycursor.close()
         return data
 

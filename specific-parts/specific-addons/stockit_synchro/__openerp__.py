@@ -46,6 +46,7 @@
              'stockit_menu.xml',
              'company_view.xml',
              'stock_view.xml',
+             'mail_data.xml',
              ],
     'installable': True,
 }

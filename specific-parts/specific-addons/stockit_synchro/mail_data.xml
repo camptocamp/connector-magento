@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="0">
+    <record model="mail.group" id="group_import_export_stockit">
+      <field name="name">Import/Export Stockit</field>
+      <field name="group_ids" eval="[(4, ref('stock.group_stock_manager'))]"/>
+      <field name="description">Warn about errors during import/export of stockit files</field>
+    </record>
+  </data>
+</openerp>
+

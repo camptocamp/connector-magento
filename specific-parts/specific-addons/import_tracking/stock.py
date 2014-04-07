@@ -129,7 +129,7 @@ class stock_picking(orm.Model):
                 body=message,
                 subtype=subtype,
                 context=context)
-        except:
+        except ValueError:
             _logger.error('Could not post a notification about the error '
                           'because the Import Tracking group has been deleted')
 
