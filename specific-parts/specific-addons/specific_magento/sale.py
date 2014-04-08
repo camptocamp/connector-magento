@@ -25,6 +25,7 @@ from openerp.addons.connector.unit.mapper import (
     ImportMapChild,
     mapping,
 )
+from openerp.addons.connector_ecommerce.sale import SpecialOrderLineBuilder
 from openerp.addons.magentoerpconnect.sale import (
     SaleOrderImport,
     SaleOrderImportMapper,
@@ -32,6 +33,41 @@ from openerp.addons.magentoerpconnect.sale import (
 from .backend import magento_debonix
 
 _logger = logging.getLogger(__name__)
+
+
+@magento_debonix
+class FidelityLineBuilder(SpecialOrderLineBuilder):
+    """ Build a sales order line with a negative amount and a service
+    product for a discount.
+
+    This line has a 19.6% tax, it will work only if all the products of the sale
+    order have the same tax percentage!
+
+    This is specific to debonix for this reason, debonix sells only
+    products with the same tax (20% actually).
+
+    The Magento API has to provide the fields ::
+
+    fidelity_points_balance -> quantity of points used on the sale order
+    base_fidelity_currency_amount -> amount of the discount
+
+    Magento provides a taxes included amount, so the FIDELITY product has
+    to be configured with a taxes include tax.
+    """
+    _model_name = 'magento.sale.order'
+
+    def __init__(self, environment):
+        super(FidelityLineBuilder, self).__init__(environment)
+        self.product_ref = ('specific_magento',
+                            'product_product_debonix_fidelity')
+        self.sign = -1
+        self.points = None
+
+    def get_line(self):
+        line = super(FidelityLineBuilder, self).get_line()
+        if self.points:
+            line['name'] = "%s %s" % (self.points, line['name'])
+        return line
 
 
 @magento_debonix
@@ -115,6 +151,24 @@ class DebonixSaleOrderImportMapper(SaleOrderImportMapper):
         )
         if account_ids:
             return {'project_id': account_ids[0]}
+
+    def _add_fidelity_line(self, map_record, values):
+        record = map_record.source
+        amount = float(record.get('base_fidelity_currency_amount') or 0.)
+        if not amount:
+            return values
+        line_builder = self.get_connector_unit_for_model(FidelityLineBuilder)
+        line_builder.price_unit = amount
+        line_builder.points = record['fidelity_points_balance']
+        line = (0, 0, line_builder.get_line())
+        values['order_line'].append(line)
+        return values
+
+    def finalize(self, map_record, values):
+        values.setdefault('order_line', [])
+        values = self._add_fidelity_line(map_record, values)
+        return super(DebonixSaleOrderImportMapper, self).finalize(
+            map_record, values)
 
 
 # ---- BELOW: TO REVIEW ----
