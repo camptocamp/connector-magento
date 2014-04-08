@@ -7,7 +7,6 @@ Feature: install and migrate the picking priorities modules
 
   I also need to import tracking numbers on the packings.
 
-
   Scenario: install addons
     Given I update the module list
     Given I install the required modules with dependencies:
@@ -40,7 +39,8 @@ Feature: install and migrate the picking priorities modules
     Given I execute the SQL commands
     """
         update delivery_carrier_file
-        set subaccount_number = (select chronopost_subaccount_number from res_company where id = 1)
+        set subaccount_number = (select chronopost_subaccount_number from res_company where id = 1),
+            export_path = (select tracking_csv_path_out from res_company where id = 1)
         where id in (select res_id from ir_model_data where model = 'delivery.carrier.file' and module = 'scenario' and name = 'chronopost')
         """
 
@@ -60,13 +60,6 @@ Feature: install and migrate the picking priorities modules
        update stock_picking set number_of_packages = package_number where number_of_packages isnull;
        """
 
-  Scenario: To import the tracking numbers, I have already created a directory in the document.feature
-          # Now, I link my company setup to this directory
-    Given I need a "res.company" with oid: base.main_company
-    And having:
-      | name                  | value                            |
-      | tracking_directory_id | by oid: scenario.import_tracking |
-
   @backend
   Scenario: set the bom_stock field on the magento backend
     Given I find a "magento.backend" with oid: scenario.magento_backend_debonix
@@ -74,7 +67,7 @@ Feature: install and migrate the picking priorities modules
          | key                    | value              |
          | product_stock_field_id | by name: bom_stock |
 
-  @recompute_magento_qty
+  @recompute_magento_qty @slow
   Scenario: recompute the quantity on all products
     Given I find a "magento.backend" with oid: scenario.magento_backend_debonix
     And I recompute the magento stock quantities without export
