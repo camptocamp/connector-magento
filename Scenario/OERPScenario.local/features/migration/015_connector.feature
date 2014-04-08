@@ -293,3 +293,10 @@ Feature: install and configure the modules related to the magento connector
       | connector_ecommerce.product_product_gift             |
       | connector_ecommerce.product_product_discount         |
 
+  @carrier
+  Scenario: the magento_code is now the full name (it was chronopost and should be chronopost_Chrono10, the name actually)
+    Given I execute the SQL commands
+    """
+    UPDATE delivery_carrier SET magento_code = name
+    WHERE magento_code not like '%\_%' and magento_code is not null;
+    """
