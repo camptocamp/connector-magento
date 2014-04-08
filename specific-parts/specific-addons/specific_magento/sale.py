@@ -21,7 +21,10 @@
 
 import logging
 
-from openerp.addons.connector.unit.mapper import ImportMapChild
+from openerp.addons.connector.unit.mapper import (
+    ImportMapChild,
+    mapping,
+)
 from openerp.addons.magentoerpconnect.sale import (
     SaleOrderImport,
     SaleOrderImportMapper,
@@ -102,6 +105,17 @@ class DebonixSaleOrderImportMapper(SaleOrderImportMapper):
               [('sms_phone', 'sms_phone'),
                ]
               )
+
+    @mapping
+    def analytic_account(self, record):
+        code = record['analytic_code']
+        account_ids = self.session.search(
+            'account.analytic.account',
+            [('code', '=', code)]
+        )
+        if account_ids:
+            return {'project_id': account_ids[0]}
+
 
 # ---- BELOW: TO REVIEW ----
 # from osv import osv
