@@ -152,6 +152,13 @@ class DebonixSaleOrderImportMapper(SaleOrderImportMapper):
         if account_ids:
             return {'project_id': account_ids[0]}
 
+    @mapping
+    def transaction_id(self, record):
+        if record.get('payment'):
+            transaction_id = (record['payment']['last_trans_id'] or
+                              record['increment_id'])
+            return {'transaction_id': transaction_id}
+
     def _add_fidelity_line(self, map_record, values):
         record = map_record.source
         amount = float(record.get('base_fidelity_currency_amount') or 0.)
