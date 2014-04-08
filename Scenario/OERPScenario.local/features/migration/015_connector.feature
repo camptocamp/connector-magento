@@ -2,6 +2,14 @@
 
 Feature: install and configure the modules related to the magento connector
 
+  @magento_fidelity
+  Scenario: the fidelity product is now in specific_magento instead of magento_fidelity
+    Given I execute the SQL commands
+    """
+    UPDATE ir_model_data SET module = 'specific_magento'
+    WHERE module = 'magento_fidelity' AND name = 'product_product_debonix_fidelity';
+    """
+
   Scenario: install addons
     Given I install the required modules with dependencies:
       | name                         |
@@ -298,3 +306,10 @@ Feature: install and configure the modules related to the magento connector
     UPDATE delivery_carrier SET magento_code = name
     WHERE magento_code not like '%\_%' and magento_code is not null;
     """
+
+  @fidelity_product
+  Scenario: the fidelity product has to be a taxes included product
+    Given I find a "product.product" with oid: specific_magento.product_product_debonix_fidelity
+    And having:
+      | key      | value     |
+      | taxes_id | by id: 43 |
