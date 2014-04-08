@@ -19,12 +19,16 @@
 #
 ##############################################################################
 
-from openerp.osv import orm
+from openerp.osv import orm, fields
 
 
 class sale_order(orm.Model):
 
     _inherit = 'sale.order'
+
+    _columns = {
+        'sms_phone': fields.char('SMS Phone', size=10),
+    }
 
     def _prepare_order_picking(self, cr, uid, order, context=None):
         vals = super(sale_order, self)._prepare_order_picking(
@@ -33,10 +37,11 @@ class sale_order(orm.Model):
         # if it is a cash on delivery
         model_data_obj = self.pool['ir.model.data']
         _, product_id = model_data_obj.get_object_reference(
-            cr, uid, 'magentoerpconnect', 'product_product_cash_on_delivery')
+            cr, uid, 'connector_ecommerce', 'product_product_cash_on_delivery')
         if [line.product_id.id == product_id for line in order.order_line]:
             vals.update({
                 'cash_on_delivery_amount': order.amount_total,
                 'cash_on_delivery_amount_untaxed': order.amount_untaxed,
-                })
+            })
+        vals['sms_phone'] = order.sms_phone
         return vals

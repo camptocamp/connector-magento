@@ -73,9 +73,12 @@ class ChronopostFileGenerator(CarrierFileGenerator):
         line.saturday_delivery = configuration.saturday_delivery_code
         line.insurance_amount = configuration.chronopost_insurance or '0.0'
 
-        address = picking.address_id
+        address = picking.partner_id
         if address:
-            line.client_code = address.partner_id.id
+            if address.parent_id:
+                line.client_code = address.parent_id.id
+            else:
+                line.client_code = address.id
             line.name1 = address.name
             line.street1 = address.street
             line.street2 = address.street2
@@ -83,8 +86,10 @@ class ChronopostFileGenerator(CarrierFileGenerator):
             line.city = address.city
             line.country = (address.country_id and
                             address.country_id.code or False)
-            line.phone = address.phone
+            line.phone = picking.sms_phone
             line.email = address.email
+            if not line.email and address.parent_id:
+                line.email = address.parent_id.email
 
         line.ref1 = picking.name
         line.ref2 = picking.sale_id and picking.sale_id.name or False

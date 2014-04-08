@@ -27,6 +27,7 @@
  'depends' : ['magentoerpconnect',
               'magentoerpconnect_pricing',
               'product_brand',
+              'delivery_carrier_file_chronopost',
               ],
  'description': """
 Magento Connector Customization

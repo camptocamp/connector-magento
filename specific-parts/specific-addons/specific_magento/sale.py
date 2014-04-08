@@ -22,7 +22,10 @@
 import logging
 
 from openerp.addons.connector.unit.mapper import ImportMapChild
-from openerp.addons.magentoerpconnect.sale import SaleOrderImport
+from openerp.addons.magentoerpconnect.sale import (
+    SaleOrderImport,
+    SaleOrderImportMapper,
+)
 from .backend import magento_debonix
 
 _logger = logging.getLogger(__name__)
@@ -91,6 +94,14 @@ class DebonixSaleOrderImport(SaleOrderImport):
         return super(DebonixSaleOrderImport, self)._merge_sub_items(
             product_type, top_item, child_items)
 
+
+@magento_debonix
+class DebonixSaleOrderImportMapper(SaleOrderImportMapper):
+
+    direct = (SaleOrderImportMapper.direct +
+              [('sms_phone', 'sms_phone'),
+               ]
+              )
 
 # ---- BELOW: TO REVIEW ----
 # from osv import osv

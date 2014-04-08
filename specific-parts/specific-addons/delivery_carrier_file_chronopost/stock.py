@@ -36,6 +36,10 @@ class stock_picking(orm.Model):
                          help="Put the untaxed amount to be used "
                               "for the packing cash on delivery "
                               "with chronopost."),
+        'sms_phone': fields.related('sale_id', 'sms_phone',
+                                    string='SMS Phone',
+                                    type='char',
+                                    readonly=True),
     }
 
     def write(self, cr, uid, ids, vals, context=None):
@@ -61,6 +65,10 @@ class stock_picking_out(orm.Model):
                          help="Put the untaxed amount to be used "
                               "for the packing cash on delivery "
                               "with chronopost."),
+        'sms_phone': fields.related('sale_id', 'sms_phone',
+                                    string='SMS Phone',
+                                    type='char',
+                                    readonly=True),
     }
 
     def write(self, cr, uid, ids, vals, context=None):
