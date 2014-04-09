@@ -27,3 +27,4 @@ from . import product
 from . import product_attribute
 from . import unit
 from . import sale
+from . import partner

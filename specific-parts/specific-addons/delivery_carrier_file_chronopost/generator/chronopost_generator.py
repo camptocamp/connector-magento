@@ -50,23 +50,16 @@ class ChronopostLine(BaseLine):
               ('customs_amount', 8),)
 
 
-class ChronopostFileGenerator(CarrierFileGenerator):
+class ChronopostRows(object):
 
-    @classmethod
-    def carrier_for(cls, carrier_name):
-        return carrier_name == 'chronopost'
+    def __init__(self, picking, configuration):
+        self.picking = picking
+        self.configuration = configuration
 
-    def _get_rows(self, picking, configuration):
-        """
-        Returns the rows to create in the file for a picking
+    def _line(self):
+        configuration = self.configuration
+        picking = self.picking
 
-        :param browse_record picking: the picking for which we generate
-                                      a row in the file
-        :param browse_record configuration: configuration of the
-                                            file to generate
-        :return: list of rows
-        """
-        lines = []
         line = ChronopostLine()
         line.subaccount = configuration.subaccount_number
         line.chrono_product = configuration.chronopost_code
@@ -84,8 +77,8 @@ class ChronopostFileGenerator(CarrierFileGenerator):
             line.street2 = address.street2
             line.zip = address.zip
             line.city = address.city
-            line.country = (address.country_id and
-                            address.country_id.code or False)
+            country = address.country_id.code if address.country_id else False
+            line.country = country
             line.phone = picking.sms_phone
             line.email = address.email
             if not line.email and address.parent_id:
@@ -96,11 +89,79 @@ class ChronopostFileGenerator(CarrierFileGenerator):
         line.weight = picking.weight or 0.5  # minimal weight
         line.rep_amount = "%.2f" % picking.cash_on_delivery_amount
         line.customs_amount = "%.2f" % picking.cash_on_delivery_amount_untaxed
+        return line
 
-        for x in range(picking.number_of_packages or 1):
+    def rows(self):
+        """
+        Returns the rows to create in the file for a picking
+
+        :param browse_record picking: the picking for which we generate
+                                      a row in the file
+        :param browse_record configuration: configuration of the
+                                            file to generate
+        :return: list of rows
+        """
+        line = self._line()
+        lines = []
+        # output as many lines as number of packages
+        for x in xrange(self.picking.number_of_packages or 1):
             lines.append(line.get_fields())
 
         return lines
+
+
+class ChronorelaisRows(ChronopostRows):
+
+    def _line(self):
+        line = super(ChronorelaisRows, self)._line()
+        address = self.picking.partner_id
+        line.ref1 = ''
+        if address:
+            # chrono relay's company
+            line.name1 = address.mag_chronorelais_company
+            # person's name who can withdraw the pack
+            line.name2 = address.name
+            line.ref1 = address.mag_chronorelais_code
+        line.ref2 = self.picking.name
+        return line
+
+
+
+class ChronopostFileGenerator(CarrierFileGenerator):
+
+    @classmethod
+    def carrier_for(cls, carrier_name):
+        return carrier_name == 'chronopost'
+
+    def _get_rows(self, picking, configuration):
+        gen = ChronopostRows(picking, configuration)
+        return gen.rows()
+
+    def _write_rows(self, file_handle, rows, configuration):
+        """
+        Write the rows in the file (file_handle)
+
+        :param StringIO file_handle: file to write in
+        :param rows: rows to write in the file
+        :param browse_record configuration: configuration of the
+                                            file to generate
+        :return: the file_handle as StringIO with the rows written in it
+        """
+        writer = UnicodeWriter(file_handle, delimiter=';', quotechar='"',
+                               lineterminator='\n', quoting=csv.QUOTE_ALL)
+        writer.writerows(rows)
+        return file_handle
+
+
+class ChronorelaisFileGenerator(CarrierFileGenerator):
+
+    @classmethod
+    def carrier_for(cls, carrier_name):
+        return carrier_name == 'chronorelais'
+
+    def _get_rows(self, picking, configuration):
+        gen = ChronorelaisRows(picking, configuration)
+        return gen.rows()
 
     def _write_rows(self, file_handle, rows, configuration):
         """

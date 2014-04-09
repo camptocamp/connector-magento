@@ -30,6 +30,8 @@ class carrier_file(orm.Model):
             cr, uid, context=context)
         if 'chronopost' not in result:
             result.append(('chronopost', 'Chronopost'))
+        if 'chronorelais' not in result:
+            result.append(('chronorelais', 'Chronorelais'))
         return result
 
     _columns = {

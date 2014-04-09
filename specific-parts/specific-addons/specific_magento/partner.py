@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,9 +18,22 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import logging
 
-import sale
-import stock
-import generator
-import carrier_file
-import partner
+from openerp.addons.magentoerpconnect.partner import (
+    AddressImportMapper,
+)
+from .backend import magento_debonix
+
+_logger = logging.getLogger(__name__)
+
+
+@magento_debonix
+class DebonixAddressImportMapper(AddressImportMapper):
+    _model_name = 'magento.address'
+
+    direct = (AddressImportMapper.direct +
+              [('w_relay_point_code', 'mag_chronorelais_code'),
+               ('company', 'mag_chronorelais_company'),
+               ]
+              )

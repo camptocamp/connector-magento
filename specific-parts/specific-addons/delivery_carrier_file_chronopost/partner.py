@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,8 +19,13 @@
 #
 ##############################################################################
 
-import sale
-import stock
-import generator
-import carrier_file
-import partner
+from openerp.osv import orm, fields
+
+
+class res_partner(orm.Model):
+    _inherit = "res.partner"
+
+    _columns = {
+        'mag_chronorelais_company': fields.char('Chrono Relais Company'),
+        'mag_chronorelais_code': fields.char('Chrono Relais Code'),
+    }
