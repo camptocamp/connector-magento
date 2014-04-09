@@ -7,6 +7,7 @@ Feature: install and migrate the picking priorities modules
 
   I also need to import tracking numbers on the packings.
 
+  @slow
   Scenario: install addons
     Given I update the module list
     Given I install the required modules with dependencies:
@@ -25,24 +26,50 @@ Feature: install and migrate the picking priorities modules
     Then my modules should have been installed and models reloaded
 
   Scenario: I need to create the carrier file configuration because it is now represented in carrier.file
-          # I have to create the configuration for chronopost and bind each delivery method to it
     Given I need a "delivery.carrier.file" with name: Chronopost and oid: scenario.chronopost
     And having:
-      | name        | value      |
-      | type        | chronopost |
-      | auto_export | true       |
-      | write_mode  | disk       |
+      | name        | value                                                               |
+      | type        | chronopost                                                          |
+      | auto_export | true                                                                |
+      | write_mode  | disk                                                                |
+      | export_path | /srv/openerp/instances/openerp_prod_debonix/shipping_smb/chronopost |
+
+  Scenario: I need to create the carrier file configuration for chronorelais
+    Given I need a "delivery.carrier.file" with name: Chronorelais and oid: scenario.chronorelais
+    And having:
+      | name        | value                                                                 |
+      | type        | chronorelais                                                          |
+      | auto_export | true                                                                  |
+      | write_mode  | disk                                                                  |
+      | export_path | /srv/openerp/instances/openerp_prod_debonix/shipping_smb/chronorelais |
+
+  Scenario: I need to create the carrier file configuration for Calbersonp
+    Given I need a "delivery.carrier.file" with name: Calbersonp and oid: scenario.calbersonp
+    And having:
+      | name        | value                                                                 |
+      | type        | chronopost                                                            |
+      | auto_export | true                                                                  |
+      | write_mode  | disk                                                                  |
+      | export_path | /srv/openerp/instances/openerp_prod_debonix/shipping_smb/calbersonp   |
+
+  Scenario: I need to create the carrier file configuration for Owebiashipping2
+    Given I need a "delivery.carrier.file" with name: Owebiashipping2 and oid: scenario.owebiashipping2
+    And having:
+      | name        | value                                                                    |
+      | type        | chronopost                                                               |
+      | auto_export | true                                                                     |
+      | write_mode  | disk                                                                     |
+      | export_path | /srv/openerp/instances/openerp_prod_debonix/shipping_smb/owebiashipping2 |
 
   Scenario: Previously, the chronopost subaccount was stored on the company, it has now moved on the
           # delivery.carrier.file configuration, as the field on company does not more exist for openerp
           # I run a SQL update to set the sub-account on the carrier file
     Given I execute the SQL commands
     """
+        -- update all records as they are all based on chronopost
         update delivery_carrier_file
-        set subaccount_number = (select chronopost_subaccount_number from res_company where id = 1),
-            export_path = (select tracking_csv_path_out from res_company where id = 1)
-        where id in (select res_id from ir_model_data where model = 'delivery.carrier.file' and module = 'scenario' and name = 'chronopost')
-        """
+        set subaccount_number = (select chronopost_subaccount_number from res_company where id = 1);
+    """
 
   @set_chronopost_carrier_file
   Scenario: Actually, a lot of delivery method exists for Chronopost
@@ -52,6 +79,30 @@ Feature: install and migrate the picking priorities modules
     Then I set their values to:
       | key             | value                       |
       | carrier_file_id | by oid: scenario.chronopost |
+
+  @set_chronopost_carrier_file
+  Scenario Outline: assign the delivery methods to their carrier file (only the output directory changes)
+    Given I find a "delivery.carrier" with name: <name>
+    Then I set their values to:
+      | key             | value                               |
+      | carrier_file_id | by oid: <carrier_file_oid>          |
+
+    Examples: on owebiashipping2 (chronopost is not an error)
+      | name                                   | carrier_file_oid         |
+      | owebiashipping2_chronopost_chronopost3 | scenario.owebiashipping2 |
+      | chronopost_chronopost                  | scenario.owebiashipping2 |
+      | owebiashipping2_chronopost_offert      | scenario.owebiashipping2 |
+      | owebiashipping2_chronopost_corse       | scenario.owebiashipping2 |
+      | owebiashipping2_chronopost             | scenario.owebiashipping2 |
+
+    Examples: on chronorelais
+      | name                      | carrier_file_oid      |
+      | chronorelais_chronorelais | scenario.chronorelais |
+
+    Examples: on calbersonp
+      | name       | carrier_file_oid    |
+      | calbersonp | scenario.calbersonp |
+
 
   Scenario: We have used a field packages_number on stock.picking, in 6.1 this fields exists in the delivery module
      # with name number_of_packages, so we migrate the data
