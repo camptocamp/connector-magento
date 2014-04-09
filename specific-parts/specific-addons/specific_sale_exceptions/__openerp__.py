@@ -27,8 +27,7 @@
  'category': 'Generic Modules/Sale',
  'complexity': "easy",
  'depends': ['sale_exceptions',
-             # 'sale_markup',  TODO reactivate once migrated (and
-             # reactivate the according rule)
+             'sale_markup',
              ],
  'description': """Custom and specific exceptions for the sale workflow""",
  'website': 'http://www.camptocamp.com',

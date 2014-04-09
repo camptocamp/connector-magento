@@ -38,8 +38,7 @@
       <field name="sequence">50</field>
       <field name="model">sale.order</field>
       <field name="code"># code set in the updatable data block below</field>
-      <!-- TODO activate after the migration of the sale_markup module -->
-      <field name="active" eval="False"/>
+      <field name="active" eval="True"/>
     </record>
 
    <record id="excep_credit_limit" model="sale.exception">
