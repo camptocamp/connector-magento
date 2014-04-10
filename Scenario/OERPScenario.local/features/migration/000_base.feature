@@ -8,6 +8,22 @@ Feature: Migrate the database after the OpenERP migration
     UPDATE ir_module_module set state = 'uninstalled' where state IN ('to install', 'to upgrade');
     """
 
+  @custom_fields
+  Scenario: delete the custom fields (x_) in openerp because they are no longer used (x_ooor_id and product attributes)
+    # and they make the upgrade of modules crash
+    Given I execute the SQL commands
+    """
+    DELETE FROM ir_model_fields WHERE name LIKE 'x\_%';
+    """
+
+  Scenario: update of modules fail when the product is there, we have to remove it anyway
+    Given I find a "delivery.carrier" with oid: sale_exceptions.no_delivery_carrier
+    Then I delete it
+    Given I find a "product.product" with oid: sale_exceptions.no_delivery_product
+    Then I delete it
+    Given I find a "res.partner" with oid: sale_exceptions.no_delivery_partner
+    Then I delete it
+
   @clean
   Scenario: clean the stuff of old modules
     Given I delete all the ir.ui.view records created by uninstalled modules

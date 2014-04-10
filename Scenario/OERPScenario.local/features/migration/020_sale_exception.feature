@@ -21,18 +21,6 @@ Feature: The sales orders must not be confirmed based on some conditions.
     WHERE module = 'specific_exceptions' and model = 'sale.exception';
     """
 
-  Scenario: remove a carrier that make the install fails (removed from the module sale_exceptions)
-    Given I find a "delivery.carrier" with oid: sale_exceptions.no_delivery_carrier
-    Then I delete it
-
-  Scenario: remove a product that make the install fails (removed from the module sale_exceptions)
-    Given I find a "product.product" with oid: sale_exceptions.no_delivery_product
-    Then I delete it
-
-  Scenario: remove a partner that make the install fails (removed from the module sale_exceptions)
-    Given I find a "res.partner" with oid: sale_exceptions.no_delivery_partner
-    Then I delete it
-
   Scenario: install addons
     Given I install the required modules with dependencies:
       | name                     |

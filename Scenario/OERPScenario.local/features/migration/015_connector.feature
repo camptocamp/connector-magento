@@ -156,7 +156,7 @@ Feature: install and configure the modules related to the magento connector
     WHERE model = 'res.partner'
     AND external_referential_id = 1
     AND NOT EXISTS (SELECT id FROM magento_res_partner c
-                    WHERE id.res_id = c.openerp_id AND replace(id.name, 'res_partner/', '') = c.magento_id);
+                    WHERE pa.partner_id = c.openerp_id AND replace(id.name, 'res_partner/', '') = c.magento_id);
 
     """
 
