@@ -17,12 +17,14 @@ Feature: Migrate the database after the OpenERP migration
     """
 
   Scenario: update of modules fail when the product is there, we have to remove it anyway
-    Given I find a "delivery.carrier" with oid: sale_exceptions.no_delivery_carrier
-    Then I delete it
-    Given I find a "product.product" with oid: sale_exceptions.no_delivery_product
-    Then I delete it
-    Given I find a "res.partner" with oid: sale_exceptions.no_delivery_partner
-    Then I delete it
+    Given I execute the SQL commands
+    """
+    DELETE FROM delivery_carrier WHERE id in (SELECT res_id FROM ir_model_data WHERE module = 'sale_exceptions' AND name = 'no_delivery_carrier');
+    DELETE FROM ir_model_data WHERE module = 'sale_exceptions' AND name = 'no_delivery_carrier';
+    DELETE FROM product_template WHERE id IN (SELECT product_tmpl_id FROM product_product WHERE id in (SELECT res_id FROM ir_model_data WHERE module = 'sale_exceptions' AND name = 'no_delivery_product'));
+    DELETE FROM ir_model_data WHERE module = 'sale_exceptions' AND name = 'no_delivery_product';
+    DELETE FROM res_partner WHERE id in (SELECT res_id FROM ir_model_data WHERE module = 'sale_exceptions' AND name = 'no_delivery_partner');
+    """
 
   @clean
   Scenario: clean the stuff of old modules
