@@ -119,6 +119,7 @@ class DebonixProductExporter(MagentoExporter):
 class DebonixProductExportMapper(ExportMapper):
     _model_name = 'magento.product.product'
 
+    # TODO: cost_price is a function field, so not triggered...
     direct = [('cost_price', 'cost'),
               ]
 
