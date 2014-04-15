@@ -14,7 +14,6 @@ Feature: install and configure the modules related to the magento connector
     Given I install the required modules with dependencies:
       | name                         |
       | magentoerpconnect            |
-      | magentoerpconnect_pricing    |
       | product_brand                |
       | specific_magento             |
       | server_env_magentoerpconnect |
