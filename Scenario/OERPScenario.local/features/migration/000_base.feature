@@ -68,8 +68,16 @@ Feature: Migrate the database after the OpenERP migration
     DELETE FROM ir_translation WHERE name = 'ir.actions.act_window,name' AND res_id IN (561,1145,1146,1147,1148,1149,1150,1151,1152,1153,1154,1155,1157,1158,1159,1160);
     """
 
+  # TODO: update modules list to avoid to install useless modules like product_links
+
   Scenario: install main addons
     Given I install the required modules with dependencies:
       | name               |
       | base               |
     Then my modules should have been installed and models reloaded
+
+  Scenario: remove the size limit on procurement_order.message (has been modified in ocb, not sure if the update do it, in doubt. remove it)
+    Given I execute the SQL commands
+    """
+    ALTER TABLE procurement_order ALTER message TYPE varchar;
+    """
