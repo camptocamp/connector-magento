@@ -119,7 +119,6 @@ class DebonixProductExporter(MagentoExporter):
 class DebonixProductExportMapper(ExportMapper):
     _model_name = 'magento.product.product'
 
-    # TODO avoid double exports when a template field is modified
     direct = [('standard_price', 'cost'),
               ]
 
@@ -143,7 +142,8 @@ def delay_export(session, model_name, record_id, vals):
                                         "as the cost")
 
 
-@on_record_write(model_names=['product.template', 'product.product'])
+# TODO: if 'product.product' fields are modified, they could be missed
+@on_record_write(model_names=['product.template'])
 def delay_export_all_bindings(session, model_name, record_id, vals):
     if session.context.get('connector_no_export'):
         return
