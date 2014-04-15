@@ -29,3 +29,4 @@ from . import unit
 from . import sale
 from . import partner
 from . import stock
+from . import supplier

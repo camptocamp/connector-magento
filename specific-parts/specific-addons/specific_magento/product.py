@@ -20,7 +20,13 @@
 ##############################################################################
 
 from openerp.tools.translate import _
-from openerp.addons.connector.unit.mapper import backend_to_m2o, ExportMapper
+from openerp.addons.connector.unit.mapper import (
+    backend_to_m2o,
+    ExportMapper,
+    ImportMapper,
+    ImportMapChild,
+    mapping,
+)
 from openerp.addons.connector.event import (on_record_write,
                                             on_record_create,
                                             on_record_unlink
@@ -50,6 +56,8 @@ class DebonixProductImport(ProductImport):
         record = self.magento_record
         self._import_dependency(record['marque'],
                                 'magento.product.brand')
+        self._import_dependency(record['openerp_supplier_name'],
+                                'magento.supplier')
 
     def _must_skip(self):
         """ Hook called right after we read the data from the backend.
@@ -70,6 +78,146 @@ class DebonixProductImport(ProductImport):
         return super(DebonixProductImport, self)._must_skip()
 
 
+class CommonSupplierInfoMapChild(ImportMapChild):
+
+    def format_items(self, items_values):
+        items = []
+        for item in items_values[:]:
+            # eventually set in ProductSupplierInfoMapper
+            # or ProductSupplierInfoLineMapper
+            if item.get('__existing_openerp_id'):
+                binding_id = item.pop('__existing_openerp_id')
+                # update the record
+                items.append((1, binding_id, item))
+            else:
+                # create the record
+                items.append((0, 0, item))
+        return items
+
+
+@magento_debonix
+class ProductSupplierInfoMapChild(CommonSupplierInfoMapChild):
+    _model_name = 'product.supplierinfo'
+
+
+@magento_debonix
+class ProductSupplierInfoLineMapChild(CommonSupplierInfoMapChild):
+    _model_name = 'pricelist.partnerinfo'
+
+
+@magento_debonix
+class ProductSupplierInfoLineMapper(ImportMapper):
+    _model_name = 'pricelist.partnerinfo'
+
+    direct = [('openerp_supplier_price', 'price'),
+              ]
+
+    @mapping
+    def from_magento(self, record):
+        """ We don't keep a binding record, only use a flag.
+
+        There is always 1 supplier on Magento, simply replaces the
+        existing record, using this flag to differentiates it from the
+        suppliers filed manually.
+        """
+        return {'from_magento': True}
+
+    @mapping
+    def min_quantity(self, record):
+        """ Forced to 1 """
+        return {'min_qty': 1}
+
+    def finalize(self, map_record, values):
+        values = super(ProductSupplierInfoLineMapper, self).finalize(
+            map_record, values)
+        suppinfo_id = self.options.suppinfo_id
+        if not suppinfo_id:
+            # new supplier
+            return values
+
+        line_ids = self.session.search(
+            'pricelist.partnerinfo',
+            [('from_magento', '=', True),
+             ('suppinfo', '=', suppinfo_id)])
+        if not line_ids:
+            # from_magento has been introduced lately, try
+            # to remap if the supplier is the same
+            line_ids = self.session.search(
+                'pricelist.partnerinfo',
+                [('suppinfo_id', '=', suppinfo_id),
+                 ('min_quantity', '=', 1)])
+
+        if line_ids:
+            # supplier info line already exists, keeps the id
+            values['__existing_openerp_id'] = line_ids[0]
+        return values
+
+
+@magento_debonix
+class ProductSupplierInfoMapper(ImportMapper):
+    _model_name = 'product.supplierinfo'
+
+    direct = [('openerp_supplier_product_code', 'product_code'),
+              ('openerp_supplier_product_name', 'product_name'),
+              ('openerp_supplier_min', 'qty'),
+              ('openerp_supplier_min', 'min_qty'),
+              ('openerp_supplier_delay', 'delay'),
+              (backend_to_m2o('openerp_supplier_name',
+                              binding='magento.supplier'),
+               'name'),
+              ]
+
+    @mapping
+    def from_magento(self, record):
+        """ We don't keep a binding record, only use a flag.
+
+        There is always 1 supplier on Magento, simply replaces the
+        existing record, using this flag to differentiates it from the
+        suppliers filed manually.
+        """
+        return {'from_magento': True}
+
+    def finalize(self, map_record, values):
+        values = super(ProductSupplierInfoMapper, self).finalize(map_record,
+                                                                 values)
+        mag_product_id = map_record.parent.source['product_id']
+        binder = self.get_binder_for_model('magento.product.product')
+        product_id = binder.to_openerp(mag_product_id, unwrap=True)
+        if not product_id:
+            # new product, new supplier
+            return values
+        suppinfo_ids = self.session.search(
+            'product.supplierinfo',
+            [('from_magento', '=', True),
+             ('name', '=', values['partner_id']),
+             ('product_id', '=', product_id)])
+        if not suppinfo_ids:
+            # from_magento has been introduced lately, try
+            # to remap if the supplier is the same
+            suppinfo_ids = self.session.search(
+                'product.supplierinfo',
+                [('name', '=', values['partner_id']),
+                 ('product_id', '=', product_id)])
+
+        line_options = self.options.copy()
+        if suppinfo_ids:
+            # supplier info already exists, keeps the id
+            values['__existing_openerp_id'] = suppinfo_ids[0]
+            line_options['suppinfo_id'] = suppinfo_ids[0]
+
+        record = map_record.source
+        price_record = {
+            'openerp_supplier_price': record['openerp_supplier_price']
+        }
+        map_child = self.get_connector_unit_for_model(
+            self._map_child_class, 'pricelist.partnerinfo')
+        items = map_child.get_items([supplier_record], map_record,
+                                    'pricelist_ids',
+                                    options=line_options)
+        values['pricelist_ids'] = items
+        return values
+
+
 @magento_debonix
 class DebonixProductImportMapper(ProductImportMapper):
     _model_name = 'magento.product.product'
@@ -78,6 +226,23 @@ class DebonixProductImportMapper(ProductImportMapper):
               [(backend_to_m2o('marque', binding='magento.product.brand'),
                 'product_brand_id'),
                ])
+
+    def finalize(self, map_record, values):
+        values = super(DebonixProductImportMapper, self).finalize(map_record,
+                                                                  values)
+        record = map_record.source
+        if not record['openerp_supplier_name']:
+            return values
+        supplier_record = dict((field, value) for field, value
+                               in record.iteritems()
+                               if field.startswith('openerp_supplier_'))
+        map_child = self.get_connector_unit_for_model(
+            self._map_child_class, 'product.supplierinfo')
+        items = map_child.get_items([supplier_record], map_record,
+                                    'seller_ids',
+                                    options=self.options)
+        values['seller_ids'] = items
+        return values
 
 
 @magento_debonix
