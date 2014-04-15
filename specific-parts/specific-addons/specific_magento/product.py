@@ -119,7 +119,7 @@ class DebonixProductExporter(MagentoExporter):
 class DebonixProductExportMapper(ExportMapper):
     _model_name = 'magento.product.product'
 
-    direct = [('standard_price', 'cost'),
+    direct = [('cost_price', 'cost'),
               ]
 
 
