@@ -25,7 +25,6 @@
  'license': 'AGPL-3',
  'category': 'Connector',
  'depends' : ['magentoerpconnect',
-              'magentoerpconnect_pricing',
               'product_brand',
               'delivery_carrier_file_chronopost',
               'packing_product_change',  # lp:c2c-ecom-addons

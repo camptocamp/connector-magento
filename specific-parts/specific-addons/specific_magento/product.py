@@ -34,7 +34,7 @@ from openerp.addons.magentoerpconnect.product import (
     ProductImport,
     ProductInventoryExport
     )
-from openerp.addons.magentoerpconnect_pricing.product import (
+from openerp.addons.magentoerpconnect.product import (
     ProductImportMapper,
     )
 from .backend import magento_debonix
