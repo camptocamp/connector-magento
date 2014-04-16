@@ -25,17 +25,72 @@
             <field name="name">Envoi de mail avec facture au client</field>
             <field name="email_from">contact@debonix.fr</field>
             <field name="subject">Your invoice (reference: ${object.number})</field>
-            <field name="email_to">${object.address_invoice_id.email or object.partner_id.emailid or object.partner_id.email}</field>
+            <field name="email_to">${object.commercial_partner_id.email or object.partner_id.emailid or object.partner_id.email}</field>
             <field name="model_id" ref="account.model_account_invoice"/>
             <field name="auto_delete" eval="True"/>
             <field name="lang">${object.partner_id.lang or 'fr_FR'}</field>
-            <field name="body_html"><![CDATA[]]></field>
-            <field name="body_text">Dear ${object.partner_id.name},
-Thank you for purchasing.
-Please find enclosed your invoice with reference ${object.name}.
+            <field name="body_html"><![CDATA[
+<div style="font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; ">
 
-Best Regards,
-Debonix</field>
+    <p>Hello ${object.partner_id.name},</p>
+
+    <p>Thank you for purchasing</p>
+
+    <p>Please find enclosed your invoice.</p>
+
+    <p style="border-left: 1px solid #8e0000; margin-left: 30px;">
+       &nbsp;&nbsp;<strong>REFERENCES</strong><br />
+       &nbsp;&nbsp;Invoice number: <strong>${object.number}</strong><br />
+       &nbsp;&nbsp;Invoice total: <strong>${object.amount_total} ${object.currency_id.name}</strong><br />
+       &nbsp;&nbsp;Invoice date: ${object.date_invoice}<br />
+       % if object.origin:
+       &nbsp;&nbsp;Order reference: ${object.origin}<br />
+       % endif
+    </p>
+    <br/>
+    <p>Best Regards,</p>
+    <p>Debonix</p>
+    <br/>
+    <br/>
+    <div style="width: 375px; margin: 0px; padding: 0px; background-color: #8E0000; border-top-left-radius: 5px 5px; border-top-right-radius: 5px 5px; background-repeat: repeat no-repeat;">
+        <h3 style="margin: 0px; padding: 2px 14px; font-size: 12px; color: #DDD;">
+            <strong style="text-transform:uppercase;">${object.company_id.name}</strong></h3>
+    </div>
+    <div style="width: 347px; margin: 0px; padding: 5px 14px; line-height: 16px; background-color: #F2F2F2;">
+        <span style="color: #222; margin-bottom: 5px; display: block; ">
+        % if object.company_id.street:
+            ${object.company_id.street}<br/>
+        % endif
+        % if object.company_id.street2:
+            ${object.company_id.street2}<br/>
+        % endif
+        % if object.company_id.city or object.company_id.zip:
+            ${object.company_id.zip} ${object.company_id.city}<br/>
+        % endif
+        % if object.company_id.country_id:
+            ${object.company_id.state_id and ('%s, ' % object.company_id.state_id.name) or ''} ${object.company_id.country_id.name or ''}<br/>
+        % endif
+        </span>
+        % if object.company_id.phone:
+            <div style="margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; ">
+                Phone:&nbsp; ${object.company_id.phone}
+            </div>
+        % endif
+        % if object.company_id.email:
+            <div style="margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; ">
+                Email:&nbsp; ${object.company_id.email}
+            </div>
+        % endif
+        % if object.company_id.website:
+            <div>
+                Web :&nbsp;<a href="${object.company_id.website}">${object.company_id.website}</a>
+            </div>
+        %endif
+        <p></p>
+    </div>
+</div>
+]]>
+            </field>
             <field name="report_template" ref="account.account_invoices"/>
             <field name="report_name">invoice_${object.number}</field>
         </record>
@@ -50,31 +105,140 @@ Debonix</field>
             <field name="value">Votre facture (reference: ${object.number})</field>
         </record>
 
-        <record model="ir.translation" id="trans_email_template_customer_invoice_fr_body_text">
-            <field name="name">email.template,body_text</field>
+        <record model="ir.translation" id="trans_email_template_customer_invoice_fr_body_html">
+            <field name="name">email.template,body_html</field>
             <field name="lang">fr_FR</field>
             <field name="type">model</field>
             <field name="res_id" ref="email_template_customer_invoice"/>
-            <field name="src">Dear ${object.partner_id.name},
-Thank you for purchasing.
-Please find enclosed your invoice with reference ${object.name}.
+            <field name="src"><![CDATA[
+<div style="font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; ">
 
-Best Regards,
-Debonix</field>
-            <field name="value">Bonjour,
-Nous vous remercions pour votre achat.
-Votre commande vient d'être expédiée, vous devriez la réceptionner sous un délai maximum de 48h.
-Veuillez trouver ci-joint votre facture ${object.name}.
+    <p>Hello ${object.partner_id.name},</p>
 
-Cordialement,
+    <p>Thank you for purchasing</p>
 
-Merci et à bientôt sur www.debonix.fr 
+    <p>Please find enclosed your invoice.</p>
 
-DEBONIX 25,
-Avenue du Pont de Tasset
-74960 MEYTHET Tel: 04.50.09.46.87
-Fax: 04.82.53.13.88
-Email: contact@debonix.fr</field>
+    <p style="border-left: 1px solid #8e0000; margin-left: 30px;">
+       &nbsp;&nbsp;<strong>REFERENCES</strong><br />
+       &nbsp;&nbsp;Invoice number: <strong>${object.number}</strong><br />
+       &nbsp;&nbsp;Invoice total: <strong>${object.amount_total} ${object.currency_id.name}</strong><br />
+       &nbsp;&nbsp;Invoice date: ${object.date_invoice}<br />
+       % if object.origin:
+       &nbsp;&nbsp;Order reference: ${object.origin}<br />
+       % endif
+    </p>
+    <br/>
+    <p>Best Regards,</p>
+    <p>Debonix</p>
+    <br/>
+    <br/>
+    <div style="width: 375px; margin: 0px; padding: 0px; background-color: #8E0000; border-top-left-radius: 5px 5px; border-top-right-radius: 5px 5px; background-repeat: repeat no-repeat;">
+        <h3 style="margin: 0px; padding: 2px 14px; font-size: 12px; color: #DDD;">
+            <strong style="text-transform:uppercase;">${object.company_id.name}</strong></h3>
+    </div>
+    <div style="width: 347px; margin: 0px; padding: 5px 14px; line-height: 16px; background-color: #F2F2F2;">
+        <span style="color: #222; margin-bottom: 5px; display: block; ">
+        % if object.company_id.street:
+            ${object.company_id.street}<br/>
+        % endif
+        % if object.company_id.street2:
+            ${object.company_id.street2}<br/>
+        % endif
+        % if object.company_id.city or object.company_id.zip:
+            ${object.company_id.zip} ${object.company_id.city}<br/>
+        % endif
+        % if object.company_id.country_id:
+            ${object.company_id.state_id and ('%s, ' % object.company_id.state_id.name) or ''} ${object.company_id.country_id.name or ''}<br/>
+        % endif
+        </span>
+        % if object.company_id.phone:
+            <div style="margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; ">
+                Phone:&nbsp; ${object.company_id.phone}
+            </div>
+        % endif
+        % if object.company_id.email:
+            <div style="margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; ">
+                Email:&nbsp; ${object.company_id.email}
+            </div>
+        % endif
+        % if object.company_id.website:
+            <div>
+                Web :&nbsp;<a href="${object.company_id.website}">${object.company_id.website}</a>
+            </div>
+        %endif
+        <p></p>
+    </div>
+</div>
+]]>
+            </field>
+            <field name="value"><![CDATA[
+<div style="font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; ">
+
+    <p>Bonjour,</p>
+
+    <p>Nous vous remercions pour votre achat.</p>
+
+    <p>Votre commande vient d'être expédiée, vous devriez la réceptionner sous un délai maximum de 48h.</p>
+
+    <p>Veuillez trouver ci joint votre facture.</p>
+    <p style="border-left: 1px solid #8e0000; margin-left: 30px;">
+       &nbsp;&nbsp;<strong>REFERENCES</strong><br />
+       &nbsp;&nbsp;Numéro de facture : <strong>${object.number}</strong><br />
+       &nbsp;&nbsp;Total de la facture : <strong>${object.amount_total} ${object.currency_id.name}</strong><br />
+       &nbsp;&nbsp;Date de facturation : ${object.date_invoice}<br />
+       % if object.origin:
+       &nbsp;&nbsp;Référence de la commande : ${object.origin}<br />
+       % endif
+    </p>
+    <br/>
+    <p>Cordialement</p>
+    <p>Merci et à bientôt sur <a href="${object.company_id.website}">${object.company_id.website}</a></p>
+    <br/>
+    <br/>
+    <div style="width: 375px; margin: 0px; padding: 0px; background-color: #8E0000; border-top-left-radius: 5px 5px; border-top-right-radius: 5px 5px; background-repeat: repeat no-repeat;">
+        <h3 style="margin: 0px; padding: 2px 14px; font-size: 12px; color: #DDD;">
+            <strong style="text-transform:uppercase;">DEBONIX</strong></h3>
+    </div>
+    <div style="width: 347px; margin: 0px; padding: 5px 14px; line-height: 16px; background-color: #F2F2F2;">
+        <span style="color: #222; margin-bottom: 5px; display: block; ">
+        % if object.company_id.street:
+            ${object.company_id.street}<br/>
+        % endif
+        % if object.company_id.street2:
+            ${object.company_id.street2}<br/>
+        % endif
+        % if object.company_id.city or object.company_id.zip:
+            ${object.company_id.zip} ${object.company_id.city}<br/>
+        % endif
+        % if object.company_id.country_id:
+            ${object.company_id.state_id and ('%s, ' % object.company_id.state_id.name) or ''} ${object.company_id.country_id.name or ''}<br/>
+        % endif
+        </span>
+        % if object.company_id.phone:
+            <div style="margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; ">
+                Tél :&nbsp; ${object.company_id.phone}
+            </div>
+        % endif
+        % if object.company_id.fax:
+            <div style="margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; ">
+                Fax : &nbsp; ${object.company_id.fax}
+            </div>
+        % endif
+        % if object.company_id.email:
+            <div style="margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; ">
+                Email :&nbsp; ${object.company_id.email}
+            </div>
+        % endif
+        % if object.company_id.website:
+            <div>
+                Web :&nbsp;<a href="${object.company_id.website}">${object.company_id.website}</a>
+            </div>
+        %endif
+        <p></p>
+    </div>
+</div>]]>
+        </field>
         </record>
 
         <record model="ir.translation" id="trans_email_template_customer_invoice_fr_report_name">
