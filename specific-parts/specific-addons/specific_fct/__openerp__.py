@@ -31,8 +31,7 @@
  'description': """Code customisation module""",
  'website': 'http://www.camptocamp.com',
  'data': [
-          # TODO
-          # 'account_invoice_action_data.xml',
+          'account_invoice_action_data.xml',
           'product_view.xml',
           'sale_view.xml',
           'account_invoice_view.xml',
