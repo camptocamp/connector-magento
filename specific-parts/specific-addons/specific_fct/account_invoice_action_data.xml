@@ -16,7 +16,7 @@
     </data>
     <!-- Mail template and workflow bindings are done in a NOUPDATE block
          so users can freely customize/delete them -->
-    <data noupdate="0">
+    <data noupdate="1">
 
         <record id="account.act_open" model="workflow.activity">
             <field name="action_id" ref="specific_fct.send_invoice_mail"/>
