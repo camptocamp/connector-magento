@@ -81,3 +81,9 @@ Feature: Migrate the database after the OpenERP migration
     """
     ALTER TABLE procurement_order ALTER message TYPE varchar;
     """
+
+  Scenario: Fix the order_policy on sales orders: 'postpaid' does no longer exist
+    Given I execute the SQL commands
+    """
+    UPDATE sale_order SET order_policy = 'manual' WHERE order_policy = 'postpaid';
+    """
