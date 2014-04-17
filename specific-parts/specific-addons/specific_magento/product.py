@@ -20,6 +20,7 @@
 ##############################################################################
 
 from openerp.tools.translate import _
+from openerp.osv import orm, fields
 from openerp.addons.connector.unit.mapper import (
     backend_to_m2o,
     ExportMapper,
@@ -44,6 +45,24 @@ from openerp.addons.magentoerpconnect.product import (
     ProductImportMapper,
     )
 from .backend import magento_debonix
+
+
+class product_supplierinfo(orm.Model):
+    _inherit = 'product.supplierinfo'
+    _columns = {
+        # indicates that the record has been created from Magento
+        # using the `openerp_supplier_*` fields
+        'from_magento': fields.boolean('From Magento', readonly=True),
+    }
+
+
+class pricelist_partnerinfo(orm.Model):
+    _inherit = 'pricelist.partnerinfo'
+    _columns = {
+        # indicates that the record has been created from Magento
+        # using the `openerp_supplier_*` fields
+        'from_magento': fields.boolean('From Magento', readonly=True),
+    }
 
 
 @magento_debonix
@@ -125,7 +144,7 @@ class ProductSupplierInfoLineMapper(ImportMapper):
     @mapping
     def min_quantity(self, record):
         """ Forced to 1 """
-        return {'min_qty': 1}
+        return {'min_quantity': 1}
 
     def finalize(self, map_record, values):
         values = super(ProductSupplierInfoLineMapper, self).finalize(
@@ -138,7 +157,7 @@ class ProductSupplierInfoLineMapper(ImportMapper):
         line_ids = self.session.search(
             'pricelist.partnerinfo',
             [('from_magento', '=', True),
-             ('suppinfo', '=', suppinfo_id)])
+             ('suppinfo_id', '=', suppinfo_id)])
         if not line_ids:
             # from_magento has been introduced lately, try
             # to remap if the supplier is the same
@@ -183,27 +202,26 @@ class ProductSupplierInfoMapper(ImportMapper):
         mag_product_id = map_record.parent.source['product_id']
         binder = self.get_binder_for_model('magento.product.product')
         product_id = binder.to_openerp(mag_product_id, unwrap=True)
-        if not product_id:
-            # new product, new supplier
-            return values
-        suppinfo_ids = self.session.search(
-            'product.supplierinfo',
-            [('from_magento', '=', True),
-             ('name', '=', values['partner_id']),
-             ('product_id', '=', product_id)])
-        if not suppinfo_ids:
-            # from_magento has been introduced lately, try
-            # to remap if the supplier is the same
+        line_options = self.options.copy()
+        if product_id:
+            # existing product, search for an existing supplier info
+            # from Magento
             suppinfo_ids = self.session.search(
                 'product.supplierinfo',
-                [('name', '=', values['partner_id']),
+                [('from_magento', '=', True),
                  ('product_id', '=', product_id)])
+            if not suppinfo_ids:
+                # from_magento has been introduced lately, try
+                # to remap if the supplier is the same
+                suppinfo_ids = self.session.search(
+                    'product.supplierinfo',
+                    [('name', '=', values['name']),  # means partner_id
+                     ('product_id', '=', product_id)])
 
-        line_options = self.options.copy()
-        if suppinfo_ids:
-            # supplier info already exists, keeps the id
-            values['__existing_openerp_id'] = suppinfo_ids[0]
-            line_options['suppinfo_id'] = suppinfo_ids[0]
+            if suppinfo_ids:
+                # supplier info already exists, keeps the id
+                values['__existing_openerp_id'] = suppinfo_ids[0]
+                line_options['suppinfo_id'] = suppinfo_ids[0]
 
         record = map_record.source
         price_record = {
@@ -211,7 +229,7 @@ class ProductSupplierInfoMapper(ImportMapper):
         }
         map_child = self.get_connector_unit_for_model(
             self._map_child_class, 'pricelist.partnerinfo')
-        items = map_child.get_items([supplier_record], map_record,
+        items = map_child.get_items([price_record], map_record,
                                     'pricelist_ids',
                                     options=line_options)
         values['pricelist_ids'] = items
