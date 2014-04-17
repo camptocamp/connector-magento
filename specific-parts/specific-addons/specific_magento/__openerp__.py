@@ -27,6 +27,7 @@
  'depends' : ['magentoerpconnect',
               'product_brand',
               'delivery_carrier_file_chronopost',
+              'base_transaction_id',
               'product_cost_incl_bom',  # for cost_price, lp:margin-analysis
               'packing_product_change',  # lp:c2c-ecom-addons
               ],
