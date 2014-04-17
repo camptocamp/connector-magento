@@ -27,11 +27,13 @@ from openerp.addons.connector.unit.mapper import (
     ImportMapper,
     ImportMapChild,
     mapping,
+    only_create,
 )
 from openerp.addons.connector.event import (on_record_write,
                                             on_record_create,
                                             on_record_unlink
                                             )
+from openerp.addons.connector.exception import MappingError
 from openerp.addons.magentoerpconnect.connector import get_environment
 from openerp.addons.magentoerpconnect.unit.export_synchronizer import (
     export_record,
@@ -244,6 +246,54 @@ class DebonixProductImportMapper(ProductImportMapper):
               [(backend_to_m2o('marque', binding='magento.product.brand'),
                 'product_brand_id'),
                ])
+
+    @mapping
+    def uom(self, record):
+        uom = record.get('openerp_supplier_product_unit')
+        uom_id = None
+        if uom:
+            uom_ids = self.session.search('product.uom',
+                                          [('name', '=ilike', uom)])
+            if uom_ids:
+                uom_id = uom_ids[0]
+        if not uom_id:
+            # not found, fallback on default unit
+            sess = self.session
+            data_obj = sess.pool['ir.model.data']
+            xmlid = ('product', 'product_uom_unit')
+            try:
+                __, uom_id = data_obj.get_object_reference(
+                    sess.cr, sess.uid, xmlid[0], xmlid[1],
+                    context=sess.context)
+            except ValueError:
+                raise MappingError('Unit of measure with xmlid %s.%s is '
+                                   'missing. Cannot create the orderpoint.' %
+                                   (xmlid[0], xmlid[1]))
+
+        return {'uom_id': uom_id, 'uom_po_id': uom_id}
+
+    @only_create
+    @mapping
+    def orderpoint(self, record):
+        sess = self.session
+        data_obj = sess.pool['ir.model.data']
+        xmlid = ('stock', 'warehouse0')
+        try:
+            warehouse = data_obj.get_object(
+                sess.cr, sess.uid, xmlid[0], xmlid[1], context=sess.context)
+        except ValueError:
+            raise MappingError('Warehouse with xmlid %s.%s is missing. '
+                               'Cannot create the orderpoint.' %
+                               (xmlid[0], xmlid[1]))
+        values = {
+            'warehouse_id': warehouse.id,
+            'product_uom': self.uom(record)['uom_id'],
+            'location_id': warehouse.lot_stock_id.id,
+            'product_min_qty': 0,
+            'product_max_qty': 0,
+            'qty_multiple': 1,
+        }
+        return {'orderpoint_ids': [(0, 0, values)]}
 
     def finalize(self, map_record, values):
         values = super(DebonixProductImportMapper, self).finalize(map_record,
