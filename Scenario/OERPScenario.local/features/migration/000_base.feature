@@ -70,6 +70,10 @@ Feature: Migrate the database after the OpenERP migration
     DELETE FROM ir_translation WHERE name = 'ir.actions.act_window,name' AND res_id IN (561,1145,1146,1147,1148,1149,1150,1151,1152,1153,1154,1155,1157,1158,1159,1160);
     """
 
+  @update_module_list
+  Scenario: Update module list before updating to avoid draging old dependancies
+  Given I update the module list
+
   @uninstall
   Scenario: uninstall addons wrongly installed during migration
     Given I uninstall the following modules:
@@ -77,8 +81,6 @@ Feature: Migrate the database after the OpenERP migration
       | mrp_jit            |
       | project_mrp        |
       | project            |
-
-  # TODO: update modules list to avoid to install useless modules like product_links
 
   Scenario: install main addons
     Given I install the required modules with dependencies:
