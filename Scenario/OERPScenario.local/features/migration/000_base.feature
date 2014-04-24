@@ -46,6 +46,7 @@ Feature: Migrate the database after the OpenERP migration
     And I delete all the ir.rule.group records created by uninstalled modules
     And I delete the broken ir.values
 
+  @clean
   Scenario: Remove stock picking menu entry to be replaced by filters
     Given I execute the SQL commands
     """
@@ -55,6 +56,7 @@ Feature: Migrate the database after the OpenERP migration
     DELETE FROM ir_translation WHERE name = 'ir.actions.act_window,name' AND src = 'Available Packing';
     """
 
+  @clean
   Scenario: Remove product attribute set menu entries
     Given I execute the SQL commands
     """
@@ -67,6 +69,14 @@ Feature: Migrate the database after the OpenERP migration
     DELETE FROM ir_act_window WHERE res_model = 'product.product' AND id IN (561,1145,1146,1147,1148,1149,1150,1151,1152,1153,1154,1155,1157,1158,1159,1160);
     DELETE FROM ir_translation WHERE name = 'ir.actions.act_window,name' AND res_id IN (561,1145,1146,1147,1148,1149,1150,1151,1152,1153,1154,1155,1157,1158,1159,1160);
     """
+
+  @uninstall
+  Scenario: uninstall addons wrongly installed during migration
+    Given I uninstall the following modules:
+      | name               |
+      | mrp_jit            |
+      | project_mrp        |
+      | project            |
 
   # TODO: update modules list to avoid to install useless modules like product_links
 
