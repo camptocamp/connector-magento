@@ -242,10 +242,20 @@ class ProductSupplierInfoMapper(ImportMapper):
 class DebonixProductImportMapper(ProductImportMapper):
     _model_name = 'magento.product.product'
 
-    direct = (ProductImportMapper.direct +
+    direct = ([(source, target) for source, target in
+               ProductImportMapper.direct if
+               not target == 'standard_price'] +
               [(backend_to_m2o('marque', binding='magento.product.brand'),
                 'product_brand_id'),
                ])
+
+    @mapping
+    @only_create
+    def cost(self, record):
+        """ Standard price is only imported on creation,
+        because it will be updated from OpenERP later.
+        """
+        return {'standard_price': record.get('cost')}
 
     @mapping
     def intrastat(self, record):
