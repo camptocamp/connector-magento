@@ -1,5 +1,37 @@
 <?xml version="1.0" ?>
 <openerp>
+    <data noupdate="0">
+
+        <!-- Activate the following options:
+
+        Sales:
+            * Use pricelists to adapt your price per customers
+            * Allow a different address for delivery and invoicing
+            * Allow setting a discount on the sales order lines
+            * Manage multiple shops
+
+        Purchases:
+            *
+
+        Warehouse:
+            * Manage multiple locations and warehouses
+
+        Accounting:
+            * Analytic accounting 
+
+        General Settings:
+            *
+        -->
+        <record model="res.groups" id="base.group_user">
+            <field name="implied_ids"
+                eval="[(4, ref('product.group_sale_pricelist')),
+                       (4, ref('sale.group_delivery_invoice_address')),
+                       (4, ref('sale.group_discount_per_so_line')),
+                       (4, ref('stock.group_locations')),
+                       (4, ref('analytic.group_analytic_accounting')),
+                       ]"/>
+        </record>
+</data>
   <data>
     <record id="stock.access_stock_picking" model="ir.model.access">
       <field name="model_id" ref="stock.model_stock_picking"/>
