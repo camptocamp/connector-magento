@@ -280,6 +280,15 @@ class DebonixProductImportMapper(ProductImportMapper):
         return {'purchase_ok': bool(int(purchase_ok))}
 
     @mapping
+    def state(self, record):
+        state = record.get('openerp_state')
+        if not state:
+            return
+        binder = self.get_binder_for_model('magento.product.state')
+        state = binder.to_openerp(state)
+        return {'state': state}
+
+    @mapping
     def uom(self, record):
         uom = record.get('openerp_supplier_product_unit')
         uom_id = None
