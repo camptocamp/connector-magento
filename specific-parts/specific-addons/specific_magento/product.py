@@ -270,6 +270,16 @@ class DebonixProductImportMapper(ProductImportMapper):
         return {'cost_method': method.lower()}
 
     @mapping
+    def sale_ok(self, record):
+        sale_ok = record.get('openerp_sale_ok') or 0
+        return {'sale_ok': bool(int(sale_ok))}
+
+    @mapping
+    def purchase_ok(self, record):
+        purchase_ok = record.get('openerp_purchase_ok') or 0
+        return {'purchase_ok': bool(int(purchase_ok))}
+
+    @mapping
     def uom(self, record):
         uom = record.get('openerp_supplier_product_unit')
         uom_id = None
