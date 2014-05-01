@@ -248,6 +248,19 @@ class DebonixProductImportMapper(ProductImportMapper):
                ])
 
     @mapping
+    def intrastat(self, record):
+        s = self.session
+        code = record['openerp_commodity']
+        code_ids = s.search('report.intrastat.code'
+                            [('intrastat_code', '=', code)])
+        if code_ids:
+            code_id = code_ids[0]
+        else:
+            code_id = s.create('report.intrastat.code',
+                               {'name': code, 'intrastat_code': code})
+        return {'intrastat_id': code_id}
+
+    @mapping
     def uom(self, record):
         uom = record.get('openerp_supplier_product_unit')
         uom_id = None
