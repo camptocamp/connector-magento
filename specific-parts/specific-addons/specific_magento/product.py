@@ -253,7 +253,7 @@ class DebonixProductImportMapper(ProductImportMapper):
         code = record.get('openerp_commodity')
         if not code:
             return
-        code_ids = s.search('report.intrastat.code'
+        code_ids = s.search('report.intrastat.code',
                             [('intrastat_code', '=', code)])
         if code_ids:
             code_id = code_ids[0]
