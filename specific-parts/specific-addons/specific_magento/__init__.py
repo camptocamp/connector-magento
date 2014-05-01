@@ -23,9 +23,11 @@ from . import connector
 from . import backend
 from . import magento_model
 from . import product_brand
+from . import product_state
 from . import product
 from . import product_attribute
 from . import unit
 from . import sale
 from . import partner
 from . import stock
+from . import supplier
