@@ -250,7 +250,9 @@ class DebonixProductImportMapper(ProductImportMapper):
     @mapping
     def intrastat(self, record):
         s = self.session
-        code = record['openerp_commodity']
+        code = record.get('openerp_commodity')
+        if not code:
+            return
         code_ids = s.search('report.intrastat.code'
                             [('intrastat_code', '=', code)])
         if code_ids:
@@ -259,6 +261,13 @@ class DebonixProductImportMapper(ProductImportMapper):
             code_id = s.create('report.intrastat.code',
                                {'name': code, 'intrastat_code': code})
         return {'intrastat_id': code_id}
+
+    @mapping
+    def cost_method(self, record):
+        method = record.get('openerp_cost_method')
+        if not method:
+            return
+        return {'cost_method': method.lower()}
 
     @mapping
     def uom(self, record):
