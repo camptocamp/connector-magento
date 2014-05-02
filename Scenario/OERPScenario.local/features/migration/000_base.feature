@@ -8,6 +8,12 @@ Feature: Migrate the database after the OpenERP migration
     UPDATE ir_module_module set state = 'uninstalled' where state IN ('to install', 'to upgrade');
     """
 
+  Scenario: remove the 'retry missing' flag on cron to avoid having them running again and again
+    Given I execute the SQL commands
+    """
+    UPDATE ir_cron SET doall = false WHERE doall = true;
+    """
+
   @custom_fields
   Scenario: delete the custom fields (x_) in openerp because they are no longer used (x_ooor_id and product attributes)
     # and they make the upgrade of modules crash
