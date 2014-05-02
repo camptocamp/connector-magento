@@ -28,7 +28,7 @@
                        (4, ref('sale.group_delivery_invoice_address')),
                        (4, ref('sale.group_discount_per_so_line')),
                        (4, ref('stock.group_locations')),
-                       (4, ref('analytic.group_analytic_accounting')),
+                       (4, ref('sale.group_analytic_accounting')),
                        ]"/>
         </record>
 </data>
