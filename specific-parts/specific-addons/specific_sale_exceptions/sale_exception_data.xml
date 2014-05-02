@@ -71,7 +71,7 @@
     </record>
 
    <record id="excep_too_low_markup_rate" model="sale.exception">
-     <field name="code">if order.markup_rate &lt;= 20.0:
+     <field name="code">if order.markup_rate &lt;= 15.0:
     failed = True</field>
     </record>
 
