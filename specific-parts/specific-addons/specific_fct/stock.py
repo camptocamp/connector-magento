@@ -37,12 +37,12 @@ class StockPicking(orm.Model):
         # exclude picking_ids because we have already
         # tried to assign them
         if not ids:
-            _logger.info('try to assign more pickings')
             domain = [('type', '=', 'out'),
                       ('state', '=', 'confirmed'),
                       ('id', 'not in', canceled_ids + assigned_ids)]
             confirmed_ids = self.search(
                 cr, uid, domain, context=context, order='priority desc')
+            _logger.info('try to assign %d more pickings', len(confirmed_ids))
             for picking_id in confirmed_ids:
                 try:
                     assigned_id = self.action_assign(cr, uid, [picking_id],
@@ -99,4 +99,5 @@ class StockPicking(orm.Model):
         picking_ids = self.search(cr, uid, domain,
                                   order='priority desc, min_date, date')
 
-        return self.retry_assign_all(cr, uid, picking_ids, context=context)
+        self.retry_assign_all(cr, uid, picking_ids, context=context)
+        return True
