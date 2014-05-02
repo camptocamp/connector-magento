@@ -22,8 +22,16 @@ Feature: The sales orders must not be confirmed based on some conditions.
     """
 
   Scenario: install addons
+    Given I update the module list
     Given I install the required modules with dependencies:
-      | name                     |
-      | sale_exceptions          |
-      | specific_sale_exceptions |
+      | name                              |
+      | sale_exceptions                   |
+      | specific_sale_exceptions          |
+      | sale_automatic_workflow_exception |
     Then my modules should have been installed and models reloaded
+
+  Scenario: activate sales exception cron (Test Draft Orders)
+    Given I find a possibly inactive "ir.cron" with oid: sale_exceptions.ir_cron_test_orders
+    And having:
+      | key               | value           |
+      | active            | true            |
