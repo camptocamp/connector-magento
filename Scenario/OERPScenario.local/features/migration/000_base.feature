@@ -87,6 +87,7 @@ Feature: Migrate the database after the OpenERP migration
       | mrp_jit            |
       | project_mrp        |
       | project            |
+      | portal             |
 
   Scenario: install main addons
     Given I install the required modules with dependencies:
