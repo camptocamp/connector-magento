@@ -106,3 +106,9 @@ Feature: Migrate the database after the OpenERP migration
     """
     UPDATE sale_order SET order_policy = 'manual' WHERE order_policy = 'postpaid';
     """
+
+  Scenario: Fix the order_policy default value on sales orders: 'postpaid' does no longer exist
+    Given I execute the SQL commands
+    """
+    UPDATE ir_values SET value = E'S''manual''\np0\n.' WHERE id = 633;
+    """
