@@ -7,6 +7,5 @@ Feature: install various modules
       | name                           |
       | intrastat_base                 |
       | l10n_fr_intrastat_product      |
-      | cancel_proc_from_purchase_line |
       | base_partner_merge             |
     Then my modules should have been installed and models reloaded
