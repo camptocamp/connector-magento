@@ -18,15 +18,15 @@
 #
 ##############################################################################
 
-from osv import fields, osv
+from openerp.osv import orm, fields
 
-class AccountAccount(osv.osv):
-        "Inherit account to add can be part of followup"
-        _inherit = 'account.account'
 
-        _columns = {
-                    'be_follow_up':
-                        fields.boolean('Do not chase payments on this account',
-                                           help="If checked, this account will be not "
-                                                "part of the chasing payment report "),
-                }
+class AccountAccount(orm.Model):
+    _inherit = 'account.account'
+
+    _columns = {
+        'be_follow_up': fields.boolean(
+            'Do not chase payments on this account',
+            help="If checked, this account will be not "
+                 "part of the chasing payment report "),
+    }

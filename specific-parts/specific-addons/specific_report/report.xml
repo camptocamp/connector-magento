@@ -27,26 +27,6 @@
             rml="specific_report/report/shipping.rml"
             string="Delivery order"/>
 
-        <!-- <report auto="False"
-                 id="specific_report_report_bank_statement_webkit"
-                 model="account.bank.statement"
-                 name="specific_report.report_bank_statement_webkit"
-                 file="specific_report/report/template/bank_statement_report.mako"
-                 string="Bank Statement"
-                 report_type="webkit"
-                 header="1"
-                 webkit_header="bank_statement_landscape_header"/>
-
-             <record id="action_print_bank_statement_webkit" model="ir.values">
-                 <field name="name">Bank Statement</field>
-                 <field name="key2">client_print_multi</field>
-                 <field name="value_unpickle"
-                     eval="'ir.actions.report.xml,' +str(ref('specific_report_report_bank_statement_webkit'))"/>
-                 <field name="key">action</field>
-                 <field name="model">account.bank.statement</field>
-             </record> -->
-
-
         <report auto="False"
             id="account_overdue"
             model="res.partner"

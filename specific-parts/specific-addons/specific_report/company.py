@@ -18,22 +18,24 @@
 #
 ##############################################################################
 
-from osv import fields, osv
-from tools.translate import _
+from openerp.osv import orm, fields
+from openerp.tools.translate import _
 
-class ResCompany(osv.osv):
-    """override company to add a list of titles for which we hide the partner name on reports"""
+
+class ResCompany(orm.Model):
+    """override company to add a list of titles for which we hide the
+    partner name on reports"""
     _inherit = "res.company"
     _columns = {
-                'report_hide_partner_title_ids':fields.many2many(
-                       'res.partner.title',
-                       'report_hide_partner_title_rel',
-                       'company_id',
-                       'res_partner_title_id',
-                       'Hide the partner name on reports for these titles',
-                       help='''For the partners corresponding to the selected titles,
-only the contact name will be displayed on report, the partner name will be hidden.
-Useful to avoid the print of 2 lines on the reports for certain categories of partners.''',
-                       ),
+        'report_hide_partner_title_ids': fields.many2many(
+            'res.partner.title',
+            'report_hide_partner_title_rel',
+            'company_id',
+            'res_partner_title_id',
+            'Hide the partner name on reports for these titles',
+            help="For the partners corresponding to the selected titles, "
+                 "only the contact name will be displayed on report, "
+                 "the partner name will be hidden. "
+                 "Useful to avoid the print of 2 lines on the reports "
+                 "for certain categories of partners."),
     }
-ResCompany()
