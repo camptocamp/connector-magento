@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+import logging
 from openerp.tools.translate import _
 from openerp.osv import orm, fields
 from openerp.addons.connector.unit.mapper import (
@@ -47,6 +48,30 @@ from openerp.addons.magentoerpconnect.product import (
     ProductImportMapper,
     )
 from .backend import magento_debonix
+
+
+_logger = logging.getLogger(__name__)
+
+
+class magento_product_product(orm.Model):
+    _inherit = 'magento.product.product'
+    _columns = {
+        'magento_cost': fields.float('Computed Cost',
+                                     help="Last computed cost to send "
+                                          "on Magento."),
+    }
+
+    def recompute_magento_cost(self, cr, uid, ids, context=None):
+        if not hasattr(ids, '__iter__'):
+            ids = [ids]
+
+        for product in self.browse(cr, uid, ids, context=context):
+            new_cost = product.cost_price
+            if new_cost != product.magento_cost:
+                self.write(cr, uid, product.id,
+                           {'magento_cost': new_cost},
+                           context=context)
+        return True
 
 
 class product_supplierinfo(orm.Model):
@@ -403,8 +428,7 @@ class DebonixProductExporter(MagentoExporter):
 class DebonixProductExportMapper(ExportMapper):
     _model_name = 'magento.product.product'
 
-    # TODO: cost_price is a function field, so not triggered...
-    direct = [('cost_price', 'cost'),
+    direct = [('magento_cost', 'cost'),
               ]
 
 
@@ -413,32 +437,10 @@ class DebonixProductExportMapper(ExportMapper):
 def delay_export(session, model_name, record_id, vals):
     if session.context.get('connector_no_export'):
         return
-    record = session.browse(model_name, record_id)
-    env = get_environment(session, model_name, record.backend_id.id)
-    mapper = env.get_connector_unit(ExportMapper)
-    # preemptively check if we have data to export to avoid to generate
-    # useless jobs
-    map_record = mapper.map_record(record)
-    fields = vals.keys()
-    if map_record.values(fields=fields):
+    if 'magento_cost' in vals:
+        name = session.pool[model_name].name_get(
+            session.cr, session.uid, record_id, session.context)[0][1]
+        descr = "Export cost of product %s" % name
         export_record.delay(session, model_name,
-                            record_id, fields=fields,
-                            description="Export product values such "
-                                        "as the cost")
-
-
-# TODO: if 'product.product' fields are modified, they could be missed
-@on_record_write(model_names=['product.template'])
-def delay_export_all_bindings(session, model_name, record_id, vals):
-    if session.context.get('connector_no_export'):
-        return
-    if model_name == 'product.template':
-        record_ids = session.search('product.product',
-                                    [('product_tmpl_id', '=', record_id)])
-    else:
-        record_ids = [record_id]
-    binding_ids = session.search('magento.product.product',
-                                 [('openerp_id', 'in', record_ids)])
-    for binding_id in binding_ids:
-        delay_export(session, 'magento.product.product',
-                     binding_id, vals)
+                            record_id, fields=['cost_price'],
+                            description=descr)

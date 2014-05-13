@@ -39,7 +39,9 @@ Magento Connector Customization
 
  """,
  'website': 'http://www.camptocamp.com',
- 'data': ['product_data.xml',
+ 'data': ['magento_data.xml',
+          'product_data.xml',
+          'product_view.xml',
           ],
  'test': [],
  'installable': True,

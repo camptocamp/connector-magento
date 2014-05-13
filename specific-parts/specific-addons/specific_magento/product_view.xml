@@ -2,42 +2,23 @@
 <openerp>
   <data>
 
-<!--     <record id="product_normal_form_view_to_deactivate" model="ir.ui.view"> -->
-<!--       <field name="name">product.product.form.to_deactivate</field> -->
-<!--       <field name="model">product.product</field> -->
-<!--       <field name="inherit_id" ref="product.product_normal_form_view" /> -->
-<!--       <field name="type">form</field> -->
-<!--       <field name="arch" type="xml"> -->
-<!--         <data> -->
-<!--           <field name="active" select="2" position="after"> -->
-<!--             <field name="to_deactivate"/> -->
-<!--           </field> -->
-<!--           <field name="purchase_ok" position="after"> -->
-<!--             <field name="magerp_rdc_active"/> -->
-<!--           </field> -->
-<!--         </data> -->
-<!--       </field> -->
-<!--     </record> -->
-
-<!--     <record id="product_category_form_view_magerp2_specific" model="ir.ui.view"> -->
-<!--       <field name="name">product.category.form_view_magerp2.specific</field> -->
-<!--       <field name="model">product.category</field> -->
-<!--       <field name="inherit_id" ref="magentoerpconnect.product_category_form_view_magerp2" /> -->
-<!--       <field name="type">form</field> -->
-<!--       <field name="arch" type="xml"> -->
-<!--         <data> -->
-<!--           <page string="Display Settings" position="after"> -->
-<!--             <page string="Products Configuration"> -->
-<!--               <separator string="Products Attributes" colspan="4" /> -->
-<!--               <field name="magento_rdc_category" /> -->
-<!--               <field name="magento_rdc_category_default" /> -->
-<!--               <field name="magento_omcategory_id" /> -->
-<!--               <field name="magento_omcategory_default_id" /> -->
-<!--             </page> -->
-<!--           </page> -->
-<!--         </data> -->
-<!--       </field> -->
-<!--     </record> -->
-
+    <record id="view_magento_product_form" model="ir.ui.view">
+      <field name="name">magento.product.product.form</field>
+      <field name="model">magento.product.product</field>
+      <field name="inherit_id" ref="magentoerpconnect.view_magento_product_form"/>
+      <field name="arch" type="xml">
+        <form position="inside">
+          <group string="Pricing">
+            <div class="oe_inline">
+              <label for="magento_cost" class="oe_inline" />
+              <field name="magento_cost" readonly="1" class="oe_inline"
+                nolabel="1"/>
+              <button name="recompute_magento_cost" string="(recompute)"
+                class="oe_link oe_inline" type="object"/>
+            </div>
+          </group>
+        </form>
+      </field>
+    </record>
   </data>
 </openerp>

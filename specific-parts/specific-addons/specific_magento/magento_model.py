@@ -19,7 +19,11 @@
 #
 ##############################################################################
 
+import logging
 from openerp.osv import orm
+
+
+_logger = logging.getLogger(__name__)
 
 
 class magento_backend(orm.Model):
@@ -34,3 +38,21 @@ class magento_backend(orm.Model):
             select_versions(cr, uid, context=context)
         versions.append(('1.7-debonix', '1.7 - Debonix'))
         return versions
+
+    def update_product_cost(self, cr, uid, ids, context=None):
+        if not hasattr(ids, '__iter__'):
+            ids = [ids]
+        mag_product_obj = self.pool.get('magento.product.product')
+        product_ids = mag_product_obj.search(cr, uid,
+                                             [('backend_id', 'in', ids)],
+                                             context=context)
+        _logger.info('Recompute Magento cost for %d products',
+                     len(product_ids))
+        mag_product_obj.recompute_magento_cost(cr, uid, product_ids,
+                                               context=context)
+        return True
+
+    def _scheduler_update_product_cost(self, cr, uid, domain=None,
+                                       context=None):
+        self._magento_backend(cr, uid, self.update_product_cost,
+                              domain=domain, context=context)
