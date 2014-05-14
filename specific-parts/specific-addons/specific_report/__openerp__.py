@@ -24,6 +24,7 @@
              'purchase',
              'report_webkit',
              'packing_product_change'
+             'magentoerpconnect',
              ],
  'author': 'Camptocamp',
  'description': """Debonix Reports""",

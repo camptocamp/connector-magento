@@ -3,3 +3,4 @@
 from . import report
 from . import company
 from . import account
+from . import partner
