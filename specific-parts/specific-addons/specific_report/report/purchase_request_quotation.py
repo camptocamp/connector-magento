@@ -21,33 +21,21 @@
 ##############################################################################
 
 import time
-from report import report_sxw
-from osv import osv
-import pooler
+from openerp.report import report_sxw
+
 
 class RequestQuotation(report_sxw.rml_parse):
     _name = 'report.purchase.quotation_custom'
-    
+
     def __init__(self, cr, uid, name, context):
         super(RequestQuotation, self).__init__(cr, uid, name, context=context)
         self.localcontext.update({
             'time': time,
             'user': self.pool.get('res.users').browse(cr, uid, uid, context),
-            'hide_partner_name': self._hide_partner_name,
         })
-        
-    def _hide_partner_name(self, partner_obj):
-        """ Define if the partner name must be displayed according to the
-        list configured on the company.
-        Return true if name must be hidden
-        """
-        user = self.pool.get('res.users').browse(self.cr, self.uid, self.uid)
-        company = user.company_id
-        if partner_obj.title and partner_obj.title in [x.shortcut for x in company.report_hide_partner_title_ids]:
-            return True
-        return False
-        
-report_sxw.report_sxw('report.purchase.quotation_custom','purchase.order','addons/specific_report/report/purchase_request_quotation.rml',parser=RequestQuotation)
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 
+report_sxw.report_sxw('report.purchase.quotation_custom',
+                      'purchase.order',
+                      'addons/specific_report/report/purchase_request_quotation.rml',
+                      parser=RequestQuotation)
