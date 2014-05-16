@@ -30,7 +30,6 @@
  'description': """Debonix Reports""",
  'category': 'Generic Modules/Accounting',
  'data': ['report.xml',
-          'company_view.xml',
           'account_view.xml',
           ],
  'installable': True,
