@@ -339,8 +339,7 @@ class DebonixProductImportMapper(ProductImportMapper):
             xmlid = ('product', 'product_uom_unit')
             try:
                 __, uom_id = data_obj.get_object_reference(
-                    sess.cr, sess.uid, xmlid[0], xmlid[1],
-                    context=sess.context)
+                    sess.cr, sess.uid, xmlid[0], xmlid[1])
             except ValueError:
                 raise MappingError('Unit of measure with xmlid %s.%s is '
                                    'missing. Cannot create the orderpoint.' %
