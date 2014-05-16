@@ -55,7 +55,7 @@ class Overdue(report_sxw.rml_parse):
         message = company_pool.browse(self.cr, self.uid,
                                       company.id,
                                       context=ctx).overdue_msg
-        return message
+        return message.split('\n')
 
 
 report_sxw.report_sxw('report.account.overdue.c2c', 'res.partner',
