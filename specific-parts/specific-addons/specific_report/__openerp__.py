@@ -23,7 +23,7 @@
  'depends': ['sale',
              'purchase',
              'report_webkit',
-             'packing_product_change'
+             'packing_product_change',
              'magentoerpconnect',
              ],
  'author': 'Camptocamp',
