@@ -21,82 +21,43 @@
 ##############################################################################
 
 import time
+from openerp.report import report_sxw
 
-from osv import osv
-from report import report_sxw
-import pooler
 
 class Overdue(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context):
         super(Overdue, self).__init__(cr, uid, name, context=context)
         self.localcontext.update( {
-            'time' : time,
-            'adr_get' : self._adr_get,
-            'getLines' : self._lines_get,
-            'tel_get' : self._tel_get,
-            'message' : self._message,
+            'time': time,
+            'getLines': self._lines_get,
+            'message': self._message,
         })
         self.context = context
-    def _adr_get(self, partner, type):
-        res = []
-        res_partner = pooler.get_pool(self.cr.dbname).get('res.partner')
-        res_partner_address = pooler.get_pool(self.cr.dbname).get('res.partner.address')
-        addresses = res_partner.address_get(self.cr, self.uid, [partner.id], [type])
-        adr_id = addresses and addresses[type] or False
-        result = {
-                  'name': False,
-                  'street': False,
-                  'city' : False,
-                  'zip' : False,
-                  'country_id' : False,
-                 }
-        if adr_id:
-            result = res_partner_address.read(
-                    self.cr,
-                    self.uid,
-                    [adr_id],
-                    context=self.context.copy())
-            result[0]['country_id'] = result[0]['country_id'] and result[0]['country_id'][1] or False
-            return result
-
-        res.append(result)
-        return res
-
-    def _tel_get(self,partner):
-        if not partner:
-            return False
-        res_partner_address = pooler.get_pool(self.cr.dbname).get('res.partner.address')
-        res_partner = pooler.get_pool(self.cr.dbname).get('res.partner')
-        addresses = res_partner.address_get(self.cr, self.uid, [partner.id], ['invoice'])
-        adr_id = addresses and addresses['invoice'] or False
-        if adr_id:
-            adr=res_partner_address.read(self.cr, self.uid, [adr_id])[0]
-            return adr['phone']
-        else:
-            return partner.address and partner.address[0].phone or False
-        return False
 
     def _lines_get(self, partner):
-        moveline_obj = pooler.get_pool(self.cr.dbname).get('account.move.line')
-        movelines = moveline_obj.search(self.cr, self.uid,
-                   [('partner_id', '=', partner.id),
-                    ('account_id.type', 'in', ['receivable', 'payable']),
-                    ('account_id.be_follow_up','=', False),
-                    ('state', '<>', 'draft'), ('reconcile_id', '=', False)])
-        movelines = moveline_obj.browse(self.cr, self.uid, movelines)
+        moveline_obj = self.pool['account.move.line']
+        partner = partner.commercial_partner_id
+        movelines = moveline_obj.search(
+            self.cr, self.uid,
+            [('partner_id', '=', partner.id),
+             ('account_id.type', 'in', ['receivable', 'payable']),
+             ('account_id.be_follow_up', '=', False),
+             ('state', '<>', 'draft'),
+             ('reconcile_id', '=', False)])
+        movelines = moveline_obj.browse(self.cr, self.uid, movelines,
+                                        context=self.context)
         return movelines
 
     def _message(self, obj, company):
-        company_pool = pooler.get_pool(self.cr.dbname).get('res.company')
-        message = company_pool.browse(
-                self.cr,
-                self.uid,
-                company.id,
-                {'lang':obj.lang}).overdue_msg 
+        company_pool = self.pool['res.company']
+        ctx = self.context.copy()
+        ctx['lang'] = obj.lang
+        message = company_pool.browse(self.cr, self.uid,
+                                      company.id,
+                                      context=ctx).overdue_msg
         return message
 
+
 report_sxw.report_sxw('report.account.overdue.c2c', 'res.partner',
-        'addons/specific_report/report/overdue.rml', parser=Overdue)
-
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+                      'addons/specific_report/report/overdue.rml',
+                      parser=Overdue)
