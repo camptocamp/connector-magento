@@ -8,12 +8,6 @@
             rml="specific_report/report/purchase_request_quotation.rml"
             string="Request for Quotation"/>
 
-        <report id="purchase.report_purchase_order"
-            model="purchase.order"
-            name="purchase.order_custom"
-            rml="specific_report/report/purchase_order.rml"
-            string="Purchase Order"/>
-
         <report id="sale.report_sale_order"
             model="sale.order"
             name="sale.order_custom"
