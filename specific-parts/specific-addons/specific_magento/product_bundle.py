@@ -46,63 +46,69 @@ class BoMBundleImporter(BundleImporter):
         """
         self.magento_record = magento_record
         self.bundle = record['_bundle_data']
+        binding_id = self._import_bom()
+        self._import_selections(binding_id)
+
+    def _import_bom(self):
         # bind the magento.bundle.bom on the id of the product
-        mag_product_id = magento_record['product_id']
+        mag_product_id = self.magento_record['product_id']
         binder = self.get_binder_for_model('magento.bundle.bom')
+        bom_values = self._bom_values()
         binding_id = binder.to_openerp(mag_product_id)
-        bom_values = self._bom_values(binding_id)
         if binding_id:
             self.session.write('magento.product.bom', binding_id, bom_values)
         else:
-            self.session.create('magento.product.bom', bom_values)
+            binding_id = self.session.create('magento.product.bom', bom_values)
+        return binding_id
 
-    def _bom_values(self, binding_id):
+    def _bom_values(self):
         mag_product_id = self.magento_record['product_id']
-        backend_id = self.backend_record.id
         values = {'magento_id': mag_product_id,
-                  'backend_id': backend_id,
+                  'backend_id': self.backend_record.id,
                   'product_id': self.binder.to_openerp(mag_product_id,
                                                        unwrap=True),
                   'product_qty': 1,
                   'type': 'phantom',  # TODO: could be normal or phantom
                   }
-        lines = []
-        for option in self.bundle['options']:
-            for selection in option['selections']:
-                lines.append(self._selection_values(selection))
-        if binding_id:
-            lines_product_ids = [line[2]['product_id'] for line in lines]
-            # remove deleted lines
-            binding = self.session.browse('magento.bundle.bom', binding_id)
-            removed_ids = self.session.search(
-                'magento.bundle.bom.product',
-                [('product_id', 'not in', lines_product_ids),
-                 ('backend_id', '=', backend_id),
-                 ('bom_id', '=', binding.openerp_id.id)
-                 ])
-            for removed in self.session.browse('magento.bundle.bom.product',
-                                               removed_ids):
-                lines.append((2, removed.openerp_id.id))  # unlink the record
-
-        values['bom_lines'] = lines
         return values
 
-    def _selection_values(self, selection):
-        mag_product_id = selection['product_id']
+    def _import_selections(self, bom_binding_id):
+        existing_product_ids = []
         binder = self.get_binder_for_model('magento.bundle.bom.product')
-        binding_id = binder.to_openerp(mag_product_id)
+        for option in self.bundle['options']:
+            for selection in option['selections']:
+                values = self._selection_values(selection)
+                existing_product_ids.append(values['product_id'])
+                prod_binding_id = binder.to_openerp(values['magento_id'])
 
-        values = {'magento_id': mag_product_id,
+                if prod_binding_id:
+                    self.session.write('magento.bundle.bom.product',
+                                       prod_binding_id, values)
+                else:
+                    self.session.create('magento.bundle.bom.product', values)
+
+        # remove deleted components
+        bom_binding = self.session.browse('magento.bundle.bom', bom_binding_id)
+        removed_ids = self.session.search(
+            'magento.bundle.bom.product',
+            [('product_id', 'not in', existing_product_ids),
+             ('backend_id', '=', self.backend_record.id),
+             ('bom_id', '=', bom_binding.openerp_id.id)
+             ])
+        for removed in self.session.browse('magento.bundle.bom.product',
+                                           removed_ids):
+            self.session.unlink('mrp.bom', removed.openerp_id.id)
+
+    def _selection_values(self, bom_binding_id, selection):
+        values = {'magento_id': selection['product_id'],
                   'backend_id': self.backend_record.id,
                   'product_id': self.binder.to_openerp(selection['product_id'],
                                                        unwrap=True),
                   'product_qty': selection['selection_qty'],
                   'type': 'normal',
+                  'bom_id': bom_binding_id,
                   }
-        if binding_id:
-            return (1, binding_id, values)
-        else:
-            return (0, 0, values)
+        return values
 
 
 class magento_bundle_bom(orm.Model):
