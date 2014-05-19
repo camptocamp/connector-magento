@@ -32,6 +32,12 @@ Feature: Migrate the database after the OpenERP migration
     DELETE FROM res_partner WHERE id in (SELECT res_id FROM ir_model_data WHERE module = 'sale_exceptions' AND name = 'no_delivery_partner');
     """
 
+  Scenario: Clean the unused crm stages because they have xmlid linked to crm_claim modules, but the xml ids do not exist in the xml files...
+    Given I execute the SQL commands
+    """
+    DELETE FROM crm_claim_stage WHERE NOT EXISTS (SELECT id FROM crm_claim WHERE stage_id = crm_claim_stage.id);
+    """
+
   @clean
   Scenario: clean the stuff of old modules
     Given I delete all the ir.ui.view records created by uninstalled modules
