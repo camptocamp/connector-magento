@@ -45,5 +45,5 @@ Feature: Define report configs
                 </place>
             </pageGraphics>
         </pageTemplate>
-    </header>'
+    </header>' WHERE name = 'Debonix France SAS'
     """
