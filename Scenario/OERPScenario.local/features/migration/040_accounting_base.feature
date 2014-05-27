@@ -21,6 +21,10 @@ Feature: install and migrate the picking priorities modules
     And having:
       | name | value           |
       | type | purchase_refund |
+    Given I find an "account.journal" with code: ACH
+    And having:
+      | name | value    |
+      | type | purchase |
 
   @bank_journals
   Scenario Outline: Reduce journal code to 5 chars
