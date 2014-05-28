@@ -33,6 +33,13 @@ def impl(ctx):
     backend.update_product_stock_qty(context={'connector_no_export': True})
 
 
+@given('I recompute the magento costs without export')
+def impl(ctx):
+    backend = ctx.found_item
+    assert backend
+    backend.update_product_cost(context={'connector_no_export': True})
+
+
 @given('I migrate the payment methods')
 def impl(ctx):
     with newcr(ctx) as cr:
