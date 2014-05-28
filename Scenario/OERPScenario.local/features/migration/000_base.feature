@@ -94,6 +94,8 @@ Feature: Migrate the database after the OpenERP migration
       | project_mrp        |
       | project            |
       | portal             |
+      | document_ftp       |
+      | product_links      |
 
   Scenario: install main addons
     Given I install the required modules with dependencies:
