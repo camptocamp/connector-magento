@@ -35,11 +35,10 @@ class account_invoice(orm.Model):
                 continue
             if not invoice.sale_order_ids:
                 return
-            if not invoice.partner_id.opt_out:
-                email_obj = self.pool['email.template']
-                __, template_id = data_obj.get_object_reference(
-                    cr, uid, 'specific_fct', 'email_template_customer_invoice')
-                email_obj.send_mail(cr, uid, template_id, invoice.id)
+            email_obj = self.pool['email.template']
+            __, template_id = data_obj.get_object_reference(
+                cr, uid, 'specific_fct', 'email_template_customer_invoice')
+            email_obj.send_mail(cr, uid, template_id, invoice.id)
 
             # move the invoice to a sftp folder if it is a Magento
             # invoice
