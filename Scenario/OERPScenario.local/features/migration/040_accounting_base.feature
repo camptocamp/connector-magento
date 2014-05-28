@@ -7,6 +7,8 @@ Feature: install and migrate the picking priorities modules
       | name                               |
       | account_tid_reconcile              |
       | currency_rate_update               |
+      | l10n_fr_profile                    |
+      | account_invoice_reference          |
     Then my modules should have been installed and models reloaded
 
   @journal_type
