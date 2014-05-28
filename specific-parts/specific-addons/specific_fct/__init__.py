@@ -22,3 +22,5 @@ from . import partner
 from . import sale
 from . import stock
 from . import statement
+from . import account_invoice
+from . import company
