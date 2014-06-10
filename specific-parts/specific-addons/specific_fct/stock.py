@@ -37,7 +37,7 @@ class StockPicking(orm.Model):
         # exclude picking_ids because we have already
         # tried to assign them
         if not ids:
-            all_ids = canceled_ids or [] + assigned_ids or []
+            all_ids = (canceled_ids or []) + (assigned_ids or [])
             domain = [('type', '=', 'out'),
                       ('state', '=', 'confirmed'),
                       ('id', 'not in', all_ids)]
