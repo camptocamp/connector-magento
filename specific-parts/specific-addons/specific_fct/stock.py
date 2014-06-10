@@ -30,33 +30,40 @@ class StockPicking(orm.Model):
     _order = 'priority desc, min_date asc, date asc'
 
     def retry_assign_all(self, cr, uid, ids, context=None):
-        canceled_ids, assigned_ids = super(StockPicking, self).retry_assign_all(
-            cr, uid, ids, context=context)
+        # Search the assigned pickings so we can exclude
+        # the pickings from the next iteration. the `super` call does
+        # not return the canceled ids and assigned ids even if it
+        # looks like.
+        domain = [('type', '!=', 'in'),
+                  ('move_lines', '!=', []),
+                  ('state', '=', 'assigned')]
+        if ids:
+            domain += [('id', 'in', ids)]
+        picking_ids = self.search(cr, uid, domain, context=context)
+
+        super(StockPicking, self).retry_assign_all(cr, uid, picking_ids,
+                                                   context=context)
         # try to assign confirmed pickings (those that were not assigned
         # before but can maybe be assigned now)
         # exclude picking_ids because we have already
         # tried to assign them
         if not ids:
-            all_ids = (canceled_ids or []) + (assigned_ids or [])
             domain = [('type', '=', 'out'),
                       ('state', '=', 'confirmed'),
-                      ('id', 'not in', all_ids)]
+                      ('id', 'not in', picking_ids)]
             confirmed_ids = self.search(
                 cr, uid, domain, context=context, order='priority desc')
             _logger.info('try to assign %d more pickings', len(confirmed_ids))
             for picking_id in confirmed_ids:
                 try:
-                    assigned_id = self.action_assign(cr, uid, [picking_id],
-                                                     context)
-                    assigned_ids.append(assigned_id)
+                    self.action_assign(cr, uid, [picking_id], context)
                 except orm.except_orm as exc:
-                    # ignore error, the picking will just stay as
-                    # confirmed
+                    # ignore error, the picking will just stay as confirmed
                     name = self.read(cr, uid, picking_id, ['name'],
                                      context=context)['name']
                     _logger.info('error in action_assign for picking %s',
                                  name, exc_info=True)
-        return canceled_ids, assigned_ids
+        return True
 
     def get_selection_priority(self, cr, uid, context=None):
         """ Rename the priorities to match what Debonix is used to.
