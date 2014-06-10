@@ -37,9 +37,10 @@ class StockPicking(orm.Model):
         # exclude picking_ids because we have already
         # tried to assign them
         if not ids:
+            all_ids = canceled_ids or [] + assigned_ids or []
             domain = [('type', '=', 'out'),
                       ('state', '=', 'confirmed'),
-                      ('id', 'not in', canceled_ids + assigned_ids)]
+                      ('id', 'not in', all_ids)]
             confirmed_ids = self.search(
                 cr, uid, domain, context=context, order='priority desc')
             _logger.info('try to assign %d more pickings', len(confirmed_ids))
