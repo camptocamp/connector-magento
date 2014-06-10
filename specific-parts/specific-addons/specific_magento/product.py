@@ -100,8 +100,9 @@ class DebonixProductImport(ProductImport):
         """ Import the dependencies for the record"""
         super(DebonixProductImport, self)._import_dependencies()
         record = self.magento_record
-        self._import_dependency(record['marque'],
-                                'magento.product.brand')
+        if record.get('marque'):
+            self._import_dependency(record['marque'],
+                                    'magento.product.brand')
         self._import_dependency(record['openerp_supplier_name'],
                                 'magento.supplier')
 
@@ -269,10 +270,16 @@ class DebonixProductImportMapper(ProductImportMapper):
 
     direct = ([(source, target) for source, target in
                ProductImportMapper.direct if
-               not target == 'standard_price'] +
-              [(backend_to_m2o('marque', binding='magento.product.brand'),
-                'product_brand_id'),
-               ])
+               not target == 'standard_price']
+              )
+
+    @mapping
+    def brand(self, record):
+        if not record.get('marque'):
+            return
+        binder = self.get_binder_for_model('magento.product.brand')
+        brand_id = binder.to_openerp(record['marque'], unwrap=True)
+        return {'product_brand_id': brand_id}
 
     @mapping
     @only_create
