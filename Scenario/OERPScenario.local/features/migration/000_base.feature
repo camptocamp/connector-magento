@@ -120,3 +120,10 @@ Feature: Migrate the database after the OpenERP migration
     """
     UPDATE ir_values SET value = E'S''manual''\np0\n.' WHERE id = 633;
     """
+
+  Scenario: Delete the 'Packing' related action on sales orders that do not work
+    Given I execute the SQL commands
+    """
+    delete from ir_actions where id = 1776;
+    delete from ir_values where id = 1533;
+    """
