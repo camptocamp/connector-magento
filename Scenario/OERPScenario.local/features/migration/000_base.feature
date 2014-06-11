@@ -73,13 +73,13 @@ Feature: Migrate the database after the OpenERP migration
     Given I execute the SQL commands
     """
     DELETE FROM ir_ui_menu
-        WHERE parent_id = 110
+        WHERE parent_id = 110;
             AND name IN
                 ('Default', 'Vetements', 'vetement', 'Chauffage', 'piscine', 'quincaillerie', 'Abrasifs',
-                 'Burins', 'Disques', 'Embouts', 'Forets', 'conso_electro', 'electricite', 'Fraises', 'Meches', 'Meules');
+                 'Burins', 'Disques', 'Embouts', 'Forets', 'conso_electro', 'electricite', 'Fraises', 'Meches', 'Meules', 'bricodeal');
 
-    DELETE FROM ir_act_window WHERE res_model = 'product.product' AND id IN (561,1145,1146,1147,1148,1149,1150,1151,1152,1153,1154,1155,1157,1158,1159,1160);
-    DELETE FROM ir_translation WHERE name = 'ir.actions.act_window,name' AND res_id IN (561,1145,1146,1147,1148,1149,1150,1151,1152,1153,1154,1155,1157,1158,1159,1160);
+    DELETE FROM ir_act_window WHERE res_model = 'product.product' AND id IN (561,1145,1146,1147,1148,1149,1150,1151,1152,1153,1154,1155,1157,1158,1159,1160,1163);
+    DELETE FROM ir_translation WHERE name = 'ir.actions.act_window,name' AND res_id IN (561,1145,1146,1147,1148,1149,1150,1151,1152,1153,1154,1155,1157,1158,1159,1160,1163);
     """
 
   @update_module_list
