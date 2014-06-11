@@ -24,13 +24,31 @@ from openerp.osv import orm
 _logger = logging.getLogger(__name__)
 
 
+class stock_change_product_qty(orm.TransientModel):
+    _inherit = "stock.change.product.qty"
+
+    def change_product_qty(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        else:
+            context = context.copy()
+        context['from_product_stock_update'] = True
+        return super(stock_change_product_qty, self).change_product_qty(
+            cr, uid, ids, context=context)
+
+
 class StockInventory(orm.Model):
 
     _inherit = "stock.inventory"
 
     def action_done(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
         res = super(StockInventory, self).action_done(
             cr, uid, ids, context=context)
-        self.pool.get('stock.picking').retry_assign_all(
-            cr, uid, [], context=context)
+        # the update stock button on the product creates an
+        # inventory, we do not want it to trigger the 'assign all'
+        if not context.get('from_product_stock_update'):
+            self.pool.get('stock.picking').retry_assign_all(
+                cr, uid, [], context=context)
         return res
