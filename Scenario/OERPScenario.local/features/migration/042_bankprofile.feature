@@ -60,7 +60,6 @@ Feature: BANK PROFILES
      | scenario.profile_import_cb_banque_populaire | Import Carte bancaire Banque Pop      | CB_BP   |
      | scenario.profile_import_cb_credit_lyonnais  | Import Carte bancaire Crédit Lyonnais | CB_CL   |
      | scenario.profile_import_cb_credit_mutuel    | Import Carte bancaire Crédit Mutuel   | CB_CM   |
-     # ? | scenario.profile_import_franfinance         | Import Franfinance                    | FRANFINANCE   |
      | scenario.profile_import_outilmania          | Import Outilmania                     | outil   |
      | scenario.profile_import_priceminister       | Import PriceMinister                  | PRICE   |
      | scenario.profile_import_pixmania            | Import Pixmania                       | pix     |

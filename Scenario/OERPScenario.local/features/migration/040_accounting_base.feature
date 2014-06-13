@@ -52,7 +52,6 @@ Feature: install and migrate the picking priorities modules
       | CB_BP | Import Carte bancaire Banque Pop      |
       | CB_CL | Import Carte bancaire Crédit Lyonnais |
       | CB_CM | Import Carte bancaire Crédit Mutuel   |
-      #? | FRANF  | Import Franfinance              |
       | outil | Import Outilmania                     |
       | PRICE | Import PriceMinister                  |
       | pix   | Import Pixmania                       |
