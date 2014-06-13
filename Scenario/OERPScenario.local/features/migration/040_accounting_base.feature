@@ -11,20 +11,17 @@ Feature: install and migrate the picking priorities modules
       | account_invoice_reference          |
     Then my modules should have been installed and models reloaded
 
-  @journal_type
-  Scenario: The journal have new types
-    Given I find an "account.journal" with code: AVTE
-    And having:
-      | name | value       |
-      | type | sale_refund |
-    Given I find an "account.journal" with code: AACH
-    And having:
-      | name | value           |
-      | type | purchase_refund |
-    Given I find an "account.journal" with code: ACH
-    And having:
-      | name | value    |
-      | type | purchase |
+  @journal
+  Scenario: openerp migration created new journal for the refunds and moved the refund move lines in them (and left some move lines which were in the wrong journal in the old journals)
+    Given I execute the SQL commands
+    """
+    UPDATE account_journal SET name = 'Journal d''avoir sur ventes (ancien)', code = 'AVTE-X', active = false
+    WHERE id = 16;
+    UPDATE account_journal SET name = 'Journal d''avoir sur achats (ancien)', code = 'AACH-X', active = false
+    WHERE id = 17;
+    UPDATE account_journal SET name = 'Journal d''avoir sur ventes', code = 'AVTE' WHERE code = 'AVTE-R';
+    UPDATE account_journal SET name = 'Journal d''avoir sur achats', code = 'AACH' WHERE code = 'AACH-R';
+    """
 
   @bank_journals
   Scenario Outline: Reduce journal code to 5 chars
@@ -32,6 +29,7 @@ Feature: install and migrate the picking priorities modules
     """
         UPDATE account_journal SET code = '<new_code>' WHERE code = '<code>';
     """
+
   Examples: Bank Journals
       | code          | new_code |
       | outilmania    | outil    |
