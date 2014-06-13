@@ -26,17 +26,6 @@
       </field>
     </record>
 
-    <record model="ir.ui.view" id="view_order_form">
-      <field name="name">sale.order.form.invoiced</field>
-      <field name="model">sale.order</field>
-      <field name="inherit_id" ref="sale.view_order_form" />
-      <field name="arch" type="xml">
-        <field name="payment_term" position="after">
-          <field name="date_invoiced"/>
-        </field>
-      </field>
-    </record>
-
     <record id="view_sales_order_filter" model="ir.ui.view">
       <field name="name">sale.order.list.select</field>
       <field name="model">sale.order</field>
@@ -48,6 +37,20 @@
         <filter string="Customer" position="after">
           <filter string="Shop" domain="[]" context="{'group_by':'shop_id'}"/>
         </filter>
+      </field>
+    </record>
+
+    <record id="view_order_form_inherit" model="ir.ui.view">
+      <field name="name">sale.order.form.sale.stock</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="sale_stock.view_order_form_inherit"/>
+      <field name="arch" type="xml">
+        <field name="payment_term" position="after">
+          <field name="date_invoiced"/>
+        </field>
+        <xpath expr="//button[@name='action_view_delivery']" position="attributes">
+          <attribute name="attrs">{'invisible': ['|',('picking_ids','=',False),('picking_ids','=',[])]}</attribute>
+        </xpath>
       </field>
     </record>
 
