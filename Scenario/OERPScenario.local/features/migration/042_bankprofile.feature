@@ -46,7 +46,7 @@ Feature: BANK PROFILES
       | company_id            | by oid: base.main_company |
     And with following rules
       | name                                           |
-      | Match from Sales Order using transaction ID     |
+      | Match from Sales Order using transaction ID    |
       | Match from line reference (based on SO number) |
       | Match from Invoice using transaction ID        |
 
@@ -72,7 +72,7 @@ Feature: BANK PROFILES
       | company_id            | by oid: base.main_company |
     And with following rules
       | name                                           |
-      | Match from Sales Order using transaction ID     |
+      | Match from Sales Order using transaction ID    |
       | Match from line reference (based on SO number) |
       | Match from Invoice using transaction ID        |
 
