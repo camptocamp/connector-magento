@@ -18,12 +18,8 @@ Feature: BANK PROFILES
       | company_id            | by oid: base.main_company |
     And with following rules
       | name                                                                      |
-      | Match from Sale Order using transaction ID                                |
-      | Match from Invoice using transaction ID                                   |
       | Match from line reference (based on Invoice number)                       |
       | Match from line reference (based on Invoice Supplier number)              |
-      | Match from line reference (based on SO number with or without mag prefix) |
-      | Match from line reference (based on SO number)                            |
       | Match from line label (based on partner field 'Bank Statement Label')     |
       | Match from line label (based on partner name)                             |
 
@@ -35,10 +31,28 @@ Feature: BANK PROFILES
       | scenario.profile_credit_lyonnais_2   | Crédit Lyonnnais 2   | Crédit Lyonnais 466338 |
       | scenario.profile_cic                 | CIC                  | CIC                    |
       | scenario.profile_credit_lyonnais_USD | Crédit Lyonnnais USD | Crédit Lyonnais USD    |
-      | scenario.profile_paypal              | Paypal               | PAYPAL_V5_OLD          |
-      | scenario.profile_paypal2             | Paypal 2             | PAYZEN BP 6            |
       | scenario.profile_caisse              | Caisse               | Caisse                 |
 
+  Scenario Outline: BANK PROFILE FOR DEBONIX
+    Given I am configuring the company with ref "base.main_company"
+    Given I need a "account.statement.profile" with oid: <oid>
+    And having:
+      | name                  | value                     |
+      | name                  | <name>                    |
+      | journal_id            | by name: <journal>        |
+      | commission_account_id | by code: 622200           |
+      | balance_check         | 1                         |
+      | import_type           | generic_csvxls_so         |
+      | company_id            | by oid: base.main_company |
+    And with following rules
+      | name                                           |
+      | Match from Sale Order using transaction ID     |
+      | Match from line reference (based on SO number) |
+      | Match from Invoice using transaction ID        |
+
+    Examples: Paypal Bank profiles for debonix
+      | scenario.profile_paypal              | Paypal               | PAYPAL_V5_OLD          |
+      | scenario.profile_paypal2             | Paypal 2             | PAYZEN BP 6            |
   # ------------------------------------------------------------------------------------------
   # Imports de payement
   # ------------------------------------------------------------------------------------------
@@ -55,15 +69,10 @@ Feature: BANK PROFILES
       | import_type           | generic_csvxls_so         |
       | company_id            | by oid: base.main_company |
     And with following rules
-      | name                                                                      |
-      | Match from Sale Order using transaction ID                                |
-      | Match from Invoice using transaction ID                                   |
-      | Match from line reference (based on Invoice number)                       |
-      | Match from line reference (based on Invoice Supplier number)              |
-      | Match from line reference (based on SO number with or without mag prefix) |
-      | Match from line reference (based on SO number)                            |
-      | Match from line label (based on partner field 'Bank Statement Label')     |
-      | Match from line label (based on partner name)                             |
+      | name                                           |
+      | Match from Sale Order using transaction ID     |
+      | Match from line reference (based on SO number) |
+      | Match from Invoice using transaction ID        |
 
     Examples: Bank import for Debonix payments
       | oid                                         | name                                  | journal |
