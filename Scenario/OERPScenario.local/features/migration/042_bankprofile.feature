@@ -89,3 +89,4 @@ Feature: BANK PROFILES
       | scenario.profile_import_banque_accord       | Import Banque Accord                  | accor   |
       | scenario.profile_import_rdc                 | Import Virement Rue Du Commerce       | RDC     |
       | scenario.profile_import_sofinco             | Import Virement Sofinco               | sofin   |
+      | scenario.profile_import_franfinance         | Import Franfinance                    | FRANF   |
