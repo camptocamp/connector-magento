@@ -65,9 +65,10 @@ class magento_product_product(orm.Model):
         if not hasattr(ids, '__iter__'):
             ids = [ids]
 
-        for product in self.browse(cr, uid, ids, context=context):
-            new_cost = product.cost_price
-            if new_cost != product.magento_cost:
+        for product in self.read(cr, uid, ids, ['cost_price', 'magento_cost'],
+                                 context=context):
+            new_cost = product['cost_price']
+            if new_cost != product['magento_cost']:
                 self.write(cr, uid, product.id,
                            {'magento_cost': new_cost},
                            context=context)
