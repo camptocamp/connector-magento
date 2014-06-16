@@ -17,15 +17,15 @@ Feature: BANK PROFILES
       | import_type           | generic_csvxls_so         |
       | company_id            | by oid: base.main_company |
     And with following rules
-      | name                                                                      |
-      | Match from line reference (based on Invoice number)                       |
-      | Match from line reference (based on Invoice Supplier number)              |
-      | Match from line label (based on partner field 'Bank Statement Label')     |
-      | Match from line label (based on partner name)                             |
+      | name                                                                  |
+      | Match from line reference (based on Invoice number)                   |
+      | Match from line reference (based on Invoice Supplier number)          |
+      | Match from line label (based on partner field 'Bank Statement Label') |
+      | Match from line label (based on partner name)                         |
 
     Examples: Bank profiles for debonix
       | oid                                  | name                 | journal                |
-      | scenario.profile_credit_mutuel       | Crédit Mutuel        | Crédit Mutuel EUR      |
+      | scenario.profile_credit_mutuel       | Crédit Mutuel        | Crédit Mutuel EUR 3    |
       | scenario.profile_banque_populaire    | Banque Populaire     | Banque Populaire       |
       | scenario.profile_credit_lyonnais     | Crédit Lyonnnais     | Crédit Lyonnais EUR    |
       | scenario.profile_credit_lyonnais_2   | Crédit Lyonnnais 2   | Crédit Lyonnais 466338 |
@@ -46,13 +46,15 @@ Feature: BANK PROFILES
       | company_id            | by oid: base.main_company |
     And with following rules
       | name                                           |
-      | Match from Sale Order using transaction ID     |
+      | Match from Sales Order using transaction ID     |
       | Match from line reference (based on SO number) |
       | Match from Invoice using transaction ID        |
 
     Examples: Paypal Bank profiles for debonix
-      | scenario.profile_paypal              | Paypal               | PAYPAL_V5_OLD          |
-      | scenario.profile_paypal2             | Paypal 2             | PAYZEN BP 6            |
+      | oid                      | name     | journal       |
+      | scenario.profile_paypal  | Paypal   | PAYPAL_V5_OLD |
+      | scenario.profile_paypal2 | Paypal 2 | PAYZEN BP 2   |
+
   # ------------------------------------------------------------------------------------------
   # Imports de payement
   # ------------------------------------------------------------------------------------------
@@ -70,7 +72,7 @@ Feature: BANK PROFILES
       | company_id            | by oid: base.main_company |
     And with following rules
       | name                                           |
-      | Match from Sale Order using transaction ID     |
+      | Match from Sales Order using transaction ID     |
       | Match from line reference (based on SO number) |
       | Match from Invoice using transaction ID        |
 
