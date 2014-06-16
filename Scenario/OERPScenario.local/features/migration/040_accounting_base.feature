@@ -19,9 +19,51 @@ Feature: install and migrate the picking priorities modules
     WHERE id = 16;
     UPDATE account_journal SET name = 'Journal d''avoir sur achats (ancien)', code = 'AACH-X', active = false
     WHERE id = 17;
+    -- merge journals
     UPDATE account_journal SET name = 'Journal d''avoir sur ventes', code = 'AVTE' WHERE code = 'AVTE-R';
+    UPDATE account_move_line SET journal_id = (SELECT id FROM account_journal WHERE code = 'AVTE') WHERE journal_id = (SELECT id FROM account_journal WHERE code = 'VTE-R');
+    UPDATE account_journal SET active = false WHERE code = 'VTE-R';
+
     UPDATE account_journal SET name = 'Journal d''avoir sur achats', code = 'AACH' WHERE code = 'AACH-R';
+    UPDATE account_move_line SET journal_id = (SELECT id FROM account_journal WHERE code = 'AACH') WHERE journal_id = (SELECT id FROM account_journal WHERE code = 'ACH-R');
+    UPDATE account_journal SET active = false WHERE code = 'ACH-R';
     """
+
+  @analytic_journal
+  Scenario: deactivate the default sale analytic journal
+    Given I find a possibly inactive "account.analytic.journal" with oid: account.analytic_journal_sale
+    And having:
+      | key    | value |
+      | active | false |
+
+  @analytic_journal
+  Scenario: create missing analytic journals
+    Given I need an "account.analytic.journal" with oid: scenario.anl_journal_purchase
+    And having:
+      | key  | value    |
+      | name | ACHATS   |
+      | code | ACHAT    |
+      | type | purchase |
+    Given I need an "account.analytic.journal" with oid: scenario.anl_journal_various
+    And having:
+      | key  | value   |
+      | name | DIVERS  |
+      | code | DIVERS  |
+      | type | general |
+
+  @journal
+  Scenario Outline: Link journals to analytic journals
+    Given I find an "account.journal" with code: <code>
+    And having:
+      | key                 | value              |
+      | analytic_journal_id | <analytic_journal> |
+
+  Examples: analytic journals
+      | code | analytic_journal                      |
+      | ACH  | by oid: scenario.anl_journal_purchase |
+      | AACH | by oid: scenario.anl_journal_purchase |
+      | VTE  | by code: COMAG                        |
+      | AVTE | by code: COMAG                        |
 
   @bank_journals
   Scenario Outline: Reduce journal code to 5 chars
