@@ -33,6 +33,9 @@ Feature: BANK PROFILES
       | scenario.profile_credit_lyonnais_USD | Crédit Lyonnnais USD | Crédit Lyonnais USD    |
       | scenario.profile_caisse              | Caisse               | Caisse                 |
 
+  # ------------------------------------------------------------------------------------------
+  # Imports de payement Paypal
+  # ------------------------------------------------------------------------------------------
   Scenario Outline: BANK PROFILE FOR DEBONIX
     Given I am configuring the company with ref "base.main_company"
     Given I need a "account.statement.profile" with oid: <oid>
