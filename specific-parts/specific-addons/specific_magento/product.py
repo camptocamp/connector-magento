@@ -69,7 +69,7 @@ class magento_product_product(orm.Model):
                                  context=context):
             new_cost = product['cost_price']
             if new_cost != product['magento_cost']:
-                self.write(cr, uid, product.id,
+                self.write(cr, uid, product['id'],
                            {'magento_cost': new_cost},
                            context=context)
         return True
