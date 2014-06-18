@@ -54,7 +54,12 @@ Feature: install various modules
       | oid                    | name     | state  | sequence |
       | crm_claim.stage_claim3 | Rejected | cancel | 29       |
 
-  @clean_claim_stage
+  @claim_stage_note
+  Scenario: Add a message with name of old status in it (in french)
+    Given I create a note in each crm_claim to save old stage
+
+
+  @claim_stage_map
   Scenario Outline: Map old stages to new stages
     Given I execute the SQL commands
     """
