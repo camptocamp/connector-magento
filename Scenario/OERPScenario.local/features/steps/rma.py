@@ -20,10 +20,8 @@ def impl(ctx):
                              'stage_claim5'])])
 
     new_stage_ids = [data.res_id for data in new_stage_data]
-    print 'found %d new stage_ids' % len(new_stage_ids)
 
     old_claims = model('crm.claim').browse([('stage_id', 'not in', new_stage_ids)])
-    print 'found %d old_claims' % len(old_claims)
     for claim in old_claims:
         values = claim.stage_id.name
         ctx.client.execute('crm.claim', 'message_post', claim.id, values)
