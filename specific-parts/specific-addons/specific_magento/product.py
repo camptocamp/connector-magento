@@ -471,6 +471,19 @@ class DebonixProductExportMapper(ExportMapper):
               ]
 
 
+@magento_debonix
+class DebonixAddCheckpoint(AddCheckpoint):
+    _model_name = ['magento.product.product',
+                   'magento.product.category',
+                   ]
+
+    def run(self, openerp_binding_id):
+        # Deactivate the creation of checkpoint for products and categories
+        # Debonix uses the 'state' of the products to now if it is ready
+        # to sell
+        pass
+
+
 @on_record_create(model_names='magento.product.product')
 @on_record_write(model_names='magento.product.product')
 def delay_export(session, model_name, record_id, vals):
