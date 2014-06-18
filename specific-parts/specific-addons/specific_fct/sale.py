@@ -179,3 +179,31 @@ class sale_order(orm.Model):
                                           grouped=grouped, context=context)
 
         return invoice_id
+
+
+class sale_order_line(orm.Model):
+    _inherit = 'sale.order.line'
+
+    def product_id_change(self, cr, uid, ids, pricelist, product, qty=0,
+                          uom=False, qty_uos=0, uos=False, name='',
+                          partner_id=False, lang=False, update_tax=True,
+                          date_order=False, packaging=False,
+                          fiscal_position=False, flag=False,
+                          context=None):
+        """ They don't want the full sale description in the line's description
+        but only the product's name.
+        """
+        result = super(sale_order_line, self).product_id_change(
+            cr, uid, ids, pricelist, product, qty=qty, uom=uom, qty_uos=0,
+            uos=uos, name=name, partner_id=partner_id, lang=lang,
+            update_tax=update_tax, date_order=date_order, packaging=packaging,
+            fiscal_position=fiscal_position, flag=flag, context=context)
+
+        if not product:
+            return result
+
+        product_obj = self.pool['product.product']
+        product_name = product_obj.name_get(cr, uid, [product],
+                                            context=context)[0][1]
+        result['value']['name'] = product_name
+        return result

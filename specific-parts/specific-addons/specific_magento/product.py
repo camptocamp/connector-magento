@@ -65,10 +65,11 @@ class magento_product_product(orm.Model):
         if not hasattr(ids, '__iter__'):
             ids = [ids]
 
-        for product in self.browse(cr, uid, ids, context=context):
-            new_cost = product.cost_price
-            if new_cost != product.magento_cost:
-                self.write(cr, uid, product.id,
+        for product in self.read(cr, uid, ids, ['cost_price', 'magento_cost'],
+                                 context=context):
+            new_cost = product['cost_price']
+            if new_cost != product['magento_cost']:
+                self.write(cr, uid, product['id'],
                            {'magento_cost': new_cost},
                            context=context)
         return True
@@ -100,8 +101,9 @@ class DebonixProductImport(ProductImport):
         """ Import the dependencies for the record"""
         super(DebonixProductImport, self)._import_dependencies()
         record = self.magento_record
-        self._import_dependency(record['marque'],
-                                'magento.product.brand')
+        if record.get('marque'):
+            self._import_dependency(record['marque'],
+                                    'magento.product.brand')
         self._import_dependency(record['openerp_supplier_name'],
                                 'magento.supplier')
 
@@ -269,10 +271,16 @@ class DebonixProductImportMapper(ProductImportMapper):
 
     direct = ([(source, target) for source, target in
                ProductImportMapper.direct if
-               not target == 'standard_price'] +
-              [(backend_to_m2o('marque', binding='magento.product.brand'),
-                'product_brand_id'),
-               ])
+               not target == 'standard_price']
+              )
+
+    @mapping
+    def brand(self, record):
+        if not record.get('marque'):
+            return
+        binder = self.get_binder_for_model('magento.product.brand')
+        brand_id = binder.to_openerp(record['marque'], unwrap=True)
+        return {'product_brand_id': brand_id}
 
     @mapping
     @only_create
@@ -288,6 +296,7 @@ class DebonixProductImportMapper(ProductImportMapper):
         code = record.get('openerp_commodity')
         if not code:
             return
+        code = code.strip()
         code_ids = s.search('report.intrastat.code',
                             [('intrastat_code', '=', code)])
         if code_ids:

@@ -42,6 +42,7 @@ Magento Connector Customization
  'data': ['magento_data.xml',
           'product_data.xml',
           'product_view.xml',
+          'magento_model_view.xml',
           ],
  'test': [],
  'installable': True,

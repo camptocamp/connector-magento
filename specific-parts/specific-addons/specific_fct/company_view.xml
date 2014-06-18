@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <record model="ir.ui.view" id="company_view_form">
+      <field name="name">res.company.form.inherit</field>
+      <field name="model">res.company</field>
+      <field name="inherit_id" ref="import_tracking.company_csv_config"/>
+      <field name="arch" type="xml">
+        <page string="Debonix Specific Configuration" position="inside">
+          <group string="Invoice SFTP">
+            <field name="sftp_invoice_host"/>
+            <field name="sftp_invoice_port"/>
+            <field name="sftp_invoice_user"/>
+            <field name="sftp_invoice_password"/>
+            <field name="sftp_invoice_path"/>
+          </group>
+        </page>
+      </field>
+    </record>
+  </data>
+</openerp>
