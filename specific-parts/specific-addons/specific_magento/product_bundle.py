@@ -39,13 +39,15 @@ class BoMBundleImporter(BundleImporter):
     """
     _model_name = 'magento.product.product'
 
-    def import_bundle(self, magento_record):
-        """ Import the bundle information about a product.
+    def run(self, magento_record):
+        """ Import the bundle information for a product.
 
         :param magento_record: product information from Magento
         """
         self.magento_record = magento_record
-        self.bundle = record['_bundle_data']
+        _logger.info('Importing bundle information for Magento product %s',
+                     magento_record['product_id'])
+        self.bundle = magento_record['_bundle_data']
         binding_id = self._import_bom()
         self._import_selections(binding_id)
 
@@ -56,20 +58,20 @@ class BoMBundleImporter(BundleImporter):
         bom_values = self._bom_values()
         binding_id = binder.to_openerp(mag_product_id)
         if binding_id:
-            self.session.write('magento.product.bom', binding_id, bom_values)
+            self.session.write('magento.bundle.bom', binding_id, bom_values)
+            _logger.info('magento.bundle.bom %d updated', binding_id)
         else:
-            binding_id = self.session.create('magento.product.bom', bom_values)
+            binding_id = self.session.create('magento.bundle.bom', bom_values)
+            _logger.info('magento.bundle.bom %d created', binding_id)
         return binding_id
 
     def _bom_values(self):
-        mag_product_id = self.magento_record['product_id']
-        values = {'magento_id': mag_product_id,
-                  'backend_id': self.backend_record.id,
-                  'product_id': self.binder.to_openerp(mag_product_id,
-                                                       unwrap=True),
+        magento_product_id = self.magento_record['product_id']
+        values = {'backend_id': self.backend_record.id,
                   'product_qty': 1,
-                  'type': 'phantom',  # TODO: could be normal or phantom
+                  'type': 'normal',
                   }
+        values.update(self._common_product_values(magento_product_id))
         return values
 
     def _import_selections(self, bom_binding_id):
@@ -77,37 +79,59 @@ class BoMBundleImporter(BundleImporter):
         binder = self.get_binder_for_model('magento.bundle.bom.product')
         for option in self.bundle['options']:
             for selection in option['selections']:
-                values = self._selection_values(selection)
+                values = self._selection_values(bom_binding_id, selection)
                 existing_product_ids.append(values['product_id'])
                 prod_binding_id = binder.to_openerp(values['magento_id'])
 
                 if prod_binding_id:
                     self.session.write('magento.bundle.bom.product',
                                        prod_binding_id, values)
+                    _logger.info('magento.bundle.bom.product %d updated',
+                                 prod_binding_id)
                 else:
-                    self.session.create('magento.bundle.bom.product', values)
+                    new_id = self.session.create('magento.bundle.bom.product',
+                                                 values)
+                    _logger.info('magento.bundle.bom.product %d created',
+                                 new_id)
 
+        bom_binder = self.get_binder_for_model('magento.bundle.bom')
         # remove deleted components
-        bom_binding = self.session.browse('magento.bundle.bom', bom_binding_id)
         removed_ids = self.session.search(
             'magento.bundle.bom.product',
             [('product_id', 'not in', existing_product_ids),
              ('backend_id', '=', self.backend_record.id),
-             ('bom_id', '=', bom_binding.openerp_id.id)
+             ('bom_id', '=', bom_binder.unwrap_binding(bom_binding_id))
              ])
+        bundle_product_binder = self.get_binder_for_model(
+            'magento.bundle.bom.product')
         for removed in self.session.browse('magento.bundle.bom.product',
                                            removed_ids):
-            self.session.unlink('mrp.bom', removed.openerp_id.id)
+            removed_id = bundle_product_binder.unwrap_binding(removed.id)
+            self.session.unlink('mrp.bom', [removed_id])
+            _logger.info('magento.bundle.bom.product %d removed', removed.id)
+
+    def _common_product_values(self, magento_product_id):
+        product_id = self.binder.to_openerp(magento_product_id,
+                                            unwrap=True)
+        product = self.session.read('product.product', product_id,
+                                    ['uom_id', 'name'])
+        values = {
+            'magento_id': magento_product_id,
+            'product_id': product_id,
+            'name': product['name'],
+            'product_uom': product['uom_id'][0],
+        }
+        return values
 
     def _selection_values(self, bom_binding_id, selection):
-        values = {'magento_id': selection['product_id'],
-                  'backend_id': self.backend_record.id,
-                  'product_id': self.binder.to_openerp(selection['product_id'],
-                                                       unwrap=True),
+        magento_product_id = selection['product_id']
+        bom_binder = self.get_binder_for_model('magento.bundle.bom')
+        values = {'backend_id': self.backend_record.id,
                   'product_qty': selection['selection_qty'],
                   'type': 'normal',
-                  'bom_id': bom_binding_id,
+                  'bom_id': bom_binder.unwrap_binding(bom_binding_id),
                   }
+        values.update(self._common_product_values(magento_product_id))
         return values
 
 

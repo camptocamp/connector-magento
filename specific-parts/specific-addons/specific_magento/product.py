@@ -48,6 +48,7 @@ from openerp.addons.magentoerpconnect.product import (
     ProductImportMapper,
     )
 from .backend import magento_debonix
+from .product_bundle import BoMBundleImporter
 
 
 _logger = logging.getLogger(__name__)
@@ -60,6 +61,13 @@ class magento_product_product(orm.Model):
                                      help="Last computed cost to send "
                                           "on Magento."),
     }
+
+    def product_type_get(self, cr, uid, context=None):
+        selection = super(magento_product_product, self).product_type_get(
+            cr, uid, context=context)
+        if 'bundle' not in [item[0] for item in selection]:
+            selection.append(('bundle', 'Bundle'))
+        return selection
 
     def recompute_magento_cost(self, cr, uid, ids, context=None):
         if not hasattr(ids, '__iter__'):
@@ -124,6 +132,13 @@ class DebonixProductImport(ProductImport):
                      'because only the simple products are used in the sales '
                      'orders.')
         return super(DebonixProductImport, self)._must_skip()
+
+    def _after_import(self, binding_id):
+        """ Hook called at the end of the import """
+        super(DebonixProductImport, self)._after_import(binding_id)
+        if self.magento_record['type_id'] == 'bundle':
+            importer = self.get_connector_unit_for_model(BoMBundleImporter)
+            importer.run(self.magento_record)
 
 
 class CommonSupplierInfoMapChild(ImportMapChild):
@@ -378,6 +393,22 @@ class DebonixProductImportMapper(ProductImportMapper):
             'qty_multiple': 1,
         }
         return {'orderpoint_ids': [(0, 0, values)]}
+
+    @only_create
+    @mapping
+    def type(self, record):
+        return {'type': 'product'}
+
+    @only_create
+    @mapping
+    def openerp_id(self, record):
+        """ Will bind the partner on an existing product with the same sku """
+        sess = self.session
+        with sess.change_context({'active_test': False}):
+            product_ids = sess.search('product.product',
+                                      [('default_code', '=', record['sku'])])
+        if product_ids:
+            return {'openerp_id': product_ids[0]}
 
     def finalize(self, map_record, values):
         values = super(DebonixProductImportMapper, self).finalize(map_record,
