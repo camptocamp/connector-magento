@@ -122,3 +122,12 @@ Feature: install and migrate the picking priorities modules
   Scenario: recompute the quantity on all products
     Given I find a "magento.backend" with oid: scenario.magento_backend_debonix
     And I recompute the magento stock quantities without export
+
+  Scenario: Fix a bug of V5: all the moves of a done picking must be done
+    Given I execute the SQL commands
+    """
+    UPDATE stock_move SET state = 'done' WHERE id IN (
+      SELECT m.id FROM stock_move m INNER JOIN stock_picking s ON s.id = m.picking_id WHERE s.state = 'done' AND m.state != 'done'
+    )
+    """
+
