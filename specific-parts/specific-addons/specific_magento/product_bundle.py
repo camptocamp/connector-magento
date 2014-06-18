@@ -69,7 +69,7 @@ class BoMBundleImporter(BundleImporter):
         magento_product_id = self.magento_record['product_id']
         values = {'backend_id': self.backend_record.id,
                   'product_qty': 1,
-                  'type': 'normal',
+                  'type': 'phantom',
                   }
         values.update(self._common_product_values(magento_product_id))
         return values
