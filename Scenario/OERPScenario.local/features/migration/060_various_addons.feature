@@ -8,4 +8,5 @@ Feature: install various modules
       | intrastat_base                 |
       | l10n_fr_intrastat_product      |
       | base_partner_merge             |
+      | last_sale_price                |
     Then my modules should have been installed and models reloaded
