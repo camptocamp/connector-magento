@@ -17,15 +17,23 @@ Feature: install and migrate the picking priorities modules
     """
     UPDATE account_journal SET name = 'Journal d''avoir sur ventes (ancien)', code = 'AVTE-X', active = false
     WHERE id = 16;
+    -- correct data: moves that were 'sale' but in the old refund journal should be moved to the sale journal
+    UPDATE account_move_line SET journal_id = 2 WHERE journal_id = 16;
+    UPDATE account_move SET journal_id = 2 WHERE journal_id = 16;
     UPDATE account_journal SET name = 'Journal d''avoir sur achats (ancien)', code = 'AACH-X', active = false
     WHERE id = 17;
+    -- correct data: moves that were 'purchase' but in the old refund journal should be moved to the purchase journal
+    UPDATE account_move_line SET journal_id = 3 WHERE journal_id = 17;
+    UPDATE account_move SET journal_id = 3 WHERE journal_id = 17;
     -- merge journals
     UPDATE account_journal SET name = 'Journal d''avoir sur ventes', code = 'AVTE' WHERE code = 'AVTE-R';
     UPDATE account_move_line SET journal_id = (SELECT id FROM account_journal WHERE code = 'AVTE') WHERE journal_id = (SELECT id FROM account_journal WHERE code = 'VTE-R');
+    UPDATE account_move SET journal_id = (SELECT id FROM account_journal WHERE code = 'AVTE') WHERE journal_id = (SELECT id FROM account_journal WHERE code = 'VTE-R');
     UPDATE account_journal SET active = false WHERE code = 'VTE-R';
 
     UPDATE account_journal SET name = 'Journal d''avoir sur achats', code = 'AACH' WHERE code = 'AACH-R';
     UPDATE account_move_line SET journal_id = (SELECT id FROM account_journal WHERE code = 'AACH') WHERE journal_id = (SELECT id FROM account_journal WHERE code = 'ACH-R');
+    UPDATE account_move SET journal_id = (SELECT id FROM account_journal WHERE code = 'AACH') WHERE journal_id = (SELECT id FROM account_journal WHERE code = 'ACH-R');
     UPDATE account_journal SET active = false WHERE code = 'ACH-R';
     """
 
