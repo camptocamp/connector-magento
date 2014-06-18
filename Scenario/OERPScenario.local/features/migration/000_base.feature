@@ -73,7 +73,7 @@ Feature: Migrate the database after the OpenERP migration
     Given I execute the SQL commands
     """
     DELETE FROM ir_ui_menu
-        WHERE parent_id = 110;
+        WHERE parent_id = 110
             AND name IN
                 ('Default', 'Vetements', 'vetement', 'Chauffage', 'piscine', 'quincaillerie', 'Abrasifs',
                  'Burins', 'Disques', 'Embouts', 'Forets', 'conso_electro', 'electricite', 'Fraises', 'Meches', 'Meules', 'bricodeal');
