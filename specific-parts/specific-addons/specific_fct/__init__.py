@@ -24,3 +24,4 @@ from . import stock
 from . import statement
 from . import account_invoice
 from . import company
+from . import wizard

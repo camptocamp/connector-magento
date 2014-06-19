@@ -34,8 +34,7 @@
  'author': 'Camptocamp',
  'description': """Code customisation module""",
  'website': 'http://www.camptocamp.com',
- 'data': [
-          'account_invoice_action_data.xml',
+ 'data': ['account_invoice_action_data.xml',
           'product_view.xml',
           'sale_view.xml',
           'account_invoice_view.xml',
@@ -45,6 +44,7 @@
           'security/security.xml',
           'data_completion.xml',
           'company_view.xml',
+          'wizard/stock_partial_picking_view.xml',
           ],
  'installable': True,
 }
