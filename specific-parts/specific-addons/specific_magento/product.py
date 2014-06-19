@@ -32,10 +32,8 @@ from openerp.addons.connector.unit.mapper import (
 )
 from openerp.addons.connector.event import (on_record_write,
                                             on_record_create,
-                                            on_record_unlink
                                             )
 from openerp.addons.connector.exception import MappingError
-from openerp.addons.magentoerpconnect.connector import get_environment
 from openerp.addons.magentoerpconnect.unit.export_synchronizer import (
     export_record,
     MagentoExporter,
