@@ -93,3 +93,25 @@ Feature: BANK PROFILES
       | scenario.profile_import_rdc                 | Import Virement Rue Du Commerce       | RDC     |
       | scenario.profile_import_sofinco             | Import Virement Sofinco               | sofin   |
       | scenario.profile_import_franfinance         | Import Franfinance                    | FRANF   |
+
+  Scenario Outline: BANK PROFILE FOR PAYMENT IMPORT with other account
+    Given I am configuring the company with ref "base.main_company"
+    Given I need a "account.statement.profile" with oid: <oid>
+    And having:
+      | name                  | value                     |
+      | name                  | <name>                    |
+      | journal_id            | by code: <journal>        |
+      | commission_account_id | by code: 622200           |
+      | receivable_account_id | by code: 411750           |
+      | balance_check         | 0                         |
+      | import_type           | generic_csvxls_so         |
+      | company_id            | by oid: base.main_company |
+    And with following rules
+      | name                                           |
+      | Match from Sales Order using transaction ID    |
+      | Match from line reference (based on SO number) |
+      | Match from Invoice using transaction ID        |
+
+    Examples: Bank import for Debonix payments
+      | oid                               | name              | journal |
+      | scenario.profile_import_cdiscount | Import C'DISCOUNT | CDISC   |
