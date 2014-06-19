@@ -23,6 +23,7 @@ Feature: install and migrate the picking priorities modules
       | bom_split                        |
       | sale_bom_split                   |
       | purchase_bom_split               |
+      | sale_jit_on_services             |
     Then my modules should have been installed and models reloaded
 
   Scenario: I need to create the carrier file configuration because it is now represented in carrier.file
