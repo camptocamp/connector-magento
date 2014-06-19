@@ -39,7 +39,7 @@ class BoMBundleImporter(BundleImporter):
     """
     _model_name = 'magento.product.product'
 
-    def run(self, magento_record):
+    def run(self, binding_id, magento_record):
         """ Import the bundle information for a product.
 
         :param magento_record: product information from Magento
@@ -48,8 +48,8 @@ class BoMBundleImporter(BundleImporter):
         _logger.info('Importing bundle information for Magento product %s',
                      magento_record['product_id'])
         self.bundle = magento_record['_bundle_data']
-        binding_id = self._import_bom()
-        self._import_selections(binding_id)
+        bom_binding_id = self._import_bom()
+        self._import_selections(bom_binding_id)
 
     def _import_bom(self):
         # bind the magento.bundle.bom on the id of the product
