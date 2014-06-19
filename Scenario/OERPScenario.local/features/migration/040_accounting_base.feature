@@ -90,7 +90,7 @@ Feature: install and migrate the picking priorities modules
       | accord        | accor    |
       | sofinco       | sofin    |
       | FRANFINANCE   | FRANF    |
-      | C'DISCOUNT    | CDISC    |
+      | C''DISCOUNT   | CDISC    |
 
   @bank_journals
   Scenario Outline: Rename all import journals adding 'Import'
@@ -112,4 +112,4 @@ Feature: install and migrate the picking priorities modules
       | RDC   | Import Virement Rue Du Commerce       |
       | sofin | Import Virement Sofinco               |
       | FRANF | Import Franfinance                    |
-      | CDISC | Import C'DISCOUNT                     |
+      | CDISC | Import C''DISCOUNT                    |
