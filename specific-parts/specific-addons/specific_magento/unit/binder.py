@@ -29,4 +29,6 @@ class DebonixBinder(MagentoModelBinder):
     _model_name = [
         'magento.product.brand',
         'magento.supplier',
+        'magento.bundle.bom',
+        'magento.bundle.bom.product',
     ]

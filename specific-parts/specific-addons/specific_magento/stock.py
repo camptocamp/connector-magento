@@ -21,6 +21,7 @@
 import logging
 import xmlrpclib
 
+from openerp.addons.connector.exception import NothingToDoJob
 from openerp.addons.magentoerpconnect.stock_picking import (
     StockPickingAdapter,
     MagentoPickingExport,
@@ -81,6 +82,11 @@ class DebonixStockPickingAdapter(StockPickingAdapter):
     def create(self, order_id, items, comment, email, include_comment,
                close=False):
         """ Create a record on the external system """
+        _logger.info('Export a delivery order with: '
+                     '%s.creer(%s)',
+                     self._magento_model,
+                     unicode([order_id, items, comment, email,
+                              include_comment, close]))
         return self._call('%s.creer' % self._magento_model,
                           [order_id, items, comment, email,
                            include_comment, close])
