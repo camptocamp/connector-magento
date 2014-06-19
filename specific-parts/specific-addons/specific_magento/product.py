@@ -132,13 +132,6 @@ class DebonixProductImport(ProductImport):
                      'orders.')
         return super(DebonixProductImport, self)._must_skip()
 
-    def _after_import(self, binding_id):
-        """ Hook called at the end of the import """
-        super(DebonixProductImport, self)._after_import(binding_id)
-        if self.magento_record['type_id'] == 'bundle':
-            importer = self.get_connector_unit_for_model(BoMBundleImporter)
-            importer.run(self.magento_record)
-
 
 class CommonSupplierInfoMapChild(ImportMapChild):
 
