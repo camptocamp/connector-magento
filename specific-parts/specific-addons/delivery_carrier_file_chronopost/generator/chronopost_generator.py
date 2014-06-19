@@ -73,6 +73,21 @@ class ChronopostRows(object):
             else:
                 line.client_code = address.id
             line.name1 = address.name
+
+            if address.company:
+                line.name2 = address.company
+            else:
+                if address.parent_id:
+                    parent = address.parent_id
+                    name = (address.name or '').strip().lower()
+                    parent_name = (parent.name or '').strip().lower()
+                    bindings = parent.magento_bind_ids
+                    if (name != parent_name and
+                        (not parent.bindings or
+                         any(bind.consider_as_company for bind in bindings))):
+                        # probably a company name
+                        line.name2 = parent.name
+
             line.street1 = address.street
             line.street2 = address.street2
             line.zip = address.zip
