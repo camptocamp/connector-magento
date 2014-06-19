@@ -19,7 +19,7 @@
 #
 ##############################################################################
 
-from openerp.osv import orm, fields
+from openerp.osv import orm
 
 
 class res_partner(orm.Model):
@@ -32,6 +32,7 @@ class res_partner(orm.Model):
         is not considered as a company.
         """
         parent = address.parent_id
+        address_company = False
         if parent:
             name = (address.name or '').strip().lower()
             parent_name = (parent.name or '').strip().lower()
@@ -44,5 +45,18 @@ class res_partner(orm.Model):
                 # only display the address' name
                 without_company = True
 
-        return super(res_partner, self)._display_address(
+        if address.company:
+            # field added by magentoerpconnect on the addresses,
+            # when a customer has filed a company on the address,
+            # he maybe want to deliver to another company than
+            # his one, so we display the address company
+            address_company = True
+            if address.name:
+                without_company = True
+
+        disp_address = super(res_partner, self)._display_address(
             cr, uid, address, without_company=without_company, context=context)
+
+        if address_company:
+            disp_address = '%s\n' % address.company + disp_address
+        return disp_address
