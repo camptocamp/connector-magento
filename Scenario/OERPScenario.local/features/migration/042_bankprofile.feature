@@ -69,7 +69,7 @@ Feature: BANK PROFILES
       | name                  | <name>                    |
       | journal_id            | by code: <journal>        |
       | commission_account_id | by code: 622200           |
-      | receivable_account_id |                           |
+      | receivable_account_id | False                     |
       | balance_check         | 0                         |
       | import_type           | generic_csvxls_so         |
       | company_id            | by oid: base.main_company |
