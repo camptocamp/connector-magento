@@ -40,11 +40,12 @@ from openerp.addons.magentoerpconnect.unit.export_synchronizer import (
     export_record,
     MagentoExporter,
     )
-from openerp.addons.magentoerpconnect.product import (
-    ProductImport,
-    ProductInventoryExport
+from openerp.addons.magentoerpconnect.unit.import_synchronizer import (
+    AddCheckpoint,
     )
 from openerp.addons.magentoerpconnect.product import (
+    ProductImport,
+    ProductInventoryExport,
     ProductImportMapper,
     )
 from .backend import magento_debonix
