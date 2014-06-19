@@ -83,7 +83,7 @@ class ChronopostRows(object):
                     parent_name = (parent.name or '').strip().lower()
                     bindings = parent.magento_bind_ids
                     if (name != parent_name and
-                        (not parent.bindings or
+                        (not bindings or
                          any(bind.consider_as_company for bind in bindings))):
                         # probably a company name
                         line.name2 = parent.name
