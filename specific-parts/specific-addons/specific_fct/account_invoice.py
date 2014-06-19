@@ -37,8 +37,9 @@ class account_invoice(orm.Model):
                 return
             email_obj = self.pool['email.template']
             __, template_id = data_obj.get_object_reference(
-                cr, uid, 'specific_fct', 'email_template_customer_invoice')
+                cr, uid, 'account', 'email_template_edi_invoice')
             email_obj.send_mail(cr, uid, template_id, invoice.id)
+            invoice.write({'sent': True})
 
             # move the invoice to a sftp folder if it is a Magento
             # invoice
