@@ -480,7 +480,7 @@ class DebonixAddCheckpoint(AddCheckpoint):
 
     def run(self, openerp_binding_id):
         # Deactivate the creation of checkpoint for products and categories
-        # Debonix uses the 'state' of the products to now if it is ready
+        # Debonix uses the 'state' of the products to know if it is ready
         # to sell
         pass
 
