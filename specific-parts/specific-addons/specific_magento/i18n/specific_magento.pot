@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-06-19 12:47+0000\n"
-"PO-Revision-Date: 2014-06-19 12:47+0000\n"
+"POT-Creation-Date: 2014-06-19 12:46+0000\n"
+"PO-Revision-Date: 2014-06-19 12:46+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -18,36 +18,36 @@ msgstr ""
 #. module: specific_magento
 #: view:magento.product.product:0
 msgid "(recompute)"
-msgstr "(recalculer)"
+msgstr ""
 
 #. module: specific_magento
 #: sql_constraint:magento.supplier:0
 msgid "A Supplier with same ID on Magento already exists."
-msgstr "Un fournisseur avec le même ID Magento existe déjà."
+msgstr ""
 
 #. module: specific_magento
 #: sql_constraint:magento.bundle.bom:0
 #: sql_constraint:magento.bundle.bom.product:0
 #: sql_constraint:magento.product.brand:0
 msgid "A product brand with same ID on Magento already exists."
-msgstr "Une marque avec le même ID Magento existe déjà."
+msgstr ""
 
 #. module: specific_magento
 #: field:magento.bundle.bom,openerp_id:0
 #: field:magento.bundle.bom.product,openerp_id:0
 msgid "Bill of Material"
-msgstr "Nomenclature"
+msgstr ""
 
 #. module: specific_magento
 #: field:magento.product.product,magento_cost:0
 msgid "Computed Cost"
-msgstr "Coût calculé"
+msgstr ""
 
 #. module: specific_magento
 #: field:pricelist.partnerinfo,from_magento:0
 #: field:product.supplierinfo,from_magento:0
 msgid "From Magento"
-msgstr "Depuis Magento"
+msgstr ""
 
 #. module: specific_magento
 #: field:magento.bundle.bom,magento_id:0
@@ -55,19 +55,19 @@ msgstr "Depuis Magento"
 #: field:magento.product.brand,magento_id:0
 #: field:magento.supplier,magento_id:0
 msgid "ID on Magento"
-msgstr "ID sur Magento"
+msgstr ""
 
 #. module: specific_magento
 #: code:_description:0
 #: model:ir.model,name:specific_magento.model_product_supplierinfo
 #, python-format
 msgid "Information about a product supplier"
-msgstr "Informations sur le fournisseur du produit"
+msgstr ""
 
 #. module: specific_magento
 #: help:magento.product.product,magento_cost:0
 msgid "Last computed cost to send on Magento."
-msgstr "Dernier coût calculé à envoyer à Magento."
+msgstr ""
 
 #. module: specific_magento
 #: field:magento.bundle.bom,sync_date:0
@@ -75,7 +75,7 @@ msgstr "Dernier coût calculé à envoyer à Magento."
 #: field:magento.product.brand,sync_date:0
 #: field:magento.supplier,sync_date:0
 msgid "Last synchronization date"
-msgstr "Dernière date de synchronisation"
+msgstr ""
 
 #. module: specific_magento
 #: code:_description:0
@@ -86,52 +86,52 @@ msgstr "Dernière date de synchronisation"
 #: field:magento.supplier,backend_id:0
 #, python-format
 msgid "Magento Backend"
-msgstr "Backend Magento"
+msgstr ""
 
 #. module: specific_magento
 #: field:product.brand,magento_bind_ids:0
 msgid "Magento Bindings"
-msgstr "Liens Magento"
+msgstr ""
 
 #. module: specific_magento
 #: code:_description:0
 #: model:ir.model,name:specific_magento.model_magento_bundle_bom
 #, python-format
 msgid "Magento Bundle (BoM)"
-msgstr "Magento Bundle (BoM)"
+msgstr ""
 
 #. module: specific_magento
 #: code:_description:0
 #: model:ir.model,name:specific_magento.model_magento_bundle_bom_product
 #, python-format
 msgid "Magento Bundle Product (BoM)"
-msgstr "Magento Bundle Product (BoM)"
+msgstr ""
 
 #. module: specific_magento
 #: code:_description:0
 #: model:ir.model,name:specific_magento.model_magento_product_product
 #, python-format
 msgid "Magento Product"
-msgstr "Article Magento"
+msgstr ""
 
 #. module: specific_magento
 #: code:_description:0
 #: model:ir.model,name:specific_magento.model_magento_product_brand
 #, python-format
 msgid "Magento Product Brand"
-msgstr "Marque d'article Magento"
+msgstr ""
 
 #. module: specific_magento
 #: code:_description:0
 #: model:ir.model,name:specific_magento.model_magento_supplier
 #, python-format
 msgid "Magento Supplier"
-msgstr "Fournisseur Magento"
+msgstr ""
 
 #. module: specific_magento
 #: field:res.partner,magento_supplier_bind_ids:0
 msgid "Magento Supplier Bindings"
-msgstr "Liens vers fournisseurs Magento"
+msgstr ""
 
 #. module: specific_magento
 #: code:_description:0
@@ -139,46 +139,46 @@ msgstr "Liens vers fournisseurs Magento"
 #: field:magento.supplier,openerp_id:0
 #, python-format
 msgid "Partner"
-msgstr "Partenaire"
+msgstr ""
 
 #. module: specific_magento
 #: view:magento.product.product:0
 msgid "Pricing"
-msgstr "Prix"
+msgstr ""
 
 #. module: specific_magento
 #: field:magento.product.brand,openerp_id:0
 msgid "Product Brand"
-msgstr "Marque"
+msgstr ""
 
 #. module: specific_magento
 #: view:magento.backend:0
 msgid "Update"
-msgstr "Mettre à jour"
+msgstr ""
 
 #. module: specific_magento
 #: view:magento.backend:0
 msgid "Update all cost prices"
-msgstr "Mettre à jour tout les coûts"
+msgstr ""
 
 #. module: specific_magento
 #: code:_description:0
 #: model:ir.model,name:specific_magento.model_pricelist_partnerinfo
 #, python-format
 msgid "pricelist.partnerinfo"
-msgstr "Informations sur le partenaire"
+msgstr ""
 
 #. module: specific_magento
 #: code:_description:0
 #: model:ir.model,name:specific_magento.model_product_brand
 #, python-format
 msgid "product.brand"
-msgstr "product.brand"
+msgstr ""
 
 #. module: specific_magento
 #: code:_description:0
 #: model:ir.model,name:specific_magento.model_specific_magento_installed
 #, python-format
 msgid "specific_magento.installed"
-msgstr "specific_magento.installed"
+msgstr ""
 
