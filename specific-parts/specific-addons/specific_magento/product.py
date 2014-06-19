@@ -493,5 +493,5 @@ def delay_export(session, model_name, record_id, vals):
             session.cr, session.uid, record_id, session.context)[0][1]
         descr = "Export cost of product %s" % name
         export_record.delay(session, model_name,
-                            record_id, fields=['cost_price'],
+                            record_id, fields=['magento_cost'],
                             description=descr)
