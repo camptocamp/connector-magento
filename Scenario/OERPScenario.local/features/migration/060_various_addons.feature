@@ -9,4 +9,5 @@ Feature: install various modules
       | l10n_fr_intrastat_product      |
       | base_partner_merge             |
       | last_sale_price                |
+      | account_balance_line           |
     Then my modules should have been installed and models reloaded
