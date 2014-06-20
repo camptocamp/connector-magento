@@ -31,4 +31,20 @@ Feature: install and configure the equivalence of products
 
   @markup_product
   Scenario: Clean markup computation on product
-    Given I recompute markup rate on products
+    Given I execute the SQL commands
+    """
+    UPDATE product_product AS prod
+      SET commercial_margin = list_price - cost_price
+      FROM product_template AS tmpl
+      WHERE tmpl.id = prod.product_tmpl_id
+        AND abs(commercial_margin - (list_price - cost_price)) > 0.01;
+    """
+    Given I execute the SQL commands
+    """
+    UPDATE product_product AS prod
+      SET markup_rate = (commercial_margin / list_price * 100.0)
+      FROM product_template AS tmpl
+      WHERE tmpl.id = prod.product_tmpl_id
+        AND list_price <> 0
+        AND abs(markup_rate - (commercial_margin / list_price * 100.0)) > 0.01;
+    """
