@@ -9,8 +9,8 @@ Feature: install and configure the equivalence of products
       | sale_floor_price |
     Then my modules should have been installed and models reloaded
 
-  @markup_sql
-  Scenario: Clean markup computation
+  @markup_so
+  Scenario: Clean markup computation on SO
     Given I execute the SQL commands
     # Compute missing cost_price based on price_unit, discount and commercial_margin
     """
@@ -28,3 +28,7 @@ Feature: install and configure the equivalence of products
     UPDATE sale_order_line SET markup_rate = round((commercial_margin / (price_unit * ((100.0 - discount) / 100.0))) * 100, 2)
         WHERE price_unit <> 0 AND discount <> 100.0 AND abs(markup_rate - round((commercial_margin / (price_unit * ((100.0 - discount) / 100.0))) * 100, 2)) > 0.01;
     """
+
+  @markup_product
+  Scenario: Clean markup computation on product
+    Given I recompute markup rate on products
