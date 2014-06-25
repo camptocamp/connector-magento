@@ -32,11 +32,18 @@
              'import_tracking',
              ],
  'author': 'Camptocamp',
- 'description': """Code customisation module""",
+ 'description': """Code customisation module
+
+Changes:
+
+Add column reconcile_partial_id on account.move.line tree to be able to
+differenciate them at first glance
+ """,
  'website': 'http://www.camptocamp.com',
  'data': ['account_invoice_action_data.xml',
           'product_view.xml',
           'sale_view.xml',
+          'account_view.xml',
           'account_invoice_view.xml',
           'partner_view.xml',
           'stock_view.xml',
