@@ -127,3 +127,9 @@ Feature: Migrate the database after the OpenERP migration
     delete from ir_actions where id = 1776;
     delete from ir_values where id = 1533;
     """
+
+  Scenario: Remove link on ir.attachments that where linked on poweremail
+    Given I execute the SQL commands
+    """
+    update ir_attachment set res_model = null, res_id = null where res_model = 'poweremail.mailbox';
+    """
