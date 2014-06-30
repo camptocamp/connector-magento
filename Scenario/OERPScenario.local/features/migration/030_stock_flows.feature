@@ -124,6 +124,7 @@ Feature: install and migrate the picking priorities modules
     Given I find a "magento.backend" with oid: scenario.magento_backend_debonix
     And I recompute the magento stock quantities without export
 
+  @fix_done_picking
   Scenario: Fix a bug of V5: all the moves of a done picking must be done
     Given I execute the SQL commands
     """
