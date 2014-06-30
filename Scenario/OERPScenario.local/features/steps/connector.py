@@ -132,3 +132,24 @@ def impl(ctx):
                    "FROM sale_order so "
                    "WHERE stock_picking.workflow_process_id IS NULL "
                    "AND so.id = stock_picking.sale_id ")
+
+
+@given('I convert "need to update" sales orders to jobs')
+def impl(ctx):
+    backend = ctx.found_item
+    assert backend
+    with newcr(ctx) as cr:
+        cr.execute("SELECT id, magento_incrementid "
+                   "FROM sale_order "
+                   "WHERE need_to_update = true "
+                   "AND state = 'draft'")
+        rows = cr.fetchall()
+    rows = dict((row[0], row[1]) for row in rows)
+
+    Sale = model('sale.order')
+    need_payment = Sale.browse(rows)
+    for sale in need_payment:
+        magento_id = rows[sale.id]
+        getattr(backend, 'import_one_sale_order')(magento_id)
+        sale.action_cancel()
+        sale.unlink()

@@ -318,3 +318,8 @@ Feature: install and configure the modules related to the magento connector
   Scenario: recompute the costs on all products
     Given I find a "magento.backend" with oid: scenario.magento_backend_debonix
     And I recompute the magento costs without export
+
+  @need_to_update
+  Scenario: Convert need to update sales orders to jobs
+    Given I need a "magento.backend" with oid: scenario.magento_backend_debonix
+    And I convert "need to update" sales orders to jobs
