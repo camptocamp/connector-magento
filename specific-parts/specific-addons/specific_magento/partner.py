@@ -20,6 +20,7 @@
 ##############################################################################
 import logging
 
+from openerp.addons.connector.unit.mapper import mapping
 from openerp.addons.magentoerpconnect.partner import (
     AddressImportMapper,
 )
@@ -32,8 +33,15 @@ _logger = logging.getLogger(__name__)
 class DebonixAddressImportMapper(AddressImportMapper):
     _model_name = 'magento.address'
 
-    direct = (AddressImportMapper.direct +
+    direct = ([(src, target) for src, target
+               in AddressImportMapper.direct
+               if not (src, target) == ('company', 'company')] +
               [('w_relay_point_code', 'mag_chronorelais_code'),
-               ('company', 'mag_chronorelais_company'),
                ]
               )
+
+    @mapping
+    def company(self, record):
+        if record.get('mag_chronorelais_company'):
+            return {'company': record['mag_chronorelais_company']}
+        return {'company': record.get('company')}
