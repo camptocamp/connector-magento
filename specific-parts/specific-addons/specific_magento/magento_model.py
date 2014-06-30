@@ -21,6 +21,10 @@
 
 import logging
 from openerp.osv import orm
+from openerp.addons.connector.session import ConnectorSession
+from openerp.addons.magentoerpconnect.unit.import_synchronizer import (
+    import_record,
+)
 
 
 _logger = logging.getLogger(__name__)
@@ -56,3 +60,13 @@ class magento_backend(orm.Model):
                                        context=None):
         self._magento_backend(cr, uid, self.update_product_cost,
                               domain=domain, context=context)
+
+    def import_one_sale_order(self, cr, uid, ids, magento_id, context=None):
+        """ Needed for the migration 5 to 7, we convert the 'need to update'
+        sales orders to jobs so we need to create jobs directly """
+        if isinstance(ids, (list, tuple)):
+            assert len(ids) == 1, "1 ID expected"
+            ids = ids[0]
+        session = ConnectorSession(cr, uid, context=context)
+        import_record.delay(session, 'magento.sale.order', ids, magento_id,
+                            max_retries=0, priority=5)
