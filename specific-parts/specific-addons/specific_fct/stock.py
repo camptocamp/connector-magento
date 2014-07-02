@@ -29,6 +29,16 @@ class StockPicking(orm.Model):
     # Debonix want them sorted in this order
     _order = 'priority desc, min_date asc, date asc'
 
+    def _get_tracked_fields(self, cr, uid, updated_fields, context=None):
+        """ Rename state from the tracked fields because the state
+        changes so often that the chatter becomes incredibly long to
+        load
+        """
+        if 'state' in updated_fields:
+            updated_fields.remove('state')
+        return super(StockPicking, self)._get_tracked_fields(
+            cr, uid, updated_fields, context=context)
+
     def retry_assign_all(self, cr, uid, ids, context=None):
         # Search the assigned pickings so we can exclude
         # the pickings from the next iteration. the `super` call does
