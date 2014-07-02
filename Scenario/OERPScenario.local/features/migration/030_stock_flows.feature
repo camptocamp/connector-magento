@@ -142,5 +142,7 @@ Feature: install and migrate the picking priorities modules
       DELETE FROM ir_translation WHERE res_id = 9 and name = 'stock.location' and xml_id IS NULL;
       -- copy translations in source
       UPDATE stock_location AS s SET name = tr.value FROM ir_translation tr WHERE tr.res_id = s.id and tr.lang = 'fr_FR' and tr.name = 'stock.location,name';
+      -- too long to use the ORM write
+      UPDATE stock_location SET complete_name = 'Emplacements physiques / Debonix / Stock' WHERE id = 11;
     """
     And I recompute complete_name on stock.location
