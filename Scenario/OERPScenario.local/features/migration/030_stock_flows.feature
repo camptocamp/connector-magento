@@ -133,3 +133,14 @@ Feature: install and migrate the picking priorities modules
     )
     """
 
+  @location_name
+  Scenario: Copy the translation of the stock locations to the name of the location because it can be confusive
+    Given I execute the SQL commands
+    """
+      -- duplicate and wrong translation for 'Votre société' location
+      UPDATE ir_translation SET value = 'Debonix' WHERE res_id = 9 and name = 'stock.location' and xml_id = 'stock_location_company';
+      DELETE FROM ir_translation WHERE res_id = 9 and name = 'stock.location' and xml_id IS NULL;
+      -- copy translations in source
+      UPDATE stock_location AS s SET name = tr.value FROM ir_translation tr WHERE tr.res_id = s.id and tr.lang = 'fr_FR' and tr.name = 'stock.location,name';
+    """
+    And I recompute complete_name on stock.location
