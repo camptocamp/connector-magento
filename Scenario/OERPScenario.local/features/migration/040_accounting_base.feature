@@ -113,3 +113,29 @@ Feature: install and migrate the picking priorities modules
       | sofin | Import Virement Sofinco               |
       | FRANF | Import Franfinance                    |
       | CDISC | Import C''DISCOUNT                    |
+
+
+  @duplicate_taxes
+  Scenario: Remove the duplicate taxes on products
+    Given I execute the SQL commands
+    """
+    DELETE FROM product_taxes_rel AS ptrl1
+    USING product_taxes_rel AS ptrl2
+    WHERE ptrl1.prod_id = ptrl2.prod_id
+    AND ptrl1.tax_id = ptrl2.tax_id AND ptrl1.ctid = (SELECT MAX(ptrl3.ctid)
+                                                      FROM product_taxes_rel AS ptrl3
+                                                      WHERE ptrl3.prod_id = ptrl1.prod_id
+                                                      GROUP BY ptrl3.prod_id, ptrl3.tax_id
+                                                      HAVING COUNT(*) > 1);
+
+
+    DELETE FROM product_supplier_taxes_rel AS ptrlX
+    USING product_supplier_taxes_rel AS ptrl2
+    WHERE ptrlX.prod_id = ptrl2.prod_id
+    AND ptrlX.tax_id = ptrl2.tax_id
+    AND ptrlX.ctid = (SELECT MAX(ptrl3.ctid)
+                      FROM product_supplier_taxes_rel AS ptrl3
+                      WHERE ptrl3.prod_id = ptrlX.prod_id
+                      GROUP BY ptrl3.prod_id, ptrl3.tax_id
+                      HAVING COUNT(*) > 1);
+    """
