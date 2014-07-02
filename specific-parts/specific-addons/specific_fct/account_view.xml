@@ -9,6 +9,9 @@
         <field name="reconcile" position="after">
           <field name="reconcile_partial_id"/>
         </field>
+        <field name="reconcile" position="replace">
+          <field name="reconcile_id"/>
+        </field>
       </field>
     </record>
   </data>
