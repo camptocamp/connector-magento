@@ -7,7 +7,7 @@ Feature: install the modules related to server environment
       | name                         |
       | server_environment           |
       | server_environment_files     |
-      | mail_environement            |
+      | mail_environment             |
     Then my modules should have been installed and models reloaded
 
   @mail_setup_incoming
