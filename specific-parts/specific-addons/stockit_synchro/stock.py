@@ -68,60 +68,12 @@ class stock_picking_in(orm.Model):
         if stockit_state not in self._columns['state'].selection:
             self._columns['state'].selection.append(stockit_state)
 
-    def get_selection_priority(self, cr, uid, context=None):
-        """ Add a Shop priority.
-
-        This is a special priority for Stockit
-
-        """
-        selection = super(stock_picking_in, self).get_selection_priority(
-            cr, uid, context=context)
-        selection.append(('9', 'Shop'))
-        return selection
-
-    _columns = {
-        'stockit_outdated': fields.boolean('Stockit outdated'),
-        'stockit_export_date': fields.datetime('Stockit export date'),
-    }
-
-    def action_cancel(self, cr, uid, ids, context=None):
-        res = super(stock_picking_in, self).action_cancel(cr, uid, ids, context)
-        for pick in self.browse(cr, uid, ids, context=context):
-            if pick.stockit_export_date:
-                pick.write({'stockit_outdated': True})
-        return res
-
 
 class stock_picking_out(orm.Model):
 
     _inherit = "stock.picking.out"
 
-    def __init__(self, pool, cr):
-        """ Add the stockit status in the available states """
-        super(stock_picking_out, self).__init__(pool, cr)
-        stockit_state = ('stockit_confirm', 'Confirmed by Stock-it')
-        if stockit_state not in self._columns['state'].selection:
-            self._columns['state'].selection.append(stockit_state)
-
-    def get_selection_priority(self, cr, uid, context=None):
-        """ Add a Shop priority.
-
-        This is a special priority for Stockit
-
-        """
-        selection = super(stock_picking_out, self).get_selection_priority(
-            cr, uid, context=context)
-        selection.append(('9', 'Shop'))
-        return selection
-
     _columns = {
         'stockit_outdated': fields.boolean('Stockit outdated'),
         'stockit_export_date': fields.datetime('Stockit export date'),
     }
-
-    def action_cancel(self, cr, uid, ids, context=None):
-        res = super(stock_picking_out, self).action_cancel(cr, uid, ids, context)
-        for pick in self.browse(cr, uid, ids, context=context):
-            if pick.stockit_export_date:
-                pick.write({'stockit_outdated': True})
-        return res
