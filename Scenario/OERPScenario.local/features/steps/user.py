@@ -17,3 +17,8 @@ def impl(ctx):
         ctx.client.login('admin', admin_login_password, database=database)
     else:
         ctx.client.login('admin', 'admin', database=database)
+
+@step('we remove all groups from the users')
+def impl(ctx):
+    for user in ctx.found_items:
+        user.groups_id = []
