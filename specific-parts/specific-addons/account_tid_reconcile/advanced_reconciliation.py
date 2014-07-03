@@ -125,6 +125,8 @@ class easy_reconcile_advanced_tid(TransientModel):
             refs += ["%s%s" % (s, lref) for s in prefixes]
 
         if move_line.get('name'):
-            refs.append(move_line['name'].lower().strip())
+            lname = move_line['name'].lower().strip()
+            refs.append(lname)
+            refs += ["%s%s" % (s, lname) for s in prefixes]
         yield ('ref', refs)
 

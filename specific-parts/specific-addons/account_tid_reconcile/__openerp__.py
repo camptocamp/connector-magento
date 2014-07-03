@@ -27,10 +27,13 @@
  'complexity': 'normal',
  'depends': ['account_advanced_reconcile'],
  'description': """
- Add specific reconciliation method which searches by :
- On: credit     => debit
+ Add specific reconciliation method which searches by:
+ On: *payment*  => *invoice*
+     credit     => debit
      partner_id => partner_id
-     ref        => name or ref or "tid_" + ref or "tid_mag_" + ref
+     ref        => name or ref or
+                   "tid_" + name or "tid_mag_" + name or
+                   "tid_" + ref or "tid_mag_" + ref or
 
  """,
  'website': 'http://www.camptocamp.com',
