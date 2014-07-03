@@ -1,4 +1,4 @@
-@debonix  @migration  @users_groups
+@users_groups
 
 Feature: Configure users and groups
 
