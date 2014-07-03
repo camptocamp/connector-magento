@@ -246,7 +246,7 @@ class StockItInPickingImport(orm.TransientModel):
             # create a backorder
             # force name in default in order to keep origin
             # (super copy reset the origin unless a name is in default...)
-            seq_name = self.pool.get('ir.sequence').get(cr, uid, 'stock.picking')
+            seq_name = self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.in')
             new_picking = pick_obj.copy(cr, uid, picking.id,
                     {'name': seq_name,
                      'move_lines': [],
