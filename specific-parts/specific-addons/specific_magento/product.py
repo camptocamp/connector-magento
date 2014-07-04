@@ -261,7 +261,8 @@ class ProductSupplierInfoMapper(ImportMapper):
 
         record = map_record.source
         price_record = {
-            'openerp_supplier_price': record['openerp_supplier_price']
+            'openerp_supplier_price': record['openerp_supplier_price'],
+            'openerp_supplier_min': record['openerp_supplier_min'],
         }
         map_child = self.get_connector_unit_for_model(
             self._map_child_class, 'pricelist.partnerinfo')
