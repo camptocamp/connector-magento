@@ -282,6 +282,17 @@ class DebonixProductImportMapper(ProductImportMapper):
               )
 
     @mapping
+    def country(self, record):
+        country_code = record.get('country_of_manufacture')
+        if not country_code:
+            return
+        s = self.session
+        country_ids = s.search('res.country', [('code', '=', country_code)])
+        if not country_ids:
+            raise MappingError('%s country code not found.' % country_code)
+        return {'country_id': country_ids}
+
+    @mapping
     def brand(self, record):
         if not record.get('marque'):
             return
