@@ -291,7 +291,7 @@ class DebonixProductImportMapper(ProductImportMapper):
         country_ids = s.search('res.country', [('code', '=', country_code)])
         if not country_ids:
             raise MappingError('%s country code not found.' % country_code)
-        return {'country_id': country_ids}
+        return {'country_id': country_ids[0]}
 
     @mapping
     def brand(self, record):
