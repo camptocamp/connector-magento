@@ -49,9 +49,10 @@ differenciate them at first glance
           'stock_view.xml',
           'security/ir.model.access.csv',
           'security/security.xml',
+          'security/debonix_groups.xml',
           'data_completion.xml',
           'company_view.xml',
           'wizard/stock_partial_picking_view.xml',
           ],
  'installable': True,
-}
+ }
