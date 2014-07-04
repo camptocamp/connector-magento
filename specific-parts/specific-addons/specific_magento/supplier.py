@@ -75,9 +75,9 @@ class res_partner(orm.Model):
         if default is None:
             default = {}
         default['magento_supplier_bind_ids'] = False
-        return super(product_brand, self).copy_data(cr, uid, id,
-                                                    default=default,
-                                                    context=context)
+        return super(res_partner, self).copy_data(cr, uid, id,
+                                                  default=default,
+                                                  context=context)
 
 
 @magento_debonix
