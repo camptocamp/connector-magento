@@ -55,3 +55,25 @@ class stock_picking(orm.Model):
             if pick.stockit_export_date:
                 pick.write({'stockit_outdated': True})
         return res
+
+
+class stock_picking_in(orm.Model):
+
+    _inherit = "stock.picking.in"
+
+    def __init__(self, pool, cr):
+        """ Add the stockit status in the available states """
+        super(stock_picking_in, self).__init__(pool, cr)
+        stockit_state = ('stockit_confirm', 'Confirmed by Stock-it')
+        if stockit_state not in self._columns['state'].selection:
+            self._columns['state'].selection.append(stockit_state)
+
+
+class stock_picking_out(orm.Model):
+
+    _inherit = "stock.picking.out"
+
+    _columns = {
+        'stockit_outdated': fields.boolean('Stockit outdated'),
+        'stockit_export_date': fields.datetime('Stockit export date'),
+    }
