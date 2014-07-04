@@ -165,6 +165,7 @@ class ProductSupplierInfoLineMapper(ImportMapper):
     _model_name = 'pricelist.partnerinfo'
 
     direct = [('openerp_supplier_price', 'price'),
+              ('openerp_supplier_min', 'min_quantity'),
               ]
 
     @mapping
@@ -176,11 +177,6 @@ class ProductSupplierInfoLineMapper(ImportMapper):
         suppliers filed manually.
         """
         return {'from_magento': True}
-
-    @mapping
-    def min_quantity(self, record):
-        """ Forced to 1 """
-        return {'min_quantity': 1}
 
     def finalize(self, map_record, values):
         values = super(ProductSupplierInfoLineMapper, self).finalize(
@@ -197,10 +193,11 @@ class ProductSupplierInfoLineMapper(ImportMapper):
         if not line_ids:
             # from_magento has been introduced lately, try
             # to remap if the supplier is the same
+            min_qty = map_record.source['openerp_supplier_min']
             line_ids = self.session.search(
                 'pricelist.partnerinfo',
                 [('suppinfo_id', '=', suppinfo_id),
-                 ('min_quantity', '=', 1)])
+                 ('min_quantity', '=', min_qty)])
 
         if line_ids:
             # supplier info line already exists, keeps the id
@@ -214,8 +211,6 @@ class ProductSupplierInfoMapper(ImportMapper):
 
     direct = [('openerp_supplier_product_code', 'product_code'),
               ('openerp_supplier_product_name', 'product_name'),
-              ('openerp_supplier_min', 'qty'),
-              ('openerp_supplier_min', 'min_qty'),
               ('openerp_supplier_delay', 'delay'),
               (backend_to_m2o('openerp_supplier_name',
                               binding='magento.supplier'),
@@ -239,6 +234,7 @@ class ProductSupplierInfoMapper(ImportMapper):
         binder = self.get_binder_for_model('magento.product.product')
         product_id = binder.to_openerp(mag_product_id, unwrap=True)
         line_options = self.options.copy()
+        for_create = True
         if product_id:
             # existing product, search for an existing supplier info
             # from Magento
@@ -258,6 +254,10 @@ class ProductSupplierInfoMapper(ImportMapper):
                 # supplier info already exists, keeps the id
                 values['__existing_openerp_id'] = suppinfo_ids[0]
                 line_options['suppinfo_id'] = suppinfo_ids[0]
+                for_create = False
+
+        if for_create:
+            values['min_qty'] = 0.
 
         record = map_record.source
         price_record = {
