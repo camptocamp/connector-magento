@@ -160,7 +160,7 @@ class StockItOutPickingExport(orm.TransientModel):
         picking_ids = picking_obj.search(
             cr, uid, domain, context=context)
 
-        if only_new:
+        if only_new and picking_ids:
             # use a cr.execute query because
             # we cannot compare 2 fields using orm search
             query = ("SELECT id "
