@@ -40,7 +40,6 @@ but `invoicing_voucher_killer`.
      'account_export_csv',
      'account_reversal',
      'currency_rate_update',
-     'invoice_webkit',
      'account_compute_tax_amount',
      'base_iban',
      'account_move_validation_improvement',
