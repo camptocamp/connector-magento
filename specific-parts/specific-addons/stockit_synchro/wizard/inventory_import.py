@@ -211,10 +211,11 @@ class StockItInventoryImport(orm.TransientModel):
             data_file = open(filename, 'r')
             try:
                 data = data_file.read().encode("base64")
-                wizard = self.create(cr, uid, {'data': data}, context=context)
                 db, pool = pooler.get_db_and_pool(cr.dbname)
                 mycursor = db.cursor()
                 try:
+                    wizard = self.create(mycursor, uid, {'data': data},
+                                         context=context)
                     inventory_id = self.import_inventory(mycursor, uid, [wizard], context)
                     mycursor.commit()
                 except Exception as e:
