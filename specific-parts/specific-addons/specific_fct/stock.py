@@ -102,6 +102,7 @@ class StockPicking(orm.Model):
 
     _defaults = {
         'priority': '1',  # normal priority
+        'number_of_packages': 1,
     }
 
     def try_action_assign_all(self, cr, uid, ids=None, context=None):
