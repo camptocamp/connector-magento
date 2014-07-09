@@ -66,7 +66,7 @@
     </record>
 
    <record id="excep_customer_blocked" model="sale.exception">
-      <field name="code">if order.partner_id.block_sales:
+      <field name="code">if order.partner_id.block_sales or order.partner_id.commercial_partner_id.block_sales:
     failed = True</field>
     </record>
 
