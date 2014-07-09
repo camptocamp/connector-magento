@@ -111,8 +111,9 @@ class DebonixProductImport(ProductImport):
         if record.get('marque'):
             self._import_dependency(record['marque'],
                                     'magento.product.brand')
-        self._import_dependency(record['openerp_supplier_name'],
-                                'magento.supplier')
+        if record.get('openerp_supplier_name'):
+            self._import_dependency(record['openerp_supplier_name'],
+                                    'magento.supplier')
 
     def _must_skip(self):
         """ Hook called right after we read the data from the backend.

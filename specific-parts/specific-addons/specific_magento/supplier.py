@@ -31,6 +31,7 @@ the ID with the name of the supplier.
 """
 
 from openerp.osv import orm, fields
+from openerp.addons.connector.exception import MappingError
 from openerp.addons.connector.unit.mapper import (mapping,
                                                   ImportMapper,
                                                   )
@@ -95,6 +96,10 @@ class SupplierImport(MagentoImportSynchronizer):
         for option in options:
             if option['value'] == str(self.magento_id):
                 return option
+        raise MappingError('On Magento, the product is configured with a '
+                           'supplier having an option with the ID %s, but '
+                           'this option does not exist on Magento' %
+                           self.magento_id)
 
 
 @magento_debonix
