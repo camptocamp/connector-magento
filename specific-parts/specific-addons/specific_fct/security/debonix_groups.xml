@@ -211,6 +211,7 @@
 
         (4, ref('product.group_sale_pricelist')),
         (4, ref('product.group_stock_packaging')),
+        (4, ref('product.group_costing_method')),
 
         (4, ref('sale.group_delivery_invoice_address')),
         (4, ref('sale.group_discount_per_so_line')),
