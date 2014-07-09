@@ -36,9 +36,9 @@ class sale_order(orm.Model):
         # amounts must only apply on the first packing of the order
         # if it is a cash on delivery
         model_data_obj = self.pool['ir.model.data']
-        _, product_id = model_data_obj.get_object_reference(
+        __, product_id = model_data_obj.get_object_reference(
             cr, uid, 'connector_ecommerce', 'product_product_cash_on_delivery')
-        if [line.product_id.id == product_id for line in order.order_line]:
+        if any(line.product_id.id == product_id for line in order.order_line):
             vals.update({
                 'cash_on_delivery_amount': order.amount_total,
                 'cash_on_delivery_amount_untaxed': order.amount_untaxed,
