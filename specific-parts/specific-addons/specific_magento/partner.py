@@ -42,6 +42,6 @@ class DebonixAddressImportMapper(AddressImportMapper):
 
     @mapping
     def company(self, record):
-        if record.get('mag_chronorelais_company'):
-            return {'company': record['mag_chronorelais_company']}
+        if record.get('w_relay_point_code'):
+            return {'mag_chronorelais_company': record.get('company')}
         return {'company': record.get('company')}
