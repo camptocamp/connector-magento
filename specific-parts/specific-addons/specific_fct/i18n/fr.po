@@ -398,3 +398,14 @@ msgstr "res.company"
 msgid "{'invisible': ['|',('picking_ids','=',False),('picking_ids','=',[])]}"
 msgstr "{'invisible': ['|',('picking_ids','=',False),('picking_ids','=',[])]}"
 
+#. module: specific_fct
+#: code:addons/specific_fct/wizard/base_partner_merge.py:39
+#, python-format
+msgid "Error"
+msgstr "Erreur"
+
+#. module: specific_fct
+#: code:addons/specific_fct/wizard/base_partner_merge.py:40
+#, python-format
+msgid "The selected partners cannot be merged together because they are linked with different customers on Magento"
+msgstr "Les partenaires sélectionnés ne peuvent pas être fusionnés car ils sont liés à des clients différents sur Magento"

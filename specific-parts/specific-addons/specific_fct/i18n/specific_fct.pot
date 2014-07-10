@@ -379,3 +379,14 @@ msgstr "<div style=\"font-family: 'Lucida Grande', Ubuntu, Arial, Verdana, sans-
 msgid "${object.company_id.name} Invoice (Ref ${object.number or 'n/a'})"
 msgstr "Votre facture (référence: ${object.number})"
 
+#. module: specific_fct
+#: code:addons/specific_fct/wizard/base_partner_merge.py:39
+#, python-format
+msgid "Error"
+msgstr ""
+
+#. module: specific_fct
+#: code:addons/specific_fct/wizard/base_partner_merge.py:40
+#, python-format
+msgid "The selected partners cannot be merged together because they are linked with different customers on Magento"
+msgstr ""

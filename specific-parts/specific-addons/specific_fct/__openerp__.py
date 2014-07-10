@@ -30,6 +30,7 @@
              'connector_ecommerce',
              'server_environment',
              'import_tracking',
+             'base_partner_merge',
              ],
  'author': 'Camptocamp',
  'description': """Code customisation module
