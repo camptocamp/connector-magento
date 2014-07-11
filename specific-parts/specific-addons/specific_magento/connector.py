@@ -20,6 +20,13 @@
 ##############################################################################
 
 from openerp.addons.connector.connector import install_in_connector
+from openerp.addons.connector.queue import job
 
 
 install_in_connector()
+
+# extend retryable jobs interval from 10 to 15 minutes
+# because they have a lot of pending sales orders
+# that are retried over hours, and they should not
+# block the other jobs by being retried too much
+job.RETRY_INTERVAL = 15 * 60  # seconds
