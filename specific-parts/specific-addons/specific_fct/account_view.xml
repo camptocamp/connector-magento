@@ -17,6 +17,7 @@
         </field>
         <field name="statement_id" position="attributes">
           <attribute name="invisible">0</attribute>
+          <attribute name="readonly">1</attribute>
         </field>
       </field>
     </record>
