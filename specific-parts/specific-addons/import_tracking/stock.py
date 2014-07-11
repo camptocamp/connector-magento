@@ -19,10 +19,10 @@
 #
 ##############################################################################
 
-import base64
 import csv
 import logging
 import os
+import os.path
 import shutil
 
 from contextlib import closing
@@ -86,30 +86,31 @@ class stock_picking(orm.Model):
         # read each file and each line in directory
         total = 0
         db = pooler.get_db(cr.dbname)
+        files = (f for f in os.listdir(path)
+                 if os.path.isfile(os.path.join(path, f)))
         with closing(db.cursor()) as local_cr:
-            for root, __dirs, files in os.walk(path, topdown=False):
-                for filename in files:
-                    try:
-                        total += 1
-                        filepath = os.path.join(root, filename)
-                        imported = self._import_tracking_from_file(
-                            local_cr, uid, filepath, context=context)
-                    except Exception as err:
-                        local_cr.rollback()
-                        _logger.exception("Tracking file %s could not be imported", filepath)
-                        message = (_("Tracking file %s could not be imported due to: %s") %
-                                   (filepath, err))
-                        self._post_import_tracking_error_message(
-                            cr, uid, message, context=context)
-                        continue
-                    else:
-                        if imported:
-                            from_path = os.path.join(path, filename)
-                            to_path = os.path.join(archive_path, filename)
-                            shutil.move(from_path, to_path)
-                            # commit so if next file fails we won't lose
-                            # the imported trackings
-                        local_cr.commit()
+            for filename in files:
+                total += 1
+                filepath = os.path.join(path, filename)
+                try:
+                    imported = self._import_tracking_from_file(
+                        local_cr, uid, filepath, context=context)
+                except Exception as err:
+                    local_cr.rollback()
+                    _logger.exception("Tracking file %s could not be imported", filepath)
+                    message = (_("Tracking file %s could not be imported due to: %s") %
+                               (filepath, err))
+                    self._post_import_tracking_error_message(
+                        cr, uid, message, context=context)
+                    continue
+                else:
+                    if imported:
+                        from_path = os.path.join(path, filename)
+                        to_path = os.path.join(archive_path, filename)
+                        shutil.move(from_path, to_path)
+                        # commit so if next file fails we won't lose
+                        # the imported trackings
+                    local_cr.commit()
 
         _logger.info('Processed %s tracking files out of %s. %s files '
                      'with errors.', len(imported_files), total,
@@ -152,7 +153,7 @@ class stock_picking(orm.Model):
                     self._post_import_tracking_error_message(
                         cr, uid, _(message) % (filepath, line),
                         context=context)
-                    return
+                    raise
                 if packing_name:
                     self._update_tracking_references(
                         cr, uid, packing_name, tracking_ref,
