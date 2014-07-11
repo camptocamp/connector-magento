@@ -15,6 +15,9 @@
         <field name="reconcile" position="after">
           <field name="reconcile_id"/>
         </field>
+        <field name="statement_id" position="attributes">
+          <attribute name="invisible">0</attribute>
+        </field>
       </field>
     </record>
   </data>
