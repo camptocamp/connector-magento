@@ -56,10 +56,11 @@ class stock_picking(orm.Model):
              ('carrier_tracking_ref', '=', False)],
             context=context)
         if picking_ids:
-            self.write(cr, uid,
-                       picking_ids,
-                       {'carrier_tracking_ref': tracking_ref},
-                       context=context)
+            picking_out_obj.write(
+                cr, uid,
+                picking_ids,
+                {'carrier_tracking_ref': tracking_ref},
+                context=context)
 
     def import_tracking_references(self, cr, uid, ids, context=None):
         """ Read the Chronopost file and update
