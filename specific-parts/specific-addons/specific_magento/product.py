@@ -404,10 +404,13 @@ class DebonixProductImportMapper(ProductImportMapper):
     def type(self, record):
         return {'type': 'product'}
 
-    @only_create
     @mapping
     def openerp_id(self, record):
-        """ Will bind the partner on an existing product with the same sku """
+        """ Will bind the product on an existing product with the same sku,
+        even if the product is already mapped with another product. In such
+        situation, the magento.product.product binding will be reassigned
+        to the product with the same SKU than the one on Magento.
+        """
         sess = self.session
         with sess.change_context({'active_test': False}):
             product_ids = sess.search('product.product',
