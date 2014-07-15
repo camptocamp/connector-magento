@@ -115,6 +115,26 @@ class DebonixProductImport(ProductImport):
             self._import_dependency(record['openerp_supplier_name'],
                                     'magento.supplier')
 
+    def _get_binding_id(self):
+        """Return the binding id from the Magento id
+
+        Debonix wants the products mapped from the SKU.
+        Still, the Magento ID should be stored correctly and
+        used as reference for the synchronizations.
+
+        When we import a product, we search if we have a binding
+        for a SKU so it the Magento ID for this SKU is wrong,
+        we have a chance to correct it.
+        """
+        sess = self.session
+        record = self.magento_record
+        with sess.change_context({'active_test': False}):
+            binding_ids = sess.search('magento.product.product',
+                                      [('default_code', '=', record['sku'])])
+            if binding_ids:
+                return binding_ids[0]
+        return super(DebonixProductImport, self)._get_binding_id()
+
     def _must_skip(self):
         """ Hook called right after we read the data from the backend.
 
