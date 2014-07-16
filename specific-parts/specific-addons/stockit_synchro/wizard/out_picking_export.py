@@ -150,7 +150,6 @@ class StockItOutPickingExport(orm.TransientModel):
 
         only_from_location = company.stockit_out_pick_exp_location_id
 
-        priority_mapping = {'0': 'BASSE', '1': 'NORMALE', '2': 'HAUTE', '9': 'SHOP'}
         rows = []
 
         domain = [('type', '=', 'out'),
@@ -194,7 +193,7 @@ class StockItOutPickingExport(orm.TransientModel):
                        '',  # expected date
                        '',  # product code
                        0.0,  # quantity
-                       '']  # priority
+                       '']  # delivery method
                 rows.append(row)
             else:
                 for line in picking.move_lines:
@@ -203,15 +202,14 @@ class StockItOutPickingExport(orm.TransientModel):
                     if only_from_location and line.location_id.id != only_from_location.id:
                         continue  # skip line if stock location is not the one to export
                     qty = line.state != 'cancel' and line.product_qty or 0.0
-                    priority = (priority_mapping[picking.priority]
-                                if picking.priority else picking.priority['1'])
+
                     row = ['S',  # type
                            str(picking.id),  # unique id
                            name[:18],  # ref/name
                            line.date,  # scheduled date / move date
                            line.product_id.default_code,  # product code
                            str(qty),  # quantity
-                           priority]
+                           picking.carrier_id.name or '']
                     rows.append(row)
             picking_obj.write(cr,
                               uid,

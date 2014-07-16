@@ -33,17 +33,6 @@ class stock_picking(orm.Model):
         if stockit_state not in self._columns['state'].selection:
             self._columns['state'].selection.append(stockit_state)
 
-    def get_selection_priority(self, cr, uid, context=None):
-        """ Add a Shop priority.
-
-        This is a special priority for Stockit
-
-        """
-        selection = super(stock_picking, self).get_selection_priority(
-            cr, uid, context=context)
-        selection.append(('9', 'Shop'))
-        return selection
-
     _columns = {
         'stockit_outdated': fields.boolean('Stockit outdated'),
         'stockit_export_date': fields.datetime('Stockit export date'),

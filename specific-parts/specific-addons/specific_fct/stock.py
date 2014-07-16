@@ -17,7 +17,7 @@
 ##############################################################################
 
 import logging
-from openerp.osv import orm, fields
+from openerp.osv import orm
 
 _logger = logging.getLogger(__name__)
 
@@ -26,82 +26,7 @@ class StockPicking(orm.Model):
 
     _inherit = "stock.picking"
 
-    # Debonix want them sorted in this order
-    _order = 'priority desc, min_date asc, date asc'
-
-    def _get_tracked_fields(self, cr, uid, updated_fields, context=None):
-        """ Rename state from the tracked fields because the state
-        changes so often that the chatter becomes incredibly long to
-        load
-        """
-        if 'state' in updated_fields:
-            updated_fields.remove('state')
-        return super(StockPicking, self)._get_tracked_fields(
-            cr, uid, updated_fields, context=context)
-
-    def retry_assign_all(self, cr, uid, ids, context=None):
-        # Search the assigned pickings so we can exclude
-        # the pickings from the next iteration. the `super` call does
-        # not return the canceled ids and assigned ids even if it
-        # looks like.
-        domain = [('type', '!=', 'in'),
-                  ('move_lines', '!=', []),
-                  ('state', '=', 'assigned')]
-        if ids:
-            domain += [('id', 'in', ids)]
-        picking_ids = self.search(cr, uid, domain, context=context)
-
-        super(StockPicking, self).retry_assign_all(cr, uid, picking_ids,
-                                                   context=context)
-        # try to assign confirmed pickings (those that were not assigned
-        # before but can maybe be assigned now)
-        # exclude picking_ids because we have already
-        # tried to assign them
-        if not ids:
-            domain = [('type', '=', 'out'),
-                      ('state', '=', 'confirmed'),
-                      ('id', 'not in', picking_ids)]
-            confirmed_ids = self.search(
-                cr, uid, domain, context=context, order='priority desc')
-            _logger.info('try to assign %d more pickings', len(confirmed_ids))
-            for picking_id in confirmed_ids:
-                try:
-                    self.action_assign(cr, uid, [picking_id], context)
-                except orm.except_orm as exc:
-                    # ignore error, the picking will just stay as confirmed
-                    name = self.read(cr, uid, picking_id, ['name'],
-                                     context=context)['name']
-                    _logger.info('error in action_assign for picking %s',
-                                 name, exc_info=True)
-        return True
-
-    def get_selection_priority(self, cr, uid, context=None):
-        """ Rename the priorities to match what Debonix is used to.
-
-        That means Low, Normal, Urgent instead of Normal, Urgent, Very Urgent.
-
-        """
-        mapping = {'0': 'Low', '1': 'Normal', '2': 'Urgent'}
-        selection = super(StockPicking, self).get_selection_priority(
-            cr, uid, context=context)
-        return [(key, mapping.get(key, name)) for key, name in selection]
-
-    def __selection_priority(self, cr, uid, context=None):
-        """ Do not touch me. Extend `get_selection_priority` to modify
-        the selection
-        """
-        return self.get_selection_priority(cr, uid, context=context)
-
-    _columns = {
-        'priority': fields.selection(__selection_priority,
-                                     'Priority',
-                                     required=True,
-                                     select=True,  # add an index for the sort
-                                     help='The priority of the picking'),
-    }
-
     _defaults = {
-        'priority': '1',  # normal priority
         'number_of_packages': 1,
     }
 
@@ -115,8 +40,15 @@ class StockPicking(orm.Model):
         if ids:
             domain += [('id', 'in', ids)]
 
-        picking_ids = self.search(cr, uid, domain,
-                                  order='priority desc, min_date, date')
+        picking_ids = self.search(cr, uid, domain, context=context)
 
-        self.retry_assign_all(cr, uid, picking_ids, context=context)
+        for picking_id in picking_ids:
+            try:
+                self.action_assign(cr, uid, [picking_id], context)
+            except orm.except_orm:
+                # ignore the error, the picking will just stay as confirmed
+                name = self.read(cr, uid, picking_id, ['name'],
+                                 context=context)['name']
+                _logger.info('error in action_assign for picking %s',
+                             name, exc_info=True)
         return True

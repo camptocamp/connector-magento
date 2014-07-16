@@ -22,18 +22,16 @@
 {"name": "Retry to assign assigned packings on inventory",
  "version": "1.0",
  "depends": ['stock',
-             'stock_picking_priority',
-             'picking_priority_on_payment_method',
              ],
  "author": "Camptocamp",
  "description": """
-When an inventory is done, available pickings stay available even if
-after inventory the quantities are insufficient.  This naive wizard
-cancel availability of all packings and retry to assign them.
+When an inventory is done, available delivery orders stay available even if
+after inventory the quantities are insufficient.
+With this module, when an inventory is done, all the delivery orders
+with products in the inventory will be checked again.
  """,
  "website": "http://www.camptocamp.com",
  "category": "Others",
- "data": ['wizard/retry_availability_view.xml',
-          ],
+ "data": [],
  'installable': True,
 }

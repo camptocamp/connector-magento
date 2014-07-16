@@ -29,6 +29,10 @@
              'sale_payment_method',  # e-commerce-addons
              ],
  'description': """
+
+THIS MODULE IS NO LONGER USED. IT IS STILL THERE SO IT COULD BE UNINSTALLED PROPERLY
+
+
 Picking Priority on Payment Method
 ==================================
 
