@@ -29,4 +29,4 @@ install_in_connector()
 # because they have a lot of pending sales orders
 # that are retried over hours, and they should not
 # block the other jobs by being retried too much
-job.RETRY_INTERVAL = 15 * 60  # seconds
+job.RETRY_INTERVAL = 20 * 60  # seconds
