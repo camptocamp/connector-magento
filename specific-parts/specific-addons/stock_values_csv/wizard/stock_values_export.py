@@ -85,7 +85,7 @@ class StockValuesExport(orm.TransientModel):
                                      WHERE location_id != %(location_id)s
                                        AND location_dest_id = %(location_id)s
                                        AND state = 'done'
-                                       AND date_expected <= %(stop_date)s
+                                       AND date <= %(stop_date)s
                                      GROUP BY product_id) AS s_in
                              INNER JOIN product_product p
                                 ON p.id = s_in.product_id
@@ -101,7 +101,7 @@ class StockValuesExport(orm.TransientModel):
                                      WHERE location_id = %(location_id)s
                                        AND location_dest_id != %(location_id)s
                                        AND state = 'done'
-                                       AND date_expected <= %(stop_date)s
+                                       AND date <= %(stop_date)s
                                      GROUP BY product_id) AS s_out
                              INNER JOIN product_product p
                                 ON p.id = s_out.product_id
