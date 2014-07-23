@@ -17,7 +17,7 @@
 ##############################################################################
 
 import logging
-from openerp.osv import orm
+from openerp.osv import orm, fields
 
 _logger = logging.getLogger(__name__)
 
@@ -29,6 +29,9 @@ class StockPicking(orm.Model):
     _defaults = {
         'number_of_packages': 1,
     }
+class StockPickingout(orm.Model):
+
+    _inherit = "stock.picking.out"
 
     _columns = {
               'partner_id': fields.many2one('res.partner', 'Partner'),
