@@ -29,3 +29,7 @@ class StockPicking(orm.Model):
     _defaults = {
         'number_of_packages': 1,
     }
+
+    _columns = {
+              'partner_id': fields.many2one('res.partner', 'Partner'),
+               }
