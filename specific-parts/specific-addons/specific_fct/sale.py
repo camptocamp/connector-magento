@@ -207,28 +207,29 @@ class sale_order_line(orm.Model):
                                             context=context)[0][1]
         result['value']['name'] = product_name
         return result
-    
 
     def copy_data(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
         ## Recompute markup_rate and commercial_margin on duplicate
         # see : https://trello.com/c/iCCivgv6/346-quand-on-duplique-une-commande-annulee-la-marge-n-est-pas-recalculee
-        current_sale_order_line = self.browse(cr,uid,id,context=context)
+        current_sale_order_line = self.browse(cr, uid, id, context=context)
         localcontext = context.copy()
-        localcontext.update( {
-                          'product_id' : current_sale_order_line.product_id and current_sale_order_line.product_id.id or False,
-                          'price_unit' : current_sale_order_line.price_unit,
-                          'discount' : current_sale_order_line.discount,
-                          'product_uom' : current_sale_order_line.product_uom and current_sale_order_line.product_uom.id or False,
-                          'pricelist' : current_sale_order_line.order_id.pricelist_id and current_sale_order_line.order_id.pricelist_id.id or False,
-                          'markup_rate' : current_sale_order_line.markup_rate,
-                          'commercial_margin' : current_sale_order_line.commercial_margin,
-                        })
+        localcontext.update(
+            {
+                'product_id': current_sale_order_line.product_id and current_sale_order_line.product_id.id or False,
+                'price_unit': current_sale_order_line.price_unit,
+                'discount': current_sale_order_line.discount,
+                'product_uom': current_sale_order_line.product_uom and current_sale_order_line.product_uom.id or False,
+                'pricelist': current_sale_order_line.order_id.pricelist_id and current_sale_order_line.order_id.pricelist_id.id or False,
+                'markup_rate': current_sale_order_line.markup_rate,
+                'commercial_margin': current_sale_order_line.commercial_margin,
+            }
+        )
         res = self.onchange_price_unit(cr, uid, [id], context=localcontext)
         if res['value']:
             default['markup_rate'] = res['value']['markup_rate']
-            default['commercial_margin'] = res['value']['commercial_margin']
+            if 'commercial_margin' in res['value']:
+                default['commercial_margin'] = res['value']['commercial_margin']
         return super(sale_order_line, self).copy_data(cr, uid, id, default=default,
-                                                    context=context)
-
+                                                      context=context)
