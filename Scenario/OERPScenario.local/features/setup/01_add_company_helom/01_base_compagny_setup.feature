@@ -105,6 +105,14 @@ Feature: Setup Helom SARL company
         | admin_ch |
   Then we assign all groups to the users
 
+  @helom_change_base_partner_company
+  Scenario: Set company on base partner
+
+    Given I need a "res.partner" with oid: helom.base_partner
+    And having:
+     | name       | value                  |
+     | company_id | by oid: helom.base_company    |
+
 
   @helom_admin_user
   Scenario: Debonix admin user

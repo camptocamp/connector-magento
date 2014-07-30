@@ -23,4 +23,5 @@ Feature: MULTICOMPANY SECURITY RULES TO DESACTIVATE IN ORDER TO SHARE FOLLOWING 
      Given I need a "ir.rule" with name: "res.partner company"
      And having:
      | name              | value     |
-     | active            | false     |
+     | domain_force            | ['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]  |
+

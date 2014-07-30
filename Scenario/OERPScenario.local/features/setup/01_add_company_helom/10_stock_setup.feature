@@ -156,4 +156,13 @@ Feature: Setup Helom SARL company
     Given I set global property named "property_stock_customer" for model "res.partner" and field "property_stock_customer" for company with ref "helom.base_company"
     And the property is related to model "stock.location" using column "name" and value "Customers"
 
+  @helom_update_stock_company
+  Scenario: Update Stock Location
+    Given I need a "res.company" with oid helom.base_company
+    And having:
+      | name                 | value        |
+      | stockit_in_picking_location_id      | by oid: helom.loss |
+      | stockit_in_picking_location_dest_id | by oid: helom.loss |
+      | stockit_inventory_location_id       | by oid: helom.loss |
+
 
