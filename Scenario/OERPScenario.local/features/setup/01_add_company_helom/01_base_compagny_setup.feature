@@ -21,6 +21,7 @@ Feature: Setup Helom SARL company
     DELETE FROM ir_module_module where name = 'l10n_ch';
     DELETE FROM ir_module_module where name like 'l10n_ch%';
     UPDATE product_pricelist set company_id = 1;
+    UPDATE res_partner SET company_id = 1 where company_id IS NULL;
     """
 
   @helom_addons
