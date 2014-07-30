@@ -145,3 +145,15 @@ Feature: Setup Helom SARL company
        | company_id   | by oid: helom.base_company |
        | warehouse_id | by oid: helom.warehouse    |
        | pricelist_id | by oid: helom.eur_pl       |
+       
+  @helom_default_stock
+  Scenario: Set global property property_stock_supplier
+    Given I set global property named "property_stock_supplier" for model "res.partner" and field "property_stock_supplier" for company with ref "helom.base_company"
+    And the property is related to model "stock.location" using column "name" and value "Suppliers"
+
+  @helom_default_stock
+ Scenario: Set global property property_stock_customer
+    Given I set global property named "property_stock_customer" for model "res.partner" and field "property_stock_customer" for company with ref "helom.base_company"
+    And the property is related to model "stock.location" using column "name" and value "Customers"
+
+

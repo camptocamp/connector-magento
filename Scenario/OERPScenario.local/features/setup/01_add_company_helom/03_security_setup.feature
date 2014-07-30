@@ -17,3 +17,10 @@ Feature: MULTICOMPANY SECURITY RULES TO DESACTIVATE IN ORDER TO SHARE FOLLOWING 
      And having:
      | name              | value     |
      | active            | false     |
+
+  @helom_multicompany_security_rules
+  Scenario: MULTICOMPANY SECURITY RULES FOR PARTNER
+     Given I need a "ir.rule" with name: "res.partner company"
+     And having:
+     | name              | value     |
+     | active            | false     |
