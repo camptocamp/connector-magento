@@ -90,6 +90,20 @@ Feature: Setup Helom SARL company
      | name       | value                      |
      | partner_id | by oid: helom.base_partner |
 
+  @helom_fiscal_year
+  Scenario: fiscal year
+    Given I need a "account.fiscalyear" with oid: helom.fy2014
+    And having:
+       | name       | value                      |
+       | name       | CH2014                     |
+       | code       | CH2014                     |
+       | date_start | 2014-01-01                 |
+       | date_stop  | 2014-12-31                 |
+       | company_id | by oid: helom.base_company |
+
+    And I create monthly periods on the fiscal year with reference "helom.fy2014"
+    Then I find a "account.fiscalyear" with oid: helom.fy2014
+
   @helom_admin_user
   Scenario: Helom admin user
   Given I need a "res.users" with oid: helom.admin_user
