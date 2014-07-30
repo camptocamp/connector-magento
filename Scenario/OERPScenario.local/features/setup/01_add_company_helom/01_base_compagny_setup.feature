@@ -18,13 +18,15 @@ Feature: Setup Helom SARL company
   Scenario: Preparation SQL
     Given  I execute the SQL commands
     """
-    DELETE FROM ir_module_module where name = 'l10n_ch';
-    DELETE FROM ir_module_module where name like 'l10n_ch%';
-    UPDATE product_pricelist set company_id = 1;
-    UPDATE res_partner SET company_id = 1 where company_id IS NULL;
-    UPDATE ir_property set company_id = 1 where company_id IS NULL;
-    UPDATE product_template set company_id = 1 where company_id is null;
-    
+    DELETE FROM ir_module_module WHERE name = 'l10n_ch';
+    DELETE FROM ir_module_module WHERE name like 'l10n_ch%';
+    UPDATE product_pricelist set company_id = 1 where company_id is NULL;
+    UPDATE product_pricelist_version SET company_id = 1 WHERE company_id is NULL;
+    UPDATE product_pricelist_item SET company_id = 1 WHERE company_id is NULL;
+    UPDATE res_partner SET company_id = 1 WHERE company_id IS NULL;
+    UPDATE ir_property set company_id = 1 WHERE company_id IS NULL;
+    UPDATE product_template set company_id = 1 WHERE company_id is null;
+
     """
 
   @helom_addons
