@@ -59,7 +59,7 @@ Feature: As an administrator, I do the following installation steps
     And having:
     | name                 | value                      |
     | account_collected_id | by name:  TVA collectée 8% |
-    | account_paid_id      | by name:  TVA collectée 8%     |
+    | account_paid_id      | by name:  TVA collectée 8% |
 
 
   @helom_taxes_accounts_relations
@@ -87,8 +87,8 @@ Feature: As an administrator, I do the following installation steps
     Given I need a "account.tax" with description: 2.5% achat
     And having:
     | name                 | value                                   |
-    | account_collected_id | by name: TVA sur Biens et Services à 7% |
-    | account_paid_id      | by name: TVA sur Biens et Services à 7% |
+    | account_collected_id | by name: TVA sur Biens et Services à 8%   |
+    | account_paid_id      | by name: TVA sur Biens et Services à 8%  |
 
 
   @helom_taxes_accounts_relations
