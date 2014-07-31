@@ -146,7 +146,7 @@ Feature: Setup Helom SARL company
 
   Given we select users below:
         | login    |
-        | admin_ch |
+        | admin_fr   |
   Then we assign all groups to the users
 
   @helom_account_chart
