@@ -226,13 +226,19 @@ class sale_order_line(orm.Model):
                 'commercial_margin': current_sale_order_line.commercial_margin,
             }
         )
-        res = self.onchange_price_unit(cr, uid, [id], override_unit_price=True, context=localcontext)
-        if res['value']:
+        res = self.onchange_price_unit(cr, uid, [id], override_unit_price=True,
+                                       context=localcontext)
+        values = res.get('value')
+        if values:
             # If price was changed because of sale_floor_price
-            if res['value']['price_unit'] > current_sale_order_line.price_unit:
-                default['price_unit'] = res['value']['price_unit']
-            default['markup_rate'] = res['value']['markup_rate']
-            if 'commercial_margin' in res['value']:
-                default['commercial_margin'] = res['value']['commercial_margin']
-        return super(sale_order_line, self).copy_data(cr, uid, id, default=default,
+            if 'price_unit' in values:
+                cur_price_unit = current_sale_order_line.price_unit
+                if values['price_unit'] > cur_price_unit:
+                    default['price_unit'] = values['price_unit']
+            if 'markup_rate' in values:
+                default['markup_rate'] = values['markup_rate']
+            if 'commercial_margin' in values:
+                default['commercial_margin'] = values['commercial_margin']
+        return super(sale_order_line, self).copy_data(cr, uid, id,
+                                                      default=default,
                                                       context=context)
