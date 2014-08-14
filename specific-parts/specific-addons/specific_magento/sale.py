@@ -29,10 +29,69 @@ from openerp.addons.connector_ecommerce.sale import SpecialOrderLineBuilder
 from openerp.addons.magentoerpconnect.sale import (
     SaleOrderImport,
     SaleOrderImportMapper,
+    SaleOrderAdapter,
 )
 from .backend import magento_debonix
 
 _logger = logging.getLogger(__name__)
+
+
+@magento_debonix
+class DebonixSaleOrderAdapter(SaleOrderAdapter):
+    """ Adapt the Adapter for Debonix
+
+    Only import sales orders that are already paid in Magento,
+    so we avoid to have pending jobs for unpaid orders that
+    are retried many times.
+
+    The downside is that jobs for the same orders will be created
+    several times, but they will return eagerly so that's not
+    so much of a problem.
+
+    """
+
+    ignored_states = ('canceled',
+                      'closed',
+                      'complete',
+                      'expired',
+                      'fraud',
+                      'pending',
+                      'pending_payzen',
+                      'pending_kwx',
+                      'pending_payment',
+                      'payment_refused',
+                      'pending_vadsmulti',
+                      'holded',
+                      'pending_paypal',
+                      'payment_review',
+                      )
+
+    def search(self, filters=None, from_date=None, to_date=None,
+               magento_storeview_ids=None):
+        """ Search records according to some criteria
+        and returns a list of ids
+
+        :rtype: list
+        """
+        if filters is None:
+            filters = {}
+        dt_fmt = '%Y/%m/%d %H:%M:%S'
+        if from_date is not None:
+            filters.setdefault('updated_at', {})
+            filters['updated_at']['from'] = from_date.strftime(dt_fmt)
+        if to_date is not None:
+            filters.setdefault('updated_at', {})
+            filters['updated_at']['to'] = to_date.strftime(dt_fmt)
+        if magento_storeview_ids is not None:
+            filters['store_id'] = {'in': magento_storeview_ids}
+
+        filters['total_paid'] = {'gt': 0.}
+        filters['state'] = {'nin': self.ignored_states}
+
+        arguments = {'imported': False,
+                     'filters': filters,
+                     }
+        return super(DebonixSaleOrderAdapter, self).search(arguments)
 
 
 @magento_debonix
@@ -124,6 +183,14 @@ class LineMapChild(ImportMapChild):
 @magento_debonix
 class DebonixSaleOrderImport(SaleOrderImport):
     _model_name = ['magento.sale.order']
+
+    def run(self, magento_id, force=False):
+        # eagerly return if the sales order exists,
+        # we don't even need to read the data on Magento
+        if self.binder.to_openerp(magento_id):
+            return _('Already imported')
+        return super(DebonixSaleOrderImport, self).run(magento_id,
+                                                       force=force)
 
     def _merge_sub_items(self, product_type, top_item, child_items):
         # special type for Debonix for Magento, should be considered as
