@@ -21,6 +21,8 @@
 
 import logging
 
+from openerp.tools.translate import _
+
 from openerp.addons.connector.unit.mapper import (
     ImportMapChild,
     mapping,
@@ -91,7 +93,7 @@ class DebonixSaleOrderAdapter(SaleOrderAdapter):
         arguments = {'imported': False,
                      'filters': filters,
                      }
-        return super(DebonixSaleOrderAdapter, self).search(arguments)
+        return self._call('%s.search' % self._magento_model, [arguments])
 
 
 @magento_debonix
