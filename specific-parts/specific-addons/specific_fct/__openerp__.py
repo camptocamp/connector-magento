@@ -47,6 +47,7 @@ differenciate them at first glance
           'account_view.xml',
           'account_invoice_view.xml',
           'partner_view.xml',
+          'purchase_view.xml',
           'stock_view.xml',
           'security/ir.model.access.csv',
           'security/security.xml',

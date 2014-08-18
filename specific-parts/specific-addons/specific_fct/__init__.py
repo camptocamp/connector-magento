@@ -17,12 +17,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import product
-from . import partner
-from . import sale
-from . import stock
-from . import statement
 from . import account_invoice
-from . import company
 from . import carrier_file
+from . import company
+from . import partner
+from . import product
+from . import purchase
+from . import sale
+from . import statement
+from . import stock
 from . import wizard
