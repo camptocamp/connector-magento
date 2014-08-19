@@ -52,7 +52,7 @@ class DebonixSaleOrderAdapter(SaleOrderAdapter):
 
     """
 
-    ignored_states = ('canceled',
+    ignored_status = ('canceled',
                       'closed',
                       'complete',
                       'expired',
@@ -88,7 +88,7 @@ class DebonixSaleOrderAdapter(SaleOrderAdapter):
             filters['store_id'] = {'in': magento_storeview_ids}
 
         filters['total_paid'] = {'gt': 0.}
-        filters['state'] = {'nin': self.ignored_states}
+        filters['status'] = {'nin': self.ignored_status}
 
         arguments = {'imported': False,
                      'filters': filters,
