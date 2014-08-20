@@ -46,6 +46,7 @@ Magento Connector Customization
           'magento_model_view.xml',
           'security/ir.model.access.csv',
           'wizard/export_all_stock_view.xml',
+          'cron_data.xml',
           ],
  'test': [],
  'installable': True,

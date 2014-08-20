@@ -35,23 +35,26 @@ class StockExportAllMagento(orm.TransientModel):
                  to Magento."""),
     }
 
+    def export_sock_all_product_magento(self, cr, uid, context=None):
+        model_name = 'magento.product.product'
+        magento_product_product_obj = self.pool.get(model_name)
+        record_ids = magento_product_product_obj.search(cr,
+                                                        uid,
+                                                        [],
+                                                        context=context)
+        session = ConnectorSession(cr, uid, context=context)
+        inventory_fields = ('manage_stock',
+                            'backorders',
+                            'magento_qty',
+                            )
+        for record_id in record_ids:
+            export_product_inventory.delay(session, model_name,
+                                       record_id, fields=inventory_fields,
+                                       priority=30)
+
     def action_manual_export(self, cr, uid, ids, context=None):
         form = self.browse(cr, uid, ids[0], context=context)
         if form.check_confirm:
             ## We will export all datas
-            model_name = 'magento.product.product'
-            magento_product_product_obj = self.pool.get(model_name)
-            record_ids = magento_product_product_obj.search(cr,
-                                                            uid,
-                                                            [],
-                                                            context=context)
-            session = ConnectorSession(cr, uid, context=context)
-            inventory_fields = ('manage_stock',
-                                'backorders',
-                                'magento_qty',
-                                )
-            for record_id in record_ids:
-                export_product_inventory.delay(session, model_name,
-                                           record_id, fields=inventory_fields,
-                                           priority=30)
+            self.export_sock_all_product_magento(cr, uid, context=context)
         return True
