@@ -35,7 +35,7 @@ class StockExportAllMagento(orm.TransientModel):
                  to Magento."""),
     }
 
-    def export_sock_all_product_magento(self, cr, uid, context=None):
+    def export_stock_all_product_magento(self, cr, uid, context=None):
         model_name = 'magento.product.product'
         magento_product_product_obj = self.pool.get(model_name)
         record_ids = magento_product_product_obj.search(cr,
@@ -56,5 +56,5 @@ class StockExportAllMagento(orm.TransientModel):
         form = self.browse(cr, uid, ids[0], context=context)
         if form.check_confirm:
             ## We will export all datas
-            self.export_sock_all_product_magento(cr, uid, context=context)
+            self.export_stock_all_product_magento(cr, uid, context=context)
         return True
