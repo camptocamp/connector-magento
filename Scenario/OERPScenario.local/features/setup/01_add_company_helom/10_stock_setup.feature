@@ -19,7 +19,7 @@ Feature: Setup Helom SARL company
    Given I need a "stock.location" with oid: helom.physical_location
      And having:
        | name                  | value                      |
-       | name                  | Physical Locations         |
+       | name                  | Physical Locations Helom   |
        | usage                 | view                       |
        | chained_location_type | none                       |
        | chained_auto_packing  | manual                     |

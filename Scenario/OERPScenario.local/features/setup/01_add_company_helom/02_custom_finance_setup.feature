@@ -42,6 +42,16 @@ Feature: As an administrator, I do the following installation steps
     And the property is related to model "account.account" using column "code" and value "707000"
 
   @helom_default_accounts
+  Scenario: Set global property property_account_expense
+    Given I set global property named "property_account_expense" for model "product.template" and field "property_account_expense" for company with ref "helom.base_company"
+    And the property is related to model "account.account" using column "code" and value "607100"
+
+  @helom_default_accounts
+  Scenario: Set global property property_account_income
+    Given I set global property named "property_account_income" for model "product.template" and field "property_account_income" for company with ref "helom.base_company"
+    And the property is related to model "account.account" using column "code" and value "707000"
+
+  @helom_default_accounts
  Scenario: Set global property property_stock_account_input
     Given I set global property named "property_stock_account_input" for model "product.template" and field "property_stock_account_input" for company with ref "helom.base_company"
     And the property is related to model "account.account" using column "code" and value "603710"
