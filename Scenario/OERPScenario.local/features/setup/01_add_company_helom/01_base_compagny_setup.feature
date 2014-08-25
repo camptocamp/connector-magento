@@ -92,6 +92,11 @@ Feature: Setup Helom SARL company
      | name       | value                      |
      | partner_id | by oid: helom.base_partner |
 
+
+  @helom_rml_header
+  Scenario: Set RML header
+  Given I set RML header to company with oid "helom.base_company" using "Helom/header_rml.txt" file
+
   @helom_fiscal_year
   Scenario: fiscal year
     Given I need a "account.fiscalyear" with oid: helom.fy2014
@@ -128,8 +133,8 @@ Feature: Setup Helom SARL company
 
     Given I need a "res.partner" with oid: helom.base_partner
     And having:
-     | name       | value                  |
-     | company_id | by oid: helom.base_company    |
+     | name       | value                      |
+     | company_id | by oid: helom.base_company |
 
 
   @helom_admin_user
