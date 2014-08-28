@@ -39,6 +39,8 @@ Changes:
 
 Add column reconcile_partial_id on account.move.line tree to be able to
 differenciate them at first glance
+
+Monkey patch cursor to avoid creating multiple files
  """,
  'website': 'http://www.camptocamp.com',
  'data': ['account_invoice_action_data.xml',
