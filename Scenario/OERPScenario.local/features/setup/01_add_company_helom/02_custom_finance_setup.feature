@@ -148,3 +148,12 @@ Feature: As an administrator, I do the following installation steps
     | name                  | value             |
     | account_collected_id  | by code: 445712   |
     | account_paid_id       | by code: 445712   |
+
+
+  @helom_bank_journal_account
+  Scenario: Attach bank journal to correct account.
+    Given I find a "account.bank.journal" with code: BNK2
+    And having:
+    | name                      | value           |
+    | default_debit_account_id  | by code: 512100 |
+    | default_credit_account_id | by code: 512100 |
