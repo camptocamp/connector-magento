@@ -26,6 +26,7 @@ Feature: Setup Helom SARL company
     UPDATE res_partner SET company_id = 1 WHERE company_id IS NULL;
     UPDATE ir_property set company_id = 1 WHERE company_id IS NULL;
     UPDATE product_template set company_id = 1 WHERE company_id is null;
+    UPDATE  account_statement_profile SET company_id = 1 WHERE company_id IS NULL;
 
     """
 
