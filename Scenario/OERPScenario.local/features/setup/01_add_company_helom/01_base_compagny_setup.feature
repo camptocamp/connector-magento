@@ -179,5 +179,5 @@ Feature: Setup Helom SARL company
 Scenario: fix currency to EUR after Account chart installation
     Given I need a "res.company" with oid helom.base_company
     And having:
-      | name                 | value        |
-      | currency_id          | by name: EUR |
+      | name        | value        |
+      | currency_id | by name: EUR |
