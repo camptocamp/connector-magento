@@ -18,10 +18,12 @@ Feature: MULTICOMPANY SECURITY RULES TO DESACTIVATE IN ORDER TO SHARE FOLLOWING 
      | name              | value     |
      | active            | false     |
 
-  @helom_multicompany_security_rules
+  @helom_multicompany_security_rules_partner
   Scenario: MULTICOMPANY SECURITY RULES FOR PARTNER
      Given I need a "ir.rule" with name: "res.partner company"
      And having:
-     | name              | value     |
-     | domain_force            | []  |
-###FIX ME domain_force must be ['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]
+     | name         | value |
+     Then I force following rule domain
+     """
+        ['|', ('company_id','=',False), ('company_id', 'child_of', [user.company_id.id])]
+     """
