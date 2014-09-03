@@ -125,7 +125,7 @@ Feature: Setup Helom SARL company
        | usage                 | internal                    |
        | location_id           | by oid: helom.base_location |
        | chained_location_type | customer                    |
-       | chained_auto_packing  | manual                      |
+       | chained_auto_packing  | transparent                 |
        | company_id            | by oid: helom.base_company  |
 
 
@@ -145,7 +145,7 @@ Feature: Setup Helom SARL company
        | company_id   | by oid: helom.base_company |
        | warehouse_id | by oid: helom.warehouse    |
        | pricelist_id | by oid: helom.eur_pl       |
-       
+
   @helom_default_stock
   Scenario: Set global property property_stock_supplier
     Given I set global property named "property_stock_supplier" for model "res.partner" and field "property_stock_supplier" for company with ref "helom.base_company"
@@ -164,5 +164,3 @@ Feature: Setup Helom SARL company
       | stockit_in_picking_location_id      | by oid: helom.loss |
       | stockit_in_picking_location_dest_id | by oid: helom.loss |
       | stockit_inventory_location_id       | by oid: helom.loss |
-
-
