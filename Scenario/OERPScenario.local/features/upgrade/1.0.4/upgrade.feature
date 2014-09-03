@@ -3,6 +3,8 @@
 
 Feature: upgrade to 1.0.4
 
+  # upgrade of specific-addons for delivery_carrier_file monkey patching
+
   Scenario: upgrade application version
     Given I execute the SQL commands
     """
