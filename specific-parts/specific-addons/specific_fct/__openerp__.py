@@ -25,7 +25,7 @@
              'sale',
              'sale_stock',
              'packing_product_change',
-             'on_inventory_retry_assign',
+             'stock_inventory_retry_assign',
              'account_statement_base_completion',
              'connector_ecommerce',
              'server_environment',
