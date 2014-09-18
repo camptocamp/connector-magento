@@ -150,11 +150,23 @@ Feature: Setup Helom SARL company
   Scenario: Set global property property_stock_supplier
     Given I set global property named "property_stock_supplier" for model "res.partner" and field "property_stock_supplier" for company with ref "helom.base_company"
     And the property is related to model "stock.location" using column "name" and value "Suppliers"
-
   @helom_default_stock
- Scenario: Set global property property_stock_customer
+  Scenario: Set global property property_stock_customer
     Given I set global property named "property_stock_customer" for model "res.partner" and field "property_stock_customer" for company with ref "helom.base_company"
     And the property is related to model "stock.location" using column "name" and value "Customers"
+  @helom_default_stock
+  Scenario: Set global property property_stock_procurement
+    Given I set global property named "property_stock_procurement" for model "product.template" and field "property_stock_procurement" for company with ref "helom.base_company"
+    And the property is related to model "stock.location" using column "name" and value "Procurement"
+  @helom_default_stock
+  Scenario: Set global property property_stock_production
+    Given I set global property named "property_stock_production" for model "product.template" and field "property_stock_production" for company with ref "helom.base_company"
+    And the property is related to model "stock.location" using column "name" and value "Production"
+  @helom_default_stock
+  Scenario: Set global property property_stock_inventory
+    Given I set global property named "property_stock_inventory" for model "product.template" and field "property_stock_inventory" for company with ref "helom.base_company"
+    And the property is related to model "stock.location" using column "name" and value "Inventory loss"
+
 
   @helom_update_stock_company
   Scenario: Update Stock Location
