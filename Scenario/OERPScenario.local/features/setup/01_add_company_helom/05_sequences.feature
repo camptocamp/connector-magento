@@ -3,14 +3,14 @@
 Feature: set sequences on new stock picking models (in, int, out)
 
   Scenario Outline: set sequences on new stock picking models (in, int, out)
-    Given I find a "ir.sequence" with name: <name>
-    Then I set their values to:
-      | key                | value        |
-      | prefix             | <prefix>     |
-      | padding            | <padding>    |
-      | number_next_actual | <number>     |
-      | code               | <code>       |
-      | company_id         | <company_id> |
+    Given I need a "ir.sequence" with name: <name> and company_id: 2
+    And having:
+      | name               | value               |
+      | prefix             | <prefix>            |
+      | padding            | <padding>           |
+      | number_next_actual | <number>            |
+      | code               | <code>              |
+      | company_id         | by id: <company_id> |
 
     Examples: on stock picking sequences
       | name                          | prefix           | padding | number | code                        | company_id |

@@ -29,6 +29,7 @@ Feature: Setup Helom SARL company
     UPDATE account_statement_profile SET company_id = 1 WHERE company_id IS NULL;
     UPDATE res_currency SET name = 'VUB' WHERE id = 150;
     UPDATE res_currency SET company_id = Null;
+    UPDATE ir_sequence SET company_id = 1 WHERE company_id IS Null;
     """
 
   @helom_addons
