@@ -51,6 +51,15 @@ def _call(self, method, arguments):
                 (err.url, err.headers, err.errcode, err.errmsg))
         else:
             raise
+    except xmlrpclib.Fault as err:
+        # <Fault 404: 'Unknown error'>
+        # retry because it seems to work when retried
+        if err.faultCode == 404:
+            raise RetryableJobError(
+                "The job received <Fault 404: 'Unknown error'> "
+                "from Magento.")
+        else:
+            raise
     else:
         return result
 
