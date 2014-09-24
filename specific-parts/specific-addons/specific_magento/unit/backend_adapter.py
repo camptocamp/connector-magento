@@ -35,7 +35,7 @@ _call_orig = MagentoCRUDAdapter._call
 
 def _call(self, method, arguments):
     try:
-        result = _call_orig(method, arguments)
+        result = _call_orig(self, method, arguments)
     except xmlrpclib.ProtocolError as err:
         # This error often appears with the Debonix' Magento (maybe
         # during upgrades of their system). If it happens on other
