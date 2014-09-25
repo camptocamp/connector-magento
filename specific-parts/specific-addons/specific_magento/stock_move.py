@@ -19,47 +19,68 @@
 #
 ##############################################################################
 
-from openerp.addons.connector.event import on_record_write
+from datetime import datetime
+from openerp.osv import orm
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.addons.connector.exception import IDMissingInBackend
 from openerp.addons.connector.queue.job import job, related_action
+from openerp.addons.connector.session import ConnectorSession
 from openerp.addons.connector.unit.synchronizer import ExportSynchronizer
 from openerp.addons.magentoerpconnect.connector import get_environment
 from openerp.addons.magentoerpconnect.unit.backend_adapter import (
     GenericAdapter,
 )
-from openerp.addons.magentoerpconnect.related_action import unwrap_binding
 from .backend import magento_debonix
 from .related_action import open_direct
 
 
-@on_record_write(model_names='stock.move')
-def move_write(session, model_name, record_id, vals):
-    if session.context.get('connector_no_export'):
-        return
-    if not vals.get('date_expected'):
-        return
-    move = session.browse(model_name, record_id)
-    picking = move.picking_id
-    if not picking:
-        return
-    if picking.type != 'out':
-        return
-    sale_line = move.sale_line_id
-    if not sale_line:
-        return
-    for binding in sale_line.magento_bind_ids:
-        # TODO set delay
-        export_move_expected_date.delay(session,
-                                        model_name,
-                                        binding.backend_id.id,
-                                        record_id)
+class stock_move(orm.Model):
+    _inherit = 'stock.move'
+
+    def write(self, cr, uid, ids, vals, context=None):
+        if vals.get('date_expected'):
+            self._on_write_expected_date(cr, uid, ids, vals['date_expected'],
+                                         context=context)
+        _super = super(stock_move, self)
+        return _super.write(cr, uid, ids, vals, context=context)
+
+    def _on_write_expected_date(self, cr, uid, ids, date_expected,
+                                context=None):
+        if context is None:
+            context = {}
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        if context.get('connector_no_export'):
+            return
+        session = ConnectorSession(cr, uid, context=context)
+        for move in self.browse(cr, uid, ids, context=context):
+            expected = datetime.strptime(date_expected,
+                                         DEFAULT_SERVER_DATETIME_FORMAT)
+            previous = datetime.strptime(move.date_expected,
+                                         DEFAULT_SERVER_DATETIME_FORMAT)
+            if expected.date() == previous.date():
+                # only export if the date changed, we don't want to spam
+                # with changes of only a few hours
+                continue
+            picking = move.picking_id
+            if not picking:
+                continue
+            if picking.type != 'out':
+                continue
+            sale_line = move.sale_line_id
+            if not sale_line:
+                continue
+            for binding in sale_line.magento_bind_ids:
+                export_move_expected_date.delay(session,
+                                                self._name,
+                                                binding.backend_id.id,
+                                                move.id)
 
 
 @job
 @related_action(action=open_direct)
 def export_move_expected_date(session, model_name, backend_id, record_id):
     """ Export the new expected delivery date of a stock move """
-    move = session.browse(model_name, record_id)
     env = get_environment(session, model_name, backend_id)
     exporter = env.get_connector_unit(MoveExpectedDateExport)
     return exporter.run(record_id)
