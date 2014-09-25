@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,19 +19,30 @@
 #
 ##############################################################################
 
-from . import connector
-from . import backend
-from . import magento_model
-from . import product_brand
-from . import product_state
-from . import product
-from . import product_bundle
-from . import product_attribute
-from . import unit
-from . import sale
-from . import partner
-from . import stock
-from . import stock_move
-from . import supplier
-from . import wizard
+from openerp.osv import orm
+from openerp.tools.translate import _
 
+
+def open_direct(session, job, id_pos=3):
+    """ Open a form view with the record.
+
+    :param id_pos: position of the record ID in the args
+    """
+    model = job.args[0]
+    # shift one to the left because session is not in job.args
+    record_id = job.args[id_pos - 1]
+    action = {
+        'name': _('Related Record'),
+        'type': 'ir.actions.act_window',
+        'view_type': 'form',
+        'view_mode': 'form',
+    }
+    record = session.browse(model, record_id)
+    if not record.exists():
+        raise orm.except_orm(_('Error'),
+                             _('The record has been deleted'))
+    action.update({
+        'res_model': model,
+        'res_id': record_id,
+    })
+    return action
