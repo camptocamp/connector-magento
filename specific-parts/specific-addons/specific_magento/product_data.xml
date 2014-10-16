@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="1">
+
+    <record id="product_product_debonix_fidelity" model="product.product">
+      <field name="default_code">FIDELITE</field>
+      <field name="list_price">0.0</field>
+      <field name="standard_price">0.0</field>
+      <field name="type">service</field>
+      <field name="name">points de fidélité</field>
+    </record>
+
+  </data>
+</openerp>
+

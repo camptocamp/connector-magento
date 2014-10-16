@@ -1,0 +1,230 @@
+<?xml version="1.0" ?>
+<openerp>
+  <data noupdate="0">
+
+    <record model="res.groups" id="group_debonix_purchase_user">
+      <field name="name">Debonix Purchase User</field>
+      <field name="implied_ids" eval="[
+        (4, ref('base.group_sale_salesman_all_leads')),
+        (4, ref('base.group_document_user')),
+        (4, ref('stock.group_stock_user')),
+        (4, ref('mrp.group_mrp_user')),
+        (4, ref('account.group_account_invoice')),
+        (4, ref('purchase.group_purchase_manager')),
+        (4, ref('base.group_user')),
+        (4, ref('share.group_share_user')),
+        (4, ref('point_of_sale.group_pos_user')),
+
+        (4, ref('base.group_no_one')),
+        (4, ref('base.group_partner_manager')),
+
+        (4, ref('account.group_supplier_inv_check_total')),
+        (4, ref('account_payment.group_account_payment')),
+
+        (4, ref('mrp.group_mrp_routings')),
+
+        (4, ref('product.group_uos')),
+        (4, ref('product.group_uom')),
+        (4, ref('product.group_product_manager')),
+        (4, ref('product.group_sale_pricelist')),
+        (4, ref('product.group_purchase_pricelist')),
+        (4, ref('product.group_costing_method')),
+        (4, ref('product.group_stock_packaging')),
+        (4, ref('product.group_mrp_properties')),
+
+        (4, ref('sale.group_delivery_invoice_address')),
+        (4, ref('sale.group_invoice_so_lines')),
+        (4, ref('sale.group_mrp_properties')),
+
+
+        (4, ref('stock.group_tracking_lot')),
+        (4, ref('stock.group_production_lot')),
+        (4, ref('stock.group_locations')),
+
+      ]"/>
+    </record>
+
+    <record model="res.groups" id="group_debonix_purchase_manager">
+      <field name="name">Debonix Purchase Manager</field>
+      <field name="implied_ids" eval="[
+        (4, ref('group_debonix_purchase_user')),
+
+        (4, ref('connector.group_connector_manager')),
+        (4, ref('product.group_product_variant')),
+        (4, ref('crm.group_fund_raising')),
+        (4, ref('base.group_multi_currency')),
+        (4, ref('stock.group_inventory_valuation')),
+        (4, ref('sale_stock.group_invoice_deli_orders')),
+      ]"/>
+    </record>
+
+    <record model="res.groups" id="group_debonix_sale_user">
+      <field name="name">Debonix Sale User</field>
+      <field name="implied_ids" eval="[
+        (4, ref('base.group_sale_salesman_all_leads')),
+        (4, ref('base.group_document_user')),
+        (4, ref('stock.group_stock_user')),
+        (4, ref('account.group_account_invoice')),
+        (4, ref('point_of_sale.group_pos_user')),
+        (4, ref('share.group_share_user')),
+
+        (4, ref('base.group_partner_manager')),
+        (4, ref('base.group_survey_user')),
+
+        (4, ref('account_payment.group_account_payment')),
+
+        (4, ref('sale.group_delivery_invoice_address')),
+        (4, ref('sale.group_invoice_so_lines')),
+        (4, ref('sale_stock.group_invoice_deli_orders')),
+
+        (4, ref('product.group_uos')),
+        (4, ref('product.group_stock_packaging')),
+        (4, ref('product.group_mrp_properties')),
+
+      ]"/>
+    </record>
+
+    <record model="res.groups" id="group_debonix_sale_manager">
+      <field name="name">Debonix Sake Manager</field>
+      <field name="implied_ids" eval="[
+        (4, ref('group_debonix_sale_user')),
+
+        (4, ref('base.group_user')),
+        (4, ref('base.group_sale_manager')),
+        (4, ref('purchase.group_purchase_manager')),
+
+
+        (4, ref('product.group_purchase_pricelist')),
+        (4, ref('sale.group_mrp_properties')),
+        (4, ref('stock.group_tracking_lot')),
+      ]"/>
+    </record>
+
+    <record model="res.groups" id="group_debonix_warehouse_user">
+      <field name="name">Debonix Warehouse User</field>
+      <field name="implied_ids" eval="[
+        (4, ref('base.group_sale_salesman_all_leads')),
+        (4, ref('base.group_document_user')),
+        (4, ref('stock.group_stock_user')),
+        (4, ref('mrp.group_mrp_user')),
+        (4, ref('base.group_hr_user')),
+        (4, ref('share.group_share_user')),
+
+        (4, ref('product.group_stock_packaging')),
+
+        (4, ref('sale.group_delivery_invoice_address')),
+
+        (4, ref('stock.group_tracking_lot')),
+        (4, ref('stock.group_locations')),
+      ]"/>
+    </record>
+
+    <record model="res.groups" id="group_debonix_warehouse_manager">
+      <field name="name">Debonix Warehouse Manager</field>
+      <field name="implied_ids" eval="[
+        (4, ref('group_debonix_warehouse_user')),
+        (4, ref('purchase.group_purchase_user')),
+
+        (4, ref('stock.group_production_lot')),
+        (4, ref('stock.group_stock_manager')),
+      ]" />
+    </record>
+
+    <record model="res.groups" id="group_debonix_account_user">
+      <field name="name">Debonix Account User</field>
+      <field name="implied_ids" eval="[
+        (4, ref('base.group_sale_salesman_all_leads')),
+        (4, ref('base.group_document_user')),
+        (4, ref('stock.group_stock_user')),
+        (4, ref('mrp.group_mrp_user')),
+        (4, ref('account.group_account_user')),
+        (4, ref('purchase.group_purchase_user')),
+        (4, ref('base.group_hr_user')),
+        (4, ref('share.group_share_user')),
+
+        (4, ref('base.group_partner_manager')),
+        
+        (4, ref('account.group_proforma_invoices')),
+        (4, ref('account.group_supplier_inv_check_total')),
+
+        (4, ref('account_payment.group_account_payment')),
+
+        (4, ref('analytic.group_analytic_accounting')),
+
+        (4, ref('sale.group_delivery_invoice_address')),
+        (4, ref('sale.group_analytic_accounting')),
+        (4, ref('sale.group_mrp_properties')),
+
+        (4, ref('sale_stock.group_invoice_deli_orders')),
+
+        (4, ref('product.group_uos')),
+
+        (4, ref('purchase.group_analytic_accounting')),
+
+      ]"/>
+    </record>
+
+    <record model="res.groups" id="group_debonix_account_manager">
+      <field name="name">Debonix Account Manager</field>
+      <field name="implied_ids" eval="[
+        (4, ref('group_debonix_account_user')),
+
+        (4, ref('base.group_hr_manager')),
+        (4, ref('base.group_multi_currency')),
+        (4, ref('base.group_no_one')),
+
+        (4, ref('account.group_account_manager')),
+
+        (4, ref('crm.group_fund_raising')),
+
+        (4, ref('point_of_sale.group_pos_user')),
+
+        (4, ref('sale.group_discount_per_so_line')),
+      ]" />
+    </record>
+
+    <record model="res.groups" id="group_debonix_contractor">
+      <field name="name">Debonix Contractor</field>
+      <field name="implied_ids" eval="[
+        (4, ref('base.group_no_one')),
+        (4, ref('base.group_document_user')),
+      ]" />
+    </record>
+
+    <record model="res.groups" id="group_debonix_aftersales">
+      <field name="name">Debonix Aftersales</field>
+      <field name="implied_ids" eval="[
+        (4, ref('base.group_sale_salesman_all_leads')),
+        (4, ref('base.group_document_user')),
+        (4, ref('stock.group_stock_user')),
+        (4, ref('mrp.group_mrp_user')),
+        (4, ref('account.group_account_user')),
+        (4, ref('purchase.group_purchase_user')),
+        (4, ref('base.group_hr_user')),
+        (4, ref('point_of_sale.group_pos_user')),
+        (4, ref('share.group_share_user')),
+
+        (4, ref('base.group_no_one')),
+        (4, ref('base.group_partner_manager')),
+
+        (4, ref('account_payment.group_account_payment')),
+
+        (4, ref('product.group_sale_pricelist')),
+        (4, ref('product.group_stock_packaging')),
+        (4, ref('product.group_costing_method')),
+        (4, ref('product.group_product_manager')),
+
+        (4, ref('sale.group_delivery_invoice_address')),
+        (4, ref('sale.group_discount_per_so_line')),
+        (4, ref('sale_stock.group_invoice_deli_orders')),
+        (4, ref('sale.group_mrp_properties')),
+
+        (4, ref('stock.group_production_lot')),
+
+        (4, ref('product.group_mrp_properties')),
+      ]"/>
+    </record>
+
+  </data>
+</openerp>
+

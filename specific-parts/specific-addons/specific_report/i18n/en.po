@@ -1,0 +1,236 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* specific_report
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 6.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-07-25 15:17+0000\n"
+"PO-Revision-Date: 2012-07-25 15:17+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: specific_report
+#: field:account.account,be_follow_up:0
+msgid "Do not chase payments on this account"
+msgstr "Do not chase payments on this account"
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Date:"
+msgstr "Date:"
+
+#. module: specific_report
+#: constraint:res.company:0
+msgid "Error! You can not create recursive companies."
+msgstr "Error! You can not create recursive companies."
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Due"
+msgstr "Due"
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Total amount due:"
+msgstr "Total amount due:"
+
+#. module: specific_report
+#: help:account.account,be_follow_up:0
+msgid "If checked, this account will be not part of the chasing payment report "
+msgstr "If checked, this account will be not part of the chasing payment report "
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Exception made of a mistake of our side, it seems that the following bills stay unpaid. Please, take appropriate measures in order to carry out this payment in the next 8 days."
+msgstr "Exception made of a mistake of our side, it seems that the following bills stay unpaid. Please, take appropriate measures in order to carry out this payment in the next 8 days."
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "."
+msgstr "."
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Ref"
+msgstr "Ref"
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Customer Ref:"
+msgstr "Customer Ref:"
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Description"
+msgstr "Description"
+
+#. module: specific_report
+#: report:addons/specific_report/report/template/bank_statement_report.mako:37
+msgid "Montant"
+msgstr "Montant"
+
+#. module: specific_report
+#: report:addons/specific_report/report/template/bank_statement_report.mako:35
+msgid "Partenaire"
+msgstr "Partenaire"
+
+#. module: specific_report
+#: constraint:res.company:0
+msgid "Error msg in raise"
+msgstr "Error msg in raise"
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Paid"
+msgstr "Paid"
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Balance :"
+msgstr "Balance :"
+
+#. module: specific_report
+#: constraint:res.company:0
+msgid "Error msg is in raise"
+msgstr "Error msg is in raise"
+
+#. module: specific_report
+#: code:addons/specific_report/report/bank_statement_report.py:59
+#, python-format
+msgid "of"
+msgstr "of"
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+#: report:addons/specific_report/report/template/bank_statement_report.mako:20
+msgid "Date"
+msgstr "Date"
+
+#. module: specific_report
+#: help:res.company,report_hide_partner_title_ids:0
+msgid "For the partners corresponding to the selected titles,\n"
+"only the contact name will be displayed on report, the partner name will be hidden.\n"
+"Useful to avoid the print of 2 lines on the reports for certain categories of partners."
+msgstr "For the partners corresponding to the selected titles,\n"
+"only the contact name will be displayed on report, the partner name will be hidden.\n"
+"Useful to avoid the print of 2 lines on the reports for certain categories of partners."
+
+#. module: specific_report
+#: model:ir.model,name:specific_report.model_account_account
+msgid "Account"
+msgstr "Account"
+
+#. module: specific_report
+#: sql_constraint:account.account:0
+msgid "The code of the account must be unique per company !"
+msgstr "The code of the account must be unique per company !"
+
+#. module: specific_report
+#: sql_constraint:res.company:0
+msgid "The company name must be unique !"
+msgstr "The company name must be unique !"
+
+#. module: specific_report
+#: constraint:account.account:0
+msgid "Configuration Error! \n"
+"You can not define children to an account with internal type different of \"View\"! "
+msgstr "Configuration Error! \n"
+"You can not define children to an account with internal type different of \"View\"! "
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Dear Sir/Madam,"
+msgstr "Dear Sir/Madam,"
+
+#. module: specific_report
+#: code:addons/specific_report/report/bank_statement_report.py:42
+#: code:addons/specific_report/report/bank_statement_report.py:50
+#, python-format
+msgid "BORDEREAU DE REMISE DE CHEQUES"
+msgstr "BORDEREAU DE REMISE DE CHEQUES"
+
+#. module: specific_report
+#: constraint:res.company:0
+msgid "The 'SIRET complement' should have exactly 5 digits."
+msgstr "The 'SIRET complement' should have exactly 5 digits."
+
+#. module: specific_report
+#: code:addons/specific_report/report/bank_statement_report.py:59
+#, python-format
+msgid "Page"
+msgstr "Page"
+
+#. module: specific_report
+#: model:ir.actions.report.xml,name:specific_report.account_overdue
+msgid "Overdue Payments"
+msgstr "Overdue Payments"
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Best regards."
+msgstr "Best regards."
+
+#. module: specific_report
+#: constraint:account.account:0
+msgid "Error ! You can not create recursive accounts."
+msgstr "Error ! You can not create recursive accounts."
+
+#. module: specific_report
+#: view:res.company:0
+#: field:res.company,report_hide_partner_title_ids:0
+msgid "Hide the partner name on reports for these titles"
+msgstr "Hide the partner name on reports for these titles"
+
+#. module: specific_report
+#: constraint:account.account:0
+msgid "Configuration Error! \n"
+"You can not select an account type with a deferral method different of \"Unreconciled\" for accounts with internal type \"Payable/Receivable\"! "
+msgstr "Configuration Error! \n"
+"You can not select an account type with a deferral method different of \"Unreconciled\" for accounts with internal type \"Payable/Receivable\"! "
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "VAT:"
+msgstr "VAT:"
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Sub-Total :"
+msgstr "Sub-Total :"
+
+#. module: specific_report
+#: view:res.company:0
+msgid "General Information"
+msgstr "General Information"
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Maturity date"
+msgstr "Maturity date"
+
+#. module: specific_report
+#: model:ir.model,name:specific_report.model_res_company
+msgid "res.company"
+msgstr "res.company"
+
+#. module: specific_report
+#: report:account.overdue.c2c:0
+msgid "Document: Customer account statement"
+msgstr "Document: Customer account statement"
+
+#. module: specific_report
+#: report:addons/specific_report/report/template/bank_statement_report.mako:19
+msgid "Bordereau"
+msgstr "Bordereau"
+
+#. module: specific_report
+#: report:addons/specific_report/report/template/bank_statement_report.mako:33
+msgid "Reference"
+msgstr "Reference"
+

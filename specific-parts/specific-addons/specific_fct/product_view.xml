@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+    <!-- For security purpose : add groups on page -->
+    <record id="product_normal_form_view_account" model="ir.ui.view">
+      <field name="name">product.normal.form.inherit</field>
+      <field name="model">product.product</field>
+      <field name="inherit_id" ref="account.product_normal_form_view"/>
+      <field name="arch" type="xml">
+        <page string="Accounting" position="attributes">
+          <attribute name="groups">account.group_account_user,product.group_product_manager</attribute>
+        </page>
+      </field>
+    </record>
+
+    <record id="product_normal_form_view_supplier" model="ir.ui.view">
+      <field name="name">product.normal.form</field>
+      <field name="model">product.product</field>
+      <field name="inherit_id" ref="product.product_normal_form_view" />
+      <field name="priority" eval="20"/>
+      <field name="arch" type="xml">
+        <xpath expr="/form/sheet/notebook/page[@string='Procurements']" position="attributes">
+          <attribute name="groups">product.group_product_manager</attribute>
+        </xpath>
+      </field>
+    </record>
+
+  </data>
+</openerp>

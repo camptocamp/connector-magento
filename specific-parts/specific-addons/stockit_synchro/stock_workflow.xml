@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!--
+        This is an activity used for stock-it pickings
+        This activity is never set from a transition, but always by the wizard "in_picking_import"
+        It has the same target transitions than "assigned"
+
+        It is used to know which packings have been confirmed (and modified with less or more products) by stock-it)
+        -->
+
+        <record id="act_stockit_confirm" model="workflow.activity">
+            <field name="wkf_id" ref="stock.wkf_picking"/>
+            <field name="name">stockit_confirm</field>
+            <field name="kind">function</field>
+            <field name="action">write({'state':'stockit_confirm'})</field>
+            <field name="flow_stop">False</field>
+        </record>
+
+
+        <record id="trans_stockit_move" model="workflow.transition">
+            <field name="act_from" ref="act_stockit_confirm"/>
+            <field name="act_to" ref="stock.act_move"/>
+            <field name="condition">auto_picking and test_auto_picking()</field>
+        </record>
+        <record id="trans_stockit_move2" model="workflow.transition">
+            <field name="act_from" ref="act_stockit_confirm"/>
+            <field name="act_to" ref="stock.act_move"/>
+            <field name="signal">button_done</field>
+        </record>
+
+    </data>
+</openerp>

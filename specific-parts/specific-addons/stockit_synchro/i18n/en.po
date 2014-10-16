@@ -1,0 +1,754 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* stockit_synchro
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 6.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-07-25 15:18+0000\n"
+"PO-Revision-Date: 2012-07-25 15:18+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: stockit_synchro
+#: field:stockit.import.in.picking,filename:0
+#: field:stockit.import.inventory,filename:0
+msgid "Filename"
+msgstr "Filename"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/inventory_import.py:142
+#: code:addons/stockit_synchro/wizard/inventory_import.py:144
+#, python-format
+msgid "Processing error append: %s"
+msgstr "Processing error append: %s"
+
+#. module: stockit_synchro
+#: sql_constraint:product.product:0
+msgid "The Magento SKU should be uniq!"
+msgstr "The Magento SKU should be uniq!"
+
+#. module: stockit_synchro
+#: field:res.company,stockit_product_ean_export:0
+msgid "Product EAN13 Export Folder"
+msgstr "Product EAN13 Export Folder"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/out_picking_export.py:246
+#, python-format
+msgid "Nothing has been exported"
+msgstr "Nothing has been exported"
+
+#. module: stockit_synchro
+#: constraint:res.company:0
+msgid "Error msg is in raise"
+msgstr "Error msg is in raise"
+
+#. module: stockit_synchro
+#: constraint:res.company:0
+msgid "Error msg in raise"
+msgstr "Error msg in raise"
+
+#. module: stockit_synchro
+#: field:res.company,stockit_product_export:0
+msgid "Product Export Folder"
+msgstr "Product Export Folder"
+
+#. module: stockit_synchro
+#: view:stock.picking:0
+msgid "Stock-It Confirmed"
+msgstr "Stock-It Confirmed"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:218
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:220
+#, python-format
+msgid "Processing error append: %"
+msgstr "Processing error append: %"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/out_picking_export.py:62
+#, python-format
+msgid "Stock-it outgoing pickings failed\n"
+"With error:\n"
+"%s"
+msgstr "Stock-it outgoing pickings failed\n"
+"With error:\n"
+"%s"
+
+#. module: stockit_synchro
+#: field:res.company,stockit_inventory_location_id:0
+msgid "Inventory Default Location"
+msgstr "Inventory Default Location"
+
+#. module: stockit_synchro
+#: constraint:res.company:0
+msgid "The 'SIRET complement' should have exactly 5 digits."
+msgstr "The 'SIRET complement' should have exactly 5 digits."
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/inventory_import.py:130
+#, python-format
+msgid "Product %s is deactivated. Skipped.\" % (product.default_code,)))\n"
+"                    continue\n"
+"\n"
+"                product_uom = product.uom_id\n"
+"\n"
+"                inventory_row = {'product_id': product_id,\n"
+"                                 'product_qty': row['quantity'],\n"
+"                                 'product_uom': product_uom.id,\n"
+"                                 'location_id': default_location_id.id,\n"
+"                                 }\n"
+"                inventory_rows.append(inventory_row)\n"
+"            except osv.except_osv, e:\n"
+"                errors_report.append(_('Processing error append: %s') % (e.value, ))\n"
+"            except Exception, e:\n"
+"                errors_report.append(_('Processing error append: %s') % (str(e)))\n"
+"        if errors_report:\n"
+"            raise osv.except_osv(_('ImportError'), \"\n"
+"\".join(errors_report))\n"
+"        if inventory_rows:\n"
+"            inventory_id = inventory_obj.create(cr, uid,\n"
+"                    {'name': _('Stockit inventory'),\n"
+"                     'date': time.strftime('%Y-%m-%d %H:%M:%S'),\n"
+"                     'inventory_line_id': [(0, 0, row)\n"
+"                                            for row\n"
+"                                            in inventory_rows]})\n"
+"            inventory_obj.action_confirm(cr, uid, [inventory_id], context=context)\n"
+"            inventory_obj.action_done(cr, uid, [inventory_id], context=context)\n"
+"\n"
+"        return inventory_id\n"
+"\n"
+"    def action_import(self, cr, uid, ids, context=None):\n"
+"        \" Import inventories according to the Stock it file\n"
+"        for frontend action, opens the form with the created inventory\n"
+"        \"\n"
+"        #Wizard call from XML RPC transaction are atomic\n"
+"        inventory_id = self.import_inventory(cr, uid, ids, context)\n"
+"        res = {'type': 'ir.actions.act_window_close'}\n"
+"        if inventory_id:\n"
+"            model_obj = self.pool.get('ir.model.data')\n"
+"            model_data_ids = model_obj.search(cr, uid, [\n"
+"                            ('model', '=', 'ir.ui.view'),\n"
+"                            ('module', '=', 'stock'),\n"
+"                            ('name', '=', 'view_inventory_form')\n"
+"                        ])\n"
+"            resource_id = model_obj.read(cr, uid, model_data_ids,\n"
+"                                         fields=['res_id'],\n"
+"                                         context=context)[0]['res_id']\n"
+"\n"
+"            res = {\n"
+"                'name': _(\"Imported inventory"
+msgstr "Product %s is deactivated. Skipped.\" % (product.default_code,)))\n"
+"                    continue\n"
+"\n"
+"                product_uom = product.uom_id\n"
+"\n"
+"                inventory_row = {'product_id': product_id,\n"
+"                                 'product_qty': row['quantity'],\n"
+"                                 'product_uom': product_uom.id,\n"
+"                                 'location_id': default_location_id.id,\n"
+"                                 }\n"
+"                inventory_rows.append(inventory_row)\n"
+"            except osv.except_osv, e:\n"
+"                errors_report.append(_('Processing error append: %s') % (e.value, ))\n"
+"            except Exception, e:\n"
+"                errors_report.append(_('Processing error append: %s') % (str(e)))\n"
+"        if errors_report:\n"
+"            raise osv.except_osv(_('ImportError'), \"\n"
+"\".join(errors_report))\n"
+"        if inventory_rows:\n"
+"            inventory_id = inventory_obj.create(cr, uid,\n"
+"                    {'name': _('Stockit inventory'),\n"
+"                     'date': time.strftime('%Y-%m-%d %H:%M:%S'),\n"
+"                     'inventory_line_id': [(0, 0, row)\n"
+"                                            for row\n"
+"                                            in inventory_rows]})\n"
+"            inventory_obj.action_confirm(cr, uid, [inventory_id], context=context)\n"
+"            inventory_obj.action_done(cr, uid, [inventory_id], context=context)\n"
+"\n"
+"        return inventory_id\n"
+"\n"
+"    def action_import(self, cr, uid, ids, context=None):\n"
+"        \" Import inventories according to the Stock it file\n"
+"        for frontend action, opens the form with the created inventory\n"
+"        \"\n"
+"        #Wizard call from XML RPC transaction are atomic\n"
+"        inventory_id = self.import_inventory(cr, uid, ids, context)\n"
+"        res = {'type': 'ir.actions.act_window_close'}\n"
+"        if inventory_id:\n"
+"            model_obj = self.pool.get('ir.model.data')\n"
+"            model_data_ids = model_obj.search(cr, uid, [\n"
+"                            ('model', '=', 'ir.ui.view'),\n"
+"                            ('module', '=', 'stock'),\n"
+"                            ('name', '=', 'view_inventory_form')\n"
+"                        ])\n"
+"            resource_id = model_obj.read(cr, uid, model_data_ids,\n"
+"                                         fields=['res_id'],\n"
+"                                         context=context)[0]['res_id']\n"
+"\n"
+"            res = {\n"
+"                'name': _(\"Imported inventory"
+
+#. module: stockit_synchro
+#: view:stockit.manual.export.out.picking:0
+msgid "Export delivery orders"
+msgstr "Export delivery orders"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/inventory_import.py:149
+#, python-format
+msgid "Stockit inventory"
+msgstr "Stockit inventory"
+
+#. module: stockit_synchro
+#: model:ir.model,name:stockit_synchro.model_stockit_export_product
+msgid "Export product in Stock iT format"
+msgstr "Export product in Stock iT format"
+
+#. module: stockit_synchro
+#: model:ir.model,name:stockit_synchro.model_stockit_import_in_picking
+msgid "Import incoming pickings in Stock iT format"
+msgstr "Import incoming pickings in Stock iT format"
+
+#. module: stockit_synchro
+#: model:ir.model,name:stockit_synchro.model_stockit_export_product_ean13
+msgid "Export product EAN in Stock iT format"
+msgstr "Export product EAN in Stock iT format"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:61
+#: code:addons/stockit_synchro/wizard/inventory_import.py:63
+#, python-format
+msgid "UserError"
+msgstr "UserError"
+
+#. module: stockit_synchro
+#: model:ir.ui.menu,name:stockit_synchro.menu_stockit_export_product_ean13
+msgid "Product EAN13"
+msgstr "Product EAN13"
+
+#. module: stockit_synchro
+#: field:stockit.manual.export.out.picking,only_new:0
+msgid "Only not yet exported"
+msgstr "Only not yet exported"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/out_picking_export.py:57
+#, python-format
+msgid "Stockit Outgoing Picking Export"
+msgstr "Stockit Outgoing Picking Export"
+
+#. module: stockit_synchro
+#: view:stock.picking:0
+msgid "_Cancel"
+msgstr "_Cancel"
+
+#. module: stockit_synchro
+#: view:stockit.manual.export.out.picking:0
+#: field:stockit.manual.export.out.picking,picking_ids:0
+msgid "Delivery Orders"
+msgstr "Delivery Orders"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_export.py:64
+#, python-format
+msgid "Stock-it ingoing pickings failed\n"
+"With error:\n"
+"%s"
+msgstr "Stock-it ingoing pickings failed\n"
+"With error:\n"
+"%s"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/out_picking_export.py:59
+#, python-format
+msgid "Error exporting outgoing pickings file : %s"
+msgstr "Error exporting outgoing pickings file : %s"
+
+#. module: stockit_synchro
+#: field:res.company,stockit_in_picking_location_id:0
+msgid "Ingoing Picking Default Source Location"
+msgstr "Ingoing Picking Default Source Location"
+
+#. module: stockit_synchro
+#: constraint:res.company:0
+msgid "Error! You can not create recursive companies."
+msgstr "Error! You can not create recursive companies."
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:150
+#, python-format
+msgid "Picking %s not found !"
+msgstr "Picking %s not found !"
+
+#. module: stockit_synchro
+#: model:ir.ui.menu,name:stockit_synchro.menu_stockit_import_inventory
+msgid "Inventory"
+msgstr "Inventory"
+
+#. module: stockit_synchro
+#: model:ir.model,name:stockit_synchro.model_stockit_export_out_picking
+msgid "Export outgoing pickings in Stock iT format"
+msgstr "Export outgoing pickings in Stock iT format"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:344
+#, python-format
+msgid "Stock-it ingoing picking import"
+msgstr "Stock-it ingoing picking import"
+
+#. module: stockit_synchro
+#: model:ir.actions.act_window,name:stockit_synchro.action_stockit_import_inventory
+#: view:stockit.import.inventory:0
+msgid "Inventory Import for Stock iT"
+msgstr "Inventory Import for Stock iT"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/ean_export.py:55
+#, python-format
+msgid "Stockit Product EAN13 Export"
+msgstr "Stockit Product EAN13 Export"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/inventory_import.py:202
+#, python-format
+msgid "Stock-it inventory import"
+msgstr "Stock-it inventory import"
+
+#. module: stockit_synchro
+#: field:stock.picking,stockit_export_date:0
+msgid "Stockit export date"
+msgstr "Stockit export date"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_export.py:61
+#, python-format
+msgid "Error exporting ingoing pickings file : %s"
+msgstr "Error exporting ingoing pickings file : %s"
+
+#. module: stockit_synchro
+#: view:stock.picking:0
+msgid "Additional info"
+msgstr "Additional info"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:119
+#, python-format
+msgid "Can not create new ean for product %s one of the following ean %s seems not correct. You can look in the log for more details"
+msgstr "Can not create new ean for product %s one of the following ean %s seems not correct. You can look in the log for more details"
+
+#. module: stockit_synchro
+#: field:res.company,stockit_in_picking_import:0
+msgid "Ingoing Picking Import Folder"
+msgstr "Ingoing Picking Import Folder"
+
+#. module: stockit_synchro
+#: model:ir.actions.act_window,name:stockit_synchro.action_stockit_manual_export_out_picking
+msgid "Export selected picking to stockit"
+msgstr "Export selected picking to stockit"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:336
+#, python-format
+msgid "Error importing ingoing picking file %s : %s"
+msgstr "Error importing ingoing picking file %s : %s"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/inventory_import.py:194
+#, python-format
+msgid "Error importing inventory file %s : %s"
+msgstr "Error importing inventory file %s : %s"
+
+#. module: stockit_synchro
+#: model:ir.model,name:stockit_synchro.model_stockit_export_in_picking
+msgid "Export incoming pickings in Stock iT format"
+msgstr "Export incoming pickings in Stock iT format"
+
+#. module: stockit_synchro
+#: model:ir.actions.act_window,name:stockit_synchro.action_stockit_export_in_picking
+#: view:stockit.export.in.picking:0
+msgid "Incoming Pickings Export for Stock iT"
+msgstr "Incoming Pickings Export for Stock iT"
+
+#. module: stockit_synchro
+#: field:res.company,stockit_out_picking_export:0
+msgid "Outgoing Picking Export Folder"
+msgstr "Outgoing Picking Export Folder"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/product_export.py:56
+#, python-format
+msgid "Error exporting product file : %s"
+msgstr "Error exporting product file : %s"
+
+#. module: stockit_synchro
+#: model:ir.ui.menu,name:stockit_synchro.menu_stockit_import
+#: view:res.company:0
+#: view:stockit.import.in.picking:0
+#: view:stockit.import.inventory:0
+msgid "Import"
+msgstr "Import"
+
+#. module: stockit_synchro
+#: field:res.company,stockit_inventory_import:0
+msgid "Inventory Import Folder"
+msgstr "Inventory Import Folder"
+
+#. module: stockit_synchro
+#: sql_constraint:product.product:0
+msgid "Default code should be uniq"
+msgstr "Default code should be uniq"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:168
+#, python-format
+msgid "Product %s not found !"
+msgstr "Product %s not found !"
+
+#. module: stockit_synchro
+#: model:ir.ui.menu,name:stockit_synchro.menu_stockit_export_in_picking
+#: model:ir.ui.menu,name:stockit_synchro.menu_stockit_import_in_picking
+msgid "Incoming Pickings"
+msgstr "Incoming Pickings"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/product_export.py:54
+#, python-format
+msgid "Stockit Product Export"
+msgstr "Stockit Product Export"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/product_export.py:59
+#, python-format
+msgid "Stock-it product export failed\n"
+"With error:\n"
+"%s"
+msgstr "Stock-it product export failed\n"
+"With error:\n"
+"%s"
+
+#. module: stockit_synchro
+#: view:res.company:0
+msgid "Base"
+msgstr "Base"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/inventory_import.py:197
+#, python-format
+msgid "Stock-it inventory import failed on file : %s\n"
+"With error:\n"
+"%s"
+msgstr "Stock-it inventory import failed on file : %s\n"
+"With error:\n"
+"%s"
+
+#. module: stockit_synchro
+#: sql_constraint:stock.picking:0
+msgid "Reference must be unique per Company!"
+msgstr "Reference must be unique per Company!"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/ean_export.py:76
+#: code:addons/stockit_synchro/wizard/in_picking_export.py:80
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:355
+#: code:addons/stockit_synchro/wizard/inventory_import.py:213
+#: code:addons/stockit_synchro/wizard/out_picking_export.py:83
+#: code:addons/stockit_synchro/wizard/out_picking_export.py:126
+#: code:addons/stockit_synchro/wizard/out_picking_export.py:246
+#: code:addons/stockit_synchro/wizard/product_export.py:75
+#, python-format
+msgid "Error"
+msgstr "Error"
+
+#. module: stockit_synchro
+#: field:res.company,stockit_out_pick_exp_location_id:0
+msgid "Outgoing Picking Export Location"
+msgstr "Outgoing Picking Export Location"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/product_export.py:64
+#, python-format
+msgid "Stock-it product export"
+msgstr "Stock-it product export"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:305
+#, python-format
+msgid "Stock are OK"
+msgstr "Stock are OK"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:62
+#: code:addons/stockit_synchro/wizard/inventory_import.py:64
+#, python-format
+msgid "You need to select a file!"
+msgstr "You need to select a file!"
+
+#. module: stockit_synchro
+#: model:ir.model,name:stockit_synchro.model_base_sale_payment_type
+msgid "Base Sale Payment Type"
+msgstr "Base Sale Payment Type"
+
+#. module: stockit_synchro
+#: view:stock.picking:0
+msgid "Process"
+msgstr "Process"
+
+#. module: stockit_synchro
+#: model:ir.actions.act_window,name:stockit_synchro.action_stockit_export_product_ean13
+#: view:stockit.export.product.ean13:0
+msgid "Product Export EAN13 for Stock iT"
+msgstr "Product Export EAN13 for Stock iT"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:334
+#, python-format
+msgid "Stockit ingoing picking import"
+msgstr "Stockit ingoing picking import"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/inventory_import.py:128
+#: code:addons/stockit_synchro/wizard/inventory_import.py:192
+#, python-format
+msgid "Stockit inventory import"
+msgstr "Stockit inventory import"
+
+#. module: stockit_synchro
+#: model:ir.actions.act_window,name:stockit_synchro.action_stockit_import_in_picking
+#: view:stockit.import.in.picking:0
+msgid "Incoming Pickings Import for Stock iT"
+msgstr "Incoming Pickings Import for Stock iT"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:305
+#, python-format
+msgid "Nothing to do"
+msgstr "Nothing to do"
+
+#. module: stockit_synchro
+#: model:ir.model,name:stockit_synchro.model_res_company
+msgid "res.company"
+msgstr "res.company"
+
+#. module: stockit_synchro
+#: view:stockit.export.in.picking:0
+#: view:stockit.export.out.picking:0
+#: view:stockit.export.product:0
+#: view:stockit.export.product.ean13:0
+#: view:stockit.import.in.picking:0
+#: view:stockit.import.inventory:0
+#: view:stockit.manual.export.out.picking:0
+msgid "Cancel"
+msgstr "Cancel"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/ean_export.py:60
+#, python-format
+msgid "Stock-it product export EAN13 failed\n"
+"With error:\n"
+"%s"
+msgstr "Stock-it product export EAN13 failed\n"
+"With error:\n"
+"%s"
+
+#. module: stockit_synchro
+#: model:ir.ui.menu,name:stockit_synchro.menu_stockit_export_out_picking
+msgid "Outgoing Pickings"
+msgstr "Outgoing Pickings"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/out_picking_export.py:126
+#, python-format
+msgid "Stock Location to export is not configured on the company."
+msgstr "Stock Location to export is not configured on the company."
+
+#. module: stockit_synchro
+#: field:stock.picking,stockit_outdated:0
+msgid "Stockit outdated"
+msgstr "Stockit outdated"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:124
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:150
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:168
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:222
+#: code:addons/stockit_synchro/wizard/inventory_import.py:98
+#: code:addons/stockit_synchro/wizard/inventory_import.py:146
+#, python-format
+msgid "ImportError"
+msgstr "ImportError"
+
+#. module: stockit_synchro
+#: model:ir.model,name:stockit_synchro.model_stockit_manual_export_out_picking
+msgid "Export selected outgoing pickings"
+msgstr "Export selected outgoing pickings"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_export.py:59
+#, python-format
+msgid "Stockit Ingoing Picking Export"
+msgstr "Stockit Ingoing Picking Export"
+
+#. module: stockit_synchro
+#: model:ir.actions.act_window,name:stockit_synchro.action_stockit_export_product
+#: view:stockit.export.product:0
+msgid "Product Export for Stock iT"
+msgstr "Product Export for Stock iT"
+
+#. module: stockit_synchro
+#: model:ir.actions.act_window,name:stockit_synchro.action_stockit_export_out_picking
+#: view:stockit.export.out.picking:0
+msgid "Outgoing Pickings Export for Stock iT"
+msgstr "Outgoing Pickings Export for Stock iT"
+
+#. module: stockit_synchro
+#: field:res.company,stockit_base_path:0
+msgid "Base Path"
+msgstr "Base Path"
+
+#. module: stockit_synchro
+#: model:ir.model,name:stockit_synchro.model_product_product
+#: model:ir.ui.menu,name:stockit_synchro.menu_stockit_export_product
+msgid "Product"
+msgstr "Product"
+
+#. module: stockit_synchro
+#: view:stockit.manual.export.out.picking:0
+msgid "Export selected picking to stockit. File will be automatically put in stockit folder"
+msgstr "Export selected picking to stockit. File will be automatically put in stockit folder"
+
+#. module: stockit_synchro
+#: field:res.company,stockit_in_picking_export:0
+msgid "Ingoing Picking Export Folder"
+msgstr "Ingoing Picking Export Folder"
+
+#. module: stockit_synchro
+#: field:res.company,stockit_in_picking_location_dest_id:0
+msgid "Ingoing Picking Default Dest. Location"
+msgstr "Ingoing Picking Default Dest. Location"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:339
+#, python-format
+msgid "Stock-it ingoing picking import failed on file : %s\n"
+"With error:\n"
+"%s"
+msgstr "Stock-it ingoing picking import failed on file : %s\n"
+"With error:\n"
+"%s"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:106
+#: code:addons/stockit_synchro/wizard/inventory_import.py:93
+#, python-format
+msgid "Product with default code %s does not exist!"
+msgstr "Product with default code %s does not exist!"
+
+#. module: stockit_synchro
+#: sql_constraint:res.company:0
+msgid "The company name must be unique !"
+msgstr "The company name must be unique !"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/ean_export.py:65
+#, python-format
+msgid "Stock-it product EAN13 export"
+msgstr "Stock-it product EAN13 export"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_export.py:69
+#, python-format
+msgid "Stock-it ingoing pickings export"
+msgstr "Stock-it ingoing pickings export"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/ean_export.py:76
+#: code:addons/stockit_synchro/wizard/in_picking_export.py:80
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:355
+#: code:addons/stockit_synchro/wizard/inventory_import.py:213
+#: code:addons/stockit_synchro/wizard/out_picking_export.py:84
+#: code:addons/stockit_synchro/wizard/product_export.py:75
+#, python-format
+msgid "Stockit path is not configured on company."
+msgstr "Stockit path is not configured on company."
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/ean_export.py:57
+#, python-format
+msgid "Error exporting product ean13 file : %s"
+msgstr "Error exporting product ean13 file : %s"
+
+#. module: stockit_synchro
+#: sql_constraint:product.product:0
+msgid "The code must be unique"
+msgstr "The code must be unique"
+
+#. module: stockit_synchro
+#: view:stockit.manual.export.out.picking:0
+msgid "Generate Files"
+msgstr "Generate Files"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/out_picking_export.py:67
+#, python-format
+msgid "Stock-it outgoing pickings export"
+msgstr "Stock-it outgoing pickings export"
+
+#. module: stockit_synchro
+#: model:ir.model,name:stockit_synchro.model_stock_picking
+msgid "Packing List"
+msgstr "Packing List"
+
+#. module: stockit_synchro
+#: constraint:product.product:0
+msgid "Error: Invalid ean code"
+msgstr "Error: Invalid ean code"
+
+#. module: stockit_synchro
+#: model:ir.ui.menu,name:stockit_synchro.menu_stockit_export
+#: view:res.company:0
+#: view:stockit.export.in.picking:0
+#: view:stockit.export.out.picking:0
+#: view:stockit.export.product:0
+#: view:stockit.export.product.ean13:0
+msgid "Export"
+msgstr "Export"
+
+#. module: stockit_synchro
+#: view:res.company:0
+msgid "Stock iT"
+msgstr "Stock iT"
+
+#. module: stockit_synchro
+#: field:stockit.export.in.picking,data:0
+#: field:stockit.export.out.picking,data:0
+#: field:stockit.export.product,data:0
+#: field:stockit.export.product.ean13,data:0
+#: field:stockit.import.in.picking,data:0
+#: field:stockit.import.inventory,data:0
+#: field:stockit.manual.export.out.picking,data:0
+msgid "File"
+msgstr "File"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:320
+#, python-format
+msgid "Incoming pickings imported from Stock-it"
+msgstr "Incoming pickings imported from Stock-it"
+
+#. module: stockit_synchro
+#: model:ir.ui.menu,name:stockit_synchro.menu_stockit_main
+msgid "Stock-it"
+msgstr "Stock-it"
+
+#. module: stockit_synchro
+#: model:ir.model,name:stockit_synchro.model_stockit_import_inventory
+msgid "Import inventories in Stock iT format"
+msgstr "Import inventories in Stock iT format"
+

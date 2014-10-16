@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_picking_in_form_stockit">
+            <field name="name">stock.picking.in.form.stockit</field>
+            <field name="model">stock.picking.in</field>
+            <field name="inherit_id" ref="stock.view_picking_in_form"/>
+            <field name="arch" type="xml">
+                <data>
+                    <button name="action_process" position="replace">
+                        <button name="action_process" states="assigned,stockit_confirm" string="Process" type="object" icon="gtk-go-forward"/>
+                    </button>
+                    <button name="button_cancel" position="replace">
+                        <button name="button_cancel" states="assigned,confirmed,draft,stockit_confirm" string="_Cancel" icon="gtk-cancel"/>
+                    </button>
+                </data>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_picking_out_form_stockit">
+            <field name="name">stock.picking.out.form.stockit</field>
+            <field name="model">stock.picking.out</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                <data>
+                    <field name="date_done" position="after">
+                        <field name="stockit_export_date"/>
+                    </field>
+                </data>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_picking_in_search_stockit">
+            <field name="name">stock.picking.in.search,stockit</field>
+            <field name="model">stock.picking.in</field>
+            <field name="inherit_id" ref="stock.view_picking_in_search"/>
+            <field name="arch" type="xml">
+                <data>
+                    <filter name="to_invoice" position="after">
+                        <separator orientation="vertical" />
+                        <filter string="Stock-It Confirmed" name="stockit_confirmed" icon="terp-accessories-archiver-minus" domain="[('state','=','stockit_confirm')]"/>
+                    </filter>
+                </data>
+            </field>
+        </record>
+    </data>
+</openerp>

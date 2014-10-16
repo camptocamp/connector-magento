@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="0">
+    <record model="mail.group" id="group_import_tracking">
+      <field name="name">Import of tracking numbers</field>
+      <field name="group_ids" eval="[(4, ref('stock.group_stock_manager'))]"/>
+      <field name="description">Warn about errors during import of tracking numbers</field>
+    </record>
+  </data>
+</openerp>

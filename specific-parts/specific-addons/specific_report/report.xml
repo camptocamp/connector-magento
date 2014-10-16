@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<openerp>
+    <data>
+
+        <report id="purchase.report_purchase_quotation"
+            model="purchase.order"
+            name="purchase.quotation_custom"
+            rml="specific_report/report/purchase_request_quotation.rml"
+            string="Request for Quotation"/>
+
+        <report id="sale.report_sale_order"
+            model="sale.order"
+            name="sale.order_custom"
+            rml="specific_report/report/sale_order.rml"
+            string="Quotation / Order"/>
+
+        <report
+            id="delivery.report_shipping"
+            model="stock.picking"
+            name="sale.shipping_custom"
+            rml="specific_report/report/shipping.rml"
+            string="Delivery order"/>
+
+        <report auto="False"
+            id="account_overdue"
+            model="res.partner"
+            name="account.overdue.c2c"
+            rml="specific_report/report/overdue.rml" string="Overdue Payments"/>
+
+        <report
+            id="account.account_invoices"
+            model="account.invoice"
+            name="account.invoice"
+            rml="specific_report/report/account_print_invoice.rml"
+            string="Invoices"
+            attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
+            attachment_use="True"
+            usage="default"
+            />
+
+    </data>
+</openerp>

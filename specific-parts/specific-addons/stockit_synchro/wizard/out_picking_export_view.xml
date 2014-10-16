@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="stockit_export_out_picking_view" model="ir.ui.view">
+             <field name="name">Outgoing Pickings Export for Stock iT</field>
+             <field name="model">stockit.export.out.picking</field>
+             <field name="arch" type="xml">
+                <form string="Outgoing Pickings Export for Stock iT" version="7.0">
+                    <field name="state" invisible="1"/>
+                    <group attrs="{'invisible': [('state', '!=', 'done')]}">
+                        <field name="data" />
+                    </group>
+                    <group attrs="{'invisible': [('state', '!=', 'empty')]}">
+                        <label string="Nothing to export."/>
+                    </group>
+                    <footer>
+                        <button name="action_manual_export" string="Export" type="object"  default_focus="1" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+             </field>
+         </record>
+
+        <record id="action_stockit_export_out_picking" model="ir.actions.act_window">
+             <field name="name">Outgoing Pickings Export for Stock iT</field>
+             <field name="res_model">stockit.export.out.picking</field>
+             <field name="type">ir.actions.act_window</field>
+             <field name="view_type">form</field>
+             <field name="view_mode">tree,form</field>
+             <field name="view_id" ref="stockit_export_out_picking_view"/>
+             <field name="context">{}</field>
+             <field name="target">new</field>
+       </record>
+
+
+        <record id="stockit_manual_export_out_picking_view" model="ir.ui.view">
+            <field name="name">stockit.manual.export.out.picking</field>
+            <field name="model">stockit.manual.export.out.picking</field>
+            <field name="arch" type="xml">
+                <form string="Export delivery orders" version="7.0">
+                    <field name="state" invisible="1"/>
+                    <group attrs="{'invisible': [('state', '=', 'done')]}">
+                      <label string="Export selected picking to stockit. File will be automatically put in stockit folder"
+                        colspan="2"/>
+                      <field name="only_new"/>
+                      <field name="picking_ids" nolabel="1" colspan="4">
+                        <tree string="Delivery Orders">
+                          <field name="name"/>
+                          <field name="partner_id"/>
+                          <field name="origin"/>
+                          <field name="state" invisible="1"/>
+                        </tree>
+                      </field>
+                    </group>
+                    <group attrs="{'invisible': [('state', '!=', 'done')]}">
+                        <field name="data"/>
+                    </group>
+                    <footer>
+                        <button name="export" string="Generate Files" type="object"  default_focus="1" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_stockit_manual_export_out_picking" model="ir.actions.act_window">
+            <field name="name">Export selected picking to stockit</field>
+            <field name="res_model">stockit.manual.export.out.picking</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="stockit_manual_export_out_picking_view"/>
+            <field name="target">new</field>
+        </record>
+
+        <record model="ir.values" id="stockit_manual_export_out_picking_ir_values">
+            <field name="object" eval="1" />
+            <field name="name">Export selected picking to stockit</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.act_window,' + str(ref('action_stockit_manual_export_out_picking'))" />
+            <field name="key">action</field>
+            <field name="model">stock.picking.out</field>
+        </record>
+    </data>
+</openerp>

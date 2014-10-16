@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <record model="ir.ui.view" id="view_company_form_stockit">
+      <field name="name">res.company.form.inherit.stockit</field>
+      <field name="model">res.company</field>
+      <field name="inherit_id" ref="base.view_company_form"/>
+      <field name="arch" type="xml">
+        <notebook position="inside">
+          <page string="Stock iT">
+            <group string="Base">
+              <field name ="stockit_base_path" colspan="4"/>
+            </group>
+            <group string="Export">
+              <field name="stockit_in_picking_export"/>
+              <field name="stockit_out_picking_export"/>
+              <field name="stockit_product_export"/>
+              <field name="stockit_out_pick_exp_location_id"/>
+              <field name="stockit_product_ean_export"/>
+            </group>
+            <group string="Import">
+              <field name="stockit_in_picking_import"/>
+              <field name="stockit_in_picking_location_id" domain="[('usage','&lt;&gt;','view')]"/>
+              <field name="stockit_in_picking_location_dest_id" domain="[('usage','=','internal')]"/>
+              <field name="stockit_inventory_import"/>
+              <field name="stockit_inventory_location_id" domain="[('usage','=','internal')]" />
+            </group>
+          </page>
+        </notebook>
+      </field>
+    </record>
+  </data>
+</openerp>

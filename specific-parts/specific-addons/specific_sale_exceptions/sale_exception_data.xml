@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="1">
+
+    <!-- Name and description are in a noupdate block so they can be modified
+         manually. -->
+
+    <record id="excep_not_sellable" model="sale.exception">
+      <field name="name">Error: an ordered product is not in production</field>
+      <field name="description"></field>
+      <field name="sequence">50</field>
+      <field name="model">sale.order.line</field>
+      <field name="code"># code set in the updatable data block below</field>
+      <field name="active" eval="True"/>
+    </record>
+
+    <record id="excep_no_product" model="sale.exception">
+      <field name="name">Error: a line of the sale order has no product</field>
+      <field name="description"></field>
+      <field name="sequence">50</field>
+      <field name="model">sale.order.line</field>
+      <field name="code"># code set in the updatable data block below</field>
+      <field name="active" eval="True"/>
+    </record>
+
+   <record id="excep_customer_blocked" model="sale.exception">
+      <field name="name">Error: the customer is blocked</field>
+      <field name="description"></field>
+      <field name="sequence">50</field>
+      <field name="model">sale.order</field>
+      <field name="code"># code set in the updatable data block below</field>
+      <field name="active" eval="True"/>
+    </record>
+
+   <record id="excep_too_low_markup_rate" model="sale.exception">
+      <field name="name">Error: the markup rate is too low</field>
+      <field name="description"></field>
+      <field name="sequence">50</field>
+      <field name="model">sale.order</field>
+      <field name="code"># code set in the updatable data block below</field>
+      <field name="active" eval="True"/>
+    </record>
+
+   <record id="excep_credit_limit" model="sale.exception">
+      <field name="name">Error: the credit limit of the customer has been reached</field>
+      <field name="description"></field>
+      <field name="sequence">50</field>
+      <field name="model">sale.order</field>
+      <field name="code"># code set in the updatable data block below</field>
+      <field name="active" eval="True"/>
+    </record>
+
+  </data>
+
+  <data noupdate="0">
+    <!-- code is in an update block so changes in the module are applied -->
+
+    <record id="excep_not_sellable" model="sale.exception">
+      <field name="code">if line.product_id and line.product_id.state != 'sellable':
+    failed = True</field>
+    </record>
+
+    <record id="excep_no_product" model="sale.exception">
+      <field name="code">if not line.product_id:
+    failed = True</field>
+    </record>
+
+   <record id="excep_customer_blocked" model="sale.exception">
+      <field name="code">if order.partner_id.block_sales or order.partner_id.commercial_partner_id.block_sales:
+    failed = True</field>
+    </record>
+
+   <record id="excep_too_low_markup_rate" model="sale.exception">
+     <field name="code">if order.markup_rate &lt;= 15.0:
+    failed = True</field>
+    </record>
+
+   <record id="excep_credit_limit" model="sale.exception">
+      <field name="code">partner = order.partner_id
+if partner.credit_limit and (partner.credit - partner.debit + order.amount_total) > partner.credit_limit:
+    failed = True</field>
+    </record>
+
+  </data>
+</openerp>

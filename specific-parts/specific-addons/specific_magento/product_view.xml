@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+    <record id="view_magento_product_form" model="ir.ui.view">
+      <field name="name">magento.product.product.form</field>
+      <field name="model">magento.product.product</field>
+      <field name="inherit_id" ref="magentoerpconnect.view_magento_product_form"/>
+      <field name="arch" type="xml">
+        <form position="inside">
+          <group string="Pricing">
+            <div class="oe_inline">
+              <label for="magento_cost" class="oe_inline" />
+              <field name="magento_cost" readonly="1" class="oe_inline"
+                nolabel="1"/>
+              <button name="recompute_magento_cost" string="(recompute)"
+                class="oe_link oe_inline" type="object"/>
+            </div>
+          </group>
+        </form>
+      </field>
+    </record>
+  </data>
+</openerp>

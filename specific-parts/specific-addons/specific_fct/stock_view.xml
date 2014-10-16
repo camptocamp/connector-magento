@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+    <!-- TODO --> 
+    <!-- <record model="ir.ui.view" id="view_picking_out_form_specific"> -->
+      <!--     <field name="name">stock.picking.out.form.specific</field> -->
+      <!--     <field name="model">stock.picking</field> -->
+      <!--     <field name="inherit_id" ref="packing_product_change.view_picking_out_form"/> -->
+      <!--     <field name="arch" type="xml"> -->
+        <!--         <data> -->
+          <!--             <xpath expr="/form/notebook/page[@string='Products']/group[1]/button[@name='force_assign']" position="attributes"> -->
+            <!--                 <attribute name="groups">stock.group_stock_manager</attribute> -->
+            <!--             </xpath> -->
+          <!-- group is 6 and no 5 because stock.picking view in packing_product_change intercalates a group -->
+          <!--             <xpath expr="/form/notebook/page[@string='Products']/field[@name='move_lines']/form[@string='Stock Moves']/group[6]/button[@name='force_assign']" position="attributes"> -->
+            <!--                 <attribute name="groups">stock.group_stock_manager</attribute> -->
+            <!--             </xpath> -->
+          <!--         </data> -->
+        <!--     </field> -->
+      <!-- </record> -->
+
+    <record id="view_picking_out_search" model="ir.ui.view">
+      <field name="name">stock.picking.out.search.specific</field>
+      <field name="model">stock.picking.out</field>
+      <field name="inherit_id" ref="stock.view_picking_out_search"/>
+      <field name="arch" type="xml">
+        <filter name="to_invoice" position="after">
+          <separator/>
+          <filter name="has_carrier" string="With carrier" domain="[('carrier_id', '!=', False)]"/>
+          <filter name="has_no_carrier" string="Without carrier" domain="[('carrier_id', '=', False)]"/>
+        </filter>
+      </field>
+    </record>
+
+  </data>
+</openerp>

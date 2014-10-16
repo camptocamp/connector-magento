@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+
+        <record id="ir_cron_stockit_export_product" model="ir.cron">
+            <field name="name">Stockit Export Products</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">24</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'stockit.export.product'" name="model"/>
+            <field eval="'run_background_export'" name="function"/>
+            <field eval="'()'" name="args"/>
+            <field eval="False" name="active"/>
+        </record>
+
+        <record id="ir_cron_stockit_export_product_ean" model="ir.cron">
+            <field name="name">Stockit Export Products EAN13</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">24</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'stockit.export.product.ean13'" name="model"/>
+            <field eval="'run_background_export'" name="function"/>
+            <field eval="'()'" name="args"/>
+            <field eval="False" name="active"/>
+        </record>
+
+        <record id="ir_cron_stockit_export_out_picking" model="ir.cron">
+            <field name="name">Stockit Export Out Pickings</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">24</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'stockit.export.out.picking'" name="model"/>
+            <field eval="'run_background_export'" name="function"/>
+            <field eval="'()'" name="args"/>
+            <field eval="False" name="active"/>
+        </record>
+
+        <record id="ir_cron_stockit_export_in_picking" model="ir.cron">
+            <field name="name">Stockit Export In Pickings</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">24</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'stockit.export.in.picking'" name="model"/>
+            <field eval="'run_background_export'" name="function"/>
+            <field eval="'()'" name="args"/>
+            <field eval="False" name="active"/>
+        </record>
+
+        <record id="ir_cron_stockit_import_inventory" model="ir.cron">
+            <field name="name">Stockit Import Inventory</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">24</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'stockit.import.inventory'" name="model"/>
+            <field eval="'run_background_import'" name="function"/>
+            <field eval="'()'" name="args"/>
+            <field eval="False" name="active"/>
+        </record>
+
+        <record id="ir_cron_stockit_import_in_picking" model="ir.cron">
+            <field name="name">Stockit Import Ingoing picking</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">24</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'stockit.import.in.picking'" name="model"/>
+            <field eval="'run_background_import'" name="function"/>
+            <field eval="'()'" name="args"/>
+            <field eval="False" name="active"/>
+        </record>
+    </data>
+    
+</openerp>

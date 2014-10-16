@@ -1,0 +1,113 @@
+<?xml version="1.0" ?>
+<openerp>
+    <data noupdate="0">
+
+        <!-- Activate the following options:
+
+        Sales:
+            * Use pricelists to adapt your price per customers
+            * Allow a different address for delivery and invoicing
+            * Allow setting a discount on the sales order lines
+            * Manage multiple shops
+
+        Purchases:
+            *
+
+        Warehouse:
+            * Manage multiple locations and warehouses
+
+        Accounting:
+            * Analytic accounting 
+
+        General Settings:
+            *
+        -->
+        <record model="res.groups" id="base.group_user">
+            <field name="implied_ids"
+                eval="[(4, ref('product.group_sale_pricelist')),
+                       (4, ref('product.group_purchase_pricelist')),
+                       (4, ref('sale.group_delivery_invoice_address')),
+                       (4, ref('sale.group_discount_per_so_line')),
+                       (4, ref('stock.group_locations')),
+                       (4, ref('sale.group_analytic_accounting')),
+                       ]"/>
+        </record>
+</data>
+  <data>
+    <record id="stock.access_stock_picking" model="ir.model.access">
+      <field name="model_id" ref="stock.model_stock_picking"/>
+      <field eval="1" name="perm_read"/>
+      <field eval="&quot;&quot;&quot;stock.picking&quot;&quot;&quot;" name="name"/>
+      <field eval="0" name="perm_unlink"/>
+      <field eval="1" name="perm_write"/>
+      <field eval="1" name="perm_create"/>
+      <field name="group_id" ref="stock.group_stock_user"/>
+    </record>
+  </data>
+  <data >
+    <record id="purchase.access_stock_picking_purchase_user" model="ir.model.access">
+      <field name="model_id" ref="stock.model_stock_picking"/>
+      <field eval="1" name="perm_read"/>
+      <field eval="&quot;&quot;&quot;stock.picking&quot;&quot;&quot;" name="name"/>
+      <field eval="0" name="perm_unlink"/>
+      <field eval="1" name="perm_write"/>
+      <field eval="1" name="perm_create"/>
+      <field name="group_id" ref="purchase.group_purchase_user"/>
+    </record>
+  </data>
+  <data >
+    <record id="purchase.access_purchase_order_manager" model="ir.model.access">
+      <field name="model_id" ref="stock.model_stock_picking"/>
+      <field eval="1" name="perm_read"/>
+      <field eval="&quot;&quot;&quot;stock.picking&quot;&quot;&quot;" name="name"/>
+      <field eval="0" name="perm_unlink"/>
+      <field eval="1" name="perm_write"/>
+      <field eval="1" name="perm_create"/>
+      <field name="group_id" ref="purchase.group_purchase_manager"/>
+    </record>
+  </data>
+  <data>
+    <record id="mrp.access_stock_picking_mrp_worker" model="ir.model.access">
+      <field name="model_id" ref="stock.model_stock_picking"/>
+      <field eval="1" name="perm_read"/>
+      <field eval="&quot;&quot;&quot;stock.picking mrp_worker&quot;&quot;&quot;" name="name"/>
+      <field eval="0" name="perm_unlink"/>
+      <field eval="1" name="perm_write"/>
+      <field eval="1" name="perm_create"/>
+      <field name="group_id" ref="mrp.group_mrp_user"/>
+    </record>
+  </data>
+  <data >
+    <record id="point_of_sale.access_stock_picking_pos_user" model="ir.model.access">
+      <field name="model_id" ref="stock.model_stock_picking"/>
+      <field eval="1" name="perm_read"/>
+      <field eval="&quot;&quot;&quot;stock.picking pos_user&quot;&quot;&quot;" name="name"/>
+      <field eval="0" name="perm_unlink"/>
+      <field eval="1" name="perm_write"/>
+      <field eval="1" name="perm_create"/>
+      <field name="group_id" ref="point_of_sale.group_pos_user"/>
+    </record>
+  </data>
+  <data>
+    <record id="ir_model_access_stockpicking3" model="ir.model.access">
+      <field name="model_id" ref="stock.model_stock_picking"/>
+      <field eval="1" name="perm_read"/>
+      <field eval="&quot;&quot;&quot;stock.picking&quot;&quot;&quot;" name="name"/>
+      <field eval="1" name="perm_unlink"/>
+      <field eval="1" name="perm_write"/>
+      <field eval="1" name="perm_create"/>
+      <field name="group_id" ref="base.group_sale_manager"/>
+    </record>
+  </data>
+  <data>
+    <record id="ir_model_access_stockpicking4" model="ir.model.access">
+      <field name="model_id" ref="stock.model_stock_picking"/>
+      <field eval="1" name="perm_read"/>
+      <field eval="&quot;&quot;&quot;stock.picking&quot;&quot;&quot;" name="name"/>
+      <field eval="1" name="perm_unlink"/>
+      <field eval="1" name="perm_write"/>
+      <field eval="1" name="perm_create"/>
+      <field name="group_id" ref="account.group_account_manager"/>
+    </record>
+  </data>
+</openerp>
