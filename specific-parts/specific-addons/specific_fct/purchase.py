@@ -22,6 +22,26 @@
 from openerp.osv import orm, fields
 
 
+class purchase_order(orm.Model):
+    _inherit = 'purchase.order'
+
+    # allow for edition in 'confirmed' state
+    _columns = {
+        'partner_ref': fields.char(
+            'Supplier Reference',
+            states={
+                'approved': [('readonly', True)],
+                'done': [('readonly', True)]
+            },
+            size=64,
+            help="Reference of the sales order or quotation sent by your "
+                 "supplier. It's mainly used to do the matching when you "
+                 "receive the products as this reference is usually written "
+                 "on the delivery order sent by your supplier."
+        ),
+    }
+
+
 class purchase_order_line(orm.Model):
     _inherit = 'purchase.order.line'
 
