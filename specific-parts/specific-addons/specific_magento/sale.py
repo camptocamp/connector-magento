@@ -208,6 +208,7 @@ class DebonixSaleOrderImportMapper(SaleOrderImportMapper):
 
     direct = (SaleOrderImportMapper.direct +
               [('sms_phone', 'sms_phone'),
+               ('po_number', 'client_order_ref'),
                ]
               )
 
