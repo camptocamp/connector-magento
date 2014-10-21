@@ -100,23 +100,20 @@ class DebonixSaleOrderAdapter(SaleOrderAdapter):
                      }
         return self._call('%s.search' % self._magento_model, [arguments])
 
-    def set_expected_date(self, id, item_id, expected_date):
+    def set_expected_date(self, id, expected_date):
         """ Update the delivery date on Magento
 
         :param id: the ID of the sale on Magento
-        :param item_id: the ID of the sale line on Magento
         :param expected_date: the date
         """
         new_date = datetime.strptime(expected_date,
                                      DEFAULT_SERVER_DATETIME_FORMAT)
         new_date = new_date.strftime(MAGENTO_DATETIME_FORMAT)
-        # TODO, use the correct method name and arguments in _call
-        _logger.info('%s.set_expected_date(%s)',
+        _logger.info('%s.update_shipping_delay(%s)',
                      self._magento_model,
-                     [id, item_id, new_date])
-        # return self._call('%s.set_expected_date',
-        #                   [id, item_id, new_date])
-
+                     [id, new_date])
+        return self._call('%s.update_shipping_delay',
+                          [id, new_date])
 
 @magento_debonix
 class FidelityLineBuilder(SpecialOrderLineBuilder):
