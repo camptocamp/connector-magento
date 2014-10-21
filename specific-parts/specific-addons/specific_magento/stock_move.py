@@ -22,7 +22,7 @@
 from datetime import datetime
 from openerp.osv import orm
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
-from openerp.addons.connector.exception import IDMissingInBackend
+from openerp.tools.translate import _
 from openerp.addons.connector.queue.job import job, related_action
 from openerp.addons.connector.session import ConnectorSession
 from openerp.addons.connector.unit.synchronizer import ExportSynchronizer
@@ -102,16 +102,14 @@ class MoveExpectedDateExport(ExportSynchronizer):
         if not magento_sale_id:
             # cannot find the sale for this move, exit
             return
-        product_binder = self.get_binder_for_model('magento.product.product')
-        if not sale_line.product_id:
-            return
-        magento_product_id = product_binder.to_backend(sale_line.product_id.id,
-                                                       wrap=True)
-        if not magento_product_id:
-            raise IDMissingInBackend
+        sale_line_binder = self.get_binder_for_model('magento.sale.order.line')
+        magento_sale_line_id = sale_line_binder.to_backend(sale_line.id,
+                                                           wrap=True)
+        if not magento_sale_line_id:
+            return _('Not a Magento order line')
 
         adapter = self.get_connector_unit_for_model(GenericAdapter,
                                                     'magento.sale.order')
         adapter.set_expected_date(magento_sale_id,
-                                  magento_product_id,
+                                  magento_sale_line_id,
                                   move.date_expected)
