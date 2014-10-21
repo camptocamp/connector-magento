@@ -20,7 +20,9 @@
 ##############################################################################
 
 import logging
+from datetime import datetime
 
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.tools.translate import _
 
 from openerp.addons.connector.unit.mapper import (
@@ -28,6 +30,9 @@ from openerp.addons.connector.unit.mapper import (
     mapping,
 )
 from openerp.addons.connector_ecommerce.sale import SpecialOrderLineBuilder
+from openerp.addons.magentoerpconnect.unit.backend_adapter import (
+    MAGENTO_DATETIME_FORMAT,
+)
 from openerp.addons.magentoerpconnect.sale import (
     SaleOrderImport,
     SaleOrderImportMapper,
@@ -94,6 +99,23 @@ class DebonixSaleOrderAdapter(SaleOrderAdapter):
                      'filters': filters,
                      }
         return self._call('%s.search' % self._magento_model, [arguments])
+
+    def set_expected_date(self, id, item_id, expected_date):
+        """ Update the delivery date on Magento
+
+        :param id: the ID of the sale on Magento
+        :param item_id: the ID of the sale line on Magento
+        :param expected_date: the date
+        """
+        new_date = datetime.strptime(expected_date,
+                                     DEFAULT_SERVER_DATETIME_FORMAT)
+        new_date = new_date.strftime(MAGENTO_DATETIME_FORMAT)
+        # TODO, use the correct method name and arguments in _call
+        _logger.info('%s.set_expected_date(%s)',
+                     self._magento_model,
+                     [id, item_id, new_date])
+        # return self._call('%s.set_expected_date',
+        #                   [id, item_id, new_date])
 
 
 @magento_debonix
