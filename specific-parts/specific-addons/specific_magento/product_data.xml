@@ -10,6 +10,14 @@
       <field name="name">points de fidélité</field>
     </record>
 
+    <record id="product_product_debonix_admin_costs" model="product.product">
+      <field name="default_code">ADMIN</field>
+      <field name="list_price">0.0</field>
+      <field name="standard_price">0.0</field>
+      <field name="type">service</field>
+      <field name="name">Frais administratifs</field>
+    </record>
+
   </data>
 </openerp>
 

@@ -151,6 +151,25 @@ class FidelityLineBuilder(SpecialOrderLineBuilder):
 
 
 @magento_debonix
+class AdminCostsLineBuilder(SpecialOrderLineBuilder):
+    """ Build a sales order line with positive amount for adminstrative costs.
+
+    The Magento API has to provide the field ::
+
+    base_xipaymentrules_fees_amount -> amount of the costs (tax included)
+
+    Magento provides a taxes included amount, so the ADMIN product has
+    to be configured with a taxes include tax.
+    """
+    _model_name = 'magento.sale.order'
+
+    def __init__(self, environment):
+        super(AdminCostsLineBuilder, self).__init__(environment)
+        self.product_ref = ('specific_magento',
+                            'product_product_debonix_admin_costs')
+
+
+@magento_debonix
 class LineMapChild(ImportMapChild):
     """ Customize the mapping of sales order lines.
 
@@ -260,8 +279,20 @@ class DebonixSaleOrderImportMapper(SaleOrderImportMapper):
         values['order_line'].append(line)
         return values
 
+    def _add_admin_costs(self, map_record, values):
+        record = map_record.source
+        amount = float(record.get('base_xipaymentrules_fees_amount') or 0.)
+        if not amount:
+            return values
+        line_builder = self.get_connector_unit_for_model(AdminCostsLineBuilder)
+        line_builder.price_unit = amount
+        line = (0, 0, line_builder.get_line())
+        values['order_line'].append(line)
+        return values
+
     def finalize(self, map_record, values):
         values.setdefault('order_line', [])
         values = self._add_fidelity_line(map_record, values)
+        values = self._add_admin_costs(map_record, values)
         return super(DebonixSaleOrderImportMapper, self).finalize(
             map_record, values)
