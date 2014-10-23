@@ -96,14 +96,12 @@ class MoveExpectedDateExport(ExportSynchronizer):
         sale_line = move.sale_line_id
         if not sale_line:
             return
-        sale = sale_line.order_id
-        sale_binder = self.get_binder_for_model('magento.sale.order')
-        magento_sale_id = sale_binder.to_backend(sale.id, wrap=True)
-        if not magento_sale_id:
-            # cannot find the sale for this move, exit
-            return
+        sale_line_binder = self.get_binder_for_model('magento.sale.order.line')
+        magento_sale_line_id = sale_line_binder.to_backend(sale_line.id, wrap=True)
+        if not magento_sale_line_id:
+            return _('Not a Magento order line')
 
         adapter = self.get_connector_unit_for_model(GenericAdapter,
                                                     'magento.sale.order')
-        adapter.set_expected_date(magento_sale_id,
+        adapter.set_expected_date(int(magento_sale_line_id),
                                   move.date_expected)
