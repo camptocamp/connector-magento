@@ -4,7 +4,7 @@
 #    Copyright 2009 Camptocamp SA
 #
 ##############################################################################
-@helom_init @helom_pricelist
+@helom_init @helom_pricelist @upgrade_from_1.0.4
 
 Feature: Setup Helom pricelist
    As an administrator, I do the following installation steps

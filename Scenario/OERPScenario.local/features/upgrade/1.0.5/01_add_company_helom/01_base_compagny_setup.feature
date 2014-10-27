@@ -8,7 +8,7 @@
 # Features Generic tags (none for all)
 ##############################################################################
 # Branch      # Module       # Processes     # System
-@helom_init
+@helom_init @upgrade_from_1.0.4
 
 Feature: Setup Helom SARL company
    As an administrator, I do the following installation steps
@@ -31,15 +31,16 @@ Feature: Setup Helom SARL company
     UPDATE res_currency SET company_id = Null;
     UPDATE ir_sequence SET company_id = 1 WHERE company_id IS NULL;
     UPDATE stock_location SET company_id = 1 WHERE company_id IS NULL;
+    UPDATE ir_module_module set name = 'stock_inventory_retry_assign' WHERE name ='on_inventory_retry_assign'
     """
 
   @helom_addons
   Scenario: INSTALL MODULES
     Given I update the module list
     Given I install the required modules with dependencies:
-     | name            |
-     | l10n_ch         |
-     | sale_exceptions |
+     | name                                |
+     | l10n_ch                             |
+     | sale_exceptions                     |
     Then my modules should have been installed and models reloaded
 
   Scenario: Post module upgrade SQL

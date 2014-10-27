@@ -1,4 +1,4 @@
-@helom_init @helom_init_crons
+@helom_init @helom_init_crons @upgrade_from_1.0.4
 
 
 Feature: set cron to support multicompany setup
