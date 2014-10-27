@@ -27,12 +27,12 @@ orphan files.
 
 from openerp.sql_db import Cursor
 
-Cursor.transaction_actions = []
-
 
 def add_transaction_action(cr, callback, *args):
     """ Queue file information to be written after commit """
-    cr.transaction_actions.append((cr._cnx, callback, args))
+    if not hasattr(cr, 'transaction_actions'):
+        cr.transaction_actions = []
+    cr.transaction_actions.append((callback, args))
 
 Cursor.add_transaction_action = add_transaction_action
 
@@ -46,10 +46,12 @@ def commit(self):
     is written only after commit. And won't be
     in case of rollback.
     """
+    if not hasattr(self, 'transaction_actions'):
+        self.transaction_actions = []
     res = former_commit(self)
-    to_do = [act for act in self.transaction_actions if act[0] == self._cnx]
-    for act in to_do:
-            act[1](*act[2])
+    while self.transaction_actions:
+        callback, args = self.transaction_actions.pop(0)
+        callback(*args)
     return res
 
 Cursor.commit = commit
@@ -62,11 +64,7 @@ def rollback(self):
     """ Perform an SQL `ROLLBACK`
     Clean file queue for the rolled back cursor
     """
-    to_remove = [index for index, act in enumerate(self.transaction_actions)
-                 if act[0] != self._cnx]
-    # start at end to avoid recomputing offset
-    for index in reversed(to_remove):
-        del self.transaction_actions[index]
+    self.transaction_actions = []
     return former_rollback(self)
 
 Cursor.rollback = rollback
