@@ -8,7 +8,7 @@
 # Features Generic tags (none for all)
 ##############################################################################
 # Branch      # Module       # Processes     # System
-@helom_init @helom_custom_chart
+@helom_init @helom_custom_chart @upgrade_from_1.0.4
 
 Feature: As an administrator, I do the following installation steps
          in order to setup custom account chart
@@ -152,8 +152,8 @@ Feature: As an administrator, I do the following installation steps
 
   @helom_bank_journal_account
   Scenario: Attach bank journal to correct account.
-    Given I find a "account.bank.journal" with code: BNK2
+    Given I find a "account.journal" with code: BNK2
     And having:
-    | name                      | value           |
-    | default_debit_account_id  | by code: 512100 |
-    | default_credit_account_id | by code: 512100 |
+    | name                      | value                                |
+    | default_debit_account_id  | by code: 512100 and company_id.id: 2 |
+    | default_credit_account_id | by code: 512100 and company_id.id: 2 |

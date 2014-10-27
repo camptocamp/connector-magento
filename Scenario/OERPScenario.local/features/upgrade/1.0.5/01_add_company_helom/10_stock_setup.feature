@@ -8,7 +8,7 @@
 # Features Generic tags (none for all)
 ##############################################################################
 # Branch      # Module       # Processes     # System
-@helom_init @helom_stock
+@helom_init @helom_stock @upgrade_from_1.0.4
 
 Feature: Setup Helom SARL company
    As an administrator, I do the following installation steps
