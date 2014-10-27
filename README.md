@@ -6,8 +6,7 @@ Private and customer specific branches for Debonix.
 
 Steps:
 
-    ln -s profiles/dev.cfg buildout.cfg
-    ./bootstrap.sh
+    ./bootstrap.sh profiles/dev.cfg
     bin/buildout
 
 :warning: do not use the other configuration files if you do not know what you
