@@ -180,6 +180,14 @@ class sale_order(orm.Model):
 
         return invoice_id
 
+    # Redefine print button to call specific report
+    def print_quotation(self, cr, uid, ids, context=None):
+        result = super(sale_order, self).print_quotation(
+            cr, uid, ids, context=context
+        )
+        result['report_name'] = 'sale.order_custom'
+        return result
+
 
 class sale_order_line(orm.Model):
     _inherit = 'sale.order.line'
