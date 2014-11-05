@@ -1,4 +1,4 @@
-#!/bin/bash
+i#!/bin/bash
 virtualenv=virtualenv
 
 function vercomp () { # Dennis Williamson http://stackoverflow.com/questions/4023830/bash-how-compare-two-strings-in-version-format
@@ -53,10 +53,28 @@ function create_virtualenv() {
     fi
 }
 
+function ensure_cfg(){
+    if [ ! -a buildout.cfg ]
+    then
+        if [ -a $1 ]
+        then
+            (cat <<EOF
+[buildout]
+extends = $1
+EOF
+            ) > buildout.cfg
+        else
+            echo "No buildout.cfg found. Please supply one or pass the name of the file to extend on the command line"
+            exit 1
+        fi
+    fi
+}
+
 function bootstrap() {
     create_virtualenv
+    ensure_cfg $1
     sandbox/bin/python bootstrap.py
 }
 
 
-bootstrap
+bootstrap $*

@@ -1,4 +1,4 @@
-@helom_init @helom_sequences
+@helom_init @helom_sequences @upgrade_from_1.0.4
 
 Feature: set sequences on new stock picking models (in, int, out)
 

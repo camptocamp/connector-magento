@@ -8,7 +8,7 @@
 # Features Generic tags (none for all)
 ##############################################################################
 # Branch      # Module       # Processes     # System
-@helom_init @helom_security
+@helom_init @helom_security @upgrade_from_1.0.4
 Feature: MULTICOMPANY SECURITY RULES TO DESACTIVATE IN ORDER TO SHARE FOLLOWING OBJECTS
 
   @helom_multicompany_security_rules
