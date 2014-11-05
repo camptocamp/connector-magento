@@ -50,3 +50,19 @@ class purchase_order_line(orm.Model):
     _columns = {
         'sequence': fields.integer('Sequence'),
     }
+
+    def unlink(self, cr, uid, ids, context=None):
+        """
+        According to the ticket [REF #398]:
+        I comment the line that raise en exception if the line in not
+        in state draft or cancel
+        """
+        procurement_ids_to_cancel = []
+        for line in self.browse(cr, uid, ids, context=context):
+#             if line.state not in ['draft', 'cancel']:
+#                 raise osv.except_osv(_('Invalid Action!'), _('Cannot delete a purchase order line which is in state \'%s\'.') %(line.state,))
+            if line.move_dest_id:
+                procurement_ids_to_cancel.extend(procurement.id for procurement in line.move_dest_id.procurements)
+        if procurement_ids_to_cancel:
+            self.pool['procurement.order'].action_cancel(cr, uid, procurement_ids_to_cancel)
+        return super(purchase_order_line, self).unlink(cr, uid, ids, context=context)
