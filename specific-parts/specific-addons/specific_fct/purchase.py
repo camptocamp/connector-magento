@@ -30,12 +30,12 @@ def unlink(self, cr, uid, ids, context=None):
     """
     procurement_ids_to_cancel = []
     for line in self.browse(cr, uid, ids, context=context):
-#             if line.state not in ['draft', 'cancel']:
-#                 raise osv.except_osv(_('Invalid Action!'), _('Cannot delete a purchase order line which is in state \'%s\'.') %(line.state,))
+#       if line.state not in ['draft', 'cancel']:
+#          raise osv.except_osv(_('Invalid Action!'), _('Cannot delete a purchase order line which is in state \'%s\'.') %(line.state,))
         if line.move_dest_id:
             procurement_ids_to_cancel.extend(procurement.id for procurement in line.move_dest_id.procurements)
-        if procurement_ids_to_cancel:
-            self.pool['procurement.order'].action_cancel(cr, uid, procurement_ids_to_cancel)
+    if procurement_ids_to_cancel:
+        self.pool['procurement.order'].action_cancel(cr, uid, procurement_ids_to_cancel)
     return super(purchase_order_line, self).unlink(cr, uid, ids, context=context)
 
 purchase_order_line = purchase.purchase.purchase_order_line
