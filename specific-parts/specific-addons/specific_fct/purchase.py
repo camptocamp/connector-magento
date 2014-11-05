@@ -22,6 +22,11 @@
 from openerp.osv import orm, fields
 from openerp.addons import purchase
 
+# Monkey-patch to allow line deletion in "Waiting approval" state
+
+addons_po_line = purchase.purchase.purchase_order_line
+
+
 def unlink(self, cr, uid, ids, context=None):
     """
     According to the ticket [REF #398]:
@@ -31,15 +36,25 @@ def unlink(self, cr, uid, ids, context=None):
     procurement_ids_to_cancel = []
     for line in self.browse(cr, uid, ids, context=context):
 #       if line.state not in ['draft', 'cancel']:
-#          raise osv.except_osv(_('Invalid Action!'), _('Cannot delete a purchase order line which is in state \'%s\'.') %(line.state,))
+#           raise osv.except_osv(
+#               _('Invalid Action!'),
+#               _('Cannot delete a purchase order line'
+#                 ' which is in state \'%s\'.')
+#               % (line.state,)
+#           )
         if line.move_dest_id:
-            procurement_ids_to_cancel.extend(procurement.id for procurement in line.move_dest_id.procurements)
+            procurement_ids_to_cancel.extend(
+                procurement.id for procurement
+                in line.move_dest_id.procurements
+            )
     if procurement_ids_to_cancel:
-        self.pool['procurement.order'].action_cancel(cr, uid, procurement_ids_to_cancel)
-    return super(purchase_order_line, self).unlink(cr, uid, ids, context=context)
+        self.pool['procurement.order'].action_cancel(
+            cr, uid, procurement_ids_to_cancel
+        )
+    return super(addons_po_line, self).unlink(cr, uid, ids, context=context)
 
-purchase_order_line = purchase.purchase.purchase_order_line
-purchase_order_line.unlink = unlink
+addons_po_line.unlink = unlink
+
 
 class purchase_order(orm.Model):
     _inherit = 'purchase.order'
