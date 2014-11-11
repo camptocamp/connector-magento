@@ -9,6 +9,7 @@ Feature: upgrade to 1.0.7
     Given I update the module list
     Given I install the required modules with dependencies:
       | name                      |
+      | account_easy_reconcile    |
       | connector_ecommerce       |
       | sale_floor_price          |
       | sale_markup               |
