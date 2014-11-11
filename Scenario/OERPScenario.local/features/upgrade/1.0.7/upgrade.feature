@@ -9,6 +9,10 @@ Feature: upgrade to 1.0.7
     Given I update the module list
     Given I install the required modules with dependencies:
       | name                      |
+      | connector_ecommerce       |
+      | sale_floor_price          |
+      | sale_markup               |
+      | sale_line_watcher         |
       | specific_sale_exceptions  |
     Then my modules should have been installed and models reloaded
 
