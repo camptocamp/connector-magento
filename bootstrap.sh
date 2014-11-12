@@ -1,4 +1,4 @@
-i#!/bin/bash
+#!/bin/bash
 virtualenv=virtualenv
 
 function vercomp () { # Dennis Williamson http://stackoverflow.com/questions/4023830/bash-how-compare-two-strings-in-version-format
