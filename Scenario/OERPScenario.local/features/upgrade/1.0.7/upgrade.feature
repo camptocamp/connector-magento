@@ -8,13 +8,15 @@ Feature: upgrade to 1.0.7
   Scenario: upgrade application version
     Given I update the module list
     Given I install the required modules with dependencies:
-      | name                      |
-      | account_easy_reconcile    |
-      | connector_ecommerce       |
-      | sale_floor_price          |
-      | sale_markup               |
-      | sale_line_watcher         |
-      | specific_sale_exceptions  |
+      | name                                |
+      | account_easy_reconcile              |
+      | connector_ecommerce                 |
+      | sale_floor_price                    |
+      | sale_markup                         |
+      | sale_line_watcher                   |
+      | specific_sale_exceptions            |
+      | stock_picking_compute_delivery_date |
+      | specific_fct                        |
     Then my modules should have been installed and models reloaded
 
 
