@@ -6,9 +6,9 @@
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="account.view_partner_property_form"/>
             <field name="arch" type="xml">
-                <field name="credit_limit" position="after">
+                <xpath expr="//field[@name='active']" position="after">
                    <field name="block_sales"/>
-                </field>
+                </xpath>
             </field>
         </record>
     </data>
