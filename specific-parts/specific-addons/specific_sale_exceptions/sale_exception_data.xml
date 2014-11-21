@@ -50,9 +50,13 @@
       <field name="active" eval="True"/>
     </record>
 
+    <!-- 19/11/2014 : Debonix does not want code upgrades to put back the original code, so
+         noupdate="0" is disabled. We keep the original rules here, though.
   </data>
 
   <data noupdate="0">
+    -->
+
     <!-- code is in an update block so changes in the module are applied -->
 
     <record id="excep_not_sellable" model="sale.exception">
