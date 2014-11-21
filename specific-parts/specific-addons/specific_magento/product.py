@@ -47,6 +47,7 @@ from openerp.addons.magentoerpconnect.product import (
     ProductInventoryExport,
     ProductImportMapper,
     ProductProductAdapter,
+    CatalogImageImporter,
     )
 from .backend import magento_debonix
 from .product_bundle import BoMBundleImporter
@@ -482,6 +483,14 @@ class DebonixProductInventoryExport(ProductInventoryExport):
                 'use_config_manage_stock': False,
             })
         return data
+
+
+@magento_debonix
+class DebonixCatalogImageImporter(CatalogImageImporter):
+    """ Do not import the images on the products """
+
+    def run(self, magento_id, binding_id):
+        return
 
 
 @magento_debonix
