@@ -54,6 +54,8 @@ class StockItInPickingImport(orm.TransientModel):
         if isinstance(ids, (list, tuple)):
             assert len(ids) == 1, "1 ID expected, got %s" % ids
             ids = ids[0]
+        if context is None:
+            context = {}
 
         picking_obj = self.pool.get('stock.picking')
         product_obj = self.pool.get('product.product')
