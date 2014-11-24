@@ -54,6 +54,8 @@ class StockItInPickingImport(orm.TransientModel):
         if isinstance(ids, (list, tuple)):
             assert len(ids) == 1, "1 ID expected, got %s" % ids
             ids = ids[0]
+        if context is None:
+            context = {}
 
         picking_obj = self.pool.get('stock.picking')
         product_obj = self.pool.get('product.product')
@@ -103,11 +105,13 @@ class StockItInPickingImport(orm.TransientModel):
         # create ean on product if it does not already exist
         product_ean_list = defaultdict(list)
         errors_report = []
+        active_context = context.copy()
+        active_context['active_test'] = False
         for row in rows:
             product_ids = product_obj.search(
                 cr, uid,
                 [('default_code', '=', row['default_code'])],
-                context=context)
+                context=active_context)
             if not product_ids:
                 errors_report.append(_('Product with default code %s does not exist!') % (row['default_code'],))
                 continue
