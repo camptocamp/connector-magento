@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,19 +19,16 @@
 #
 ##############################################################################
 
-from . import connector
-from . import backend
-from . import magento_model
-from . import product_brand
-from . import product_state
-from . import product
-from . import product_bundle
-from . import product_attribute
-from . import unit
-from . import sale
-from . import partner
-from . import stock
-from . import stock_move
-from . import supplier
-from . import invoice
-from . import wizard
+
+from openerp.addons.magentoerpconnect import invoice
+from openerp.addons.connector_ecommerce.event import (on_invoice_paid,
+                                                      on_invoice_validated)
+
+
+# Switch off the creation of binding for the invoice,
+# debonix doesn't want to export invoices because they are
+# always created on Magento before the import of the sales orders.
+# If a magento.account.invoice binding record is created manually,
+# it will still be exported though.
+on_invoice_paid.unsubscribe(invoice.invoice_create_bindings)
+on_invoice_validated.unsubscribe(invoice.invoice_create_bindings)

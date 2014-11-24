@@ -20,6 +20,7 @@
 ##############################################################################
 
 import logging
+import xmlrpclib
 from openerp.tools.translate import _
 from openerp.osv import orm, fields
 from openerp.addons.connector.unit.mapper import (
@@ -33,7 +34,7 @@ from openerp.addons.connector.unit.mapper import (
 from openerp.addons.connector.event import (on_record_write,
                                             on_record_create,
                                             )
-from openerp.addons.connector.exception import MappingError
+from openerp.addons.connector.exception import MappingError, RetryableJobError
 from openerp.addons.magentoerpconnect.unit.export_synchronizer import (
     export_record,
     MagentoExporter,
@@ -45,6 +46,8 @@ from openerp.addons.magentoerpconnect.product import (
     ProductImport,
     ProductInventoryExport,
     ProductImportMapper,
+    ProductProductAdapter,
+    CatalogImageImporter,
     )
 from .backend import magento_debonix
 from .product_bundle import BoMBundleImporter
@@ -483,6 +486,14 @@ class DebonixProductInventoryExport(ProductInventoryExport):
 
 
 @magento_debonix
+class DebonixCatalogImageImporter(CatalogImageImporter):
+    """ Do not import the images on the products """
+
+    def run(self, magento_id, binding_id):
+        return
+
+
+@magento_debonix
 class DebonixProductExporter(MagentoExporter):
     """ Products are created on Magento. Export only changes of
     some fields.
@@ -510,6 +521,28 @@ class DebonixAddCheckpoint(AddCheckpoint):
         # Debonix uses the 'state' of the products to know if it is ready
         # to sell
         pass
+
+
+@magento_debonix
+class DebonixProductProductAdapter(ProductProductAdapter):
+
+    def write(self, id, data, storeview_id=None):
+        """ Update records on the external system """
+        _super = super(DebonixProductProductAdapter, self)
+        try:
+            return _super.write(id, data, storeview_id=storeview_id)
+        except xmlrpclib.Fault as err:
+            deadlock_msg = ('SQLSTATE[40001]: Serialization failure: 1213 '
+                            'Deadlock found when trying to get lock; try '
+                            'restarting transaction')
+            # 1 means internal error
+            if err.faultCode == 1 and err.faultString == deadlock_msg:
+                raise RetryableJobError('Magento returned: "%s", possibly due '
+                                        'to a reindexation in progress. '
+                                        'This job will be retried later.' %
+                                        deadlock_msg)
+            else:
+                raise
 
 
 @on_record_create(model_names='magento.product.product')
