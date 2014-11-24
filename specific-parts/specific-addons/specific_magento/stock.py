@@ -21,6 +21,7 @@
 import logging
 import xmlrpclib
 
+from openerp.tools.translate import _
 from openerp.addons.magentoerpconnect.stock_picking import (
     StockPickingAdapter,
     MagentoPickingExport,
