@@ -173,10 +173,13 @@ class StockItInPickingImport(orm.TransientModel):
                     not_receipt_moves[move.product_id.id] = move
 
                 complete, too_many, too_few, new_moves = [], [], [], []
+                active_context = context.copy()
+                active_context['active_test'] = False
                 for row in rows:
                     product_ids = product_obj.search(cr, uid,
                                                      [('default_code', '=',
-                                                       row['default_code'])])
+                                                       row['default_code'])],
+                                                     context=active_context)
                     if not product_ids:
                         raise orm.except_orm(
                             _('ImportError'),
