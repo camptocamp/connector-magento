@@ -523,28 +523,6 @@ class DebonixAddCheckpoint(AddCheckpoint):
         pass
 
 
-@magento_debonix
-class DebonixProductProductAdapter(ProductProductAdapter):
-
-    def write(self, id, data, storeview_id=None):
-        """ Update records on the external system """
-        _super = super(DebonixProductProductAdapter, self)
-        try:
-            return _super.write(id, data, storeview_id=storeview_id)
-        except xmlrpclib.Fault as err:
-            deadlock_msg = ('SQLSTATE[40001]: Serialization failure: 1213 '
-                            'Deadlock found when trying to get lock; try '
-                            'restarting transaction')
-            # 1 means internal error
-            if err.faultCode == 1 and err.faultString == deadlock_msg:
-                raise RetryableJobError('Magento returned: "%s", possibly due '
-                                        'to a reindexation in progress. '
-                                        'This job will be retried later.' %
-                                        deadlock_msg)
-            else:
-                raise
-
-
 @on_record_create(model_names='magento.product.product')
 @on_record_write(model_names='magento.product.product')
 def delay_export(session, model_name, record_id, vals):
