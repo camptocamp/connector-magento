@@ -22,6 +22,7 @@ from . import account_invoice
 from . import carrier_file
 from . import company
 from . import partner
+from . import procurement
 from . import product
 from . import purchase
 from . import sale
