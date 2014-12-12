@@ -301,10 +301,10 @@ class ProductSupplierInfoMapper(ImportMapper):
 class DebonixProductImportMapper(ProductImportMapper):
     _model_name = 'magento.product.product'
 
-    direct = ([(source, target) for source, target in
-               ProductImportMapper.direct if
-               not target == 'standard_price']
-              )
+    direct = [(source, target) for source, target in
+              ProductImportMapper.direct if
+              not target in ('standard_price', 'weight')] + \
+             [('weight', 'weight_net')]
 
     @mapping
     def country(self, record):
