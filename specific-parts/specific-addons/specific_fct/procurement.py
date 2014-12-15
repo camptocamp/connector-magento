@@ -27,6 +27,8 @@ class ProcurementOrder(orm.Model):
 
     # Add context for ir.actions.server call
     def action_cancel(self, cr, uid, ids, context=None):
-        if context and 'active_ids' in context:
+        if context and \
+           context.get('cancel_procurements_act_server', False) and \
+           'active_ids' in context:
             ids = context['active_ids']
         return super(ProcurementOrder, self).action_cancel(cr, uid, ids)
