@@ -11,6 +11,7 @@
         <data>
           <field name="website" position="after">
             <field name="siret"/>
+            <field name="origin_country_id"/>
           </field>
         </data>
       </field>
