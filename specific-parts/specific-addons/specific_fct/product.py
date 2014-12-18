@@ -62,3 +62,23 @@ class Product(orm.Model):
             vals['default_code'] = self._fix_default_code(
                 cr, uid, vals['default_code'], context=context)
         return super(Product, self).write(cr, uid, ids, vals, context=context)
+
+
+class product_supplierinfo(orm.Model):
+    _inherit = "product.supplierinfo"
+
+    def create(self, cr, uid, vals, context=None):
+        if 'origin_country_id' in vals:
+            if not vals['origin_country_id']:
+                supplier_id = vals['name']
+                partner_obj = self.pool['res.partner']
+                origin_country = partner_obj.read(cr, uid,
+                                                  [supplier_id],
+                                                  ['origin_country_id'],
+                                                  context=context)[0]
+                if origin_country['origin_country_id']:
+                    country_id = origin_country['origin_country_id'][0]
+                    vals['origin_country_id'] = country_id
+        return super(product_supplierinfo, self).create(cr, uid,
+                                                        vals,
+                                                        context=context)
