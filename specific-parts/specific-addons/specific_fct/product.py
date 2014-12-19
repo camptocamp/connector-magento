@@ -70,9 +70,9 @@ class product_supplierinfo(orm.Model):
 
     def create(self, cr, uid, vals, context=None):
         if 'origin_country_id' in vals:
-            supplier_id = vals['name']
-            partner_obj = self.pool['res.partner']
             if not vals['origin_country_id']:
+                supplier_id = vals['name']
+                partner_obj = self.pool['res.partner']
                 origin_country = partner_obj.read(cr, uid,
                                                   [supplier_id],
                                                   ['origin_country_id'],
