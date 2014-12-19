@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!--
+        Procurement
+        -->
+        <record id="cancel_procurements" model="ir.actions.server">
+            <field name="code">obj.action_cancel(context=dict(context, cancel_procurements_act_server=True))</field>
+            <field name="state">code</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="procurement.model_procurement_order"/>
+            <field name="condition">True</field>
+            <field name="name">Cancel Procurements</field>
+        </record>
+
+        <record id="ir_button_cancel_procurements" model="ir.values">
+            <field eval="'client_action_multi'" name="key2"/>
+            <field eval="'procurement.order'" name="model"/>
+            <field name="name">Cancel Procurements</field>
+            <field eval="'ir.actions.server,%d'%cancel_procurements" name="value"/>
+        </record>
+
+    </data>
+</openerp>

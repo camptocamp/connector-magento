@@ -56,6 +56,7 @@ Monkey patch cursor to avoid creating multiple files
           'security/debonix_groups.xml',
           'data_completion.xml',
           'company_view.xml',
+          'procurement_view.xml',
           'wizard/stock_partial_picking_view.xml',
           ],
  'installable': True,
