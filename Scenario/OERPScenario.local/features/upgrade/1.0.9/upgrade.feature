@@ -37,9 +37,9 @@ Feature: upgrade to 1.0.9
     UPDATE res_partner set origin_country_id = 222 where id in (46,71628);
     -- I update supplier info linked with partner Toolstream
     UPDATE product_supplierinfo set origin_country_id = 222 where name in (46,71628);
-    -- I update supplier Festool
-    UPDATE res_partner set origin_country_id = 56 where id = 32;
-    UPDATE product_supplierinfo set origin_country_id = 56 where name = 32;
+    -- I update supplier Festool and geo Fennel and ISM Heinrich Kramer
+    UPDATE res_partner set origin_country_id = 56 where id in (32,161397,83726);
+    UPDATE product_supplierinfo set origin_country_id = 56 where name in (32,161397,83726);
     """
 
     Given I set the version of the instance to "1.0.9"
