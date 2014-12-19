@@ -5,7 +5,7 @@ Feature: upgrade to 1.0.9
 
 
   Scenario: upgrade application version
-    Given I back up the database to "/var/tmp/openerp/before_upgrade_backups"
+ #    Given I back up the database to "/var/tmp/openerp/before_upgrade_backups"
     Given I update the module list
     Given I install the required modules with dependencies:
       | name                                |
@@ -28,6 +28,18 @@ Feature: upgrade to 1.0.9
     DELETE FROM mail_message
     WHERE model = 'product.product'
     AND body ILIKE '<p>Scheduled date update to %';
+    """
+
+  Scenario: Set Uk as origin country for ToolStream (France)
+    Given I execute the SQL commands
+    """
+    -- I update Toolstream partner
+    UPDATE res_partner set origin_country_id = 222 where id in (46,71628);
+    -- I update supplier info linked with partner Toolstream
+    UPDATE product_supplierinfo set origin_country_id = 222 where name in (46,71628);
+    -- I update supplier Festool
+    UPDATE res_partner set origin_country_id = 56 where id = 32;
+    UPDATE product_supplierinfo set origin_country_id = 56 where name = 32;
     """
 
     Given I set the version of the instance to "1.0.9"
