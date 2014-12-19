@@ -30,4 +30,16 @@ Feature: upgrade to 1.0.9
     AND body ILIKE '<p>Scheduled date update to %';
     """
 
+  Scenario: Set Uk as origin country for ToolStream (France)
+    Given I execute the SQL commands
+    """
+    -- I update Toolstream partner
+    UPDATE res_partner set origin_country_id = 222 where id in (46,71628);
+    -- I update supplier info linked with partner Toolstream
+    UPDATE product_supplierinfo set origin_country_id = 222 where name in (46,71628);
+    -- I update supplier Festool and geo Fennel and ISM Heinrich Kramer
+    UPDATE res_partner set origin_country_id = 56 where id in (32,161397,83726);
+    UPDATE product_supplierinfo set origin_country_id = 56 where name in (32,161397,83726);
+    """
+
     Given I set the version of the instance to "1.0.9"
