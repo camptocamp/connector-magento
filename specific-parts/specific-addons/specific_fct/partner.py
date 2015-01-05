@@ -28,6 +28,8 @@ class ResPartner(orm.Model):
 
     _columns = {
         'siret': fields.char('Siret', size=14),
+        'origin_country_id': fields.many2one('res.country',
+                                             'Country origin of products'),
     }
 
     _defaults = {
