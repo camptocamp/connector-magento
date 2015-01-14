@@ -83,20 +83,6 @@ class StockItInventoryImport(orm.TransientModel):
         rows = [row for row in rows if row['type'] == 'I']
 
         errors_report = []
-        for row in rows:
-            ctx = dict(context, active_test=False)
-            product_ids = product_obj.search(
-                cr, uid,
-                [('default_code', '=', row['default_code'])],
-                context=ctx)
-            if not product_ids:
-                errors_report.append(_('Product with default code %s does not exist!') % (row['default_code'],))
-                continue
-            product_id = product_ids[0]
-
-        if errors_report:
-            raise orm.except_orm(_('ImportError'), "\n".join(errors_report))
-
         # sum quantities of duplicate products and remove them
         rows = sorted(rows, key=itemgetter('default_code'))
         if rows:
@@ -142,8 +128,6 @@ class StockItInventoryImport(orm.TransientModel):
             except Exception as e:
                 _logger.exception('Error when importing inventory row %s' % (row,))
                 errors_report.append(_('Processing error append: %s') % e)
-        if errors_report:
-            raise orm.except_orm(_('ImportError'), "\n".join(errors_report))
         if inventory_rows:
             inventory_id = inventory_obj.create(cr, uid,
                     {'name': _('Stockit inventory'),
@@ -151,17 +135,27 @@ class StockItInventoryImport(orm.TransientModel):
                      'inventory_line_id': [(0, 0, row)
                                             for row
                                             in inventory_rows]})
-            inventory_obj.action_confirm(cr, uid, [inventory_id], context=context)
-            inventory_obj.action_done(cr, uid, [inventory_id], context=context)
+            try:
+                inventory_obj.action_confirm(cr, uid, [inventory_id], context=context)
+                inventory_obj.action_done(cr, uid, [inventory_id], context=context)
+            except orm.except_orm as e:
+                errors_report.append(_('Processing error append: %s') % (e.value, ))
+            except Exception as e:
+                _logger.exception('Error when validating inventory %s' % (inventory_id,))
+                errors_report.append(_('Processing error append: %s') % e)
 
-        return inventory_id
+        return (inventory_id, errors_report)
 
     def action_import(self, cr, uid, ids, context=None):
         """ Import inventories according to the Stock it file
         for frontend action, opens the form with the created inventory
         """
         #Wizard call from XML RPC transaction are atomic
-        inventory_id = self.import_inventory(cr, uid, ids, context)
+        (inventory_id, errors_report) = self.import_inventory(
+            cr, uid, ids, context)
+        if errors_report:
+            self.post_error(
+                cr, uid, "Manual Import", "\n".join(errors_report), context)
         res = {'type': 'ir.actions.act_window_close'}
         if inventory_id:
             model_obj = self.pool.get('ir.model.data')
@@ -208,6 +202,7 @@ class StockItInventoryImport(orm.TransientModel):
         files = glob.glob(os.path.join(files_folder, '*.*'))
         for filename in files:
             inventory_id = False
+            errors_report = []
             data_file = open(filename, 'r')
             try:
                 data = data_file.read().encode("base64")
@@ -216,7 +211,7 @@ class StockItInventoryImport(orm.TransientModel):
                 try:
                     wizard = self.create(mycursor, uid, {'data': data},
                                          context=context)
-                    inventory_id = self.import_inventory(mycursor, uid, [wizard], context)
+                    (inventory_id, errors_report) = self.import_inventory(mycursor, uid, [wizard], context)
                     mycursor.commit()
                 except Exception as e:
                     mycursor.rollback()
@@ -228,6 +223,9 @@ class StockItInventoryImport(orm.TransientModel):
             except Exception as e:
                 self.post_error(cr, uid, filename, str(e), context)
             finally:
+                if errors_report:
+                    self.post_error(
+                        cr, uid, filename, "\n".join(errors_report), context)
                 data_file.close()
             if inventory_id:
                 archive_file(filename)
