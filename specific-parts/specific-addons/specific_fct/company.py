@@ -69,11 +69,6 @@ class res_company(orm.Model):
             string='Username',
             type='char',
             multi='server_env'),
-        'sftp_invoice_password': fields.function(
-            _get_environment_config_by_id,
-            string='Password',
-            type='char',
-            multi='server_env'),
         'sftp_invoice_path': fields.function(
             _get_environment_config_by_id,
             string='Path',
