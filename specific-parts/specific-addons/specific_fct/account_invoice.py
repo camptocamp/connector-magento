@@ -21,6 +21,7 @@
 
 from StringIO import StringIO
 import paramiko
+import os
 from openerp.osv import orm
 from openerp import netsvc
 
@@ -64,11 +65,14 @@ class account_invoice(orm.Model):
                                          context=context)
             content = StringIO(result)
             filename = "%s-%s.%s" % (sale.name, invoice.number, ext)
+            ## Load private key for transfert
+            privatekeyfile = os.path.expanduser('~/.ssh/id_rsa')
+            mykey = paramiko.RSAKey.from_private_key_file(privatekeyfile)
             transport = paramiko.Transport((company.sftp_invoice_host,
                                             company.sftp_invoice_port))
             try:
                 transport.connect(username=company.sftp_invoice_user,
-                                  password=company.sftp_invoice_password)
+                                  pkey = mykey)
                 client = paramiko.SFTPClient.from_transport(transport)
                 try:
                     client.chdir(company.sftp_invoice_path)
