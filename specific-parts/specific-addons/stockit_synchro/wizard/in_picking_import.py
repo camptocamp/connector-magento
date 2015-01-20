@@ -229,6 +229,8 @@ class StockItInPickingImport(orm.TransientModel):
                                                       context=context)
 
                 picking_obj.write(cr, uid, backorder_id, {'state': 'stockit_confirm'})
+                picking_obj.action_move(cr, uid, [backorder_id], context=context)
+                wf_service.trg_validate(uid, 'stock.picking', backorder_id, 'button_done', cr)
                 wf_service.trg_write(uid, 'stock.picking', backorder_id, cr)
                 imported_picking_ids.append(backorder_id)
             except orm.except_orm as e:
