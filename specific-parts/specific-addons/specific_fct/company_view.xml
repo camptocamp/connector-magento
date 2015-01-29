@@ -11,6 +11,7 @@
             <field name="sftp_invoice_host"/>
             <field name="sftp_invoice_port"/>
             <field name="sftp_invoice_user"/>
+            <field name="sftp_invoice_password"/>
             <field name="sftp_invoice_path"/>
           </group>
         </page>
