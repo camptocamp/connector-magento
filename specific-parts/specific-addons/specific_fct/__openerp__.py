@@ -31,6 +31,7 @@
              'server_environment',
              'import_tracking',
              'base_partner_merge',
+             'point_of_sale',
              ],
  'author': 'Camptocamp',
  'description': """Code customisation module
