@@ -5,7 +5,8 @@ python:
 
 env:
   - 
-  - RUNTESTS=1
+  - RUNTESTS=1 EXCLUDE=last_sale_price
+  - RUNTESTS=1 INCLUDE=last_sale_price
 
 cache:
   directories:
@@ -36,12 +37,13 @@ before_script:
   - export db_name=$(grep db_name ${TRAVIS_BUILD_DIR}/etc/openerp.cfg | cut -d ' ' -f 3)
   - export db_user=$(grep db_user ${TRAVIS_BUILD_DIR}/etc/openerp.cfg | cut -d ' ' -f 3)
   - export db_pass=$(grep db_password ${TRAVIS_BUILD_DIR}/etc/openerp.cfg | cut -d ' ' -f 3)
-  - export specific_addons=$(find ${TRAVIS_BUILD_DIR}/specific-parts/specific-addons/* -maxdepth 0 -type d -printf "%f\n" | awk -vORS=, '{print $1}' | sed 's/,$/\n/')
+  - export exclude_addons=$(echo "($EXCLUDE)" | sed 's/,/|/')  # transform list "module1,module2" in "(module1|module2)" for the sed regexp
+  - export specific_addons=$(find ${TRAVIS_BUILD_DIR}/specific-parts/specific-addons/* -maxdepth 0 -type d -printf "%f\n" | sed "/\b$exclude_addons\b/d" | awk -vORS=, '{print $1}' | sed 's/,$/\n/')
   - psql -c "CREATE USER ${db_user} WITH PASSWORD '${db_pass}' CREATEDB;" -U postgres
   - if [ -n "$RUNTESTS" ] ; then createdb -O ${db_user} ${db_name} ; fi
 
 script:
   - if [ -z "$RUNTESTS" ] ; then flake8 ${TRAVIS_BUILD_DIR}/specific-parts/specific-addons --exclude=__init__.py; fi
-  - if [ -n "$RUNTESTS" ] ; then "echo \"Running tests on: ${specific_addons}\""; fi
-  - if [ -n "$RUNTESTS" ] ; then bin/start_openerp --stop-after-init --log-level=warn -i ${specific_addons} ; fi
-  - if [ -n "$RUNTESTS" ] ; then bin/runtests -u ${specific_addons} ; fi
+  - if [ -n "$RUNTESTS" ] ; then "echo \"Running tests on: ${INCLUDE-$specific_addons}\""; fi
+  - if [ -n "$RUNTESTS" ] ; then bin/start_openerp --stop-after-init --log-level=warn -i ${INCLUDE-$specific_addons} ; fi
+  - if [ -n "$RUNTESTS" ] ; then bin/runtests -u ${INCLUDE-$specific_addons} ; fi
