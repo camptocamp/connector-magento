@@ -1,0 +1,41 @@
+language: python
+
+python:
+  - "2.7"
+
+env:
+  - 
+  - RUNTESTS=1
+
+cache:
+  directories:
+    - ${HOME}/.eggs-cache
+
+virtualenv:
+  system_site_packages: true
+
+before_install:
+  - git config --global user.name "TravisCI"
+  - git config --global user.email "travis@camptocamp.com"
+  - pip install -q flake8
+  - mkdir ${HOME}/.buildout
+  - echo -e "[buildout]\neggs-directory = "${HOME}"/.eggs-cache\n" > ~/.buildout/default.cfg
+
+install:
+  - echo -e "[buildout]\nextends = profiles/travis.cfg\n" > ${TRAVIS_BUILD_DIR}/buildout.cfg
+  - ${TRAVIS_BUILD_DIR}/bootstrap.sh
+  - ${TRAVIS_BUILD_DIR}/bin/buildout
+
+before_script:
+  - export db_name=$(grep db_name ${TRAVIS_BUILD_DIR}/etc/openerp.cfg | cut -d ' ' -f 3)
+  - export db_user=$(grep db_user ${TRAVIS_BUILD_DIR}/etc/openerp.cfg | cut -d ' ' -f 3)
+  - export db_pass=$(grep db_password ${TRAVIS_BUILD_DIR}/etc/openerp.cfg | cut -d ' ' -f 3)
+  - export specific_addons=$(find ${TRAVIS_BUILD_DIR}/specific-parts/specific-addons/* -maxdepth 0 -type d -printf "%f\n" | awk -vORS=, '{print $1}' | sed 's/,$/\n/')
+  - psql -c "CREATE USER ${db_user} WITH PASSWORD '${db_pass}' CREATEDB;" -U postgres
+  - if [ -n "$RUNTESTS" ] ; then createdb -O ${db_user} ${db_name} ; fi
+
+script:
+  - if [ -z "$RUNTESTS" ] ; then flake8 ${TRAVIS_BUILD_DIR}/specific-parts/specific-addons --exclude=__init__.py; fi
+  - if [ -n "$RUNTESTS" ] ; then "echo \"Running tests on: ${specific_addons}\""; fi
+  - if [ -n "$RUNTESTS" ] ; then bin/start_openerp --stop-after-init --log-level=warn -i ${specific_addons} ; fi
+  - if [ -n "$RUNTESTS" ] ; then bin/runtests -u ${specific_addons} ; fi
