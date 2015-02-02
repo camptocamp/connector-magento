@@ -15,6 +15,12 @@ virtualenv:
   system_site_packages: true
 
 before_install:
+  - echo -e "Host bazaar.launchpad.net\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  - echo -e "Host bazaar.camptocamp.net\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  - mkdir ~/.bazaar
+  - echo -e "[DEFAULT]\nlaunchpad_username = camptocamp-business-robot\n" > ~/.bazaar/bazaar.conf
+  - echo -e "[Launchpad]\nhost = .launchpad.net\nuser = camptocamp-business-robot\n" > ~/.bazaar/authentication.conf
+  - echo -e "[c2cbazaar]\nhost = bazaar.camptocamp.net\nuser = openerp\n" >> ~/.bazaar/authentication.conf
   - git config --global user.name "TravisCI"
   - git config --global user.email "travis@camptocamp.com"
   - pip install -q flake8
