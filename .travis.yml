@@ -23,7 +23,7 @@ before_install:
   - echo -e "[c2cbazaar]\nhost = bazaar.camptocamp.net\nuser = openerp\n" >> ~/.bazaar/authentication.conf
   - git config --global user.name "TravisCI"
   - git config --global user.email "travis@camptocamp.com"
-  - pip install -q flake8
+  - pip install -q flake8 flake8-debugger flake8-print
   - mkdir ${HOME}/.buildout
   - echo -e "[buildout]\neggs-directory = "${HOME}"/.eggs-cache\n" > ~/.buildout/default.cfg
 
