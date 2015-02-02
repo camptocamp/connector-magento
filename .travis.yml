@@ -24,7 +24,8 @@ before_install:
   - echo -e "[c2cbazaar]\nhost = bazaar.camptocamp.net\nuser = openerp\n" >> ~/.bazaar/authentication.conf
   - git config --global user.name "TravisCI"
   - git config --global user.email "travis@camptocamp.com"
-  - pip install -q flake8 flake8-debugger flake8-print
+  - pip install -q flake8 flake8-debugger flake8-print coverage
+  - sudo apt-get -q -y install expect-dev # provides unbuffer utility
   - mkdir ${HOME}/.buildout
   - echo -e "[buildout]\neggs-directory = "${HOME}"/.eggs-cache\n" > ~/.buildout/default.cfg
 
