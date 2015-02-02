@@ -31,6 +31,7 @@
              'server_environment',
              'import_tracking',
              'base_partner_merge',
+             'product_multi_ean',
              'point_of_sale',
              ],
  'author': 'Camptocamp',
