@@ -34,16 +34,10 @@ install:
   - ${TRAVIS_BUILD_DIR}/bin/buildout
 
 before_script:
-  - export db_name=$(grep db_name ${TRAVIS_BUILD_DIR}/etc/openerp.cfg | cut -d ' ' -f 3)
-  - export db_user=$(grep db_user ${TRAVIS_BUILD_DIR}/etc/openerp.cfg | cut -d ' ' -f 3)
-  - export db_pass=$(grep db_password ${TRAVIS_BUILD_DIR}/etc/openerp.cfg | cut -d ' ' -f 3)
-  - export exclude_addons=$(echo "($EXCLUDE)" | sed 's/,/|/')  # transform list "module1,module2" in "(module1|module2)" for the sed regexp
-  - export specific_addons=$(find ${TRAVIS_BUILD_DIR}/specific-parts/specific-addons/* -maxdepth 0 -type d -printf "%f\n" | sed "/\b$exclude_addons\b/d" | awk -vORS=, '{print $1}' | sed 's/,$/\n/')
-  - psql -c "CREATE USER ${db_user} WITH PASSWORD '${db_pass}' CREATEDB;" -U postgres
-  - if [ -n "$RUNTESTS" ] ; then createdb -O ${db_user} ${db_name} ; fi
+  - export DB_NAME=$(grep db_name ${TRAVIS_BUILD_DIR}/etc/openerp.cfg | cut -d ' ' -f 3)
+  - export DB_USER=$(grep db_user ${TRAVIS_BUILD_DIR}/etc/openerp.cfg | cut -d ' ' -f 3)
+  - export DB_PASS=$(grep db_password ${TRAVIS_BUILD_DIR}/etc/openerp.cfg | cut -d ' ' -f 3)
 
 script:
   - if [ -z "$RUNTESTS" ] ; then flake8 ${TRAVIS_BUILD_DIR}/specific-parts/specific-addons --exclude=__init__.py; fi
-  - "if [ -n \"$RUNTESTS\" ] ; then echo \"Running tests on: ${INCLUDE-$specific_addons}\"; fi"
-  - if [ -n "$RUNTESTS" ] ; then bin/start_openerp --stop-after-init --log-level=warn -i ${INCLUDE-$specific_addons} ; fi
-  - if [ -n "$RUNTESTS" ] ; then bin/runtests -u ${INCLUDE-$specific_addons} ; fi
+  - if [ -n "$RUNTESTS" ] ; then ./test_server; fi
