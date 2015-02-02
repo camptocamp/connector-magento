@@ -58,6 +58,7 @@ Monkey patch cursor to avoid creating multiple files
           'company_view.xml',
           'procurement_view.xml',
           'wizard/stock_partial_picking_view.xml',
+          'cron_data.xml',
           ],
  'installable': True,
  }
