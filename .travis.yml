@@ -44,6 +44,6 @@ before_script:
 
 script:
   - if [ -z "$RUNTESTS" ] ; then flake8 ${TRAVIS_BUILD_DIR}/specific-parts/specific-addons --exclude=__init__.py; fi
-  - if [ -n "$RUNTESTS" ] ; then "echo \"Running tests on: ${INCLUDE-$specific_addons}\""; fi
+  - "if [ -n \"$RUNTESTS\" ] ; then echo \"Running tests on: ${INCLUDE-$specific_addons}\"; fi"
   - if [ -n "$RUNTESTS" ] ; then bin/start_openerp --stop-after-init --log-level=warn -i ${INCLUDE-$specific_addons} ; fi
   - if [ -n "$RUNTESTS" ] ; then bin/runtests -u ${INCLUDE-$specific_addons} ; fi
