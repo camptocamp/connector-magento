@@ -113,7 +113,10 @@ class StockItInPickingImport(orm.TransientModel):
                 [('default_code', '=', row['default_code'])],
                 context=active_context)
             if not product_ids:
-                errors_report.append(_('Product with default code %s does not exist!') % (row['default_code'],))
+                errors_report.append(
+                    _('Product with default code %s does not exist!') %
+                    (row['default_code'],)
+                )
                 continue
             product_id = product_ids[0]
             # defaultdict
@@ -128,10 +131,12 @@ class StockItInPickingImport(orm.TransientModel):
             except Exception as e:
                 _logger.exception('Error when adding EAN %s for product %s' %
                                   (product_ean_list[product_id], product_id))
-                errors_report.append(_('Can not create new ean for product %s'
-                                       ' one of the following ean %s seems not correct.'
-                                       ' You can look in the log for more details')
-                                     % (product_id, str(product_ean_list[product_id])))
+                errors_report.append(
+                    _('Can not create new ean for product %s'
+                      ' one of the following ean %s seems not correct.'
+                      ' You can look in the log for more details') %
+                    (product_id, str(product_ean_list[product_id]))
+                )
         if errors_report:
             raise orm.except_orm(_('ImportError'), "\n".join(errors_report))
 
@@ -142,10 +147,10 @@ class StockItInPickingImport(orm.TransientModel):
             for index in range(len(rows) - 2, -1, -1):
                 if last['id'] == rows[index]['id'] and \
                    last['default_code'] == rows[index]['default_code']:
-                    last['expected_qty'] = last['expected_qty'] + \
-                                       rows[index]['expected_qty']
-                    last['received_qty'] = last['received_qty'] + \
-                                       rows[index]['received_qty']
+                    last['expected_qty'] = (last['expected_qty'] +
+                                            rows[index]['expected_qty'])
+                    last['received_qty'] = (last['received_qty'] +
+                                            rows[index]['received_qty'])
                     del rows[index]
                 else:
                     last = rows[index]
@@ -156,7 +161,7 @@ class StockItInPickingImport(orm.TransientModel):
                                         lambda row: row['id']):
             try:
                 picking_ids = picking_obj.search(cr, uid,
-                    [('id', '=', picking_id)])
+                                                 [('id', '=', picking_id)])
 
                 if not picking_ids:
                     raise orm.except_orm(
@@ -183,7 +188,9 @@ class StockItInPickingImport(orm.TransientModel):
                     if not product_ids:
                         raise orm.except_orm(
                             _('ImportError'),
-                            _("Product %s not found !") % (row['default_code'],))
+                            _("Product %s not found !") %
+                            (row['default_code'],)
+                        )
                     product_id = product_ids[0]
 
                     found_product = False
@@ -224,13 +231,19 @@ class StockItInPickingImport(orm.TransientModel):
                     backorder_move = {'move': move, 'qty': 0.0}
                     too_few.append(backorder_move)
 
-                backorder_id = self._create_backorder(cr, uid, picking.id, complete,
-                                                      too_many, too_few, new_moves,
-                                                      context=context)
+                backorder_id = self._create_backorder(
+                    cr, uid,
+                    picking.id, complete, too_many, too_few,
+                    new_moves, context=context
+                )
 
-                wf_service.trg_validate(uid, 'stock.picking', backorder_id, 'button_confirm', cr)
-                picking_obj.action_move(cr, uid, [backorder_id], context=context)
-                wf_service.trg_validate(uid, 'stock.picking', backorder_id, 'button_done', cr)
+                wf_service.trg_validate(uid, 'stock.picking',
+                                        backorder_id, 'button_confirm', cr)
+                picking_obj.action_move(cr, uid,
+                                        [backorder_id],
+                                        context=context)
+                wf_service.trg_validate(uid, 'stock.picking',
+                                        backorder_id, 'button_done', cr)
                 wf_service.trg_write(uid, 'stock.picking', backorder_id, cr)
                 imported_picking_ids.append(backorder_id)
             except orm.except_orm as e:
@@ -255,30 +268,30 @@ class StockItInPickingImport(orm.TransientModel):
             # create a backorder
             # force name in default in order to keep origin
             # (super copy reset the origin unless a name is in default...)
-            seq_name = self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.in')
+            sequence_obj = self.pool.get('ir.sequence')
+            seq_name = sequence_obj.get(cr, uid, 'stock.picking.in')
             new_picking = pick_obj.copy(cr, uid, picking.id,
-                    {'name': seq_name,
-                     'move_lines': [],
-                     'state': 'draft', })
+                                        {'name': seq_name,
+                                         'move_lines': [],
+                                         'state': 'draft',
+                                         })
 
         for move_dict in too_few:
             move = move_dict['move']
             qty = move_dict['qty']
             if qty:
                 move_obj.copy(cr, uid, move.id,
-                    {
-                        'product_qty': qty,
-                        'product_uos_qty': qty,
-                        'picking_id': new_picking,
-                        'state': 'assigned',
-                        'move_dest_id': False,
-                        'price_unit': move.price_unit,
-                    })
+                              {'product_qty': qty,
+                               'product_uos_qty': qty,
+                               'picking_id': new_picking,
+                               'state': 'assigned',
+                               'move_dest_id': False,
+                               'price_unit': move.price_unit,
+                               })
             move_obj.write(cr, uid, [move.id],
-                    {
-                        'product_qty': move.product_qty - qty,
-                        'product_uos_qty': move.product_qty - qty,
-                    })
+                           {'product_qty': move.product_qty - qty,
+                            'product_uos_qty': move.product_qty - qty,
+                            })
 
         for move in new_moves:
             move.update({'picking_id': new_picking or picking.id})
@@ -293,13 +306,12 @@ class StockItInPickingImport(orm.TransientModel):
 
             # update qty and move "too many" moves to backorder
             for move_dict in too_many:
-                move_obj.write(
-                    cr, uid, [move_dict['move'].id],
-                    {'product_qty': move_dict['qty'],
-                     'product_uos_qty': move_dict['qty'],
-                     'picking_id': new_picking,
-                     },
-                     context=context)
+                move_obj.write(cr, uid, [move_dict['move'].id],
+                               {'product_qty': move_dict['qty'],
+                                'product_uos_qty': move_dict['qty'],
+                                'picking_id': new_picking,
+                                },
+                               context=context)
         else:
             for move_dict in too_many:
                 move_obj.write(
@@ -318,7 +330,8 @@ class StockItInPickingImport(orm.TransientModel):
         wf_service = netsvc.LocalService("workflow")
         pick_obj.force_assign(cr, uid, [new_picking or picking.id])
         wf_service.trg_validate(uid, 'stock.picking',
-                                new_picking or picking.id, 'button_confirm', cr)
+                                new_picking or picking.id,
+                                'button_confirm', cr)
 
         return new_picking or picking.id
 
@@ -332,11 +345,12 @@ class StockItInPickingImport(orm.TransientModel):
         res = {'type': 'ir.actions.act_window_close'}
         if imported_picking_ids:
             model_obj = self.pool.get('ir.model.data')
-            model_data_ids = model_obj.search(cr, uid, [
-                            ('model', '=', 'ir.ui.view'),
-                            ('module', '=', 'stock'),
-                            ('name', '=', 'view_picking_in_form')
-                        ])
+            model_data_ids = model_obj.search(
+                cr, uid,
+                [('model', '=', 'ir.ui.view'),
+                 ('module', '=', 'stock'),
+                 ('name', '=', 'view_picking_in_form')
+                 ])
             resource_id = model_obj.read(cr, uid,
                                          model_data_ids,
                                          fields=['res_id'],
@@ -366,7 +380,8 @@ class StockItInPickingImport(orm.TransientModel):
     def run_background_import(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
-        if not company.stockit_base_path or not company.stockit_in_picking_import:
+        if (not company.stockit_base_path or
+                not company.stockit_in_picking_import):
             raise orm.except_orm(
                 _('Error'),
                 _('Stockit path is not configured on company.'))
@@ -384,7 +399,10 @@ class StockItInPickingImport(orm.TransientModel):
                 try:
                     wizard = self.create(mycursor, uid, {'data': data},
                                          context=context)
-                    imported_picking_ids = self.import_in_picking(mycursor, uid, [wizard], context)
+                    imported_picking_ids = self.import_in_picking(
+                        mycursor, uid,
+                        [wizard], context
+                    )
                     mycursor.commit()
                 except Exception as e:
                     mycursor.rollback()

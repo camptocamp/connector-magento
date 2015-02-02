@@ -19,8 +19,8 @@
 #
 ##############################################################################
 
-from openerp.osv import orm, fields
-from openerp.tools.translate import _
+from openerp.osv import orm
+
 
 class account_period_close(orm.TransientModel):
     _inherit = 'account.period.close'
@@ -30,9 +30,6 @@ class account_period_close(orm.TransientModel):
         Override the method not to block if the period contains draft
         move lines
         """
-        period_pool = self.pool.get('account.period')
-        account_move_obj = self.pool.get('account.move')
-
         mode = 'done'
         for form in self.read(cr, uid, ids, context=context):
             if form['sure']:

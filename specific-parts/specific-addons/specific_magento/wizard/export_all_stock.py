@@ -29,10 +29,12 @@ class StockExportAllMagento(orm.TransientModel):
     _description = 'Export Stock values for all products'
 
     _columns = {
-                "check_confirm": fields.boolean('Confirm Export',
-                help="""If the Confirm Export field is set to True,
-                 Stock values for all products will be exported
-                 to Magento."""),
+        'check_confirm': fields.boolean(
+            'Confirm Export',
+            help="If the Confirm Export field is set to True, "
+                 "Stock values for all products will be exported "
+                 "to Magento."
+        ),
     }
 
     def export_stock_all_product_magento(self, cr, uid, context=None):
@@ -49,12 +51,12 @@ class StockExportAllMagento(orm.TransientModel):
                             )
         for record_id in record_ids:
             export_product_inventory.delay(session, model_name,
-                                       record_id, fields=inventory_fields,
-                                       priority=30)
+                                           record_id, fields=inventory_fields,
+                                           priority=30)
 
     def action_manual_export(self, cr, uid, ids, context=None):
         form = self.browse(cr, uid, ids[0], context=context)
         if form.check_confirm:
-            ## We will export all datas
+            # We will export all data
             self.export_stock_all_product_magento(cr, uid, context=context)
         return True

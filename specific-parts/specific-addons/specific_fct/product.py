@@ -69,7 +69,7 @@ class product_supplierinfo(orm.Model):
     _inherit = "product.supplierinfo"
 
     def create(self, cr, uid, vals, context=None):
-        if not vals.get('origin_country_id',False):
+        if not vals.get('origin_country_id', False):
             supplier_id = vals['name']
             partner_obj = self.pool['res.partner']
             origin_country = partner_obj.read(cr, uid,

@@ -97,7 +97,8 @@ class MoveExpectedDateExport(ExportSynchronizer):
         if not sale_line:
             return
         sale_line_binder = self.get_binder_for_model('magento.sale.order.line')
-        magento_sale_line_id = sale_line_binder.to_backend(sale_line.id, wrap=True)
+        magento_sale_line_id = sale_line_binder.to_backend(sale_line.id,
+                                                           wrap=True)
         if not magento_sale_line_id:
             return _('Not a Magento order line')
 

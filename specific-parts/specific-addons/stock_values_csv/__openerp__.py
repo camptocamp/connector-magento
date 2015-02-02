@@ -18,14 +18,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{'name' : 'Stock Values at Date',
- 'version' : '1.2',
- 'author' : 'Camptocamp',
+{'name': 'Stock Values at Date',
+ 'version': '1.2',
+ 'author': 'Camptocamp',
  'maintainer': 'Camptocamp',
  'category': 'Others',
  'complexity': "normal",
- 'depends' : ['stock',
-              ],
+ 'depends': ['stock',
+             ],
  'description': """Debonix Specific.
 
 Add a wizard to export the stock value for each product in a location at
@@ -38,4 +38,4 @@ a given date.  The data is exported as a CSV file
  'auto_install': False,
  'license': 'AGPL-3',
  'application': True,
-}
+ }

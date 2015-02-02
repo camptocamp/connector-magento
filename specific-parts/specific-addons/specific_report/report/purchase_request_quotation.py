@@ -35,7 +35,9 @@ class RequestQuotation(report_sxw.rml_parse):
         })
 
 
-report_sxw.report_sxw('report.purchase.quotation_custom',
-                      'purchase.order',
-                      'addons/specific_report/report/purchase_request_quotation.rml',
-                      parser=RequestQuotation)
+report_sxw.report_sxw(
+    'report.purchase.quotation_custom',
+    'purchase.order',
+    'addons/specific_report/report/purchase_request_quotation.rml',
+    parser=RequestQuotation
+)

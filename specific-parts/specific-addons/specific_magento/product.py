@@ -20,7 +20,6 @@
 ##############################################################################
 
 import logging
-import xmlrpclib
 from openerp.tools.translate import _
 from openerp.osv import orm, fields
 from openerp.addons.connector.unit.mapper import (
@@ -34,7 +33,7 @@ from openerp.addons.connector.unit.mapper import (
 from openerp.addons.connector.event import (on_record_write,
                                             on_record_create,
                                             )
-from openerp.addons.connector.exception import MappingError, RetryableJobError
+from openerp.addons.connector.exception import MappingError
 from openerp.addons.magentoerpconnect.unit.export_synchronizer import (
     export_record,
     MagentoExporter,
@@ -46,11 +45,9 @@ from openerp.addons.magentoerpconnect.product import (
     ProductImport,
     ProductInventoryExport,
     ProductImportMapper,
-    ProductProductAdapter,
     CatalogImageImporter,
     )
 from .backend import magento_debonix
-from .product_bundle import BoMBundleImporter
 
 
 _logger = logging.getLogger(__name__)
@@ -303,7 +300,7 @@ class DebonixProductImportMapper(ProductImportMapper):
 
     direct = [(source, target) for source, target in
               ProductImportMapper.direct if
-              not target in ('standard_price', 'weight')] + \
+              target not in ('standard_price', 'weight')] + \
              [('weight', 'weight_net')]
 
     @mapping

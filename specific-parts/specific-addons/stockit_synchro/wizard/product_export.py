@@ -54,12 +54,12 @@ class StockItProductExport(orm.TransientModel):
         rows = self.get_data(cr, uid, ids, context)
         exporter = StockitExporter()
         data = exporter.get_csv_data(rows)
-        result = self.write(cr,
-                            uid,
-                            ids,
-                            {'data': base64.encodestring(data),
-                             'state': 'done'},
-                            context=context)
+        self.write(cr,
+                   uid,
+                   ids,
+                   {'data': base64.encodestring(data),
+                    'state': 'done'},
+                   context=context)
         return {
             'type': 'ir.actions.act_window',
             'res_model': self._name,
