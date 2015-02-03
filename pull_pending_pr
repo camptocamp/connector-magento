@@ -5,5 +5,9 @@ cd parts/connector-magento
 git pull --no-edit origin pull/25/head # Export cancellation of sales orders to Magento
 cd -
 
+cd parts/sale-workflow
+git pull --no-edit origin pull/101/head # Translate sale_workflow
+cd -
+
 set +v
 set +e
