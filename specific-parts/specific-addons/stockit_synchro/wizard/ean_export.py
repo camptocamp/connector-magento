@@ -54,12 +54,12 @@ class StockItProductEANExport(orm.TransientModel):
         rows = self.get_data(cr, uid, ids, context)
         exporter = StockitExporter()
         data = exporter.get_csv_data(rows)
-        result = self.write(cr,
-                            uid,
-                            ids,
-                            {'data': base64.encodestring(data),
-                             'state': 'done'},
-                            context=context)
+        self.write(cr,
+                   uid,
+                   ids,
+                   {'data': base64.encodestring(data),
+                    'state': 'done'},
+                   context=context)
         return {
             'type': 'ir.actions.act_window',
             'res_model': self._name,
@@ -73,7 +73,8 @@ class StockItProductEANExport(orm.TransientModel):
     def run_background_export(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
-        if not company.stockit_base_path or not company.stockit_product_ean_export:
+        if (not company.stockit_base_path or
+                not company.stockit_product_ean_export):
             raise orm.except_orm(
                 _('Error'),
                 _('Stockit path is not configured on company.'))

@@ -22,6 +22,7 @@ import logging
 import xmlrpclib
 
 from openerp.tools.translate import _
+from openerp.addons.connector.exception import FailedJobError
 from openerp.addons.magentoerpconnect.stock_picking import (
     StockPickingAdapter,
     MagentoPickingExport,
@@ -110,7 +111,8 @@ class DebonixMagentoPickingExport(MagentoPickingExport):
             magento_id = self.backend_adapter.create(*args, close=False)
         except xmlrpclib.Fault as err:
             # When the shipping is already created on Magento, it returns:
-            # <Fault 102: u"Impossible de faire l\'exp\xe9dition de la commande.">
+            # <Fault 102: u"Impossible de faire l\'exp\xe9dition de la
+            # commande.">
             if err.faultCode == 102:
                 return _('Canceled: the delivery order already '
                          'exists on Magento (fault 102).')
@@ -131,7 +133,8 @@ class DebonixMagentoPickingExport(MagentoPickingExport):
             magento_id = self.backend_adapter.create(*args, close=False)
         except xmlrpclib.Fault as err:
             # When the shipping is already created on Magento, it returns:
-            # <Fault 102: u"Impossible de faire l\'exp\xe9dition de la commande.">
+            # <Fault 102: u"Impossible de faire l\'exp\xe9dition de la
+            # commande.">
             if err.faultCode == 102:
                 return _('Canceled: the delivery order already '
                          'exists on Magento (fault 102).')
@@ -180,13 +183,10 @@ class DebonixMagentoTrackingExport(MagentoTrackingExport):
         # So when we send the tracking number, we try to find if
         # we have a magento_id on another binding for the same sale
         # order and we send the tracking on this one.
-        binder = self.get_binder_for_model()
         sale = binding.sale_id
         for picking in sale.picking_ids:
             if picking.id == binding.openerp_id.id:
                 continue
-            # check if already exported to Magento
-            magento_id = binder.to_backend(picking.id, wrap=True)
             other_bindings = picking.magento_bind_ids
             if other_bindings and other_bindings[0].magento_id:
                 self._export_tracking_on_first_picking(binding,

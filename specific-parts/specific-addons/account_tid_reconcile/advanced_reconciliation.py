@@ -129,4 +129,3 @@ class easy_reconcile_advanced_tid(TransientModel):
             refs.append(lname)
             refs += ["%s%s" % (s, lname) for s in prefixes]
         yield ('ref', refs)
-

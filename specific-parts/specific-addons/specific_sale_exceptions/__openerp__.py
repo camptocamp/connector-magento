@@ -19,7 +19,7 @@
 #
 ##############################################################################
 
-{'name' : 'Specific Sale Exceptions',
+{'name': 'Specific Sale Exceptions',
  'version': '1.0',
  'author': 'Camptocamp',
  'maintainer': 'Camptocamp',

@@ -43,12 +43,12 @@ class stock_picking(orm.Model):
     }
 
     def write(self, cr, uid, ids, vals, context=None):
-        #cash on delivery must only apply on the first packing
+        # cash on delivery must only apply on the first packing
         if 'backorder_id' in vals:
             vals['cash_on_delivery_amount'] = 0.0
             vals['cash_on_delivery_amount_untaxed'] = 0.0
-        return super(stock_picking, self).write(
-            cr, uid, ids, vals, context=context)
+        return super(stock_picking, self).write(cr, uid, ids,
+                                                vals, context=context)
 
 
 class stock_picking_out(orm.Model):
@@ -72,7 +72,7 @@ class stock_picking_out(orm.Model):
     }
 
     def write(self, cr, uid, ids, vals, context=None):
-        #cash on delivery must only apply on the first packing
+        # cash on delivery must only apply on the first packing
         if 'backorder_id' in vals:
             vals['cash_on_delivery_amount'] = 0.0
             vals['cash_on_delivery_amount_untaxed'] = 0.0

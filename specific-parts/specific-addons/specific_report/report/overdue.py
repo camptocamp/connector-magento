@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-#    OpenERP, Open Source Management Solution	
+#    OpenERP, Open Source Management Solution
 #    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>). All Rights Reserved
 #    $Id$
 #
@@ -27,7 +27,7 @@ from openerp.report import report_sxw
 class Overdue(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context):
         super(Overdue, self).__init__(cr, uid, name, context=context)
-        self.localcontext.update( {
+        self.localcontext.update({
             'time': time,
             'getLines': self._lines_get,
             'message': self._message,

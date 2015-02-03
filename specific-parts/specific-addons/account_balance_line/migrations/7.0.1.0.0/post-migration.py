@@ -19,11 +19,11 @@
 #
 ##############################################################################
 
+
 def migrate(cr, version):
     """
     On first install, compute all stored balance with SQL for performance
     """
     if not version:
         cr.execute("UPDATE account_move_line SET line_balance = debit - credit"
-                      " WHERE line_balance IS NULL")
-
+                   " WHERE line_balance IS NULL")

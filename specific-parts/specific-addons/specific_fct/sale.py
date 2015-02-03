@@ -32,9 +32,12 @@ class sale_order(orm.Model):
             res[id] = False
         if not ids:
             return res
-        cr.execute("SELECT rel.order_id,MIN(inv.date_invoice) FROM sale_order_invoice_rel rel \
-        JOIN account_invoice inv ON (rel.invoice_id=inv.id) WHERE rel.order_id IN %s \
-        GROUP BY rel.order_id", (tuple(ids),))
+        cr.execute(
+            "SELECT rel.order_id,MIN(inv.date_invoice) "
+            "FROM sale_order_invoice_rel rel "
+            "JOIN account_invoice inv ON (rel.invoice_id=inv.id) "
+            "WHERE rel.order_id IN %s "
+            "GROUP BY rel.order_id", (tuple(ids),))
         for line in cr.fetchall():
             res[line[0]] = line[1]
         return res
@@ -47,9 +50,11 @@ class sale_order(orm.Model):
         for argument in args:
             operator = argument[1]
             value = argument[2]
-            cr.execute("SELECT rel.order_id FROM sale_order_invoice_rel rel \
-            JOIN account_invoice inv ON (rel.invoice_id=inv.id) WHERE inv.date_invoice IS NOT NULL AND \
-            inv.date_invoice " + operator + " %s", (str(value),))
+            cr.execute(
+                "SELECT rel.order_id FROM sale_order_invoice_rel rel "
+                "JOIN account_invoice inv ON (rel.invoice_id=inv.id) "
+                "WHERE inv.date_invoice IS NOT NULL AND "
+                "inv.date_invoice " + operator + " %s", (str(value),))
             for line in cr.fetchall():
                 ids.append(line[0])
         if ids:
@@ -103,8 +108,8 @@ class sale_order(orm.Model):
                     for move_line in picking.move_lines:
                         if move_line.state == 'cancel':
                             continue
-                        product = move_line.old_product_id or \
-                                  move_line.product_id
+                        product = (move_line.old_product_id or
+                                   move_line.product_id)
 
                         # filter out products of the sale order
                         if product.id in so_products:
@@ -117,11 +122,11 @@ class sale_order(orm.Model):
                         else:
                             name = move_line.name
 
-                        account_id = move_line.product_id.product_tmpl_id.\
-                                property_account_income.id
+                        product = move_line.product_id
+                        account_id = product.property_account_income.id
                         if not account_id:
-                            account_id = move_line.product_id.categ_id.\
-                                    property_account_income_categ.id
+                            account_id = product.categ_id.\
+                                property_account_income_categ.id
 
                         tax_ids = picking_obj._get_taxes_invoice(
                             cr, uid, move_line, invoice.type)
@@ -129,8 +134,8 @@ class sale_order(orm.Model):
                             picking_obj._get_account_analytic_invoice(
                                 cr, uid, picking, move_line)
 
-                        uos_id = move_line.product_uos and \
-                                 move_line.product_uos.id or False
+                        uos_id = (move_line.product_uos.id
+                                  if move_line.product_uos else False)
                         if not uos_id:
                             uos_id = move_line.product_uom.id
                         fisc_pos_obj = self.pool.get('account.fiscal.position')
@@ -138,10 +143,11 @@ class sale_order(orm.Model):
                             cr, uid,
                             partner.property_account_position,
                             account_id)
-                        note = _("This product has been "
-                                 "added in the delivery order %s") % \
-                               (picking.name,)
-                        invoice_line_id = invoice_line_obj.create(cr, uid,
+                        note = (_("This product has been "
+                                  "added in the delivery order %s") %
+                                (picking.name,))
+                        invoice_line_id = invoice_line_obj.create(
+                            cr, uid,
                             {'name': '\n'.join([name, note]),
                              'origin': origin,
                              'invoice_id': invoice.id,
@@ -150,11 +156,11 @@ class sale_order(orm.Model):
                              'account_id': account_id,
                              'price_unit': 0.0,
                              'discount': 0.0,
-                             'quantity': move_line.product_uos_qty or
-                                         move_line.product_qty,
+                             'quantity': (move_line.product_uos_qty or
+                                          move_line.product_qty),
                              'invoice_line_tax_id': [(6, 0, tax_ids)],
                              'account_analytic_id': account_analytic_id,
-                            })
+                             })
                         picking_obj._invoice_line_hook(
                             cr, uid, move_line, invoice_line_id)
 
@@ -219,20 +225,21 @@ class sale_order_line(orm.Model):
     def copy_data(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
-        ## Recompute markup_rate and commercial_margin on duplicate
-        # see : https://trello.com/c/iCCivgv6/346-quand-on-duplique-une-commande-annulee-la-marge-n-est-pas-recalculee
+        # Recompute markup_rate and commercial_margin on duplicate
+        # see: https://trello.com/c/iCCivgv6
         current_sale_order_line = self.browse(cr, uid, id, context=context)
         localcontext = context.copy()
+        line = current_sale_order_line
         localcontext.update(
-            {
-                'product_id': current_sale_order_line.product_id and current_sale_order_line.product_id.id or False,
-                'price_unit': current_sale_order_line.price_unit,
-                'discount': current_sale_order_line.discount,
-                'product_uom': current_sale_order_line.product_uom and current_sale_order_line.product_uom.id or False,
-                'pricelist': current_sale_order_line.order_id.pricelist_id and current_sale_order_line.order_id.pricelist_id.id or False,
-                'markup_rate': current_sale_order_line.markup_rate,
-                'commercial_margin': current_sale_order_line.commercial_margin,
-            }
+            {'product_id': line.product_id and line.product_id.id or False,
+             'price_unit': line.price_unit,
+             'discount': line.discount,
+             'product_uom': line.product_uom and line.product_uom.id or False,
+             'pricelist': (line.order_id.pricelist_id and
+                           line.order_id.pricelist_id.id or False),
+             'markup_rate': line.markup_rate,
+             'commercial_margin': line.commercial_margin,
+             }
         )
         res = self.onchange_price_unit(cr, uid, [id], override_unit_price=True,
                                        context=localcontext)

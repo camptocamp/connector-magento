@@ -19,7 +19,9 @@
 #
 ##############################################################################
 
-from openerp.addons.magentoerpconnect.unit.backend_adapter import GenericAdapter
+from openerp.addons.magentoerpconnect.unit.backend_adapter import (
+    GenericAdapter
+)
 from .backend import magento_debonix
 
 

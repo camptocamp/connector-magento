@@ -45,7 +45,7 @@ function create_virtualenv() {
     then
         echo "reusing existing virtualenv"
     else
-        ${virtualenv} ${options} sandbox
+        ${virtualenv} ${options} --no-site-packages sandbox
         if [ -z ${options} ]
         then
             ./sandbox/bin/pip uninstall -y setuptools
@@ -54,9 +54,9 @@ function create_virtualenv() {
 }
 
 function ensure_cfg(){
-    if [ ! -a buildout.cfg ]
+    if [ ! -e buildout.cfg ]
     then
-        if [ -a $1 ]
+        if [ -e $1 ]
         then
             (cat <<EOF
 [buildout]

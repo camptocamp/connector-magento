@@ -24,8 +24,10 @@ from openerp.osv import fields, orm
 try:
     from server_environment import serv_config
 except ImportError:
-    logging.getLogger('openerp.module').warning('server_environment not available in addons path. '
-                                                'specific_fct will not be usable')
+    logging.getLogger('openerp.module').warning(
+        'server_environment not available in addons path. '
+        'specific_fct will not be usable'
+    )
 
 _logger = logging.getLogger(__name__)
 

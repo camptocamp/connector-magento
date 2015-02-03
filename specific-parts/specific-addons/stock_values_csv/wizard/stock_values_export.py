@@ -71,7 +71,8 @@ class StockValuesExport(orm.TransientModel):
             'target': 'new',
         }
 
-    def _get_product_qty(self, cr, uid, ids, location_id, stop_date=None, context=None):
+    def _get_product_qty(self, cr, uid, ids, location_id, stop_date=None,
+                         context=None):
         stop_date = stop_date or time.strftime('%Y-%m-%d %H:%M:%S')
         cr.execute("""
                     SELECT pp.id,
@@ -116,8 +117,8 @@ class StockValuesExport(orm.TransientModel):
                      GROUP BY pp.id
                     HAVING SUM(qty) <> 0""",
                    {'location_id': location_id,
-                    'stop_date': stop_date,}
-                    )
+                    'stop_date': stop_date,
+                    })
         return dict(cr.fetchall())
 
     def _get_header(self, cr, uid, ids, context=None):
@@ -128,16 +129,19 @@ class StockValuesExport(orm.TransientModel):
                 u'standard_price',
                 u'total',
                 u'supplier_price',
-                u'total_supplier_price',]
+                u'total_supplier_price',
+                ]
 
     def _get_rows(self, cr, uid, ids, products_qty, context=None):
         """
         Return list to generate rows of the CSV file
-        @param products_qty: dict where keys = product_id and values = quantity in location
+        @param products_qty: dict where keys = product_id and
+                             values = quantity in location
         """
         product_obj = self.pool.get('product.product')
         rows = []
-        for product in product_obj.browse(cr, uid, products_qty.keys(), context=context):
+        for product in product_obj.browse(cr, uid, products_qty.keys(),
+                                          context=context):
             quantity = products_qty[product.id]
             total = quantity * product.standard_price
 
@@ -170,10 +174,12 @@ class StockValuesExport(orm.TransientModel):
 
         form = self.browse(cr, uid, ids[0], context=context)
 
-        products_qty = self._get_product_qty(cr, uid, ids, form.location_id.id, form.stop_date, context=context)
+        products_qty = self._get_product_qty(cr, uid, ids, form.location_id.id,
+                                             form.stop_date, context=context)
 
         rows = []
         rows.append(self._get_header(cr, uid, ids, context=context))
-        rows.extend(self._get_rows(cr, uid, ids, products_qty, context=context))
+        rows.extend(self._get_rows(cr, uid, ids, products_qty,
+                                   context=context))
 
         return rows

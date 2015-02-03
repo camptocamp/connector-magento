@@ -20,9 +20,7 @@
 ##############################################################################
 
 import logging
-from datetime import datetime
 
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.tools.translate import _
 
 from openerp.addons.connector.unit.mapper import (
@@ -30,9 +28,6 @@ from openerp.addons.connector.unit.mapper import (
     mapping,
 )
 from openerp.addons.connector_ecommerce.sale import SpecialOrderLineBuilder
-from openerp.addons.magentoerpconnect.unit.backend_adapter import (
-    MAGENTO_DATETIME_FORMAT,
-)
 from openerp.addons.magentoerpconnect.sale import (
     SaleOrderImport,
     SaleOrderImportMapper,
@@ -113,13 +108,14 @@ class DebonixSaleOrderAdapter(SaleOrderAdapter):
                           % self._magento_model,
                           [item_id, expected_date])
 
+
 @magento_debonix
 class FidelityLineBuilder(SpecialOrderLineBuilder):
     """ Build a sales order line with a negative amount and a service
     product for a discount.
 
-    This line has a 19.6% tax, it will work only if all the products of the sale
-    order have the same tax percentage!
+    This line has a 19.6% tax, it will work only if all the products of
+    the sale order have the same tax percentage!
 
     This is specific to debonix for this reason, debonix sells only
     products with the same tax (20% actually).
@@ -215,7 +211,6 @@ class LineMapChild(ImportMapChild):
                         items.remove(other_item)
 
         return [(0, 0, item) for item in items]
-
 
 
 @magento_debonix

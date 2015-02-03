@@ -59,4 +59,4 @@ but `invoicing_voucher_killer`.
  ],
  'data': [],
  'installable': True
-}
+ }

@@ -46,4 +46,3 @@ class ResPartner(orm.Model):
 
         return super(ResPartner, self).copy(
             cr, uid, id, default=default, context=context)
-
