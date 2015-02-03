@@ -1,0 +1,9 @@
+set -v
+set -e
+
+cd parts/connector-magento
+git pull --no-edit origin pull/25/head # Export cancellation of sales orders to Magento
+cd -
+
+set +v
+set +e
