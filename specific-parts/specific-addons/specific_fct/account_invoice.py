@@ -132,4 +132,7 @@ class account_invoice(orm.Model):
                 # ftp_invoice() returned False, stop the cron after first
                 # message due to issues with connection.
                 break
+            # Commit if passed, in order to avoid losing already-sent invoices
+            # in case of non-SSHException.
+            cr.commit()
         return True
