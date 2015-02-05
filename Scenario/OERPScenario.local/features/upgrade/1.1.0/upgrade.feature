@@ -10,6 +10,7 @@ Feature: upgrade to 1.1.0
     Given I install the required modules with dependencies:
       | name                                |
       | sale_dropshipping                   |
+      | sale_bom_split_dropshipping         |
     Then my modules should have been installed and models reloaded
 
     Given I set the version of the instance to "1.1.0"
