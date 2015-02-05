@@ -6,7 +6,8 @@ git pull --no-edit origin pull/25/head # Export cancellation of sales orders to 
 cd -
 
 cd parts/sale-workflow
-git pull --no-edit origin pull/101/head # Translate sale_workflow
+git pull --no-edit origin pull/101/head # Translate sale_dropshipping
+git pull --no-edit origin pull/102/head # improve sale_dropshipping onchange
 cd -
 
 set +v
