@@ -1,5 +1,4 @@
 from support import *
-from support.tools import model
 import os.path as osp
 import os
 import datetime as dt
