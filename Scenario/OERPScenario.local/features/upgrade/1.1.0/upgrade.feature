@@ -9,6 +9,7 @@ Feature: upgrade to 1.1.0
     Given I update the module list
     Given I install the required modules with dependencies:
       | name                                |
+      | purchase_group_hooks                |
       | sale_dropshipping                   |
       | sale_bom_split_dropshipping         |
       | magentoerpconnect                   |
