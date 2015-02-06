@@ -11,6 +11,16 @@ Feature: upgrade to 1.1.0
       | name                                |
       | sale_dropshipping                   |
       | sale_bom_split_dropshipping         |
+      | magentoerpconnect                   |
+      | account_export_csv                  |
+      | account_easy_reconcile              |
+      | account_advanced_reconcile          |
+      | account_statement_base_completion   |
+      | account_statement_base_import       |
+      | account_statement_ext               |
+      | base_transaction_id                 |
+      | sale_exceptions                     |
+      | last_sale_price                     |
     Then my modules should have been installed and models reloaded
 
     Given I set the version of the instance to "1.1.0"
