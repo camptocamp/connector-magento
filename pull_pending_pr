@@ -5,5 +5,15 @@ cd parts/connector-magento
 git pull --no-edit origin pull/25/head # Export cancellation of sales orders to Magento
 cd -
 
+cd parts/sale-workflow
+git pull --no-edit origin pull/101/head # Translate sale_dropshipping
+git pull --no-edit origin pull/102/head # improve sale_dropshipping onchange
+git pull --no-edit origin pull/103/head # sale_dropshipping: use _prepare method
+cd -
+
+cd parts/product-kitting
+git pull --no-edit origin pull/6/head # Compatibility between sale_dropshipping and sale_bom_split
+cd -
+
 set +v
 set +e
