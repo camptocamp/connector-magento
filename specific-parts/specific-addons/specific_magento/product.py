@@ -233,6 +233,7 @@ class ProductSupplierInfoMapper(ImportMapper):
     direct = [('openerp_supplier_product_code', 'product_code'),
               ('openerp_supplier_product_name', 'product_name'),
               ('openerp_supplier_delay', 'delay'),
+              ('drop_shipping', 'direct_delivery_flag'),
               (backend_to_m2o('openerp_supplier_name',
                               binding='magento.supplier'),
                'name'),
