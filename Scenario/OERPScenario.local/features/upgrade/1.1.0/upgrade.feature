@@ -22,6 +22,8 @@ Feature: upgrade to 1.1.0
       | base_transaction_id                 |
       | sale_exceptions                     |
       | last_sale_price                     |
+      | server_environment_files            |
+      | specific_fct                        |
     Then my modules should have been installed and models reloaded
 
     Given I set the version of the instance to "1.1.0"
