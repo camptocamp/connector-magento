@@ -24,8 +24,10 @@
     "version": "1.0",
     "depends": ["base"],
     "author": "Camptocamp",
-    "description": """This module provides a file store for classical configuration by environnement file pattern into OpenERP provided by server_environment.
-     It is ment to be used by server_environment module. Please look at this module for more info and doc.
+    "description": """This module provides a file store for classical
+    configuration by environnement file pattern into OpenERP provided by
+    server_environment.  It is meant to be used by server_environment
+    module. Please look at this module for more info and doc.
     """,
     "website": "http://www.camptocamp.com",
     "category": "Tools",

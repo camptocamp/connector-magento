@@ -146,7 +146,8 @@ class StockItOutPickingExport(orm.TransientModel):
         if not company.stockit_out_pick_exp_location_id:
             raise orm.except_orm(
                 _('Error'),
-                _('Stock Location to export is not configured on the company.'))
+                _('Stock Location to export is not configured on the company.')
+            )
 
         only_from_location = company.stockit_out_pick_exp_location_id
 
@@ -184,7 +185,8 @@ class StockItOutPickingExport(orm.TransientModel):
                                               context=context)
 
         picking_ids = list(set(picking_ids))
-        for picking in picking_obj.browse(cr, uid, picking_ids, context=context):
+        for picking in picking_obj.browse(cr, uid, picking_ids,
+                                          context=context):
             name = picking.name
             if picking.state == 'cancel':
                 row = ['S',  # type
@@ -199,8 +201,10 @@ class StockItOutPickingExport(orm.TransientModel):
                 for line in picking.move_lines:
                     if line.product_id.type == 'service':
                         continue  # skip service products
-                    if only_from_location and line.location_id.id != only_from_location.id:
-                        continue  # skip line if stock location is not the one to export
+                    if (only_from_location and
+                            line.location_id.id != only_from_location.id):
+                        # skip line if stock location is not the one to export
+                        continue
                     qty = line.state != 'cancel' and line.product_qty or 0.0
 
                     row = ['S',  # type
@@ -232,7 +236,7 @@ class StockItOutPickingManualExport(orm.TransientModel):
             context = {}
         res = False
         if (context.get('active_model') == 'stock.picking.out' and
-            context.get('active_ids')):
+                context.get('active_ids')):
             res = context['active_ids']
         return res
 

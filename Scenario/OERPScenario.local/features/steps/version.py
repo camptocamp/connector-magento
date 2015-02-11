@@ -1,3 +1,4 @@
+from support.tools import model
 
 @step('I set the version of the instance to the value of "{filename}"')
 def impl(ctx, filename):
@@ -13,4 +14,3 @@ def set_version(ctx, version):
         model('ir.config_parameter').write(ids, val)
     else:
         model('ir.config_parameter').create(val)
-

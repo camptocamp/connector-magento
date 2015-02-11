@@ -31,6 +31,8 @@
              'server_environment',
              'import_tracking',
              'base_partner_merge',
+             'product_multi_ean',
+             'point_of_sale',
              ],
  'author': 'Camptocamp',
  'description': """Code customisation module
@@ -58,6 +60,7 @@ Monkey patch cursor to avoid creating multiple files
           'company_view.xml',
           'procurement_view.xml',
           'wizard/stock_partial_picking_view.xml',
+          'cron_data.xml',
           ],
  'installable': True,
  }

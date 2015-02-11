@@ -19,16 +19,16 @@
 #
 ##############################################################################
 
-{'name' : 'Import Tracking Numbers',
- 'version' : '1.0',
- 'author' : 'Camptocamp',
+{'name': 'Import Tracking Numbers',
+ 'version': '1.0',
+ 'author': 'Camptocamp',
  'maintainer': 'Camptocamp',
  'license': 'AGPL-3',
  'category': 'Generic Modules/Warehouse',
  'complexity': "normal",  # easy, normal, expert
- 'depends' : ['delivery',
-              'stock',
-              ],
+ 'depends': ['delivery',
+             'stock',
+             ],
  'description': """
  Custom module to import tracking references on packings
  """,
@@ -41,4 +41,4 @@
  'tests': [],
  'installable': True,
  'auto_install': False,
-}
+ }

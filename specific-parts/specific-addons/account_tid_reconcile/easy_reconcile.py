@@ -31,6 +31,6 @@ class account_easy_reconcile_method(Model):
             _get_all_rec_method(cr, uid, context=context)
         methods += [
             ('easy.reconcile.advanced.tid',
-            'Advanced. Partner and Ref with TID')
+             'Advanced. Partner and Ref with TID')
         ]
         return methods

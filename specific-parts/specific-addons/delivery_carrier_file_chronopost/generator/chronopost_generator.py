@@ -141,7 +141,6 @@ class ChronorelaisRows(ChronopostRows):
         return line
 
 
-
 class ChronopostFileGenerator(CarrierFileGenerator):
 
     @classmethod

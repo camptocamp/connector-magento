@@ -34,4 +34,4 @@
           'account_view.xml',
           ],
  'installable': True,
-}
+ }

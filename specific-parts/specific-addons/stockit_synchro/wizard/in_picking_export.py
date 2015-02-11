@@ -81,7 +81,8 @@ class StockItInPickingExport(orm.TransientModel):
     def run_background_export(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
-        if not company.stockit_base_path or not company.stockit_in_picking_export:
+        if (not company.stockit_base_path or
+                not company.stockit_in_picking_export):
             raise orm.except_orm(
                 _('Error'),
                 _('Stockit path is not configured on company.'))
@@ -113,7 +114,8 @@ class StockItInPickingExport(orm.TransientModel):
                                          [('type', '=', 'in'),
                                           ('state', '=', 'assigned')],
                                          context=context)
-        for picking in picking_obj.browse(cr, uid, picking_ids, context=context):
+        for picking in picking_obj.browse(cr, uid, picking_ids,
+                                          context=context):
             address = picking.partner_id
             if address.parent_id:
                 partner_name = address.parent_id.name

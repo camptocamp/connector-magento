@@ -24,8 +24,10 @@ from openerp.osv import fields, orm
 try:
     from server_environment import serv_config
 except ImportError:
-    logging.getLogger('openerp.module').warning('server_environment not available in addons path. '
-                                                'specific_fct will not be usable')
+    logging.getLogger('openerp.module').warning(
+        'server_environment not available in addons path. '
+        'specific_fct will not be usable'
+    )
 
 _logger = logging.getLogger(__name__)
 
@@ -67,11 +69,6 @@ class res_company(orm.Model):
         'sftp_invoice_user': fields.function(
             _get_environment_config_by_id,
             string='Username',
-            type='char',
-            multi='server_env'),
-        'sftp_invoice_password': fields.function(
-            _get_environment_config_by_id,
-            string='Password',
             type='char',
             multi='server_env'),
         'sftp_invoice_path': fields.function(

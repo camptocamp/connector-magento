@@ -26,7 +26,8 @@ class ProductProduct(orm.Model):
 
     _inherit = 'product.product'
 
-    def add_ean_if_not_exists(self, cr, uid, product_id, ean_list, context=None):
+    def add_ean_if_not_exists(self, cr, uid, product_id,
+                              ean_list, context=None):
         """ Given a list of EAN13, check on the product if it already exists
          and create it if not
 
@@ -41,7 +42,7 @@ class ProductProduct(orm.Model):
         existing_ean = [ean.name for ean in product.ean13_ids]
         ean_list = list(set(ean_list))  # remove duplicates
         for input_ean in ean_list:
-            if not input_ean in existing_ean:
+            if input_ean not in existing_ean:
                 product_ean_obj.create(
                     cr, uid,
                     {'name': input_ean,

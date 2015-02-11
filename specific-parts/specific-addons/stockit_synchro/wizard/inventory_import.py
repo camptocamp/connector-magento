@@ -89,8 +89,8 @@ class StockItInventoryImport(orm.TransientModel):
             last = rows[-1]
             for index in range(len(rows) - 2, -1, -1):
                 if last['default_code'] == rows[index]['default_code']:
-                    last['quantity'] = last['quantity'] + \
-                                       rows[index]['quantity']
+                    last['quantity'] = (last['quantity'] +
+                                        rows[index]['quantity'])
                     del rows[index]
                 else:
                     last = rows[index]
@@ -106,8 +106,8 @@ class StockItInventoryImport(orm.TransientModel):
                 )
 
                 if not product_ids:
-                    raise Exception('ImportError', "Product code %s not found !" %
-                                                   (row['default_code'],))
+                    raise Exception("Product code %s not found !" %
+                                    (row['default_code'],))
                 product_id = product_ids[0]
                 product = product_obj.browse(cr, uid, product_id)
                 if not product.active:
@@ -124,24 +124,30 @@ class StockItInventoryImport(orm.TransientModel):
                                  }
                 inventory_rows.append(inventory_row)
             except orm.except_orm as e:
-                errors_report.append(_('Processing error append: %s') % (e.value, ))
+                errors_report.append(
+                    _('Processing error append: %s') % (e.value,)
+                )
             except Exception as e:
-                _logger.exception('Error when importing inventory row %s' % (row,))
+                _logger.exception('Error when importing inventory row %s', row)
                 errors_report.append(_('Processing error append: %s') % e)
         if inventory_rows:
-            inventory_id = inventory_obj.create(cr, uid,
-                    {'name': _('Stockit inventory'),
-                     'date': time.strftime('%Y-%m-%d %H:%M:%S'),
-                     'inventory_line_id': [(0, 0, row)
-                                            for row
-                                            in inventory_rows]})
+            inventory_id = inventory_obj.create(
+                cr, uid,
+                {'name': _('Stockit inventory'),
+                 'date': time.strftime('%Y-%m-%d %H:%M:%S'),
+                 'inventory_line_id': [(0, 0, row) for row in inventory_rows]}
+            )
             try:
-                inventory_obj.action_confirm(cr, uid, [inventory_id], context=context)
-                inventory_obj.action_done(cr, uid, [inventory_id], context=context)
+                inventory_obj.action_confirm(cr, uid,
+                                             [inventory_id], context=context)
+                inventory_obj.action_done(cr, uid,
+                                          [inventory_id], context=context)
             except orm.except_orm as e:
-                errors_report.append(_('Processing error append: %s') % (e.value, ))
+                errors_report.append(_('Processing error append: %s') %
+                                     (e.value,))
             except Exception as e:
-                _logger.exception('Error when validating inventory %s' % (inventory_id,))
+                _logger.exception('Error when validating inventory %s',
+                                  inventory_id)
                 errors_report.append(_('Processing error append: %s') % e)
 
         return (inventory_id, errors_report)
@@ -150,7 +156,7 @@ class StockItInventoryImport(orm.TransientModel):
         """ Import inventories according to the Stock it file
         for frontend action, opens the form with the created inventory
         """
-        #Wizard call from XML RPC transaction are atomic
+        # Wizard call from XML RPC transaction are atomic
         (inventory_id, errors_report) = self.import_inventory(
             cr, uid, ids, context)
         if errors_report:
@@ -159,11 +165,12 @@ class StockItInventoryImport(orm.TransientModel):
         res = {'type': 'ir.actions.act_window_close'}
         if inventory_id:
             model_obj = self.pool.get('ir.model.data')
-            model_data_ids = model_obj.search(cr, uid, [
-                            ('model', '=', 'ir.ui.view'),
-                            ('module', '=', 'stock'),
-                            ('name', '=', 'view_inventory_form')
-                        ])
+            model_data_ids = model_obj.search(
+                cr, uid,
+                [('model', '=', 'ir.ui.view'),
+                 ('module', '=', 'stock'),
+                 ('name', '=', 'view_inventory_form')
+                 ])
             resource_id = model_obj.read(cr, uid, model_data_ids,
                                          fields=['res_id'],
                                          context=context)[0]['res_id']
@@ -192,7 +199,8 @@ class StockItInventoryImport(orm.TransientModel):
     def run_background_import(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
-        if not company.stockit_base_path or not company.stockit_inventory_import:
+        if (not company.stockit_base_path or
+                not company.stockit_inventory_import):
             raise orm.except_orm(
                 _('Error'),
                 _('Stockit path is not configured on company.'))
@@ -211,7 +219,9 @@ class StockItInventoryImport(orm.TransientModel):
                 try:
                     wizard = self.create(mycursor, uid, {'data': data},
                                          context=context)
-                    (inventory_id, errors_report) = self.import_inventory(mycursor, uid, [wizard], context)
+                    (inventory_id, errors_report) = self.import_inventory(
+                        mycursor, uid, [wizard], context
+                    )
                     mycursor.commit()
                 except Exception as e:
                     mycursor.rollback()

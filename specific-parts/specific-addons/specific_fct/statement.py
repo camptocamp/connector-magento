@@ -19,9 +19,10 @@
 ##############################################################################
 from openerp.osv import orm, fields
 from openerp.tools.translate import _
-from openerp import netsvc
 
-from openerp.addons.account_statement_base_completion.statement import ErrorTooManyPartner
+from openerp.addons.account_statement_base_completion.statement import (
+    ErrorTooManyPartner
+)
 
 
 class AccountStatementCompletionRule(orm.Model):
@@ -34,25 +35,27 @@ class AccountStatementCompletionRule(orm.Model):
     _inherit = "account.statement.completion.rule"
 
     def _get_functions(self, cr, uid, context=None):
-        res = super (AccountStatementCompletionRule, self)._get_functions(
-                cr, uid, context=context)
+        res = super(AccountStatementCompletionRule, self)._get_functions(
+            cr, uid, context=context)
         res.append(('get_from_ref_and_so_with_prefix',
                     'From line reference (based on SO number '
                     'with or without mag_)'))
         return res
 
-    _columns={
+    _columns = {
         'function_to_call': fields.selection(_get_functions, 'Method'),
     }
 
     def get_from_ref_and_so_with_prefix(self, cr, uid, line_id, context=None):
         """
-        Match the partner based on the SO number (with and without '_mag' as prefix)
-        and the reference of the statement
-        line. Then, call the generic get_values_for_line method to complete other values.
-        If more than one partner matched, raise the ErrorTooManyPartner error.
+        Match the partner based on the SO number (with and without
+        '_mag' as prefix) and the reference of the statement line. Then,
+        call the generic get_values_for_line method to complete other
+        values.  If more than one partner matched, raise the
+        ErrorTooManyPartner error.
 
-        :param int/long line_id: id of the concerned account.bank.statement.line
+        :param int/long line_id: id of the concerned
+        account.bank.statement.line
         :return:
             A dict of value that can be passed directly to the write method of
             the statement line or {}

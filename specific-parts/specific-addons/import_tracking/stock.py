@@ -97,9 +97,12 @@ class stock_picking(orm.Model):
                                                     context=context)
                 except Exception as err:
                     local_cr.rollback()
-                    _logger.exception("Tracking file %s could not be imported", filepath)
-                    message = (_("Tracking file %s could not be imported due to: %s") %
-                               (filepath, err))
+                    _logger.exception(
+                        "Tracking file %s could not be imported",
+                        filepath
+                    )
+                    message = (_("Tracking file %s could not be "
+                                 "imported due to: %s") % (filepath, err))
                     self._post_import_tracking_error_message(
                         cr, uid, message, context=context)
                     continue
