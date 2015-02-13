@@ -53,21 +53,29 @@ def _call(self, method, arguments):
         else:
             raise
     except xmlrpclib.Fault as err:
-        deadlock_msg = ('SQLSTATE[40001]: Serialization failure: 1213 '
-                        'Deadlock found when trying to get lock; try '
-                        'restarting transaction')
+        lock_msgs = ('SQLSTATE[40001]: Serialization failure: 1213 '
+                     'Deadlock found when trying to get lock; try '
+                     'restarting transaction',
+                     'SQLSTATE[HY000]: General error: 1205 Lock wait '
+                     'timeout exceeded; try restarting transaction',
+                     )
+        session_expired_msg = 'Session expired. Try to relogin.'
         # <Fault 404: 'Unknown error'>
         # retry because it seems to work when retried
         if err.faultCode == 404:
             raise RetryableJobError(
                 "The job received <Fault 404: 'Unknown error'> "
                 "from Magento.")
-        elif err.faultCode == 1 and err.faultString == deadlock_msg:
+        elif err.faultCode == 1 and err.faultString in lock_msgs:
             # 1 means internal error
             raise RetryableJobError('Magento returned: "%s", possibly due '
                                     'to a reindexation in progress. '
                                     'This job will be retried later.' %
-                                    deadlock_msg)
+                                    err.faultString)
+        elif err.faultCode == 5 and err.faultString == session_expired_msg:
+            raise RetryableJobError('Magento returned: "%s".\n'
+                                    'This job will be retried later.' %
+                                    err.faultString)
         else:
             raise
     else:
