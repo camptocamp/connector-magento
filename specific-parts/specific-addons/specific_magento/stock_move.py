@@ -93,6 +93,8 @@ class MoveExpectedDateExport(ExportSynchronizer):
     def run(self, record_id):
         """ Export the new expected date to Magento """
         move = self.session.browse(self.model._name, record_id)
+        if not move.exists():
+            return
         sale_line = move.sale_line_id
         if not sale_line:
             return
