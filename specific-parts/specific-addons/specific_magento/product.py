@@ -240,6 +240,14 @@ class ProductSupplierInfoMapper(ImportMapper):
               ]
 
     @mapping
+    def is_drop_shipping(self, record):
+        """Check if the supplier support drop shipping in Magento
+        and set direct_delivery_flag in OpenERP
+        drop_shipping == 1 in Magento means
+        direct_delivery_flag == True"""
+        return {'direct_delivery_flag': (record.get('drop_shipping') == '1')}
+
+    @mapping
     def from_magento(self, record):
         """ We don't keep a binding record, only use a flag.
 
