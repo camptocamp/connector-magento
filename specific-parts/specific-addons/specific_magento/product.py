@@ -474,8 +474,8 @@ class DebonixProductImportMapper(ProductImportMapper):
             return values
         supplier_record = dict((field, value) for field, value
                                in record.iteritems()
-                               if field.startswith('openerp_supplier_')
-                               or field == 'drop_shipping')
+                               if field.startswith('openerp_supplier_') or
+                               field == 'drop_shipping')
         map_child = self.get_connector_unit_for_model(
             self._map_child_class, 'product.supplierinfo')
         items = map_child.get_items([supplier_record], map_record,
