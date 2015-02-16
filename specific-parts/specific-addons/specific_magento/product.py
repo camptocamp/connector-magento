@@ -34,6 +34,10 @@ from openerp.addons.connector.event import (on_record_write,
                                             on_record_create,
                                             )
 from openerp.addons.connector.exception import MappingError
+from openerp.addons.magentoerpconnect.product import ProductProductAdapter
+from openerp.addons.magentoerpconnect.unit.backend_adapter import (
+    MAGENTO_DATETIME_FORMAT,
+)
 from openerp.addons.magentoerpconnect.unit.export_synchronizer import (
     export_record,
     MagentoExporter,
@@ -98,6 +102,29 @@ class pricelist_partnerinfo(orm.Model):
         # using the `openerp_supplier_*` fields
         'from_magento': fields.boolean('From Magento', readonly=True),
     }
+
+
+@magento_debonix
+class DebonixProductProductAdapter(ProductProductAdapter):
+
+    def search(self, filters=None, from_date=None, to_date=None):
+        """ Search records according to some criteria
+        and returns a list of ids
+
+        :rtype: list
+        """
+        if filters is None:
+            filters = {}
+        dt_fmt = MAGENTO_DATETIME_FORMAT
+        if from_date is not None:
+            filters.setdefault('updated_at', {})
+            filters['updated_at']['from'] = from_date.strftime(dt_fmt)
+        if to_date is not None:
+            filters.setdefault('updated_at', {})
+            filters['updated_at']['to'] = to_date.strftime(dt_fmt)
+        magento_ids = self._call('%s.search' % self._magento_model,
+                                 [filters] if filters else [{}])
+        return (int(magento_id) for magento_id in magento_ids)
 
 
 @magento_debonix
@@ -447,8 +474,8 @@ class DebonixProductImportMapper(ProductImportMapper):
             return values
         supplier_record = dict((field, value) for field, value
                                in record.iteritems()
-                               if field.startswith('openerp_supplier_')
-                               or field == 'drop_shipping')
+                               if field.startswith('openerp_supplier_') or
+                               field == 'drop_shipping')
         map_child = self.get_connector_unit_for_model(
             self._map_child_class, 'product.supplierinfo')
         items = map_child.get_items([supplier_record], map_record,
