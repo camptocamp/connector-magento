@@ -13,5 +13,9 @@ cd parts/product-kitting
 git pull --no-edit origin pull/6/head # Compatibility between sale_dropshipping and sale_bom_split
 cd -
 
+cd parts/purchase-workflow
+git pull --no-edit origin pull/107/head # Add purchase_supplier_postage_free
+cd -
+
 set +v
 set +e
