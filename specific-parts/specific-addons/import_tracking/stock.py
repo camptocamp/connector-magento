@@ -146,8 +146,11 @@ class stock_picking(orm.Model):
                     continue
 
                 try:
-                    tracking_ref = line[1].strip()
-                    packing_name = line[6].strip()
+                    tracking_ref = line[19].strip()
+                    if line[11].startswith('p'):
+                        packing_name = line[11].strip()
+                    else:
+                        packing_name = line[12].strip()
                 except IndexError:
                     message = ("Tracking file %s could not be read at "
                                "line %s. Import of file canceled.")
