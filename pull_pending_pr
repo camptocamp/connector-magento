@@ -17,5 +17,13 @@ cd parts/purchase-workflow
 git pull --no-edit origin pull/107/head # Add purchase_supplier_postage_free
 cd -
 
+cd parts/server
+git pull --no-edit origin pull/176/head # Check active_id in sale order form
+cd -
+
+cd parts/stock-logistics-workflow
+git pull --no-edit origin pull/91/head # Remove unnecessary messages on pickings
+cd -
+
 set +v
 set +e
