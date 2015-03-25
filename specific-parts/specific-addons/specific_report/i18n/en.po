@@ -234,3 +234,13 @@ msgstr "Bordereau"
 msgid "Reference"
 msgstr "Reference"
 
+#. module: account
+#: report:account.invoice:0
+msgid "Payment term :"
+msgstr "Payment term :"
+
+#. module: account
+#: report:account.invoice:0
+msgid "Due date :"
+msgstr "Due date :"
+
