@@ -27,5 +27,9 @@ cd parts/stock-logistics-workflow
 git pull --no-edit origin pull/91/head # Remove unnecessary messages on pickings
 cd -
 
+cd parts/server-tools
+git pull --no-edit origin pull/144/head # Fix for SQL concurrency
+cd -
+
 set +v
 set +e

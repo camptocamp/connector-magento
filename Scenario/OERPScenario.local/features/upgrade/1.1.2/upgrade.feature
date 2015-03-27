@@ -10,6 +10,7 @@ Feature: upgrade to 1.1.2
     Given I install the required modules with dependencies:
       | name                                |
       | stock_picking_compute_delivery_date |
+      | base_login_date_improvement         |
     Then my modules should have been installed and models reloaded
 
     Given I execute the SQL commands
