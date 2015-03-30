@@ -354,7 +354,6 @@
     <para style="terp_default_8">
       <font color="white"> </font>
     </para>
-    <para style="terp_default_9">[[ (o.payment_term and o.payment_term.note and format(o.payment_term and o.payment_term.note)) or removeParentNode('para') ]]</para>
     <para style="terp_default_9">
       <font color="white"> </font>
     </para>
@@ -389,5 +388,13 @@ de la créance.</xpre>
     <para style="terp_default_2">
       <font color="white"> </font>
     </para>
+    <para style="terp_default_2">
+      <font color="white"> </font>
+    </para>
+    <para style="terp_default_2">
+      <font color="white"> </font>
+    </para>
+    <para style="terp_default_9">Payment term :  [[ (o.payment_term and format(o.payment_term.name)) or removeParentNode('para') ]]</para>
+    <para style="terp_default_9">Due date : [[ o.date_due and formatLang(o.date_due, date=True) or removeParentNode('para') ]]</para>
   </story>
 </document>

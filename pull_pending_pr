@@ -17,5 +17,19 @@ cd parts/purchase-workflow
 git pull --no-edit origin pull/107/head # Add purchase_supplier_postage_free
 cd -
 
+cd parts/server
+# git pull --no-edit origin pull/176/head # Check active_id in sale order form
+git cherry-pick 54321dc9b6618b91a41f327d203efa067a54f612
+git cherry-pick ddc9d2144c3811d9c2257032702a0d5895e7d796
+cd -
+
+cd parts/stock-logistics-workflow
+git pull --no-edit origin pull/91/head # Remove unnecessary messages on pickings
+cd -
+
+cd parts/server-tools
+git pull --no-edit origin pull/144/head # Fix for SQL concurrency
+cd -
+
 set +v
 set +e
