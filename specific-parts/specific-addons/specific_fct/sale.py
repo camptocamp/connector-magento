@@ -16,7 +16,7 @@
 #
 ##############################################################################
 
-from openerp.osv import orm, fields
+from openerp.osv import orm, fields, osv
 from openerp.tools.translate import _
 
 from openerp import netsvc
@@ -163,6 +163,36 @@ class sale_order(orm.Model):
                              })
                         picking_obj._invoice_line_hook(
                             cr, uid, move_line, invoice_line_id)
+
+    def action_cancel(self, cr, uid, ids, context=None):
+        # Cancel POs and procurements for make_to_order items.
+        wf_service = netsvc.LocalService("workflow")
+        if context is None:
+            context = {}
+        proc_obj = self.pool.get('procurement.order')
+        for sale in self.browse(cr, uid, ids, context=context):
+            # Cancel all MTO procurements and POs linked to the sale order,
+            # except if the PO is not draft.
+            proc_ids = proc_obj.search(
+                cr, uid, [('origin', '=', sale.name),
+                          ('procure_method', '=', 'make_to_order')],
+                context=context)
+            if proc_ids:
+                for proc in proc_obj.browse(cr, uid, proc_ids, context=context):
+                    if proc.purchase_id:
+                        # Purchase order is present: either cancel it or stop
+                        purchase = proc.purchase_id
+                        if purchase.state in ('draft', 'cancel'):
+                            wf_service.trg_validate(uid, 'purchase.order', purchase.id, 'button_cancel', cr)
+                        else:
+                            raise osv.except_osv(
+                                _('Cannot cancel sales order!'),
+                                _('A make-to-order item was already purchased!'))
+                # Cancel all procurements
+                proc_obj.action_cancel(cr, uid, proc_ids)
+
+        return super(sale_order, self).action_cancel(
+            cr, uid, ids, context=context)
 
     def action_invoice_create(self, cr, uid, ids, grouped=False,
                               states=['confirmed', 'done', 'exception'],
