@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-@upgrade_from_1.1.3 @debonix
+@upgrade_from_1.1.2 @debonix
 
 Feature: upgrade to 1.1.3
 
