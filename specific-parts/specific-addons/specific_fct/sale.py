@@ -183,7 +183,8 @@ class sale_order(orm.Model):
                         # Purchase order is present: either cancel it or stop
                         purchase = proc.purchase_id
                         if purchase.state in ('draft', 'cancel'):
-                            wf_service.trg_validate(uid, 'purchase.order', purchase.id, 'button_cancel', cr)
+                            wf_service.trg_validate(uid, 'purchase.order',
+                                                    purchase.id, 'purchase_cancel', cr)
                         else:
                             raise osv.except_osv(
                                 _('Cannot cancel sales order!'),
