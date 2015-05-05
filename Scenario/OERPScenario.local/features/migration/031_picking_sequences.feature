@@ -16,7 +16,6 @@ Feature: set sequences on new stock picking models (in, int, out)
       | Picking IN  | in_    | 5       | 1      | stock.picking.in       |
       | Picking INT | int_   | 5       | 1      | stock.picking.internal |
 
-   @picking_sequences
     Given I execute the SQL commands
     """
     UPDATE ir_sequence
