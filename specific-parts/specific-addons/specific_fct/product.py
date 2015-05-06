@@ -18,7 +18,7 @@
 #
 ##############################################################################
 
-from openerp.osv import orm
+from openerp.osv import orm, fields
 from openerp.tools.translate import _
 
 
@@ -67,6 +67,52 @@ class Product(orm.Model):
 
 class product_supplierinfo(orm.Model):
     _inherit = "product.supplierinfo"
+
+    def _calc_min_qty(self, cr, uid, ids, fields, arg, context=None):
+        result = {}
+        priceinfo_obj = self.pool['pricelist.partnerinfo']
+        for suppinfo_id in ids:
+            # Retrieve lowest min_quantity
+            priceinfo_ids = priceinfo_obj.search(
+                cr, uid, [('suppinfo_id', '=', suppinfo_id),
+                          ('min_quantity', '!=', False)], limit=1,
+                order='min_quantity asc', context=context)
+            if len(priceinfo_ids) > 0:
+                priceinfo = priceinfo_obj.browse(cr, uid, priceinfo_ids[0],
+                                                 context=context)
+                result[suppinfo_id] = priceinfo.min_quantity
+            else:
+                # default value: 1.0
+                result[suppinfo_id] = 1.0
+        return result
+
+    def _get_suppinfo_from_pricelistinfo(self, cr, uid, ids, context=None):
+        suppinfos = []
+        for priceinfo in self.pool['pricelist.partnerinfo'].browse(
+                cr, uid, ids, context=context):
+            suppinfos.append(priceinfo.suppinfo_id.id)
+        return list(set(suppinfos))
+
+    _qty_store_dict = {
+        'product.supplierinfo':
+        (lambda self, cr, uid, ids, c={}: ids,
+         ['pricelist_ids'],
+         20),
+        'pricelist.partnerinfo':
+        (_get_suppinfo_from_pricelistinfo,
+         ['min_quantity'],
+         20)
+    }
+
+    _columns = {
+        'min_qty': fields.function(
+            _calc_min_qty,  type='float', string='Minimal Quantity',
+            readonly=True, store=_qty_store_dict,
+            help="The minimal quantity to purchase to this supplier, "
+                 "expressed in the supplier Product Unit of Measure "
+                 "if not empty, in the default unit of measure "
+                 "of the product otherwise."),
+    }
 
     def create(self, cr, uid, vals, context=None):
         if not vals.get('origin_country_id', False):
