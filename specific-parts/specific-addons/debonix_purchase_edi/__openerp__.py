@@ -18,33 +18,37 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{'name': 'EDIFACT Purchase Automation',
- 'summary': 'Generate EDIFACT files on purchase order approval',
- 'version': '0.1',
+{'name': 'EDIFACT messages from purchase orders',
+ 'summary': 'Generate EDIFACT files on purchase order approval (sort of)',
+ 'version': '0.3',
  'author': 'Camptocamp',
  'maintainter': 'Camptocamp',
  'category': 'Purchase',
- 'depends': ['account'],
+ 'depends': ['purchase'],
  'description': """
-Balance for a line
-==================
 
-Add a balance total for grouped lines in move line view.
+Generate EDIFACT messages from purchase_orders
+==============================================
 
-Balance field will only be shown when move lines are grouped by account
-or filtered by account.
+Ce module implémente le format du pivot de commande e-commerce utilisé par
+la société Debonix.
 
-Contributors
-------------
+Ce format de commande est pris en charge par la plupart des filiales de Debonix
+(hormis quelques exotiques) et il est compatible avec les deux principaux
+systèmes d’information utilisés : Easy et Emeraude.
 
-* Charbel Jacquin <charbel.jacquin@camptocamp.com>
+Note : Un compte client doit être crée sur le système d’information pour que
+la commande puisse être intégrée.
+
+Les fichiers pivots sont déposés dans un sas FTP pour être routé
+vers les filiales souhaitées (TODO).
+
 """,
  'website': 'http://www.camptocamp.com',
- 'data': [],
+ 'data': ['purchase_edi_view.xml'],
  'tests': [],
  'installable': True,
  'auto_install': False,
  'license': 'AGPL-3',
  'application': False,
  }
-

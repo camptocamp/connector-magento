@@ -2,17 +2,20 @@
 # -*- coding: utf-8 -*-
 import os
 import re
-import colorama
 import logging
 import pystache
-import datetime
+import simplejson
 
 DEBUG = False
+
+BASE = '/home/cjacquin/debonix/debonix_purchase_edi'
+SPEC = os.path.join(BASE, 'doc/debonix.pdf')
 
 PAGE_FOOTER = '(\x0c)?Maquette : ' + \
               'STD Flux de commande DEBONIX - v1.6 ( *) Page : (\d+)/(\d+)'
 
 _logger = logging.getLogger('.'.join(__name__.split('.')[-1:]))
+
 
 class Debonix(object):
     """
@@ -30,25 +33,69 @@ class Debonix(object):
         self.current_subsection = None
         self.spec = None
 
-    def render(self, ref):
-        if not self.spec:
-            self.parse_spec('spec.pdf')
+    def build_templates(self):
+        if self.spec:
+            return
+        self._parse_spec(SPEC)
+        assert self.spec
 
+        path = os.path.join(BASE, 'doc/CF1504233161.edi')
         records, samples, \
-            template = self.generate_template('doc/CF1504233161.edi')
+            template = self.readfile(path, for_template=True)
 
-        for i, s in enumerate(self.spec.sections):
-            s.sanity_check()
-            if s.code == '160':
-                s.template = '{{#commentaire}}160    A{{.}}\r\n{{/commentaire}}'
+        variables = {}
+        line_variables = {}
+        for i, section in enumerate(self.spec.sections):
+            section.sanity_check()
+            if section.code == '160':
+                section.template = '{{#commentaire}}160    A{{.}}\r\n' + \
+                                   '{{/commentaire}}'
+            if section.code == '200':
+                section.template = '{{#__lines__}}%s{{/__lines__}}' % \
+                                   section.template
+            for name, var in section.get_variables():
+                if section.code == '200':
+                    line_variables[name] = var
+                else:
+                    variables.setdefault(name, []).append(var)
 
-        rec, order, order_lines = generate_edifact(ref)
-        record_line = rec.copy()
-        record_line.update(order_lines[0])
-        message = ''.join(pystache.render(section.template,
-                                          section.format_record(record_line))
-                          for section in self.spec.sections)
-        return message, order
+        for (name, duplicates) in variables.items():
+            if len(duplicates) > 1:
+                _logger.debug('multiple occurrences of variable %r' % name)
+                _logger.debug('duplicates %r' % duplicates)
+                first = v = duplicates[0]
+                others = duplicates[1:]
+                while others:
+                    assert v.size == others[0].size
+                    assert v.type_ == others[0].type_
+                    v, others = others[0], others[1:]
+
+            variables[name] = duplicates[0]
+
+        self.template = ''.join(section.template for 
+                                section in self.spec.sections)
+        self.variables = variables
+        self.line_variables = line_variables
+
+    def _encode(self, data, variables):
+        #variables = self.variables if not line else self.line_variables
+        data = data.copy()
+        for name, var in variables.items():
+            val = data[name]
+            encoded = var.encode(val)
+            _logger.debug('FORMAT [%s]([%r) -> %r' % (name, val, encoded))
+            data[name] = encoded
+        return data
+
+    def render(self, data):
+
+        self.build_templates()
+        data = self._encode(data, self.variables)
+        data['__lines__'] = [self._encode(line, self.line_variables)
+                             for line in data['__lines__']]
+
+        message = pystache.render(self.template, data)
+        return message
 
     def accept_spec_line(self, line, container):
         """ accept a line from the pdf document """
@@ -77,7 +124,8 @@ class Debonix(object):
             container.content.append(line)
         return container
 
-    def parse_spec(self, path):
+    def _parse_spec(self, path):
+        assert not self.spec
 
         self.path = path
         self.content = []
@@ -111,7 +159,8 @@ class Debonix(object):
         return sub
 
     def readfile(self, path, samples={}, locale='latin1', for_template=False):
-        assert self.sections
+        if not self.spec:
+            self.build_templates()
         spec = self.sections[2]
         d = dict((s.get_spec()[0].value, s) for s in spec.sections)
 
@@ -129,9 +178,6 @@ class Debonix(object):
                 templates.append(subtemplate)
         template = ''.join(templates)
         return records, samples, template
-
-    def generate_template(self, path):
-        return self.readfile(path, for_template=True)
 
 
 class DebonixFieldSpec:
@@ -226,7 +272,7 @@ class Field(object):
         return line[self.offset:self.offset+self.size]
 
 
-class Alphanumeric(Field):
+class Alphanum(Field):
 
     def encode(self, val):
         _logger.debug('AN:encode(%r)' % val)
@@ -248,7 +294,7 @@ class Numeric(Field):
         return raw.rjust(self.size, '0')
 
 
-class Alphabetic(Field):
+class Alpha(Field):
 
     def encode(self, val):
         _logger.debug('AN:encode(%r)' % val)
@@ -260,13 +306,15 @@ class Alphabetic(Field):
 
 def make_field(name, type_, size, offset, value,
                required=False, comment=None, note=None):
-    return {'AN': Alphanumeric,
-            'A': Alphabetic,
+    return {'AN': Alphanum,
+            'A': Alpha,
             'N': Numeric}[type_](name, required, type_,
                                  size, offset, value, comment, note)
 
 
 class Section(object):
+    # TODO: this class is to big. Extract doc parser.
+
     HEADER = re.compile(
         u'(Nom *)(O/F *)(Type *)(Taille *)(Offset *)(Valeur\n)')
     FIELDS = [DebonixFieldSpec('name', '[^$]*', lambda s: s.strip()),
@@ -342,7 +390,7 @@ class Section(object):
             if field.is_variable():
                 val = rec[name]
                 encoded = field.encode(val)
-                print "XXXX", name, repr(encoded)
+                _logger.debug('FORMAT [%s]([%r) -> %r' % (name, val, encoded))
                 r2[name] = encoded
 
         return r2
@@ -540,20 +588,18 @@ class SubSection(Section):
         return '<Section %s %s (%s)>' % (self.index, self.title, self.code)
 
 
-def generate_edifact(command, user='admin', password='admin',
-                     dbname='debonix_master', port=8501):
+def rpc_read_edifact(po_name, user='admin', password='admin',
+                     dbname='debonix_edi', port=8501):
     import oerplib
     oerp = oerplib.OERP('localhost', protocol='xmlrpc', port=port)
 
     # Login (the object returned is a browsable record)
     user = oerp.login(user, password, dbname)
-    print(user.name)             # name of the user connected
-    print(user.company_id.name)  # the name of its company
 
     po = oerp.get('purchase.order')
-
-    po_ids = po.search([('name', '=', command)])
-
+    po_ids = po.search([('name', '=', po_name)])
+    if not po_ids:
+        raise ValueError("Purchase order %s not found" % po_name)
     for order in po.browse(po_ids):
         record = {}
 
@@ -639,7 +685,6 @@ def generate_edifact(command, user='admin', password='admin',
         totalHT = 0
         for line_index, order_line in enumerate(order_lines):
             line = {}
-            print order_line
             line['codag'] = order_line.product_id.code
             line['libelle'] = order_line.product_id.name[:70]
             line['prixUnitaireNet'] = pu = int(order_line.price_unit * 10000)
@@ -662,9 +707,8 @@ def generate_edifact(command, user='admin', password='admin',
 
             line['uq'] = convert_unit(order_line.product_uom.name)
             line['dateLiv'] = order_line.date_planned.strftime('%Y%m%d')
-            line['uep'] = 1 # CHECKME
+            line['uep'] = 1    # CHECKME
 
-            line['__object__'] = order_line
             lines.append(line)
 
         # 300
@@ -678,7 +722,9 @@ def generate_edifact(command, user='admin', password='admin',
         #        for ol in order.order_line:
         #            print ol
         #        return order
-        return record, order, lines
+        record['__lines__'] = lines
+        return record
+
 
 def htmldoc(doc):
     spec = doc.content[2]
@@ -712,10 +758,15 @@ def main():
     parser = OptionParser()
     option = parser.add_option
     option('-d', "--debug", dest="debug", action="store_true")
-    option('-g', "--gen-doc", dest="gen_doc", action="store_true")
+    option('-D', "--docgen", dest="docgen", action="store_true")
+    option('-j', "--json-read", dest="jsonread", action="store_true")
+    option('-J', "--json-write", dest="jsonwrite", action="store_true")
+    option('-M', "--mustache", dest="mustache", action="store_true")
+    option('-i', "--edi-read", dest="ediread", action="store_true")
+    option('-I', "--edi-write", dest="ediwrite", action="store_true")
+    option('-r', "--rpc", dest="rpc", action="store_true")
     logging.basicConfig()
     (options, args) = parser.parse_args()
-    print options
 
     if options.debug:
         import edifact
@@ -723,14 +774,30 @@ def main():
         _logger.setLevel(logging.DEBUG)
 
     doc = Debonix()
+    doc.build_templates()
+
+    if options.docgen:
+        htmldoc(doc)
+
+    if options.mustache:
+        with open("debonix.mustache", "w") as out:
+            out.write(doc.template)
 
     for ref in args:
-        with open('%s.edi' % ref, 'w') as out:
-            message, order = doc.render(ref)
-            out.write(message.encode('latin1'))
+        if options.rpc:
+            record = rpc_read_edifact(ref)
+        elif options.ediread:
+            raise NotImplementedError, "reading edifact"
+        elif options.jsonread:
+            with open("%s.json" % ref) as data:
+                record = simplejson.load(data)
+        if options.ediwrite:
+            with open('%s.edi' % ref, 'w') as out:
+                out.write(doc.render(record).encode('latin1'))
+        if options.jsonwrite:
+            with open('%s.json' % ref, 'w') as out:
+                out.write(simplejson.dumps(record))
 
-    if options.gen_doc:
-        htmldoc(doc)
 
     # generate_edifact(ref)
 
