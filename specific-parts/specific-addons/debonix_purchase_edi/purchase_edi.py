@@ -20,15 +20,14 @@
 ##############################################################################
 from openerp.osv import osv, fields
 import pdb
-import tools.edifact
 import logging
-import pystache
 
 _logger = logging.getLogger('debonix_EDI')
 
 _logger.info('loading module !')
 
 _spec = None
+
 class purchase_order(osv.Model):
     _inherit = "purchase.order"
 
@@ -37,9 +36,11 @@ class purchase_order(osv.Model):
     }
 
     def generate_edifact(self, cr, uid, ids, context=None):
+        import tools.edifact
+
         _logger.info('BINGO !')
 
-        pdb.set_trace()
+        # pdb.set_trace()
         mapping = {}
         orders = self.browse(cr, uid, ids, context=context)
 
@@ -93,6 +94,7 @@ class purchase_order(osv.Model):
                 return 'P'
             assert 0 == 1
 
+
         totalQty = 0
         totalHT = 0
         for line_index, order_line in enumerate(order_lines):
@@ -129,6 +131,9 @@ class purchase_order(osv.Model):
         mapping['totalHT'] = int(order.amount_untaxed * 1000)
         mapping['totalTVA'] = int(order.amount_tax * 1000)
         mapping['totalTTC'] = int(order.amount_total * 1000)
+
+
+        mapping['__lines__'] =  lines
         #    for order in po.browse(po_ids):
         #        print order.name
         #        for ol in order.order_line:
@@ -137,18 +142,11 @@ class purchase_order(osv.Model):
         _logger.debug('DATA extracted [%d] lines', len(lines))
         # assert len(lines) == 1
 
-        if _spec is None:
-            global _spec
-            doc = tools.edifact.Debonix()
-            doc.build_templates()
-            _spec = doc.spec
-
-        record = mapping.copy()
-        record['order_lines'] = lines
-        message = ''.join(pystache.render(section.template,
-                                          section.format_record(record))
-                          for section in _spec.sections)
-
+        doc =  tools.edifact.Debonix()
+        message = doc.render(mapping)
+        pdb.set_trace()
         res = {'message': message,
-               'edi_record': record}
+               'template': doc.template,
+               'edi_record': mapping}
+        _logger.debug('EDIFACT %r' % message)
         return res

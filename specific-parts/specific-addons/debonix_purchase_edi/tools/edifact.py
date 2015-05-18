@@ -384,17 +384,6 @@ class Section(object):
         if notes:
             last['note'] = notes
 
-    def format_record(self, rec):
-        r2 = rec.copy()
-        for name, field in self.get_variables():
-            if field.is_variable():
-                val = rec[name]
-                encoded = field.encode(val)
-                _logger.debug('FORMAT [%s]([%r) -> %r' % (name, val, encoded))
-                r2[name] = encoded
-
-        return r2
-
     def get_spec(self):
         if self.records is None:
             self.records = list(self.convert_to_objects())
