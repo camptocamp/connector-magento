@@ -1,0 +1,12 @@
+DEBR{{codefiliale}}S{{siretFiliale}}RCDECL1.1{{dateCmd}}{{heureCmd}}
+DMS{{codeAgence}}S{{siretAgence}}S{{siretDebonix}}                 0000000000000000000000000
+100{{noCmd}}{{dateCmd}}E{{heureCmd}}                                   {{refCmd}}                                                                                                                                              00000000{{dateLiv}}0000000000000000000000000000 L {{compteDebonix}} ORFEUREUR000000000000                                                                       00000000                              000000000000000
+110S{{siretAgence}}
+120S{{siretDebonix}}
+130S{{siretDebonix}}               {{adr1}}{{adr2}}{{adr3}}{{adr4}}{{adr5}}{{cp}}{{ville}}                                   FR                                                                                                        {{tel}}{{fax}}                                                     
+140S{{siretDebonix}}               {{adr1}}{{adr2}}{{adr3}}{{adr4}}{{adr5}}{{cp}}{{ville}}                                   FR                                                                                                        {{tel}}{{fax}}                                                     
+{{#commentaire}}160    A{{.}}
+{{/commentaire}}{{#__lines__}}200{{refarticleFournisseur}}0000000000000                                                                                       {{ligne}}{{libelle}}{{qte}}000000000000000 000000000000000{{prixUnitaireNet}}{{montantLigne}}   {{uq}}  {{dateLiv}}0000000000000000   000000000000000                                     00000000000000000000000000000000000000000                                                                                                                           {{uep}}   {{codag}}O000000000000   000000000000000
+{{/__lines__}}300{{totalQte}}{{totalLigne}}{{totalHT}}{{totalTVA}}{{totalTTC}}000000000000000
+FMS
+FIN
