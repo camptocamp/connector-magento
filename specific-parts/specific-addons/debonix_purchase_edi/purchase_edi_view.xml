@@ -14,7 +14,13 @@
 		    groups="purchase.group_purchase_manager"
 		    />
 	  </xpath>
+
+	  <field name="shipped" position="after">
+              <field name="edifact_sent"/>
+              <field name="edifact_removed"/>
+	  </field>
 	</field>
+
       </record>
     </data>
 </openerp>

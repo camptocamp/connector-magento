@@ -19,34 +19,44 @@
 #
 ##############################################################################
 from openerp.osv import osv, fields
-import pdb
+from openerp.exceptions import Warning
+
+import os
 import logging
 
-_logger = logging.getLogger('debonix_EDI')
+_logger = logging.getLogger('EDIFACT')
 
-_logger.info('loading module !')
+_logger.debug('loading module !')
 
 _spec = None
+
+# class res_company(osv.Model):
+#     # TODO, configurable drop dir
+#     pass
 
 class purchase_order(osv.Model):
     _inherit = "purchase.order"
 
     _columns = {
-        'create_date': fields.datetime('Creation Time', readonly=True)
+        'create_date': fields.datetime('Creation Time', readonly=True),
+        'edifact_sent': fields.boolean('EDI Sent', readonly=True),
+        'edifact_removed':  fields.boolean('EDI Removed', readonly=True)
     }
 
     def generate_edifact(self, cr, uid, ids, context=None):
         import tools.edifact
 
-        _logger.info('BINGO !')
-
         # pdb.set_trace()
         mapping = {}
         orders = self.browse(cr, uid, ids, context=context)
 
-        for order in orders:
+        assert len(ids) == 1   # FIXME For now one, we will do batch later
 
-            _logger.info('ORDER: %s' % order.name)
+        for order in orders:
+            _logger.debug('ORDER: %s' % order.name)
+
+        if order.edifact_sent:
+            raise Warning('EDIFACT document already sent to partner, please ask your DBA to clear clear the edifact_sent status on %s if you want to regenerate' % order.name)
 
         mapping['codefiliale'] = 'PLN'
         mapping['siretFiliale'] = '52789590800012'
@@ -94,14 +104,15 @@ class purchase_order(osv.Model):
                 return 'P'
             assert 0 == 1
 
-
         totalQty = 0
         totalHT = 0
         for line_index, order_line in enumerate(order_lines):
             line = {}
             line['codag'] = order_line.product_id.code
             line['libelle'] = order_line.product_id.name[:70]
-            line['prixUnitaireNet'] = pu = int(order_line.price_unit * 10000)
+
+            price_unit = order_line.price_unit
+            line['prixUnitaireNet'] = pu = int(price_unit * 10000)
 
             # call for behave
             # La quantité doit tenir compte du conditionnement remonté dans
@@ -110,14 +121,16 @@ class purchase_order(osv.Model):
             # Si un client saisie 10 en quantité
             #  sur le site et que le conditionnement présent dans le
             #  champs quantity = 200,  la quantité sera égal  2000 * 1000'
-            line['qte'] = qty = int(order_line.product_qty * 1000)
+            line['qte'] = int(order_line.product_qty * 1000)
 
             line['refarticleFournisseur'] = order_line.product_id.code
             line['ligne'] = line_index+1
-            line['montantLigne'] = montant = int(order_line.price_subtotal * 1000)
+
+            montant = int(order_line.price_subtotal * 1000)
+            line['montantLigne'] = montant
 
             totalHT += (pu * montant)
-            totalQty += qty
+            totalQty += line['qte']
 
             line['uq'] = convert_unit(order_line.product_uom.name)
             line['dateLiv'] = order_line.date_planned.replace('-', '')
@@ -132,8 +145,7 @@ class purchase_order(osv.Model):
         mapping['totalTVA'] = int(order.amount_tax * 1000)
         mapping['totalTTC'] = int(order.amount_total * 1000)
 
-
-        mapping['__lines__'] =  lines
+        mapping['__lines__'] = lines
         #    for order in po.browse(po_ids):
         #        print order.name
         #        for ol in order.order_line:
@@ -142,11 +154,23 @@ class purchase_order(osv.Model):
         _logger.debug('DATA extracted [%d] lines', len(lines))
         # assert len(lines) == 1
 
-        doc =  tools.edifact.Debonix()
+        doc = tools.edifact.Debonix()
         message = doc.render(mapping)
-        pdb.set_trace()
-        res = {'message': message,
-               'template': doc.template,
-               'edi_record': mapping}
-        _logger.debug('EDIFACT %r' % message)
+
+        _logger.debug('message for %r:\n%r' % (order.name,  message))
+        _logger.debug('TODO: Drop it to FTP')
+        droppath = '/tmp/edifact'
+        filename = '%s.edi' % order.name
+        fullpath = os.path.join(droppath, filename)
+        os.path.exists(droppath) or os.mkdir(droppath)
+        if os.path.exists(fullpath):
+            raise Warning("""EDIFACT file %s already present in '%s'.
+            Please remove it before you can regenerate""" %
+                          (filename,  droppath))
+        with open(fullpath, 'w') as out:
+            out.write(message.encode('latin1'))
+
+        # order.edifact_sent = True
+        res = {'edifact_sent': True}
+        self.write(cr, uid, [order.id], res)
         return res
