@@ -9,6 +9,7 @@ Feature: upgrade to 1.1.4
     Given I install the required modules with dependencies:
       | name                             |
       | specific_fct                     |
+      | procurement                      |
     Then my modules should have been installed and models reloaded
 
     Given I execute the SQL commands
