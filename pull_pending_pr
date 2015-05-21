@@ -1,12 +1,8 @@
 set -v
 set -e
 
-cd parts/connector-magento
-git pull --no-edit origin pull/25/head # Export cancellation of sales orders to Magento
-cd -
-
 cd parts/sale-workflow
-git pull --no-edit origin pull/109/head # Remove the filter on incoming pickings from the purchase orders
+git pull --no-edit origin pull/160/head # Remove the filter on incoming pickings from the purchase orders
 cd -
 
 cd parts/product-kitting
