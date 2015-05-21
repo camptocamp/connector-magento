@@ -2,7 +2,7 @@ set -v
 set -e
 
 cd parts/sale-workflow
-git pull --no-edit origin pull/160/head # Remove the filter on incoming pickings from the purchase orders
+git pull --no-edit origin pull/160/head # Merge automatically POs from the same SO with dropshipping
 cd -
 
 cd parts/product-kitting
