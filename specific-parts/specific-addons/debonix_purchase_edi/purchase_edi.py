@@ -24,12 +24,9 @@ from openerp.exceptions import Warning
 import os
 import logging
 from tools import handlebars
-import pdb
 
 _logger = logging.getLogger('EDIFACT')
 _logger.setLevel(logging.DEBUG)
-_logger.debug('loading module !')
-
 
 
 class purchase_order(osv.Model):
@@ -78,7 +75,7 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
         mapping = self._build_mapping(order)
         template = self._get_template()
         renderer = make_render_engine()
-        pdb.set_trace()
+
         message = renderer.render(template, mapping)
 
         _logger.debug('message for %r:\n%r', order.name, message)
