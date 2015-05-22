@@ -32,13 +32,6 @@ _logger.setLevel(logging.DEBUG)
 _logger.debug('loading module !')
 
 
-def _gv(obj, attr):
-    """ helper function for mapping values generation """
-    if not obj:
-        return ''
-    val = getattr(obj, attr)
-    return val if val else ''
-
 
 class purchase_order(osv.Model):
 
@@ -108,6 +101,7 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
         """ generate data mapping needed for template rendering """
 
         dest_address = order.dest_address_id
+
         def convert_unit(name):
             if name == 'PCE':
                 return 'P'
@@ -117,6 +111,16 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
                 return 'M'
             else:
                 raise NotImplementedError("mapping for uom %s" % name)
+
+
+
+        def _gv(obj, attr):
+            """ helper function for mapping values generation """
+            if not obj:
+                return ''
+            val = getattr(obj, attr)
+            return val if val else ''
+
 
         mapping = {
             'codefiliale': 'PLN',
