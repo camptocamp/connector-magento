@@ -23,9 +23,9 @@ from openerp.exceptions import Warning
 
 import os
 import logging
-import simplejson
-
-import tools.edifact
+from tools import handlebars
+import pdb
+#import tools.edifact
 
 _logger = logging.getLogger('EDIFACT')
 _logger.setLevel(logging.DEBUG)
@@ -50,7 +50,7 @@ class purchase_order(osv.Model):
         'edifact_removed':  fields.boolean('EDI Removed', readonly=True)
     }
 
-    _edi_renderer = None
+    _edi_template = None
 
     def check_removed_edifact_files(self, cr, uid, ids=None, context=None):
 
@@ -84,7 +84,10 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
                           order.name)
 
         mapping = self._build_mapping(order)
-        message = self._get_renderer().render(mapping)
+        template = self._get_template()
+        renderer = make_render_engine()
+        pdb.set_trace()
+        message = renderer.render(template, mapping)
 
         _logger.debug('message for %r:\n%r', order.name, message)
 
@@ -178,16 +181,14 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
 
 
     @classmethod
-    def _get_renderer(cls):
-        """ get EDIFACT renderer for purchase orders """
-        if cls._edi_renderer is None:
+    def _get_template(cls):
+        """ get EDIFACT template for purchase orders """
+        if cls._edi_template is None:
             module_path = os.path.dirname(os.path.abspath(__file__))
-            specfile = os.path.join(module_path, 'debonix.json')
+            specfile = os.path.join(module_path, 'debonix.mustache')
             with open(specfile) as data:
-                json = simplejson.load(data)
-                doc = tools.edifact.Debonix.fromjson(json)
-                cls._edi_renderer = doc
-        return cls._edi_renderer
+                cls._edi_template = data.read()
+        return cls._edi_template
 
     @staticmethod
     def _save_edi(path, message):
@@ -203,3 +204,19 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
             message = message.encode('latin1', 'replace')
         with open(path, 'w') as out:
             out.write(message)
+
+
+def make_render_engine():
+    renderer = handlebars.Renderer()
+
+    def lj(v, width, fill=' '):
+        v = unicode(v)
+        return v.ljust(width, fill)
+    def rj(v, width, fill=' '):
+        v = unicode(v)
+        return v.rjust(width, fill)
+
+    renderer.register_helper('lj', lj)
+    renderer.register_helper('rj', rj)
+
+    return renderer

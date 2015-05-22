@@ -3,7 +3,6 @@
 import os
 import re
 import logging
-import pystache
 import simplejson
 
 DEBUG = False
@@ -32,6 +31,7 @@ class Debonix(object):
         self.current_section = None
         self.current_subsection = None
         self.spec = None
+        self.engine = None
 
         self.template =  None
         self.fields =  None
@@ -60,6 +60,7 @@ class Debonix(object):
                  'fields':  fields,
                  'line_fields':  line_fields
         }
+
 
     def build_templates(self):
         if self.spec:
@@ -109,6 +110,48 @@ class Debonix(object):
         self.fields = fields
         self.line_fields = line_fields
 
+    def build_templates2(self):
+        assert self.spec
+        for s in self.spec.sections:
+            assert s.records
+
+        fields = {}
+        line_fields = {}
+        templates = []
+        _logger.warn('SPEC %r' % self.spec)
+        for section in self.spec.sections:
+            section.sanity_check()
+            template = section.gen_template()
+            _logger.warn('XXX: %r', template)
+            if section.code == '160':
+                template = '{{#commentaire}}160    A{{lj . 350}}\r\n' + \
+                           '{{/commentaire}}'
+            if section.code == '200':
+                template = '{{#__lines__}}%s{{/__lines__}}' % template
+            templates.append(template)
+            for name, var in section.get_vars():
+                if section.code == '200':
+                    line_fields[name] = var
+                else:
+                    fields.setdefault(name, []).append(var)
+
+        for (name, duplicates) in fields.items():
+            if len(duplicates) > 1:
+                _logger.debug('multiple occurrences of field %r' % name)
+                _logger.debug('duplicates %r' % duplicates)
+                first = v = duplicates[0]
+                others = duplicates[1:]
+                while others:
+                    assert v.size == others[0].size
+                    assert v.type_ == others[0].type_
+                    v, others = others[0], others[1:]
+
+            fields[name] = duplicates[0]
+
+        template = ''.join(template for
+                                template in templates)
+        return template, fields, line_fields
+
     def _encode(self, data, fields):
         #fields = self.fields if not line else self.line_fields
         data = data.copy()
@@ -128,6 +171,14 @@ class Debonix(object):
 
         message = pystache.render(self.template, data)
         return message
+
+    def render2(self, data):
+        self.build_templates() # FIXME
+        template, variables, line_variables = self.build_templates2()
+        renderer = self._make_engine()
+        _logger.warn('TEMPLATE %r', template)
+        _logger.warn('DATA %r', data)
+        return renderer.render(template, data)
 
     def accept_spec_line(self, line, container):
         """ accept a line from the pdf document """
@@ -294,23 +345,41 @@ class FixedField(object):
 
     def gen_template(self):
         """ generate a template for this field """
+
+        def make(var, size, type_):
+            if type_ == 'N':
+                return "{{rj %s %s '0'}}" % (var, size)
+            elif type_ in ('AN', 'A'):
+                return "{{lj %s %s}}" % (var, size)
+            else:
+                raise AssertionError("unkown field type %r" % self.type_)
+
+        size = self.size
+        type_ = self.type_
+
         if self.is_variable():
+
             var = self.get_varname()
+            return make(var, size, type_)
 
         elif self.value == '[Vide]':  # (FIXME) debonix specific, move away
+
             var = "''"
+            if type_ == 'N' and size < len("{{lj '' 10}}"):
+                return '0' * size
+            elif type_ in ('AN', 'A') and size < len("{{rj '' 10 '0'}}"):
+                return ' ' * size
+            else:
+                return make(var, size, type_)
+
         elif isinstance(self.value, (str, unicode)):
             if len(self.value) == self.size: # string values
                 return self.value
             var = "'%s'" % self.value
         else:
             var = self.value
-        if self.type_ == 'N':
-            return "{{rj %s %s '0'}}" % (var, self.size)
-        elif self.type_ in ('AN', 'A'):
-            return "{{lj %s %s}}" % (var, self.size)
-        else:
-            raise AssertionError("unkown field type %r" % self.type_)
+
+        return make(var, size, type_)
 
     def __repr__(self):
         return '<%s %s [%s:%s+%s]>' % (self.__class__.__name__, self.name,
@@ -645,6 +714,10 @@ class SubSection(Section):
     def get_vars(self):
         return [(f.get_varname(), f)
                 for f in self.get_spec() if f.value.startswith('$')]
+
+
+    def gen_template(self):
+        return ''.join(r.gen_template() for r in self.records) + '\r\n'
 
     def __repr__(self):
         return '<%s %s %r (%s)>' % (self.__class__.__name__,
