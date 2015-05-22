@@ -1,4 +1,4 @@
-w# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    Author: Charbel Jacquin (Camptocamp)
@@ -111,7 +111,10 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
             'ville': _gv(dest_address, 'city'),
             'tel': _gv(dest_address, 'phone'),
             'fax': _gv(dest_address, 'fax'),
-            'commentaire': _gv(order, 'notes')
+            'commentaire': _gv(order, 'notes'),
+            'totalHT': int(order.amount_untaxed * 1000),
+            'totalTVA': int(order.amount_tax * 1000),
+            'totalTTC': int(order.amount_total * 1000)
         }
 
         order_lines = list(order.order_line)
@@ -141,21 +144,10 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
             lines.append(line)
 
         mapping['__lines__'] = lines
-
-        # 300
         mapping['totalQte'] = total_qty
         mapping['totalLigne'] = line_index+1
-        mapping['totalHT'] = int(order.amount_untaxed * 1000)
-        mapping['totalTVA'] = int(order.amount_tax * 1000)
-        mapping['totalTTC'] = int(order.amount_total * 1000)
-
-        #    for order in po.browse(po_ids):
-        #        print order.name
-        #        for ol in order.order_line:
-        #            print ol
-        #        return order
         _logger.debug('DATA extracted [%d] lines', len(lines))
-        # assert len(lines) == 1
+
         return mapping
 
     @staticmethod
