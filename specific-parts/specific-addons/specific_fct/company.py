@@ -76,4 +76,9 @@ class res_company(orm.Model):
             string='Path',
             type='char',
             multi='server_env'),
-    }
+        'edifact_path': fields.function(
+            _get_environment_config_by_id,
+            string="Path",
+            type='char',
+            multi='server_env')
+        }

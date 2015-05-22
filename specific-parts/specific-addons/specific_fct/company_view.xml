@@ -13,6 +13,9 @@
             <field name="sftp_invoice_user"/>
             <field name="sftp_invoice_path"/>
           </group>
+          <group string="EDIFACT">
+            <field name="edifact_path"/>
+          </group>
         </page>
       </field>
     </record>
