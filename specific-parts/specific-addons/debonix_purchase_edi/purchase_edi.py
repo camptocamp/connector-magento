@@ -71,9 +71,9 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
         self._save_edi(order, message)
 
         # order.edifact_sent = True
-        res = {'edifact_sent': True}
-        self.write(cr, uid, [order.id], res)
-        return res
+        vals = {'edifact_sent': True}
+        self.write(cr, uid, [order.id], vals, context=context)
+        return vals
 
     def _build_mapping(self, order):
         """ generate data mapping needed for template rendering """
@@ -82,7 +82,12 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
         def convert_unit(name):
             if name == 'PCE':
                 return 'P'
-            assert 0 == 1
+            elif name == 'KGM':
+                return 'K'
+            elif name == 'm':
+                return 'M'
+            else:
+                raise NotImplementedError("mapping for uom %s" % name)
 
         mapping = {
             'codefiliale': 'PLN',
