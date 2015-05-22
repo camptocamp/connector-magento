@@ -52,9 +52,29 @@ class purchase_order(osv.Model):
 
     _edi_renderer = None
 
+    def check_removed_edifact_files(self, cr, uid, ids=None, context=None):
+
+        company = self.pool['res.users'].browse(cr, uid, uid, context).company_id
+        droppath = company.edifact_purchase_path
+
+        ids = self.search(cr, uid, ['&', ('edifact_sent', '=', True),
+                                    ('edifact_removed', '=', False)])
+        _logger.warn('XXX: ids %r', ids)
+        removed = []
+        for rec in self.read(cr, uid, ids, ['name']):
+            fullpath = os.path.join(droppath, '%s.edi' % rec['name'])
+            if not os.path.exists(fullpath):
+                removed.append(rec['id'])
+
+        _logger.warn('XXX: removed %r', removed)
+        if removed:
+            self.write(cr, uid, removed, {'edifact_removed': True}, context=context)
+        return True
+
     def generate_edifact(self, cr, uid, ids, context=None):
         """ generate EDIFACT message for the selected purchase orders """
         assert len(ids) == 1   # FIXME For now one, we will do batch later
+
 
         orders = self.browse(cr, uid, ids, context=context)
         for order in orders:
@@ -70,12 +90,18 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
 
         _logger.debug('message for %r:\n%r', order.name, message)
 
-        self._save_edi(order, message)
+        company = self.pool['res.users'].browse(cr, uid, uid, context).company_id
+        droppath = company.edifact_purchase_path
+        filename = '%s.edi' % order.name
+        fullpath = os.path.join(droppath, filename)
+        if not os.path.exists(droppath):
+            os.mkdir(droppath)
+        self._save_edi(fullpath, message)
 
         # order.edifact_sent = True
         vals = {'edifact_sent': True}
         self.write(cr, uid, [order.id], vals, context=context)
-        return vals
+        return True
 
     def _build_mapping(self, order):
         """ generate data mapping needed for template rendering """
@@ -167,22 +193,16 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
         return cls._edi_renderer
 
     @staticmethod
-    def _save_edi(order, message):
+    def _save_edi(path, message):
         """ save EDIFACT message """
         _logger.debug('TODO: Drop it to FTP')
-        droppath = '/tmp/edifact'
-        filename = '%s.edi' % order.name
-        fullpath = os.path.join(droppath, filename)
-        if not os.path.exists(droppath):
-            os.mkdir(droppath)
-        if os.path.exists(fullpath):
-            raise Warning("""EDIFACT file %s already present in '%s'.
-            Please remove it before you can regenerate""" %
-                          (filename, droppath))
+        if os.path.exists(path):
+            raise Warning("""EDIFACT file %s already exists.
+            Please remove it before you can regenerate""" % path)
         try:
             message = message.encode('latin1')
         except UnicodeEncodeError:
             _logger.warn("""EDIFACT message contains non latin1 encodable unicode caracters, they have been replaced by '?'""")
             message = message.encode('latin1', 'replace')
-        with open(fullpath, 'w') as out:
+        with open(path, 'w') as out:
             out.write(message)

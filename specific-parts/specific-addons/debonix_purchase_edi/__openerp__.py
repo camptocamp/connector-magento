@@ -45,7 +45,8 @@ vers les filiales souhaitées (TODO).
 
 """,
  'website': 'http://www.camptocamp.com',
- 'data': ['purchase_edi_view.xml'],
+ 'data': ['purchase_edi_view.xml',
+          'purchase_edi_data.xml'],
  'tests': [],
  'installable': True,
  'auto_install': False,
