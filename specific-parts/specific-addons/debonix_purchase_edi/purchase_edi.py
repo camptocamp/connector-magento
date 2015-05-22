@@ -25,7 +25,6 @@ import os
 import logging
 from tools import handlebars
 import pdb
-#import tools.edifact
 
 _logger = logging.getLogger('EDIFACT')
 _logger.setLevel(logging.DEBUG)
