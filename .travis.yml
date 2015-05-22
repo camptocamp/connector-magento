@@ -8,7 +8,7 @@ python:
 # product_multi_ean...
 # Thus they are not tested until a solution is found
 env:
-  - 
+  - RUNTESTS=
   - RUNTESTS=1 EXCLUDE=last_sale_price,specific_fct,stockit_synchro
   - RUNTESTS=1 INCLUDE=last_sale_price
 
