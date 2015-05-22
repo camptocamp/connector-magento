@@ -14,7 +14,7 @@
             <field name="sftp_invoice_path"/>
           </group>
           <group string="EDIFACT">
-            <field name="edifact_path"/>
+            <field name="edifact_purchase_path"/>
           </group>
         </page>
       </field>
