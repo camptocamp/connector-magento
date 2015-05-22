@@ -59,14 +59,12 @@ class purchase_order(osv.Model):
 
         ids = self.search(cr, uid, ['&', ('edifact_sent', '=', True),
                                     ('edifact_removed', '=', False)])
-        _logger.warn('XXX: ids %r', ids)
         removed = []
         for rec in self.read(cr, uid, ids, ['name']):
             fullpath = os.path.join(droppath, '%s.edi' % rec['name'])
             if not os.path.exists(fullpath):
                 removed.append(rec['id'])
 
-        _logger.warn('XXX: removed %r', removed)
         if removed:
             self.write(cr, uid, removed, {'edifact_removed': True}, context=context)
         return True
@@ -185,7 +183,6 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
         if cls._edi_renderer is None:
             module_path = os.path.dirname(os.path.abspath(__file__))
             specfile = os.path.join(module_path, 'debonix.json')
-            _logger.debug('XXXX %r', specfile)
             with open(specfile) as data:
                 json = simplejson.load(data)
                 doc = tools.edifact.Debonix.fromjson(json)
