@@ -33,6 +33,34 @@ class Debonix(object):
         self.current_subsection = None
         self.spec = None
 
+        self.template =  None
+        self.fields =  None
+        self.line_fields =  None
+
+    @staticmethod
+    def fromjson(json):
+        template =  json['template']
+        fields = json['fields']
+        line_fields =  json['line_fields']
+
+        doc = Debonix()
+        doc.spec =  Section('0', 'format from json')
+        #doc.spec.sections = sections
+        doc.template = template
+        doc.fields =  dict((name, FixedField.from_dict(value)) for (name, value)
+                           in fields.items())
+        doc.line_fields = dict((name, FixedField.from_dict(value)) for (name, value)
+                               in line_fields.items())
+        return doc
+
+    def tojson(self):
+        fields =  dict((name,  value.as_dict()) for (name,  value) in self.fields.items())
+        line_fields =  dict((name,  value.as_dict()) for (name,  value) in self.line_fields.items())
+        return { 'template': self.template,
+                 'fields':  fields,
+                 'line_fields':  line_fields
+        }
+
     def build_templates(self):
         if self.spec:
             return
@@ -42,10 +70,14 @@ class Debonix(object):
         path = os.path.join(BASE, 'doc/CF1504233161.edi')
         records, samples, \
             template = self.readfile(path, for_template=True)
+        for s in self.spec.sections:
+            assert s.records
 
-        variables = {}
-        line_variables = {}
+        fields = {}
+        line_fields = {}
+        _logger.warn('SPEC %r' % self.spec)
         for i, section in enumerate(self.spec.sections):
+            _logger.warn('SPEC-SECTION %r' % section)
             section.sanity_check()
             if section.code == '160':
                 section.template = '{{#commentaire}}160    A{{.}}\r\n' + \
@@ -53,15 +85,15 @@ class Debonix(object):
             if section.code == '200':
                 section.template = '{{#__lines__}}%s{{/__lines__}}' % \
                                    section.template
-            for name, var in section.get_variables():
+            for name, var in section.get_vars():
                 if section.code == '200':
-                    line_variables[name] = var
+                    line_fields[name] = var
                 else:
-                    variables.setdefault(name, []).append(var)
+                    fields.setdefault(name, []).append(var)
 
-        for (name, duplicates) in variables.items():
+        for (name, duplicates) in fields.items():
             if len(duplicates) > 1:
-                _logger.debug('multiple occurrences of variable %r' % name)
+                _logger.debug('multiple occurrences of field %r' % name)
                 _logger.debug('duplicates %r' % duplicates)
                 first = v = duplicates[0]
                 others = duplicates[1:]
@@ -70,17 +102,17 @@ class Debonix(object):
                     assert v.type_ == others[0].type_
                     v, others = others[0], others[1:]
 
-            variables[name] = duplicates[0]
+            fields[name] = duplicates[0]
 
         self.template = ''.join(section.template for 
                                 section in self.spec.sections)
-        self.variables = variables
-        self.line_variables = line_variables
+        self.fields = fields
+        self.line_fields = line_fields
 
-    def _encode(self, data, variables):
-        #variables = self.variables if not line else self.line_variables
+    def _encode(self, data, fields):
+        #fields = self.fields if not line else self.line_fields
         data = data.copy()
-        for name, var in variables.items():
+        for name, var in fields.items():
             val = data[name]
             encoded = var.encode(val)
             _logger.debug('FORMAT [%s]([%r) -> %r' % (name, val, encoded))
@@ -90,8 +122,8 @@ class Debonix(object):
     def render(self, data):
 
         self.build_templates()
-        data = self._encode(data, self.variables)
-        data['__lines__'] = [self._encode(line, self.line_variables)
+        data = self._encode(data, self.fields)
+        data['__lines__'] = [self._encode(line, self.line_fields)
                              for line in data['__lines__']]
 
         message = pystache.render(self.template, data)
@@ -234,7 +266,8 @@ class LinePattern:
                         for (key, value) in rec.items())
 
 
-class Field(object):
+class FixedField(object):
+    """ FixedField represents a field in a fixed data format like EDIFACT ones """
 
     def __init__(self, name, required, type_, size, offset, value,
                  comment='', note=None):
@@ -271,20 +304,38 @@ class Field(object):
     def extract_field(self, line):
         return line[self.offset:self.offset+self.size]
 
+    def as_dict(self):
+        return dict((name, value) for (name, value) in
+                    ((name,  getattr(self,  name)) for name in dir(self)
+                     if not name.startswith('_') and not callable(getattr(self,  name))))
 
-class Alphanum(Field):
+    @staticmethod
+    def from_dict(json):
+        type_ =  json['type_']
+        if type_ ==  'N':
+            return Numeric( ** json)
+        elif type_ ==  'AN':
+            return Alphanum( ** json)
+        elif type_ ==  'A':
+            return Alpha( ** json)
+        else:
+            raise ValueError("bad field type")
+
+class Alphanum(FixedField):
 
     def encode(self, val):
         _logger.debug('AN:encode(%r)' % val)
         raw = unicode(val)
         if len(raw) > self.size:
-            raise ValueError(val)
+            #raise ValueError(val)
+            _logger.warn('value for %r is truncated' % self.get_varname())
+            raw =  raw[:self.size]
         if self.get_varname() == 'commentaire' and not val:  # FIXME
             return ''
         return raw.ljust(self.size)
 
 
-class Numeric(Field):
+class Numeric(FixedField):
 
     def encode(self, val):
         _logger.debug('N:encode(%r)' % val)
@@ -294,7 +345,7 @@ class Numeric(Field):
         return raw.rjust(self.size, '0')
 
 
-class Alpha(Field):
+class Alpha(FixedField):
 
     def encode(self, val):
         _logger.debug('AN:encode(%r)' % val)
@@ -366,7 +417,8 @@ class Section(object):
         self.records = None
 
     def __repr__(self):
-        return '<Section %s %s>' % (self.index, self.title)
+        return '<%s %s %r>' % (self.__class__.__name__,
+                               self.index, self.title)
 
     def merge_text(self, previous, current):
         if previous and current:
@@ -384,14 +436,6 @@ class Section(object):
         if notes:
             last['note'] = notes
 
-    def get_spec(self):
-        if self.records is None:
-            self.records = list(self.convert_to_objects())
-        return self.records[:]
-
-    def get_variables(self):
-        return [(f.get_varname(), f)
-                for f in self.get_spec() if f.value.startswith('$')]
 
     def extract_line(self, line, samples, locale='latin1', for_template=False):
         _logger.info('EXTRACT LINE[%s] %s' % (for_template, self))
@@ -571,10 +615,33 @@ class SubSection(Section):
         super(SubSection, self).__init__(index, title)
         self.code = code
         if fields:
-            self.fields = fields
+            self.records =  fields
+        #if fields:
+        #    self.fields = fields
+
+    def get_spec(self):
+        if self.records is None:
+            self.records = list(self.convert_to_objects())
+        return self.records[:]
+
+    def get_vars(self):
+        return [(f.get_varname(), f)
+                for f in self.get_spec() if f.value.startswith('$')]
 
     def __repr__(self):
-        return '<Section %s %s (%s)>' % (self.index, self.title, self.code)
+        return '<%s %s %r (%s)>' % (self.__class__.__name__,
+                                    self.index, self.title, self.code)
+
+    def as_dict(self):
+        return {'index': self.index,
+                'title': self.title,
+                'code': self.code,
+                'fields': [field.as_dict() for field in self.records] }
+
+    @staticmethod
+    def from_dict(data):
+        return SubSection(data['index'],  data['title'],  data['code'],
+                          [FixedField.from_dict(f) for f in data['fields']])
 
 
 def rpc_read_edifact(po_name, user='admin', password='admin',
@@ -751,6 +818,7 @@ def main():
     option('-j', "--json-read", dest="jsonread", action="store_true")
     option('-J', "--json-write", dest="jsonwrite", action="store_true")
     option('-M', "--mustache", dest="mustache", action="store_true")
+    option('-s', "--save", dest="save", action="store_true")
     option('-i', "--edi-read", dest="ediread", action="store_true")
     option('-I', "--edi-write", dest="ediwrite", action="store_true")
     option('-r', "--rpc", dest="rpc", action="store_true")
@@ -771,6 +839,10 @@ def main():
     if options.mustache:
         with open("debonix.mustache", "w") as out:
             out.write(doc.template)
+
+    if options.save:
+        with open("debonix.json", "w") as out:
+            out.write(simplejson.dumps(doc.tojson(), sort_keys=True, indent=4 * ' '))
 
     for ref in args:
         if options.rpc:
