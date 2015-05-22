@@ -104,7 +104,7 @@ class Debonix(object):
 
             fields[name] = duplicates[0]
 
-        self.template = ''.join(section.template for 
+        self.template = ''.join(section.template for
                                 section in self.spec.sections)
         self.fields = fields
         self.line_fields = line_fields
@@ -269,7 +269,7 @@ class LinePattern:
 class FixedField(object):
     """ FixedField represents a field in a fixed data format like EDIFACT ones """
 
-    def __init__(self, name, required, type_, size, offset, value,
+    def __init__(self, name=None, required=False, type_='N', size=0, offset=0, value=None,
                  comment='', note=None):
         self.name = name
         self.required = required
@@ -277,7 +277,6 @@ class FixedField(object):
         self.size = size
         self.offset = offset
         self.value = value
-        assert not comment or not note
         self.comment = comment
         self.note = note
 
@@ -293,6 +292,26 @@ class FixedField(object):
             name = name[:-1]
         return name
 
+    def gen_template(self):
+        """ generate a template for this field """
+        if self.is_variable():
+            var = self.get_varname()
+
+        elif self.value == '[Vide]':  # (FIXME) debonix specific, move away
+            var = "''"
+        elif isinstance(self.value, (str, unicode)):
+            if len(self.value) == self.size: # string values
+                return self.value
+            var = "'%s'" % self.value
+        else:
+            var = self.value
+        if self.type_ == 'N':
+            return "{{rj %s %s '0'}}" % (var, self.size)
+        elif self.type_ in ('AN', 'A'):
+            return "{{lj %s %s}}" % (var, self.size)
+        else:
+            raise AssertionError("unkown field type %r" % self.type_)
+
     def __repr__(self):
         return '<%s %s [%s:%s+%s]>' % (self.__class__.__name__, self.name,
                                        self.offset,
@@ -305,9 +324,12 @@ class FixedField(object):
         return line[self.offset:self.offset+self.size]
 
     def as_dict(self):
-        return dict((name, value) for (name, value) in
-                    ((name,  getattr(self,  name)) for name in dir(self)
-                     if not name.startswith('_') and not callable(getattr(self,  name))))
+        return dict((name, value)
+                    for (name, value) in ((name,  getattr(self,  name))
+                            for name in dir(self)
+                            if not name.startswith('_') and
+                            not callable(getattr(self, name))
+                    ))
 
     @staticmethod
     def from_dict(json):
@@ -354,14 +376,12 @@ class Alpha(FixedField):
             raise ValueError(val)
         return raw.ljust(self.size)
 
-
 def make_field(name, type_, size, offset, value,
                required=False, comment=None, note=None):
     return {'AN': Alphanum,
             'A': Alpha,
             'N': Numeric}[type_](name, required, type_,
                                  size, offset, value, comment, note)
-
 
 class Section(object):
     # TODO: this class is to big. Extract doc parser.
@@ -616,8 +636,6 @@ class SubSection(Section):
         self.code = code
         if fields:
             self.records =  fields
-        #if fields:
-        #    self.fields = fields
 
     def get_spec(self):
         if self.records is None:

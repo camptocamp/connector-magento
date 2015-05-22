@@ -41,26 +41,13 @@ class purchase_order(osv.Model):
 
     _edi_renderer = None
 
-    @classmethod
-    def _get_renderer(cls):
-        import tools.edifact
-        if cls._edi_renderer is None:
-            module_path = os.path.dirname(os.path.abspath(__file__))
-            specfile = os.path.join(module_path, 'debonix.json')
-            _logger.debug('XXXX %r' % specfile)
-            with open(specfile) as data:
-                json = simplejson.load(data)
-                doc = tools.edifact.Debonix.fromjson(json)
-                cls._edi_renderer = doc
-        return cls._edi_renderer
-
     def generate_edifact(self, cr, uid, ids, context=None):
-
+        """ generate EDIFACT message for the selected purchase orders """
         assert len(ids) == 1   # FIXME For now one, we will do batch later
 
         orders = self.browse(cr, uid, ids, context=context)
         for order in orders:
-            _logger.debug('ORDER: %s' % order.name)
+            _logger.debug('ORDER: %s', order.name)
 
         if order.edifact_sent:
             raise Warning("""EDIFACT document already sent to partner
@@ -68,9 +55,9 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
                           order.name)
 
         mapping = self._build_mapping(order)
-        message = self._get_formater().render(mapping)
+        message = self._get_renderer().render(mapping)
 
-        _logger.debug('message for %r:\n%r' % (order.name, message))
+        _logger.debug('message for %r:\n%r', order.name, message)
 
         self._save_edi(order, message)
 
@@ -80,6 +67,7 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
         return res
 
     def _build_mapping(self, order):
+        """ generate data mapping needed for template rendering """
         mapping = {}
 
         mapping['codefiliale'] = 'PLN'
@@ -149,7 +137,9 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
         # assert len(lines) == 1
         return mapping
 
-    def _build_line(self, line_index, order_line):
+    @staticmethod
+    def _build_line(line_index, order_line):
+        """ build order line """
         line = {}
         line['codag'] = order_line.product_id.code
         line['libelle'] = order_line.product_id.name[:70]
@@ -183,8 +173,23 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
 
         return line
 
+    @classmethod
+    def _get_renderer(cls):
+        """ get EDIFACT renderer for purchase orders """
+        import tools.edifact
+        if cls._edi_renderer is None:
+            module_path = os.path.dirname(os.path.abspath(__file__))
+            specfile = os.path.join(module_path, 'debonix.json')
+            _logger.debug('XXXX %r', specfile)
+            with open(specfile) as data:
+                json = simplejson.load(data)
+                doc = tools.edifact.Debonix.fromjson(json)
+                cls._edi_renderer = doc
+        return cls._edi_renderer
+
     @staticmethod
     def _save_edi(order, message):
+        """ save EDIFACT message """
         _logger.debug('TODO: Drop it to FTP')
         droppath = '/tmp/edifact'
         filename = '%s.edi' % order.name
