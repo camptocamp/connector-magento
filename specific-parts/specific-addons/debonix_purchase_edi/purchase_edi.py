@@ -33,6 +33,7 @@ _logger.debug('loading module !')
 
 
 def _gv(obj, attr):
+    """ helper function for mapping values generation """
     if not obj:
         return ''
     val = getattr(obj, attr)
@@ -40,6 +41,7 @@ def _gv(obj, attr):
 
 
 class purchase_order(osv.Model):
+
     _inherit = "purchase.order"
 
     _columns = {
@@ -150,13 +152,6 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
 
         return mapping
 
-    @staticmethod
-    def _build_line(line_index, order_line):
-        """ build order line """
-
-
-
-        return line
 
     @classmethod
     def _get_renderer(cls):
