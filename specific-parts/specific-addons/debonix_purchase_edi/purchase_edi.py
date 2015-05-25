@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Charbel Jacquin (Camptocamp)
-#    Copyright 2010-2014 Camptocamp SA
+#    Copyright 2015 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -21,8 +21,11 @@
 from openerp.osv import osv, fields
 from openerp.exceptions import Warning
 
+from StringIO import StringIO
 import os
+import paramiko
 import logging
+import socket
 from tools import handlebars
 
 _logger = logging.getLogger('EDIFACT')
@@ -30,7 +33,7 @@ _logger.setLevel(logging.DEBUG)
 
 
 class purchase_order(osv.Model):
-
+    """ extends purchase.order to implement edifact message generation """
     _inherit = "purchase.order"
 
     _columns = {
@@ -41,27 +44,72 @@ class purchase_order(osv.Model):
 
     _edi_template = None
 
-    def check_removed_edifact_files(self, cr, uid, ids=None, context=None):
+    def wkf_confirm_order(self, cr, uid, ids, context=None):
 
-        company = self.pool['res.users'].browse(cr, uid, uid, context).company_id
+        _logger.info("wkf_confirm_order, calling super")
+        super(purchase_order, self).wkf_confirm_order(cr, uid, ids, context=context)
+        _logger.info("wkf_confirm_order, calling generate_edifact()")
+        self.generate_edifact(cr, uid, ids, context)
+
+    def check_removed_edifact_files(self, cr, uid, ids=None, context=None):
+        """ Check for edifact files removed from the ftp server
+
+        This method will be called in a cron job.
+        """
+        user = self.pool['res.users'].browse(cr, uid, uid, context)
+        company = user.company_id
+        host = company.edifact_purchase_host
+        port = company.edifact_purchase_port
+        ftpuser = company.edifact_purchase_user
         droppath = company.edifact_purchase_path
 
         ids = self.search(cr, uid, ['&', ('edifact_sent', '=', True),
                                     ('edifact_removed', '=', False)])
+
+        to_check = self.read(cr, uid, ids, ['name'])
         removed = []
-        for rec in self.read(cr, uid, ids, ['name']):
-            fullpath = os.path.join(droppath, '%s.edi' % rec['name'])
-            if not os.path.exists(fullpath):
-                removed.append(rec['id'])
+
+        if not host and not port:
+            # assuming local path
+            for rec in to_check:
+                fullpath = os.path.join(droppath, '%s.edi' % rec['name'])
+                if not os.path.exists(fullpath):
+                    removed.append(rec['id'])
+        else:
+            try:
+                transport = self._connect(host, port, ftpuser)
+                try:
+                    ftp = paramiko.SFTPClient.from_transport(transport)
+                    ftp.chdir(droppath)
+                    # doing it by ftp
+                    listing = ftp.listdir()
+                    for rec in to_check:
+                        filename = '%s.edi' % rec['name']
+                        if filename not in listing:
+                            removed.append(rec['id'])
+                finally:
+                    ftp.close()
+                    transport.close()
+            except (paramiko.SSHException, socket.error, IOError) as err:
+                raise Warning("Could not check processed purchase order EDIFACT messages on FTP server: %s" % err.message)
 
         if removed:
-            self.write(cr, uid, removed, {'edifact_removed': True}, context=context)
+            self.write(cr, uid, removed,
+                       {'edifact_removed': True}, context=context)
         return True
+
+    def _connect(self, host, port, user):
+        """ connect to ftp server """
+        # Load private key for transfert
+        privatekeyfile = os.path.expanduser('~/.ssh/id_rsa')
+        mykey = paramiko.RSAKey.from_private_key_file(privatekeyfile)
+        transport = paramiko.Transport((host, port))
+        transport.connect(username=user, pkey=mykey)
+        return transport
 
     def generate_edifact(self, cr, uid, ids, context=None):
         """ generate EDIFACT message for the selected purchase orders """
         assert len(ids) == 1   # FIXME For now one, we will do batch later
-
 
         orders = self.browse(cr, uid, ids, context=context)
         for order in orders:
@@ -80,13 +128,44 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
 
         _logger.debug('message for %r:\n%r', order.name, message)
 
-        company = self.pool['res.users'].browse(cr, uid, uid, context).company_id
+        user = self.pool['res.users'].browse(cr, uid, uid, context)
+        company = user.company_id
+        host = company.edifact_purchase_host
+        port = company.edifact_purchase_port
+        ftpuser = company.edifact_purchase_user
         droppath = company.edifact_purchase_path
+
         filename = '%s.edi' % order.name
         fullpath = os.path.join(droppath, filename)
-        if not os.path.exists(droppath):
-            os.mkdir(droppath)
-        self._save_edi(fullpath, message)
+
+        try:
+            message = message.encode('latin1')
+        except UnicodeEncodeError:
+            _logger.warn("""EDIFACT message contains non latin1 encodable unicode caracters, they have been replaced by '?'""")
+            message = message.encode('latin1', 'replace')
+
+        if not host and not port:
+            if not os.path.exists(droppath):
+                os.mkdir(droppath)
+            self._save_edi(fullpath, message)
+        else:
+            try:
+                transport = self._connect(host, port, ftpuser)
+                try:
+                    ftp = paramiko.SFTPClient.from_transport(transport)
+                    try:
+                        ftp.chdir(droppath)
+                    except IOError as err:
+                        raise Warning('could not cd to %r on ftp server: %s' %
+                                      (droppath, err.message))
+                    content = StringIO(message)
+                    ftp.putfo(content, filename)
+                finally:
+                    ftp.close()
+                    transport.close()
+            except (paramiko.SSHException, socket.error) as err:
+                raise Warning("could not save EDIFACT message on FTP server: %s" %
+                              err.message)
 
         # order.edifact_sent = True
         vals = {'edifact_sent': True}
@@ -108,15 +187,12 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
             else:
                 raise NotImplementedError("mapping for uom %s" % name)
 
-
-
         def _gv(obj, attr):
             """ helper function for mapping values generation """
             if not obj:
                 return ''
             val = getattr(obj, attr)
             return val if val else ''
-
 
         mapping = {
             'codefiliale': 'PLN',
@@ -179,7 +255,6 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
 
         return mapping
 
-
     @classmethod
     def _get_template(cls):
         """ get EDIFACT template for purchase orders """
@@ -193,15 +268,10 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
     @staticmethod
     def _save_edi(path, message):
         """ save EDIFACT message """
-        _logger.debug('TODO: Drop it to FTP')
         if os.path.exists(path):
             raise Warning("""EDIFACT file %s already exists.
             Please remove it before you can regenerate""" % path)
-        try:
-            message = message.encode('latin1')
-        except UnicodeEncodeError:
-            _logger.warn("""EDIFACT message contains non latin1 encodable unicode caracters, they have been replaced by '?'""")
-            message = message.encode('latin1', 'replace')
+
         with open(path, 'w') as out:
             out.write(message)
 
@@ -212,6 +282,7 @@ def make_render_engine():
     def lj(v, width, fill=' '):
         v = unicode(v)
         return v.ljust(width, fill)
+
     def rj(v, width, fill=' '):
         v = unicode(v)
         return v.rjust(width, fill)

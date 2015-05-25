@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-
         <record id="ir_cron_edifact_check_removed" model="ir.cron">
             <field name="name">Check EDIFACT drop dir for processed purchase orders</field>
             <field name="user_id" ref="base.user_root"/>

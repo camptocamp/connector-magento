@@ -13,6 +13,12 @@
 		    type="object"
 		    groups="purchase.group_purchase_manager"
 		    />
+            <button name="check_removed_edifact_files"
+		    states="confirmed,approved"
+		    string="Check removed EDIFACT"
+		    type="object"
+		    groups="purchase.group_purchase_manager"
+		    />
 	  </xpath>
 
 	  <field name="shipped" position="after">
