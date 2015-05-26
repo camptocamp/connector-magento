@@ -1,0 +1,377 @@
+1. Introduction
+Ce document décrit le format du pivot de commande e-commerce qui sera utilisé par la société DEBONIX
+
+Ce format de commande est pris en charge par la plupart de nos filiales (hormis quelques exotiques) et il est
+compatible avec les deux principaux systèmes d’information utilisés : EASY et EMERAUDE.
+
+Note : Un compte client doit être crée sur le système d’information pour que la commande puisse être
+intégrée.
+
+Les fichiers pivots sont déposés dans un sas FTP pour être routé vers les filiales souhaitées.
+
+
+2. Format du fichier
+Code Occurrence Obligatoire                      Description
+DEB       1     Oui                              Identification de la commande
+DMS       1     Oui                              Identification du client
+100       1     Oui                              Caractéristique de la commande
+110       1     Oui                              Identificateur du vendeur
+120       1     Oui                              Identificateur de l’acheteur
+140       1     Oui                              Identificateur de la livraison
+160     0à1     Non                              Commentaire sur la commande
+200   1 à 9999  Oui, au moins une                Ligne de commande client
+300       1     Oui                              Pied de commande
+FMS       1     Oui                              Fin de message
+FIN       1     Oui                              Fin du pivot
+
+3. Format des lignes
+Les champs de type numérique (N) doivent comporter des 0 sur toute la longueur du champ si
+vide.
+
+Les champs Alphanumérique (AN) peuvent rester vides et doivent être « calés » sur la gauche.
+
+Lorsqu’un champ doit rester vide il contient le tag suivant : [Vide]
+
+Les prix et quantité sont multiplié par 1000 (3 décimales) , et 10000 (4décimales) pour le prix
+unitaire sur la ligne article.
+
+3.1. Identification de la commande (DEB)
+Nom                                        O/F     Type   Taille   Offset   Valeur
+code enregistrement                        O       AN     3        1        DEB
+Type de pivot                              O       AN     1        4        R
+code société                               O       AN     3        5        $codefiliale
+code identification filiale                O       AN     1        8        S
+identification filiale                     O       N      14       9        $siretFiliale
+code test ou réel                          O       AN     1        23       R
+Type de message                            O       AN     3        24       CDE
+Type de partenaire                         O       AN     2        27       CL
+version de pivot                           O       AN     3        29       1.1
+date de création du fichier pivot          O       N      8        32       $dateCmd (YYYYAAMM)
+Heure de création du fichier pivot         O       N      6        40       $heureCmd (HHMMSS)
+O/F = Obligatoire / Facultatif
+
+
+Maquette : STD Flux de commande DEBONIX - v1.6                                                       Page : 5/12
+Offset = Emplacement sur la ligne
+
+3.2. Identification du client (DMS)
+Nom                                                    O/F   Type     Taille   Offset   Valeur
+code enregistrement                                    O     AN       3        1        DMS
+code agence réceptrice                                 O     N        3        4        $codeAgence
+code identification agence réceptrice                  O     AN       1        7        S
+identification agence réceptrice                       O     N        14       8        $siretAgence
+code identification client                             O     AN       1        22       S
+identification client                                  O     N        14       23       $siretDebonix]
+code demande accusé de réception de cde                F     AN       1        37       [Vide]
+zone non utilisée                                      F     AN       15       38       [Vide]
+code message probatoire                                F     AN       1        53       [Vide]
+no SYSLOG                                              F     N        10       54       [Vide]
+date création SYSLOG                                   F     N        8        64       [Vide]
+Heure création SYSLOG                                  F     N        6        72       [Vide]
+code détection doublon                                 F     N        1        78       [Vide]
+
+3.3. Caractéristique de la commande (100)
+
+Nom                                  O/F    Type   Taille    Offset   Valeur
+code enregistrement                  O      AN     3         1        100
+Numéro de commande                   O      AN     35        4        $noCmd
+date de la commande                  O      N      8         39       $dateCmd (YYYYMMJJ)
+Type de la commande                  F      A      1         47       E
+Heure de la commande                 F      N      6         48       $heureCmd (HHMMSS)
+référence devis                      F      AN     35        54       [Vide]
+référence 1 client                   O      AN     35        89       $refCmd
+référence 2 client                   F      AN     35        124      [Vide]
+référence 3 client                   F      AN     35        159      [Vide]
+référence 4 client                   F      AN     35        194      [Vide]
+no d'accord commercial               F      AN     35        229      [Vide]
+Type d'accord commercial             F      AN     2         264      [Vide]
+date accord commercial               F      N      8         266      [Vide]
+date de livraison souhaitée          O      N      8         274      $dateLiv
+Heure de livraison souhaitée         F      N      4         282      [Vide]
+date de livraison au plus tôt        F      N      8         286      [Vide]
+Heure de livraison au plus                                            [Vide]
+tôt                                  F      N      4         294
+date de livraison au plus                                             [Vide]
+tard                                 F      N      8         298
+Heure de livraison au plus                                            [Vide]
+tard                                 F      N      4         306
+dégroupage de la                                                      [Vide]
+commande                             F      A      1         310
+Mode de livraison                    F      A      1         311      L
+Fonction de la commande              F      A      1         312      [Vide]
+                                                                      $compteDebonix (compléter avec des 0 sur
+no compte client                     O      AN     35        313      10 pour Prolians et sur 6 pour Dexis)
+code livraison express               F      A      1         348      [Vide]
+Livraison partielle admise           F      A      1         349      O
+solde de la commande                        A      1         350      R
+code commande franco                 F      A      1         351      F
+monnaie de référence                 F      AN     3         352      EUR
+
+Maquette : STD Flux de commande DEBONIX - v1.6                                                           Page : 6/12
+monnaie cible                         F     AN        3        355      EUR
+taux de change                        F     N         12       358      [Vide]
+no compte fournisseur                                                   [Vide]
+(attribué par le client)              F     AN        35       370
+no identification TVA                 F     AN        35       405      [Vide]
+code détection commandes                                                [Vide]
+en double                             F     AN        1        440
+Date Relance                          F     N         8        441      [Vide]
+Référence commande client                                               [Vide]
+final                                 F     AN        30       449
+montant frais de port pour                                              [Vide]
+l'ensemble de la cde                  F     N         15       479
+
+
+
+3.4. Identification du vendeur (110)
+Nom                             O/F    Type      Taille    Offset   Valeur
+code enregistrement             O      AN        3         1        110
+code ident filiale agence       O      A         1         4        S
+ident filiale agence            O      N         14        5        $siretAgence
+
+3.5. Identification de l’acheteur (120)
+Nom                             O/F    Type      Taille    Offset   Valeur
+code enregistrement             O      AN        3         1        120
+code ident filiale agence       O      A         1         4        S
+ident filiale agence            O      N         14        5        $siretDebonix
+
+3.6. Identification de la facturation (130)
+Nom                                           O/F    Type     Taille   Offset    Valeur
+code enregistrement                           O      AN       3        1         130
+code ident filiale agence                     O      A        1        4         S
+ident filiale agence                          O      N        14       5         $siretDebonix
+code ident 2 filiale agence                   F      A        1        19        [Vide]
+ident 2 filiale agence                        F      AN       14       20        [Vide]
+nom et adresse 1                              F      AN       35       34        $adr1
+nom et adresse 2                              F      AN       35       69        $adr2
+nom et adresse 3                              F      AN       35       104       $adr3
+nom et adresse 4                              F      AN       35       139       $adr4
+nom et adresse 5                              F      AN       35       174       $adr5
+code postal                                   F      AN       9        209       $cp
+Ville                                                                            $ville
+                                    F                AN       35       218
+province                            F                AN       35       253       [Vide]
+Pays                                F                A        2        288       FR
+code identification vendeur         F                AN       17       290       [Vide]
+nom vendeur                         F                AN       35       307       [Vide]
+code identification service vendeur F                AN       17       342       [Vide]
+nom service vendeur                 F                AN       35       359       [Vide]
+no téléphone vendeur                F                AN       25       394       $tel
+no FAX vendeur                      F                AN       25       419       $fax
+no telex vendeur                    F                AN       25       444       [Vide]
+code interne d'identification       F                AN       25       469       [Vide]
+code agence destinatrice imposée F                   AN       3        494       [Vide]
+
+Maquette : STD Flux de commande DEBONIX - v1.6                                                   Page : 7/12
+3.7. Identification de la livraison (140)
+Nom                                           O/F     Type     Taille   Offset   Valeur
+code enregistrement                           O       AN       3        1        140
+code ident filiale agence                     O       A        1        4        S
+ident filiale agence                          O       N        14       5        $siretDebonix
+code ident 2 filiale agence                   F       A        1        19       [Vide]
+ident 2 filiale agence                        F       AN       14       20       [Vide]
+nom et adresse 1                              O       AN       35       34       $adr1
+nom et adresse 2                              F       AN       35       69       $adr2
+nom et adresse 3                              O       AN       35       104      $adr3
+nom et adresse 4                              F       AN       35       139      $adr4
+nom et adresse 5                              F       AN       35       174      $adr5
+code postal                                   O       AN       9        209      $cp
+Ville                                                                            $ville
+                                              O       AN       35       218
+province                                      F       AN       35       253      [Vide]
+Pays                                          F       A        2        288      FR
+code identification vendeur                   F       AN       17       290      [Vide]
+nom vendeur                                   F       AN       35       307      [Vide]
+code identification service vendeur           F       AN       17       342      [Vide]
+nom service vendeur                           F       AN       35       359      [Vide]
+no téléphone vendeur                          F       AN       25       394      $tel
+no FAX vendeur                                F       AN       25       419      $fax
+no telex vendeur                              F       AN       25       444      [Vide]
+code interne d'identification                 F       AN       25       469      [Vide]
+code agence destinatrice imposée              F       AN       3        494      [Vide]
+
+3.8. Commentaire sur la commande (160)
+Nom                             O/F    Type       Taille    Offset   Valeur
+code enregistrement             O      AN         3         1        160
+type de texte                   F      AN         1         4        [Vide]
+code texte                      F      AN         3         5        [Vide]
+attribution du code texte       F      AN         1         8        A
+texte 1                         F      AN         350       9        $commentaire
+
+3.9. Ligne de commande client (200)
+Nom                         O/F Type Taille Offset Valeur
+code enregistrement         O   AN   3      1      200
+référence exacte                                   $refarticleFournisseur
+fournisseur                 F   AN   35     4
+code EAN13                  F   N    13     39     [Vide]
+référence                                          [Vide]
+informatique
+fournisseur                 F      AN      35          52
+code séquentiel             F      AN      17          87        [Vide]
+référence article                                                [Vide]
+client                      F      AN      35          104
+no de ligne de la                                                $ligne
+commande                    O      AN      5           139
+Libellé de l'article        O      AN      70          144       $libelle
+                                                                 $qte (*1000)
+Quantité                                                         Note :
+commandée                   O      N       15          214       La quantité doit tenir compte du conditionnement
+
+Maquette : STD Flux de commande DEBONIX - v1.6                                                            Page : 8/12
+                                                       remonté dans le champ Quantity du catalogue
+                                                       Si un client saisie 10 en quantité sur le site et que le
+                                                       conditionnement présent dans le champs quantity =
+                                                       200, la quantité sera égal à 2000 * 1000
+prix unitaire brut          F      N       15    229   [Vide]
+code remise                 F      A       1     244   [Vide]
+Valeur remise               F      N       15    245   [Vide]
+prix unitaire net           O      N       15    260   $prixUnitaireNet (*10000)
+montant de la ligne         O      N       15    275   $montantLigne (*1000)
+code prix unitaire                                     [Vide]
+négocié                     F      A       1     290
+code prix promotion         F      A       1     291   [Vide]
+unité de prix               F      A       1     292   [Vide]
+unité de quantité                                      $uq (P/M/K)
+(commandée)                 O      A       1     293
+zone non utilisée           F      A       1     294   [Vide]
+code dépannage /                                       [Vide]
+procurage                   F      A       1     295
+date livraison                                         $dateLiv
+souhaitée                   O      N       8     296
+date livraison au                                      [Vide]
+plus tôt                    F      N       8     304
+date livraison au                                      [Vide]
+plus tard                   F      N       8     312
+code livraison                                         [Vide]
+express                     F      A       1     320
+Livraison partielle                                    [Vide]
+admise                      F      A       1     321
+solde ligne                 F      A       1     322   [Vide]
+poids de la ligne           F      N       15    323   [Vide]
+no d'accord                                            [Vide]
+commercial                  F      AN      35    338
+type d'accord                                          [Vide]
+commercial                  F      AN      2     373
+date accord                                            [Vide]
+commercial                  F      N       8     375
+Quantité de                                            [Vide]
+conditionnement             F      N       15    383
+taille de l'article         F      N       18    398   [Vide]
+Identification du                                      [Vide]
+fournisseur                 F      AN      17    416
+type code langage                                      [Vide]
+commun                      F      AN      1     433
+code langage                                           [Vide]
+commun                      F      AN      35    434
+Libellé article                                        [Vide]
+SOGEDESCA                   F      AN      35    469
+référence                                              [Vide]
+demandeur interne
+client                      F      AN      35    504
+unité d'expression                                     $uep
+du prix                     O      N       5     539
+qualifiant unité de         F      AN      3     544   [Vide]
+
+
+Maquette : STD Flux de commande DEBONIX - v1.6                                                       Page : 9/12
+mesure
+Code Article Groupe         O      N       9      547     $codag
+Code « prix                                               O
+impératif »                 F      AN      1      556
+dimension de l'article      F      N       6      557     [Vide]
+dimension de l'article      F      N       6      563     [Vide]
+type de longueur            F      A       2      569     [Vide]
+unité de prix               F      A       1      571     [Vide]
+prix de revient             F      N       15     572     [Vide]
+
+3.10. Pied de page (300)
+Nom                             O/F Type Taille Offset Valeur
+code enregistrement             O   AN   3      1      300
+                                                       $totalQte (*1000)
+                                                       Note : C’est le total des quantités des lignes 200
+total quantités                 O   N    15     4      prenant en compte la notion de conditionnement
+Nombre de lignes                                       $totalLigne
+commandées                      O   N    15     19
+Montant NET HT de la                                   $totalHT (*1000)
+commande                        O   N    15     34
+Montant TVA                     O   N    15     49     $totalTVA (*1000)
+Montant TTC                     O   N    15     64     $totalTTC (*1000)
+poids de la commande            F   N    15     79     [Vide]
+
+3.11. Fin de message (FMS)
+Nom                 O/F Type Taille Offset Valeur
+code enregistrement O   AN   3      1      FMS
+
+3.12. Fin (FIN)
+Nom                 O/F Type Taille Offset Valeur
+code enregistrement O   AN   3      1      FIN
+
+4. Implémentation
+Le programme main.php ci-joint avec ce document donne un exemple d’implémentation du pivot
+de commande ainsi qu’un pivot crée avec l’outil : sample.edi.
+
+Voici un résumé des paramètres nécessaire pour envoyer une commande
+Nom                 Valeur                                                         Origine de la donnée
+                    PLN
+                    MT
+code filiale        OM
+                    Plateforme logistique Nord (PLN) : 52789590800012
+                    Montant Annecy (MT) : 38976785600013
+siret filiale       Sommair (OM) : 43425621000023
+date cmd                                                                           SI Debonix
+heure cmd                                                                          SI Debonix
+                    Plateforme logistique Nord (PLN) : 928
+                    Montant Annecy (MT) : 322
+code agence         Sommair (OM) : 892
+                    Plateforme logistique Nord (PLN) : 52789590800012
+                    Montant Annecy (MT) : 38976785600013
+siret agence        Sommair (OM) : 43425621000023
+
+Maquette : STD Flux de commande DEBONIX - v1.6                                                   Page : 10/12
+siret debonix             49039922700035
+                          Plateforme logistique Nord (PLN) : 175000
+                          Montant (MT) : 5000459
+comptes Debonix           Sommair (OM) : 5003344
+numéro de
+commande                                                                    SI Debonix
+reference de la
+commande                                                                    SI Debonix
+date de livraison
+souhaitée                                                                   SI Debonix
+Adresse de
+livraison et de
+facturation                                                                 SI Debonix
+commentaire                                                                 SI Debonix
+                                                                            Flux catalogue
+codag                                                                       (Company Code)
+                                                                            Flux catalogue
+                                                                            (Supplier Product
+libellé                                                                     name)
+                                                                            Flux catalogue
+prix unitaire                                                               (Standard_price)
+                                                                            SI Debonix * Champ
+                                                                            Quantity du flux
+quantité                                                                    catalogue
+reférence                                                                   Flux catalogue
+fournisseur                                                                 (Manufacturer Code)
+                                                                            Flux catalogue
+unité                                                                       (Supplier Product Unit)
+unité d'expression                                                          Flux catalogue
+du prix                                                                     (Quantity)
+
+
+
+Ce pivot à fait l’objet d’un test sur un environnement de test du système d’information sur afin de
+garantir la pertinence de l’implémentation de l’outil.
+
+
+
+
+Maquette : STD Flux de commande DEBONIX - v1.6                                            Page : 11/12
+                            Figure 1 Commande intégrée dans le SI Emeraude
+
+
+
+
+Maquette : STD Flux de commande DEBONIX - v1.6                               Page : 12/12
+

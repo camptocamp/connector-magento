@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+      <record id="my_purchase_order_form" model="ir.ui.view">
+	<field name="name">purchase.order.form_edifact</field>
+	<field name="model">purchase.order</field>
+	<field name="inherit_id" ref="purchase.purchase_order_form" />
+	<field name="arch" type="xml">
+          <xpath expr="/form/header/button[@name='purchase_approve']" position="after">
+            <button name="generate_edifact"
+		    states="confirmed,approved"
+		    string="Generate EDIFACT"
+		    type="object"
+		    groups="purchase.group_purchase_manager"
+		    />
+            <button name="check_removed_edifact_files"
+		    states="confirmed,approved"
+		    string="Check removed EDIFACT"
+		    type="object"
+		    groups="purchase.group_purchase_manager"
+		    />
+	  </xpath>
+
+	  <field name="shipped" position="after">
+              <field name="edifact_sent"/>
+              <field name="edifact_removed"/>
+	  </field>
+	</field>
+
+      </record>
+    </data>
+</openerp>
