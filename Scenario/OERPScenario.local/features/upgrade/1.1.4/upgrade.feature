@@ -10,6 +10,7 @@ Feature: upgrade to 1.1.4
       | name                             |
       | specific_fct                     |
       | procurement                      |
+      | debonix_purchase_edi             |
     Then my modules should have been installed and models reloaded
 
     Given I execute the SQL commands
