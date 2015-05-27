@@ -20,6 +20,7 @@
 ##############################################################################
 from openerp.osv import osv, fields
 from openerp.exceptions import Warning
+from datetime import datetime
 
 from StringIO import StringIO
 import os
@@ -37,26 +38,35 @@ class purchase_order(osv.Model):
     _inherit = "purchase.order"
 
     _columns = {
-        'create_date': fields.datetime('Creation Time', readonly=True),
         'edifact_sent': fields.boolean('EDI Sent', readonly=True),
         'edifact_removed':  fields.boolean('EDI Removed', readonly=True)
     }
 
+    _defaults = {
+        'edifact_sent': False,
+        'edifact_removed': False,
+    }
+
     _edi_template = None
 
-    def wkf_confirm_order(self, cr, uid, ids, context=None):
+    def wkf_approve_order(self, cr, uid, ids, context=None):
 
-        _logger.info("wkf_confirm_order, calling super")
-        super(purchase_order, self).wkf_confirm_order(cr, uid, ids, context=context)
-        _logger.info("wkf_confirm_order, calling generate_edifact()")
-        self.generate_edifact(cr, uid, ids, context)
+        _logger.debug("wkf_approve_order, calling super")
+        super(purchase_order, self).wkf_approve_order(
+            cr, uid, ids, context=context)
+        _logger.debug("wkf_approve_order, calling generate_edifact() "
+                      "if supplier is SOGEDESCA and customer address "
+                      "is present (indicates drop-shipping).")
+        for order in self.browse(cr, uid, ids, context=context):
+            if order.dest_address_id and order.partner_id.name == 'SOGEDESCA':
+                self.generate_edifact(cr, uid, ids, context)
 
     def check_removed_edifact_files(self, cr, uid, ids=None, context=None):
         """ Check for edifact files removed from the ftp server
 
         This method will be called in a cron job.
         """
-        user = self.pool['res.users'].browse(cr, uid, uid, context)
+        user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         company = user.company_id
         host = company.edifact_purchase_host
         port = company.edifact_purchase_port
@@ -64,9 +74,10 @@ class purchase_order(osv.Model):
         droppath = company.edifact_purchase_path
 
         ids = self.search(cr, uid, ['&', ('edifact_sent', '=', True),
-                                    ('edifact_removed', '=', False)])
+                                    ('edifact_removed', '=', False)],
+                          context=context)
 
-        to_check = self.read(cr, uid, ids, ['name'])
+        to_check = self.read(cr, uid, ids, ['name'], context=context)
         removed = []
 
         if not host and not port:
@@ -91,7 +102,9 @@ class purchase_order(osv.Model):
                     ftp.close()
                     transport.close()
             except (paramiko.SSHException, socket.error, IOError) as err:
-                raise Warning("Could not check processed purchase order EDIFACT messages on FTP server: %s" % err.message)
+                raise Warning("Could not check processed purchase order "
+                              "EDIFACT messages on FTP server: %s"
+                              % err.message)
 
         if removed:
             self.write(cr, uid, removed,
@@ -116,8 +129,9 @@ class purchase_order(osv.Model):
             _logger.debug('ORDER: %s', order.name)
 
         if order.edifact_sent:
-            raise Warning("""EDIFACT document already sent to partner
-If you need to regenerate, please ask your DBA to clear the 'edifact_sent' status on %s""" %
+            raise Warning("EDIFACT document already sent to partner. "
+                          "If you need to regenerate, please ask your "
+                          "DBA to clear the 'edifact_sent' status on %s" %
                           order.name)
 
         mapping = self._build_mapping(order)
@@ -128,7 +142,7 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
 
         _logger.debug('message for %r:\n%r', order.name, message)
 
-        user = self.pool['res.users'].browse(cr, uid, uid, context)
+        user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         company = user.company_id
         host = company.edifact_purchase_host
         port = company.edifact_purchase_port
@@ -141,7 +155,8 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
         try:
             message = message.encode('latin1')
         except UnicodeEncodeError:
-            _logger.warn("""EDIFACT message contains non latin1 encodable unicode caracters, they have been replaced by '?'""")
+            _logger.warn("EDIFACT message contains non latin1 encodable "
+                         "unicode caracters, they have been replaced by '?'")
             message = message.encode('latin1', 'replace')
 
         if not host and not port:
@@ -164,7 +179,8 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
                     ftp.close()
                     transport.close()
             except (paramiko.SSHException, socket.error) as err:
-                raise Warning("could not save EDIFACT message on FTP server: %s" %
+                raise Warning("could not save EDIFACT message "
+                              "on FTP server: %s" %
                               err.message)
 
         # order.edifact_sent = True
@@ -187,61 +203,76 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
             else:
                 raise NotImplementedError("mapping for uom %s" % name)
 
-        def _gv(obj, attr):
-            """ helper function for mapping values generation """
-            if not obj:
-                return ''
-            val = getattr(obj, attr)
-            return val if val else ''
-
         mapping = {
             'codefiliale': 'PLN',
             'siretFiliale': '52789590800012',
-            'dateCmd': _gv(order, 'date_order').replace('-', ''),
-            'heureCmd': _gv(order, 'create_date').split()[1].replace(':', ''),
+            'dateCmd': datetime.now().strftime('%y%m%d'),
+            'heureCmd': datetime.now().strftime('%H%M%S'),
             'codeAgence': '928',
             'siretAgence': '52789590800012',
             'siretDebonix': '49039922700035',
-            'noCmd': _gv(order, 'name'),
-            'refCmd': _gv(order, 'name'),
-            'dateLiv': _gv(order, 'minimum_planned_date').replace('-', ''),
+            'noCmd': order and order.name or '',
+            'refCmd': order and order.name or '',
+            'dateLiv': order
+            and order.minimum_planned_date
+            and order.minimum_planned_date.replace('-', '')
+            or '',
             'compteDebonix': '0000175000',
-            # NEED REVIEW adress mapping. edifact 5*35, oerp 2*128
-            'adr1': _gv(dest_address, 'name'),
-            'adr2': '',
-            'adr3': _gv(dest_address, 'street'),
-            'adr4': '',
-            'adr5': '',
-            'cp': _gv(dest_address, 'zip'),
-            'ville': _gv(dest_address, 'city'),
-            'tel': _gv(dest_address, 'phone'),
-            'fax': _gv(dest_address, 'fax'),
-            'commentaire': _gv(order, 'notes'),
+            'adr1': dest_address
+            and dest_address.name
+            and dest_address.name[:35]
+            or '',
+            'adr2': dest_address
+            and dest_address.name
+            and dest_address.name[35:70]
+            or '',
+            'adr3': dest_address
+            and dest_address.street
+            and dest_address.street[:35]
+            or '',
+            'adr4': dest_address
+            and dest_address.street
+            and dest_address.street[35:70]
+            or '',
+            'adr5': dest_address
+            and dest_address.street2
+            and dest_address.street2[:35]
+            or '',
+            'cp': dest_address and dest_address.zip or '',
+            'ville': dest_address and dest_address.city or '',
+            'tel': dest_address and dest_address.phone or '',
+            'fax': dest_address and dest_address.fax or '',
+            'commentaire': order and order.notes or '',
             'totalHT': int(order.amount_untaxed * 1000),
             'totalTVA': int(order.amount_tax * 1000),
             'totalTTC': int(order.amount_total * 1000)
         }
 
-        order_lines = list(order.order_line)
-
         lines = []
 
         total_qty = 0
-        # totalHT = 0
-        for line_index, order_line in enumerate(order_lines):
-            # totalHT += line['prixUnitaireNet'] * line['montantLigne']
+        for line_index, order_line in enumerate(order.order_line):
             product = order_line.product_id
             uom = product.uom_id
             line = {
-                'codag': _gv(product, 'code'),
-                'libelle': _gv(product, 'name')[:70],
+                'codag': product
+                and product.code
+                and product.code[:9]
+                or '',
+                'libelle': product
+                and product.name
+                and product.name[:70]
+                or '',
                 'prixUnitaireNet': int(order_line.price_unit * 10000),
                 'qte': int(order_line.product_qty * 1000),
-                'refarticleFournisseur': _gv(product, 'code'),
+                'refarticleFournisseur': product and product.code or '',
                 'ligne': line_index+1,
                 'montantLigne': int(order_line.price_subtotal * 1000),
                 'uq': convert_unit(uom.name),
-                'dateLiv': order_line.date_planned.replace('-', ''),
+                'dateLiv': order_line
+                and order_line.date_planned
+                and order_line.date_planned.replace('-', '')
+                or '',
                 'uep': 1    # CHECKME,
             }
 
@@ -274,6 +305,15 @@ If you need to regenerate, please ask your DBA to clear the 'edifact_sent' statu
 
         with open(path, 'w') as out:
             out.write(message)
+
+    def copy(self, cr, uid, id, default=None, context=None):
+        default = default or {}
+        default.update({
+            'edifact_sent': False,
+            'edifact_removed': False,
+        })
+        return super(purchase_order, self).copy(cr, uid, id, default,
+                                                context=context)
 
 
 def make_render_engine():
