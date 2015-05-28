@@ -30,7 +30,7 @@ except ImportError:
     )
 
 _logger = logging.getLogger(__name__)
-
+_logger.setLevel(logging.DEBUG)
 
 class res_company(orm.Model):
     _inherit = 'res.company'
@@ -38,6 +38,7 @@ class res_company(orm.Model):
     def _get_environment_config_by_id(self, cr, uid, ids, field_names,
                                       arg, context=None):
         values = {}
+        _logger.debug('GECBI %r [%r]:', field_names, arg)
         for company in self.browse(cr, uid, ids, context=context):
             values[company.id] = {}
             for field_name in field_names:
@@ -45,8 +46,8 @@ class res_company(orm.Model):
                                          str(company.id)))
                 try:
                     value = serv_config.get(section_name, field_name)
-                    if field_name == 'sftp_invoice_port':
-                        value = int(value)
+                    if field_name in ('sftp_invoice_port', 'edifact_purchase_port'):
+                        value = int(value) if value else 0
                 except:
                     _logger.exception('error trying to read field %s '
                                       'in section %s', field_name,
@@ -76,4 +77,25 @@ class res_company(orm.Model):
             string='Path',
             type='char',
             multi='server_env'),
-    }
+
+        'edifact_purchase_host': fields.function(
+            _get_environment_config_by_id,
+            string='Host',
+            type='char',
+            multi='server_env'),
+        'edifact_purchase_user': fields.function(
+            _get_environment_config_by_id,
+            string='Username',
+            type='char',
+            multi='server_env'),
+        'edifact_purchase_password': fields.function(
+            _get_environment_config_by_id,
+            string='Password',
+            type='char',
+            multi='server_env'),
+        'edifact_purchase_path': fields.function(
+            _get_environment_config_by_id,
+            string="Path",
+            type='char',
+            multi='server_env')
+        }

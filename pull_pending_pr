@@ -1,12 +1,8 @@
 set -v
 set -e
 
-cd parts/connector-magento
-git pull --no-edit origin pull/25/head # Export cancellation of sales orders to Magento
-cd -
-
 cd parts/sale-workflow
-git pull --no-edit origin pull/109/head # Remove the filter on incoming pickings from the purchase orders
+git pull --no-edit origin pull/160/head # Merge automatically POs from the same SO with dropshipping
 cd -
 
 cd parts/product-kitting
@@ -18,9 +14,8 @@ git pull --no-edit origin pull/107/head # Add purchase_supplier_postage_free
 cd -
 
 cd parts/server
-# git pull --no-edit origin pull/176/head # Check active_id in sale order form
-git cherry-pick 54321dc9b6618b91a41f327d203efa067a54f612
-git cherry-pick ddc9d2144c3811d9c2257032702a0d5895e7d796
+git pull --no-edit origin pull/176/head # Check active_id in sale order form
+git pull --no-edit origin pull/223/head # Add message for MRP scheduler summary + better exception handling
 cd -
 
 cd parts/stock-logistics-workflow
