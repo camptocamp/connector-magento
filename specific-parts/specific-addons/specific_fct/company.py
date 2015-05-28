@@ -83,14 +83,14 @@ class res_company(orm.Model):
             string='Host',
             type='char',
             multi='server_env'),
-        'edifact_purchase_port': fields.function(
-            _get_environment_config_by_id,
-            string='Port',
-            type='integer',
-            multi='server_env'),
         'edifact_purchase_user': fields.function(
             _get_environment_config_by_id,
             string='Username',
+            type='char',
+            multi='server_env'),
+        'edifact_purchase_password': fields.function(
+            _get_environment_config_by_id,
+            string='Password',
             type='char',
             multi='server_env'),
         'edifact_purchase_path': fields.function(

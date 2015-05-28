@@ -23,8 +23,8 @@ from openerp.exceptions import Warning
 from datetime import datetime
 
 from StringIO import StringIO
+import ftplib
 import os
-import paramiko
 import logging
 import socket
 from tools import handlebars
@@ -69,8 +69,8 @@ class purchase_order(osv.Model):
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         company = user.company_id
         host = company.edifact_purchase_host
-        port = company.edifact_purchase_port
         ftpuser = company.edifact_purchase_user
+        ftppass = company.edifact_purchase_password
         droppath = company.edifact_purchase_path
 
         ids = self.search(cr, uid, ['&', ('edifact_sent', '=', True),
@@ -80,7 +80,7 @@ class purchase_order(osv.Model):
         to_check = self.read(cr, uid, ids, ['name'], context=context)
         removed = []
 
-        if not host and not port:
+        if not host:
             # assuming local path
             for rec in to_check:
                 fullpath = os.path.join(droppath, '%s.edi' % rec['name'])
@@ -88,37 +88,25 @@ class purchase_order(osv.Model):
                     removed.append(rec['id'])
         else:
             try:
-                transport = self._connect(host, port, ftpuser)
-                try:
-                    ftp = paramiko.SFTPClient.from_transport(transport)
-                    ftp.chdir(droppath)
-                    # doing it by ftp
-                    listing = ftp.listdir()
-                    for rec in to_check:
-                        filename = '%s.edi' % rec['name']
-                        if filename not in listing:
-                            removed.append(rec['id'])
-                finally:
-                    ftp.close()
-                    transport.close()
-            except (paramiko.SSHException, socket.error, IOError) as err:
+                ftp = ftplib.FTP(host, ftpuser, ftppass)
+                ftp.cwd(droppath)
+                # doing it by ftp
+                listing = ftp.nlst()
+                for rec in to_check:
+                    filename = '%s.edi' % rec['name']
+                    if filename not in listing:
+                        removed.append(rec['id'])
+            except (socket.error, IOError) as err:
                 raise Warning("Could not check processed purchase order "
                               "EDIFACT messages on FTP server: %s"
                               % err.message)
+            finally:
+                ftp.quit()
 
         if removed:
             self.write(cr, uid, removed,
                        {'edifact_removed': True}, context=context)
         return True
-
-    def _connect(self, host, port, user):
-        """ connect to ftp server """
-        # Load private key for transfert
-        privatekeyfile = os.path.expanduser('~/.ssh/id_rsa')
-        mykey = paramiko.RSAKey.from_private_key_file(privatekeyfile)
-        transport = paramiko.Transport((host, port))
-        transport.connect(username=user, pkey=mykey)
-        return transport
 
     def generate_edifact(self, cr, uid, ids, context=None):
         """ generate EDIFACT message for the selected purchase orders """
@@ -145,8 +133,8 @@ class purchase_order(osv.Model):
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         company = user.company_id
         host = company.edifact_purchase_host
-        port = company.edifact_purchase_port
         ftpuser = company.edifact_purchase_user
+        ftppass = company.edifact_purchase_password
         droppath = company.edifact_purchase_path
 
         filename = '%s.edi' % order.name
@@ -159,29 +147,26 @@ class purchase_order(osv.Model):
                          "unicode caracters, they have been replaced by '?'")
             message = message.encode('latin1', 'replace')
 
-        if not host and not port:
+        if not host:
             if not os.path.exists(droppath):
                 os.mkdir(droppath)
             self._save_edi(fullpath, message)
         else:
             try:
-                transport = self._connect(host, port, ftpuser)
+                ftp = ftplib.FTP(host, ftpuser, ftppass)
                 try:
-                    ftp = paramiko.SFTPClient.from_transport(transport)
-                    try:
-                        ftp.chdir(droppath)
-                    except IOError as err:
-                        raise Warning('could not cd to %r on ftp server: %s' %
-                                      (droppath, err.message))
-                    content = StringIO(message)
-                    ftp.putfo(content, filename)
-                finally:
-                    ftp.close()
-                    transport.close()
-            except (paramiko.SSHException, socket.error) as err:
+                    ftp.cwd(droppath)
+                except IOError as err:
+                    raise Warning('could not cd to %r on ftp server: %s' %
+                                  (droppath, err.message))
+                content = StringIO(message)
+                ftp.storlines('STOR ' + filename, content)
+            except socket.error as err:
                 raise Warning("could not save EDIFACT message "
                               "on FTP server: %s" %
                               err.message)
+            finally:
+                ftp.quit()
 
         # order.edifact_sent = True
         vals = {'edifact_sent': True}
