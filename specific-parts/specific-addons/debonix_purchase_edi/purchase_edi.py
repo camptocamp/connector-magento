@@ -87,6 +87,7 @@ class purchase_order(osv.Model):
                 if not os.path.exists(fullpath):
                     removed.append(rec['id'])
         else:
+            ftp = None
             try:
                 ftp = ftplib.FTP(host, ftpuser, ftppass)
                 ftp.cwd(droppath)
@@ -101,7 +102,9 @@ class purchase_order(osv.Model):
                               "EDIFACT messages on FTP server: %s"
                               % err.message)
             finally:
-                ftp.quit()
+                # Test for variable, None if connection failed
+                if ftp:
+                    ftp.quit()
 
         if removed:
             self.write(cr, uid, removed,
@@ -152,6 +155,7 @@ class purchase_order(osv.Model):
                 os.mkdir(droppath)
             self._save_edi(fullpath, message)
         else:
+            ftp = None
             try:
                 ftp = ftplib.FTP(host, ftpuser, ftppass)
                 try:
@@ -166,7 +170,9 @@ class purchase_order(osv.Model):
                               "on FTP server: %s" %
                               err.message)
             finally:
-                ftp.quit()
+                # Test for variable, None if connection failed
+                if ftp:
+                    ftp.quit()
 
         # order.edifact_sent = True
         vals = {'edifact_sent': True}
@@ -191,7 +197,7 @@ class purchase_order(osv.Model):
         mapping = {
             'codefiliale': 'PLN',
             'siretFiliale': '52789590800012',
-            'dateCmd': datetime.now().strftime('%y%m%d'),
+            'dateCmd': datetime.now().strftime('%Y%m%d'),
             'heureCmd': datetime.now().strftime('%H%M%S'),
             'codeAgence': '928',
             'siretAgence': '52789590800012',
