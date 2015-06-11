@@ -32,6 +32,7 @@ except ImportError:
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.DEBUG)
 
+
 class res_company(orm.Model):
     _inherit = 'res.company'
 
@@ -46,7 +47,8 @@ class res_company(orm.Model):
                                          str(company.id)))
                 try:
                     value = serv_config.get(section_name, field_name)
-                    if field_name in ('sftp_invoice_port', 'edifact_purchase_port'):
+                    if field_name in ('sftp_invoice_port',
+                                      'edifact_purchase_port'):
                         value = int(value) if value else 0
                 except:
                     _logger.exception('error trying to read field %s '
@@ -96,6 +98,16 @@ class res_company(orm.Model):
         'edifact_purchase_path': fields.function(
             _get_environment_config_by_id,
             string="Path",
+            type='char',
+            multi='server_env'),
+        'edifact_regex_ref': fields.function(
+            _get_environment_config_by_id,
+            string="Regex EDI file ref",
+            type='char',
+            multi='server_env'),
+        'edifact_regex_errors': fields.function(
+            _get_environment_config_by_id,
+            string="Regex EDI file errors",
             type='char',
             multi='server_env')
         }
