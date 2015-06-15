@@ -307,6 +307,7 @@ class purchase_order(osv.Model):
         return super(purchase_order, self).copy(cr, uid, id, default,
                                                 context=context)
 
+
 class purchase_order_cancel_edi(osv.TransientModel):
 
     _name = 'purchase.order.edi.cancel'
@@ -345,16 +346,14 @@ class purchase_order_cancel_edi(osv.TransientModel):
                     # We will set the current purchase order edifact to false
                     purchase_order_obj.write(cr, uid,
                                              [purchase_order.id],
-                                             {'edifact_sent': False})
+                                             {'edifact_sent': False,
+                                              'edifact_removed': False},
+                                             context=context)
                     message = "There was an error(s) in EDI File  : %s" \
                         % "\n".join(errors)
                     purchase_order_obj.message_post(cr, uid, purchase_order.id,
                                                     body=message,
                                                     context=context)
-
-
-
-
 
 
 def make_render_engine():
