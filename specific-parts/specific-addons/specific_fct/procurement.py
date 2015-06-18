@@ -32,3 +32,14 @@ class ProcurementOrder(orm.Model):
            'active_ids' in context:
             ids = context['active_ids']
         return super(ProcurementOrder, self).action_cancel(cr, uid, ids)
+
+    def allow_automatic_merge(self, cr, uid, procurement, po_vals,
+                              line_vals, context=None):
+        # redefining function from sale_dropshipping
+        sogedesca_ids = self.pool['res.partner'].search(
+            cr, uid, [('name', '=', 'SOGEDESCA')], context=context)
+        if po_vals.get('dest_address_id', False) and \
+           po_vals.get('partner_id', False) in sogedesca_ids:
+            return True
+        return super(ProcurementOrder, self).allow_automatic_merge(
+            cr, uid, procurement, po_vals, line_vals, context=context)
