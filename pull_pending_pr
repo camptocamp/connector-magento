@@ -16,7 +16,7 @@ cd -
 cd parts/server
 git pull --no-edit origin pull/176/head # Check active_id in sale order form
 git pull --no-edit origin pull/223/head # Add message for MRP scheduler summary + better exception handling
-git cherry-pick bc54c78d10927c47aec18f225ae6cc3b3d38a5f6 # Remove setting the procurement state as 'exception'
+git pull --no-edit origin pull/257/head # Remove setting the procurement state as 'exception'
 cd -
 
 cd parts/stock-logistics-workflow
