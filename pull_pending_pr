@@ -13,10 +13,15 @@ cd parts/purchase-workflow
 git pull --no-edit origin pull/107/head # Add purchase_supplier_postage_free
 cd -
 
+cd parts/reporting-engine
+git pull --no-edit origin pull/17/head # Only import what is needed (otherwise, eval = safe_eval)
+cd -
+
 cd parts/server
 git pull --no-edit origin pull/176/head # Check active_id in sale order form
 git pull --no-edit origin pull/223/head # Add message for MRP scheduler summary + better exception handling
 git pull --no-edit origin pull/257/head # Remove setting the procurement state as 'exception'
+git pull --no-edit origin pull/258/head # Remove filter on message type for 'body_original'
 cd -
 
 cd parts/stock-logistics-workflow
