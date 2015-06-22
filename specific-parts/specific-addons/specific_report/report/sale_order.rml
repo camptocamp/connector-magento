@@ -339,7 +339,7 @@
     </blockTable>
     
     <blockTable colWidths="283.0,250.0" style="Standard_Outline">
-    [[ o.state in ('draft','sent) and removeParentNode('blockTable') ]]
+    [[ o.state in ('draft','sent') and removeParentNode('blockTable') ]]
       <tr>
         <td>
           <para style="terp_default_9">
