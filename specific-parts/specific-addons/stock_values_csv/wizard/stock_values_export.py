@@ -24,7 +24,7 @@ import StringIO
 import base64
 
 from openerp.osv import orm, fields
-from ..unicode_csv.writer import UnicodeWriter
+import unicodecsv
 
 
 class StockValuesExport(orm.TransientModel):
@@ -52,7 +52,7 @@ class StockValuesExport(orm.TransientModel):
 
         file_data = StringIO.StringIO()
         try:
-            writer = UnicodeWriter(file_data)
+            writer = unicodecsv.writer(file_data, encoding='utf-8')
             writer.writerows(rows)
             file_value = file_data.getvalue()
             self.write(cr, uid, ids,
