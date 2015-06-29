@@ -35,11 +35,18 @@
     </record>
 
     <menuitem
+        id="next_id_51"
+        name="Accounting"
+        sequence="12"
+        parent="base.menu_reporting"
+        groups="account.group_account_manager"/>
+
+    <menuitem
         icon="STOCK_EXECUTE"
         name="Cutoff for incoming/outgoing pickings"
         action="action_cutoff_export"
         id="menu_cutoff_export"
-        parent="stock.next_id_61"
+        parent="next_id_51"
         sequence="10"
         />
 
