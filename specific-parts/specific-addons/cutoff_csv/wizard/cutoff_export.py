@@ -77,7 +77,7 @@ class cutoff_report_wizard(orm.TransientModel):
                              context=None):
         cutoff_date = cutoff_date or time.strftime('%Y-%m-%d %H:%M:%S')
         cr.execute("""
-            SELECT sp.name, pp.default_code, sm.name,
+            SELECT sp.name, pp.default_code,
                    CAST(sm.product_qty AS int), pt.standard_price,
                    (CAST(sm.product_qty AS int) * pt.standard_price) as total
             FROM stock_move sm
@@ -101,7 +101,7 @@ class cutoff_report_wizard(orm.TransientModel):
                              context=None):
         cutoff_date = cutoff_date or time.strftime('%Y-%m-%d %H:%M:%S')
         cr.execute("""
-            SELECT sp.name, pp.default_code, sm.name,
+            SELECT sp.name, pp.default_code,
             CAST(sm.product_qty AS int), pt.standard_price,
             (CAST(sm.product_qty AS int) * pt.standard_price) as total
             FROM stock_move sm
@@ -136,7 +136,6 @@ class cutoff_report_wizard(orm.TransientModel):
     def _get_header(self, cr, uid, ids, context=None):
         return [u'picking_name',
                 u'default_code',
-                u'name',
                 u'quantity',
                 u'standard_price',
                 u'total']

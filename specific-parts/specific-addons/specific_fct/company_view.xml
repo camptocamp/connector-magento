@@ -19,6 +19,10 @@
             <field name="edifact_purchase_password"/>
             <field name="edifact_purchase_path"/>
           </group>
+          <group string="EDIFACT Email Error Regex">
+            <field name="edifact_regex_ref"/>
+            <field name="edifact_regex_errors"/>
+          </group>
         </page>
       </field>
     </record>

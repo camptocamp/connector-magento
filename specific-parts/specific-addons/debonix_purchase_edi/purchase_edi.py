@@ -28,6 +28,7 @@ import os
 import logging
 import socket
 from tools import handlebars
+import re
 
 _logger = logging.getLogger('EDIFACT')
 _logger.setLevel(logging.DEBUG)
@@ -305,6 +306,54 @@ class purchase_order(osv.Model):
         })
         return super(purchase_order, self).copy(cr, uid, id, default,
                                                 context=context)
+
+
+class purchase_order_cancel_edi(osv.TransientModel):
+
+    _name = 'purchase.order.edi.cancel'
+    _description = 'Purchase Order EDI Cancel'
+    _inherit = ['mail.thread']
+
+    def message_new(self, cr, uid, msg, custom_values=None, context=None):
+        user = self.pool['res.users'].browse(cr, uid, uid, context=context)
+        company = user.company_id
+        edifact_regex_ref = company.edifact_regex_ref
+        edifact_regex_errors = company.edifact_regex_errors
+        purchase_order_obj = self.pool['purchase.order']
+        picking_in_obj = self.pool['stock.picking.in']
+        # Call Regex
+        pattern_ref = re.compile(edifact_regex_ref, re.MULTILINE | re.UNICODE)
+        pattern_errors = re.compile(edifact_regex_errors,
+                                    re.MULTILINE | re.UNICODE)
+        ref = re.search(pattern_ref, msg['body'])
+        errors = re.findall(pattern_errors, msg['body'])
+        if ref:
+            purchase_ids = purchase_order_obj.search(cr, uid,
+                                                     [('name', '=',
+                                                       ref.group(1))],
+                                                     context=context)
+            purchase_list = purchase_order_obj.browse(cr, uid,
+                                                      purchase_ids,
+                                                      context=context)
+            for purchase_order in purchase_list:
+                # We search packing for this purchase
+                if purchase_order.picking_ids and \
+                        purchase_order.state == 'approved':
+                    picking_ids = [picking.id for picking
+                                   in purchase_order.picking_ids]
+                    picking_in_obj.action_cancel(cr, uid,
+                                                 picking_ids, context=context)
+                    # We will set the current purchase order edifact to false
+                    purchase_order_obj.write(cr, uid,
+                                             [purchase_order.id],
+                                             {'edifact_sent': False,
+                                              'edifact_removed': False},
+                                             context=context)
+                    message = "There was an error(s) in EDI File  : %s" \
+                        % "\n".join(errors)
+                    purchase_order_obj.message_post(cr, uid, purchase_order.id,
+                                                    body=message,
+                                                    context=context)
 
 
 def make_render_engine():
