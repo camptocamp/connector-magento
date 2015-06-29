@@ -10,6 +10,7 @@ Feature: upgrade to 1.1.6
       | name                             |
       | specific_fct                     |
       | cutoff_csv                       |
+      | debonix_purchase_edi             |
     Then my modules should have been installed and models reloaded
 
     Given I set the version of the instance to "1.1.6"
