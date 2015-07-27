@@ -64,6 +64,29 @@ class Product(orm.Model):
                 cr, uid, vals['default_code'], context=context)
         return super(Product, self).write(cr, uid, ids, vals, context=context)
 
+    def search(self, cr, uid, args, offset=0, limit=None,
+               order=None, context=None, count=False):
+        # Only return products with no open POs (see procurement.py)
+        if context is None:
+            context = {}
+
+        po_line_obj = self.pool['purchase.order.line']
+
+        if 'automatic_op_skip_po' in context and \
+                context['automatic_op_skip_po']:
+            # search for product on draft/confirmed POs, and remove them
+            # from the result
+            po_line_ids = po_line_obj.search(
+                cr, uid, [('order_id.state', 'in', ('draft', 'confirmed'))],
+                context=context)
+            po_lines = po_line_obj.browse(
+                cr, uid, po_line_ids, context=context)
+            product_ids = [line.product_id.id for line in po_lines]
+            args += [('id', 'not in', product_ids)]
+        return super(Product, self).search(
+            cr, uid, args, offset, limit, order,
+            context, count=count)
+
 
 class product_supplierinfo(orm.Model):
     _inherit = "product.supplierinfo"
