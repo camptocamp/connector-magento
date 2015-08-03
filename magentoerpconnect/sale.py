@@ -839,8 +839,8 @@ class SaleOrderImport(MagentoImportSynchronizer):
 
     def _import_dependencies(self):
         record = self.magento_record
-
-        self._import_addresses()
+        with self.session.change_context({'connector_no_export': True}):
+            self._import_addresses()
 
         for line in record.get('items', []):
             _logger.debug('line: %s', line)
