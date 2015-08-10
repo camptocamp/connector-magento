@@ -19,6 +19,7 @@
 ##############################################################################
 from . import sql_db
 from . import account_invoice
+from . import account_move_line
 from . import carrier_file
 from . import company
 from . import partner

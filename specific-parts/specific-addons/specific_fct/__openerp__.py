@@ -33,6 +33,7 @@
              'base_partner_merge',
              'product_multi_ean',
              'point_of_sale',
+             'account_constraints',
              ],
  'author': 'Camptocamp',
  'description': """Code customisation module
