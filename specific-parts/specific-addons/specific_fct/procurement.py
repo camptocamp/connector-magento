@@ -45,13 +45,13 @@ class ProcurementOrder(orm.Model):
             cr, uid, procurement, po_vals, line_vals, context=context)
 
     def _product_virtual_get(self, cr, uid, order_point):
-        # Since some manual orders could be in draft or confirmed,
+        # Since some manual orders could be confirmed,
         # we return None if a PO has the orderpoint's product in its lines
         product_id = order_point.product_id.id
         po_lines = self.pool['purchase.order.line'].search(
             cr, uid,
             [('product_id', '=', product_id),
-             ('order_id.state', 'in', ('draft', 'confirmed'))],
+             ('order_id.state', '=', 'confirmed')],
             context={})
         if len(po_lines) > 0:
             return None

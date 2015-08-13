@@ -74,10 +74,10 @@ class Product(orm.Model):
 
         if 'automatic_op_skip_po' in context and \
                 context['automatic_op_skip_po']:
-            # search for product on draft/confirmed POs, and remove them
+            # search for product on confirmed POs, and remove them
             # from the result
             po_line_ids = po_line_obj.search(
-                cr, uid, [('order_id.state', 'in', ('draft', 'confirmed'))],
+                cr, uid, [('order_id.state', '=', 'confirmed')],
                 context=context)
             po_lines = po_line_obj.browse(
                 cr, uid, po_line_ids, context=context)
