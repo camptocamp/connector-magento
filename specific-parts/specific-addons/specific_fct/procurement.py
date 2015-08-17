@@ -43,3 +43,26 @@ class ProcurementOrder(orm.Model):
             return True
         return super(ProcurementOrder, self).allow_automatic_merge(
             cr, uid, procurement, po_vals, line_vals, context=context)
+
+    def _product_virtual_get(self, cr, uid, order_point):
+        # Since some manual orders could be confirmed,
+        # we return None if a PO has the orderpoint's product in its lines
+        product_id = order_point.product_id.id
+        po_lines = self.pool['purchase.order.line'].search(
+            cr, uid,
+            [('product_id', '=', product_id),
+             ('order_id.state', '=', 'confirmed')],
+            context={})
+        if len(po_lines) > 0:
+            return None
+        return super(ProcurementOrder, self)._product_virtual_get(
+            cr, uid, order_point)
+
+    def create_automatic_op(self, cr, uid, use_new_cursor=False, context=None):
+        # Add a flag to context (see product.py) in order to skip products
+        # with open POs
+        if context is None:
+            context = {}
+        context.update({'automatic_op_skip_po': True})
+        return super(ProcurementOrder, self).create_automatic_op(
+            cr, uid, use_new_cursor, context=context)
