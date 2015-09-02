@@ -75,6 +75,20 @@ class purchase_order(orm.Model):
         ),
     }
 
+    def wkf_approve_order(self, cr, uid, ids, context=None):
+        # Update product price if dropshipping order is approved
+        super(purchase_order, self).wkf_approve_order(
+            cr, uid, ids, context=context)
+        product_obj = self.pool['product.product']
+        for order in self.browse(cr, uid, ids, context=context):
+            if order.sale_flow and order.sale_flow == 'direct_delivery':
+                for line in order.order_line:
+                    product = line.product_id
+                    if product.type in ('product', 'consu'):
+                        product_obj.write(cr, uid, [product.id],
+                                          {'standard_price': line.price_unit},
+                                          context=context)
+
 
 class purchase_order_line(orm.Model):
     _inherit = 'purchase.order.line'
