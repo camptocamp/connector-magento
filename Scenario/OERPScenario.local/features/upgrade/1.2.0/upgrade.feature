@@ -11,6 +11,8 @@ Feature: upgrade to 1.2.0
       | magentoerpconnect                |
       | server_env_magentoerpconnect     |
       | specific_magento                 |
+      | elasticsearch_view_export        |
+      | sql_view                         |
     Then my modules should have been installed and models reloaded
 
     Given I execute the SQL commands
