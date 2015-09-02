@@ -88,6 +88,7 @@ class purchase_order(orm.Model):
                         product_obj.write(cr, uid, [product.id],
                                           {'standard_price': line.price_unit},
                                           context=context)
+        return True
 
 
 class purchase_order_line(orm.Model):
