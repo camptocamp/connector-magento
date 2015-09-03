@@ -6,16 +6,17 @@ Feature: upgrade to 1.2.0
   Scenario: upgrade application version
     Given I update the module list
     Given I install the required modules with dependencies:
-      | name                             |
-      | connector                        |
-      | magentoerpconnect                |
-      | server_env_magentoerpconnect     |
-      | specific_magento                 |
-      | elasticsearch_view_export        |
-      | sql_view                         |
-      | sql_view_purchase                |
-      | sql_view_sale                    |
-      | sql_view_stock                   |
+      | name                                 |
+      | connector                            |
+      | magentoerpconnect                    |
+      | server_env_magentoerpconnect         |
+      | specific_magento                     |
+      | elasticsearch_view_export            |
+      | sql_view                             |
+      | sql_view_purchase                    |
+      | sql_view_sale                        |
+      | sql_view_stock                       |
+      | server_env_elasticsearch_view_export |
     Then my modules should have been installed and models reloaded
 
     Given I execute the SQL commands
