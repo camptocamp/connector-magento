@@ -65,4 +65,28 @@ Feature: upgrade to 1.2.0
     WHERE id = 10590;
     """
 
+    Given I need a "elasticsearch.host" with oid: scenario.elasticsearch_host_kibana
+    And having:
+      | key  | value |
+      | code | ELK   |
+    And I need a "elasticsearch.view.index" with oid: scenario.elasticsearch_index_purchase
+    And having:
+      | key      | value                          |
+      | name     | odoo-purchase-lines            |
+      | host_id  | by code: ELK                   |
+      | sql_view | sql_view_purchase_order_report |
+    And I need a "elasticsearch.view.index" with oid: scenario.elasticsearch_index_sale
+    And having:
+      | key      | value                      |
+      | name     | odoo-sale-lines            |
+      | host_id  | by code: ELK               |
+      | sql_view | sql_view_sale_order_report |
+    And I need a "elasticsearch.view.index" with oid: scenario.elasticsearch_index_stock_turnover
+    And having:
+      | key      | value                        |
+      | name     | odoo-stock-turnover          |
+      | host_id  | by code: ELK                 |
+      | sql_view | sql_view_stock_move_turnover |
+
+
     Given I set the version of the instance to "1.2.0"
