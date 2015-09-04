@@ -88,5 +88,43 @@ Feature: upgrade to 1.2.0
       | host_id  | by code: ELK                 |
       | sql_view | sql_view_stock_move_turnover |
 
+    Given I need an Elasticsearch template named "odoo" on host with oid "scenario.elasticsearch_host_kibana" having template:
+    """
+    {
+      "template" : "*odoo*",
+      "order" : 0,
+      "settings" : {
+        "number_of_shards" : 1,
+        "number_of_replicas" : 1
+      },
+      "mappings" : {
+        "_default_" : {
+          "dynamic_templates" : [ {
+            "string_fields" : {
+              "mapping" : {
+                "type" : "multi_field",
+                "fields" : {
+                  "raw" : {
+                    "index" : "not_analyzed",
+                    "type" : "string"
+                  },
+                  "{name}" : {
+                    "index" : "analyzed",
+                    "norms" : { "enabled" : false },
+                    "type" : "string"
+                  }
+                }
+              },
+              "match_mapping_type" : "string",
+              "match" : "*"
+            }
+          } ],
+          "properties" : {
+          }
+        }
+      }
+    }
+    """
+
 
     Given I set the version of the instance to "1.2.0"
