@@ -87,6 +87,21 @@ Feature: upgrade to 1.2.0
       | name     | odoo-stock-turnover          |
       | host_id  | by code: ELK                 |
       | sql_view | sql_view_stock_move_turnover |
+    And having the following index configuration:
+    """
+    {
+      "mappings": {
+        "_default_": {
+          "properties": {
+            "month": {
+              "type": "date",
+              "format": "yyyy-MM-dd HH:mm:ss"
+            }
+          }
+        }
+      }
+    }
+    """
 
     Given I need an Elasticsearch template named "odoo" on host with oid "scenario.elasticsearch_host_kibana" having template:
     """

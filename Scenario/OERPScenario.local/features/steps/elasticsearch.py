@@ -19,3 +19,12 @@ def impl(ctx, name, host_xmlid):
         record = IndexTemplate.create(values)
 
     record.refresh_template()
+
+
+@given('having the following index configuration')
+def impl(ctx):
+    record = ctx.found_item
+    assert record
+    index_config = ctx.text
+    assert index_config
+    record.index_config = index_config
