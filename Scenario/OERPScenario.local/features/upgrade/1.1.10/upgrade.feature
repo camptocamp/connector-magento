@@ -13,6 +13,10 @@ Feature: upgrade to 1.1.10
 
     Given I execute the SQL commands
     """
+    -- clean up before inserting
+    DELETE FROM product_price_history;
+
+    -- insert at Jan 1st 1900, to be sure value is set in the past.
     INSERT INTO product_price_history (
         create_uid,
         write_uid,
@@ -74,6 +78,73 @@ Feature: upgrade to 1.1.10
         CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
         CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
         '1900-01-01 00:00:00',
+        'standard_price',
+        standard_price,
+        id
+    FROM product_template;
+
+    -- insert with date now() to have a more solid date
+    INSERT INTO product_price_history (
+        create_uid,
+        write_uid,
+        company_id,
+        create_date,
+        write_date,
+        datetime,
+        name,
+        amount,
+        product_id
+    ) SELECT
+        1,
+        1,
+        1,
+        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
+        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
+        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
+        'cost_price',
+        cost_price,
+        product_tmpl_id
+    FROM product_product;
+
+    INSERT INTO product_price_history (
+        create_uid,
+        write_uid,
+        company_id,
+        create_date,
+        write_date,
+        datetime,
+        name,
+        amount,
+        product_id
+    ) SELECT
+        1,
+        1,
+        1,
+        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
+        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
+        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
+        'list_price',
+        list_price,
+        id
+    FROM product_template;
+
+    INSERT INTO product_price_history (
+        create_uid,
+        write_uid,
+        company_id,
+        create_date,
+        write_date,
+        datetime,
+        name,
+        amount,
+        product_id
+    ) SELECT
+        1,
+        1,
+        1,
+        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
+        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
+        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
         'standard_price',
         standard_price,
         id
