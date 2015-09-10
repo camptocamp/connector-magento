@@ -409,3 +409,11 @@ msgstr "Erreur"
 #, python-format
 msgid "The selected partners cannot be merged together because they are linked with different customers on Magento"
 msgstr "Les partenaires sélectionnés ne peuvent pas être fusionnés car ils sont liés à des clients différents sur Magento"
+
+#. module: product_price_history
+#: model:ir.actions.act_window,name:product_price_history.act_product_prices_history_open
+#: model:ir.actions.act_window,name:product_price_history.action_price_history
+#: model:ir.ui.menu,name:product_price_history.menu_product_price_history_action_form
+#: view:product.product:0
+msgid "Prices History"
+msgstr "Historique des prix"
