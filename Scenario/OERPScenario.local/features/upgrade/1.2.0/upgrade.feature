@@ -11,8 +11,6 @@ Feature: upgrade to 1.2.0
       | magentoerpconnect                    |
       | server_env_magentoerpconnect         |
       | specific_magento                     |
-      | product_price_history                |
-      | product_cost_incl_bom_price_history  |
       | elasticsearch_view_export            |
       | sql_view                             |
       | sql_view_purchase                    |
@@ -20,75 +18,6 @@ Feature: upgrade to 1.2.0
       | sql_view_stock                       |
       | server_env_elasticsearch_view_export |
     Then my modules should have been installed and models reloaded
-
-    Given I execute the SQL commands
-    """
-    INSERT INTO product_price_history (
-        create_uid,
-        write_uid,
-        company_id,
-        create_date,
-        write_date,
-        datetime,
-        name,
-        amount,
-        product_id
-    ) SELECT
-        1,
-        1,
-        1,
-        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
-        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
-        '1900-01-01 00:00:00',
-        'cost_price',
-        cost_price,
-        product_tmpl_id
-    FROM product_product;
-
-    INSERT INTO product_price_history (
-        create_uid,
-        write_uid,
-        company_id,
-        create_date,
-        write_date,
-        datetime,
-        name,
-        amount,
-        product_id
-    ) SELECT
-        1,
-        1,
-        1,
-        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
-        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
-        '1900-01-01 00:00:00',
-        'list_price',
-        list_price,
-        id
-    FROM product_template;
-
-    INSERT INTO product_price_history (
-        create_uid,
-        write_uid,
-        company_id,
-        create_date,
-        write_date,
-        datetime,
-        name,
-        amount,
-        product_id
-    ) SELECT
-        1,
-        1,
-        1,
-        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
-        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
-        '1900-01-01 00:00:00',
-        'standard_price',
-        standard_price,
-        id
-    FROM product_template;
-    """
 
     Given I need a "elasticsearch.host" with oid: scenario.elasticsearch_host_kibana
     And having:
