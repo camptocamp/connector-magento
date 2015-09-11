@@ -32,5 +32,9 @@ cd parts/server-tools
 git pull --no-edit origin pull/144/head # Fix for SQL concurrency
 cd -
 
+cd parts/margin-analysis
+git pull --no-edit origin pull/28/head # BoM price history: correct call to store function
+cd -
+
 set +v
 set +e
