@@ -16,7 +16,7 @@ def archive_file(filepath, in_error=False):
     new_filename = "%s_%s%s" % (basename, date_str, extension)
     # If file is in error we archive it in ERROR directory
     if in_error:
-        archive_path = os.path.join(path, 'ERROR', new_filename)
+        archive_path = os.path.join(path, 'ERREUR', new_filename)
     else:
         archive_path = os.path.join(path, 'Archive', new_filename)
     return os.renames(filepath, archive_path)
