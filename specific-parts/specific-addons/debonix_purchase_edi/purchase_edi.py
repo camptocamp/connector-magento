@@ -357,7 +357,7 @@ class purchase_order_cancel_edi(osv.TransientModel):
 
 
 def make_render_engine():
-    renderer = handlebars.Renderer()
+    renderer = handlebars.Renderer(escape=lambda u: u)
 
     def lj(v, width, fill=' '):
         v = unicode(v)

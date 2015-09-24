@@ -411,8 +411,10 @@ class StockItInPickingImport(orm.TransientModel):
                     mycursor.close()
             except orm.except_orm as e:
                 self.post_error(cr, uid, filename, e.value, context)
+                archive_file(filename, in_error=True)
             except Exception as e:
                 self.post_error(cr, uid, filename, unicode(e), context)
+                archive_file(filename, in_error=True)
             finally:
                 data_file.close()
             if imported_picking_ids:
