@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+import time
 import datetime
 import logging
 import os
@@ -33,7 +34,7 @@ from openerp import pooler
 from openerp import netsvc
 from openerp.tools.translate import _
 from ..stockit_importer.importer import StockitImporter
-from .wizard_utils import archive_file, post_message
+from .wizard_utils import archive_file, create_claim
 
 
 _logger = logging.getLogger(__name__)
@@ -45,6 +46,7 @@ class StockItInPickingImport(orm.TransientModel):
 
     _columns = {
         'data': fields.binary('File', required=True),
+        'filename': fields.char('Filename'),
     }
 
     def import_in_picking(self, cr, uid, ids, context=None):
@@ -249,12 +251,9 @@ class StockItInPickingImport(orm.TransientModel):
             except orm.except_orm as e:
                 errors_report.append(_('Processing error: %s') % e.value)
             except Exception as e:
-                _logger.exception('Error when importing picking_id %s' %
-                                  picking_id)
                 errors_report.append(_('Processing error: %s') % e)
-        if errors_report:
-            raise orm.except_orm(_('ImportError'), "\n".join(errors_report))
-        return imported_picking_ids
+
+        return (imported_picking_ids, errors_report)
 
     def _create_backorder(self, cr, uid, picking_id, complete, too_many,
                           too_few, new_moves, context=None):
@@ -339,7 +338,14 @@ class StockItInPickingImport(orm.TransientModel):
         """ Update incoming pickings according the Stock it file
         """
 
-        imported_picking_ids = self.import_in_picking(cr, uid, ids, context)
+        (imported_picking_ids, errors_report) = self.import_in_picking(
+            cr, uid, ids, context)
+        if errors_report:
+            raise orm.except_orm(
+                _('Error:'),
+                _("Stock-it ingoing picking import failed "
+                  "with error:\n"
+                  "%s") % ("\n".join(errors_report),))
         if not imported_picking_ids:
             raise orm.except_orm(_('Nothing to do'), _('Stock are OK'))
         res = {'type': 'ir.actions.act_window_close'}
@@ -368,13 +374,21 @@ class StockItInPickingImport(orm.TransientModel):
             }
         return res
 
-    def post_error(self, cr, uid, filename, err_msg, context=None):
+    def post_error(self, cr, uid, filename, file_data, err_msg, context=None):
         _logger.exception("Error importing ingoing picking file %s", filename)
 
+        filename_no_path = os.path.split(filename)[1]
+
+        title = _("Stock-it ingoing picking %s") % (filename_no_path, )
+
         message = _("Stock-it ingoing picking import failed on file: %s "
-                    "with error:<br>"
+                    "with error:\n"
                     "%s") % (filename, err_msg)
-        post_message(self, cr, uid, message, context=context)
+        __, categ_id = self.pool['ir.model.data'].get_object_reference(
+            cr, uid, 'stockit_synchro', 'categ_claim_stockit_in_picking')
+
+        create_claim(self, cr, uid, title, message, filename_no_path,
+                     file_data, categ_id, context=context)
         return True
 
     def run_background_import(self, cr, uid, context=None):
@@ -399,10 +413,11 @@ class StockItInPickingImport(orm.TransientModel):
                 try:
                     wizard = self.create(mycursor, uid, {'data': data},
                                          context=context)
-                    imported_picking_ids = self.import_in_picking(
-                        mycursor, uid,
-                        [wizard], context
-                    )
+                    (imported_picking_ids, errors_report) = \
+                        self.import_in_picking(
+                            mycursor, uid,
+                            [wizard], context
+                        )
                     mycursor.commit()
                 except Exception as e:
                     mycursor.rollback()
@@ -410,13 +425,18 @@ class StockItInPickingImport(orm.TransientModel):
                 finally:
                     mycursor.close()
             except orm.except_orm as e:
-                self.post_error(cr, uid, filename, e.value, context)
+                self.post_error(cr, uid, filename, data, e.value, context)
                 archive_file(filename, in_error=True)
             except Exception as e:
-                self.post_error(cr, uid, filename, unicode(e), context)
+                self.post_error(cr, uid, filename, data, unicode(e), context)
                 archive_file(filename, in_error=True)
             finally:
+                if errors_report:
+                    self.post_error(
+                        cr, uid, filename, data, "\n".join(errors_report),
+                        context)
+                    archive_file(filename, in_error=True)
                 data_file.close()
-            if imported_picking_ids:
+            if imported_picking_ids and not errors_report:
                 archive_file(filename)
         return True

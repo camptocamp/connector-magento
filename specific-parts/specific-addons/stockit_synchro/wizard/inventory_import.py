@@ -23,6 +23,7 @@ import os
 import glob
 import logging
 import time
+import base64
 
 from operator import itemgetter
 
@@ -30,7 +31,7 @@ from openerp import pooler
 from openerp.osv import orm, fields
 from openerp.tools.translate import _
 from ..stockit_importer.importer import StockitImporter
-from .wizard_utils import archive_file, post_message
+from .wizard_utils import archive_file, create_claim
 
 
 _logger = logging.getLogger(__name__)
@@ -42,6 +43,7 @@ class StockItInventoryImport(orm.TransientModel):
 
     _columns = {
         'data': fields.binary('File', required=True),
+        'filename': fields.char('Filename'),
     }
 
     def import_inventory(self, cr, uid, ids, context=None):
@@ -57,6 +59,7 @@ class StockItInventoryImport(orm.TransientModel):
         inventory_id = False
         inventory_obj = self.pool.get('stock.inventory')
         product_obj = self.pool.get('product.product')
+        attachment_obj = self.pool.get('ir.attachment')
 
         wizard = self.browse(cr, uid, ids, context)
         if not wizard.data:
@@ -128,7 +131,6 @@ class StockItInventoryImport(orm.TransientModel):
                     _('Processing error append: %s') % (e.value,)
                 )
             except Exception as e:
-                _logger.exception('Error when importing inventory row %s', row)
                 errors_report.append(_('Processing error append: %s') % e)
         if inventory_rows:
             inventory_id = inventory_obj.create(
@@ -137,6 +139,19 @@ class StockItInventoryImport(orm.TransientModel):
                  'date': time.strftime('%Y-%m-%d %H:%M:%S'),
                  'inventory_line_id': [(0, 0, row) for row in inventory_rows]}
             )
+            # Use file name if available
+            filename = wizard.filename or (
+                "Stockit inventory file %s.csv" %
+                (time.strftime('%Y-%m-%d %H:%M:%S'), )
+            )
+            attachment_data = {
+                'name': filename,
+                'datas': wizard.data,
+                'datas_fname': filename,
+                'res_model': 'stock.inventory',
+                'res_id': inventory_id,
+            }
+            attachment_obj.create(cr, uid, attachment_data, context=context)
             try:
                 inventory_obj.action_confirm(cr, uid,
                                              [inventory_id], context=context)
@@ -146,8 +161,6 @@ class StockItInventoryImport(orm.TransientModel):
                 errors_report.append(_('Processing error append: %s') %
                                      (e.value,))
             except Exception as e:
-                _logger.exception('Error when validating inventory %s',
-                                  inventory_id)
                 errors_report.append(_('Processing error append: %s') % e)
 
         return (inventory_id, errors_report)
@@ -160,8 +173,11 @@ class StockItInventoryImport(orm.TransientModel):
         (inventory_id, errors_report) = self.import_inventory(
             cr, uid, ids, context)
         if errors_report:
-            self.post_error(
-                cr, uid, "Manual Import", "\n".join(errors_report), context)
+            raise orm.except_orm(
+                _('Error:'),
+                _("Stock-it inventory import failed "
+                  "with error:\n"
+                  "%s") % ("\n".join(errors_report),))
         res = {'type': 'ir.actions.act_window_close'}
         if inventory_id:
             model_obj = self.pool.get('ir.model.data')
@@ -187,16 +203,26 @@ class StockItInventoryImport(orm.TransientModel):
             }
         return res
 
-    def post_error(self, cr, uid, filename, err_msg, context=None):
+    def post_error(self, cr, uid, filename, file_data, err_msg, context=None):
         _logger.exception("Error importing inventory file %s", filename)
 
+        filename_no_path = os.path.split(filename)[1]
+
+        title = _("Stock-it inventory %s") % (filename_no_path, )
+
         message = _("Stock-it inventory import failed on file: %s "
-                    "with error:<br>"
+                    "with error:\n"
                     "%s") % (filename, err_msg)
-        post_message(self, cr, uid, message, context=context)
+        __, categ_id = self.pool['ir.model.data'].get_object_reference(
+            cr, uid, 'stockit_synchro', 'categ_claim_stockit_inventory')
+
+        create_claim(self, cr, uid, title, message, filename_no_path,
+                     file_data, categ_id, context=context)
         return True
 
     def run_background_import(self, cr, uid, context=None):
+        if context is None:
+            context = {}
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         company = user.company_id
         if (not company.stockit_base_path or
@@ -217,8 +243,11 @@ class StockItInventoryImport(orm.TransientModel):
                 db, pool = pooler.get_db_and_pool(cr.dbname)
                 mycursor = db.cursor()
                 try:
-                    wizard = self.create(mycursor, uid, {'data': data},
-                                         context=context)
+                    wizard = self.create(
+                        mycursor, uid,
+                        {'data': data,
+                         'filename': os.path.split(filename)[1]},
+                        context=context)
                     (inventory_id, errors_report) = self.import_inventory(
                         mycursor, uid, [wizard], context
                     )
@@ -229,17 +258,18 @@ class StockItInventoryImport(orm.TransientModel):
                 finally:
                     mycursor.close()
             except orm.except_orm as e:
-                self.post_error(cr, uid, filename, e.value, context)
+                self.post_error(cr, uid, filename, data, e.value, context)
                 archive_file(filename, in_error=True)
             except Exception as e:
-                self.post_error(cr, uid, filename, str(e), context)
+                self.post_error(cr, uid, filename, data, str(e), context)
                 archive_file(filename, in_error=True)
             finally:
                 if errors_report:
                     self.post_error(
-                        cr, uid, filename, "\n".join(errors_report), context)
+                        cr, uid, filename, data, "\n".join(errors_report),
+                        context)
                     archive_file(filename, in_error=True)
                 data_file.close()
-            if inventory_id:
+            if inventory_id and not errors_report:
                 archive_file(filename)
         return True
