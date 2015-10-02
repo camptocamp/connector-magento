@@ -437,6 +437,6 @@ class StockItInPickingImport(orm.TransientModel):
                         context)
                     archive_file(filename, in_error=True)
                 data_file.close()
-            if imported_picking_ids and not errors_report:
+            if not errors_report:
                 archive_file(filename)
         return True
