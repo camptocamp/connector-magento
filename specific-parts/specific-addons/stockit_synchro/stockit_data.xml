@@ -79,6 +79,22 @@
             <field eval="'()'" name="args"/>
             <field eval="False" name="active"/>
         </record>
+
+        <record model="crm.case.section" id="section_stockit_error">
+            <field name="name">Anomalie Expédition</field>
+        </record>
+
+        <record model="crm.case.categ" id="categ_claim_stockit_inventory">
+            <field name="name">Inventaire Stockit</field>
+            <field name="section_id" ref="section_stockit_error"/>
+            <field name="object_id" search="[('model','=','crm.claim')]" model="ir.model"/>
+        </record>
+
+        <record model="crm.case.categ" id="categ_claim_stockit_in_picking">
+            <field name="name">Réception Stockit</field>
+            <field name="section_id" ref="section_stockit_error"/>
+            <field name="object_id" search="[('model','=','crm.claim')]" model="ir.model"/>
+        </record>
     </data>
     
 </openerp>

@@ -439,16 +439,6 @@ msgid "Base"
 msgstr "Base"
 
 #. module: stockit_synchro
-#: code:addons/stockit_synchro/wizard/inventory_import.py:197
-#, python-format
-msgid "Stock-it inventory import failed on file : %s\n"
-"With error:\n"
-"%s"
-msgstr "Stock-it inventory import failed on file : %s\n"
-"With error:\n"
-"%s"
-
-#. module: stockit_synchro
 #: sql_constraint:stock.picking:0
 msgid "Reference must be unique per Company!"
 msgstr "Reference must be unique per Company!"
@@ -634,16 +624,6 @@ msgid "Ingoing Picking Default Dest. Location"
 msgstr "Ingoing Picking Default Dest. Location"
 
 #. module: stockit_synchro
-#: code:addons/stockit_synchro/wizard/in_picking_import.py:339
-#, python-format
-msgid "Stock-it ingoing picking import failed on file : %s\n"
-"With error:\n"
-"%s"
-msgstr "Stock-it ingoing picking import failed on file : %s\n"
-"With error:\n"
-"%s"
-
-#. module: stockit_synchro
 #: code:addons/stockit_synchro/wizard/in_picking_import.py:106
 #: code:addons/stockit_synchro/wizard/inventory_import.py:93
 #, python-format
@@ -752,3 +732,64 @@ msgstr "Stock-it"
 msgid "Import inventories in Stock iT format"
 msgstr "Import inventories in Stock iT format"
 
+#. module: stockit_synchro
+#: model:ir.ui.menu,name:stockit_synchro.menu_stockit_error_claim
+msgid "Delivery"
+msgstr "Delivery"
+
+#. module: stockit_synchro
+#: model:ir.actions.act_window,name:stockit_synchro.action_stockit_error_claim
+msgid "Delivery Anomalies"
+msgstr "Delivery Anomalies"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:382
+#, python-format
+msgid "Stock-it ingoing picking %s"
+msgstr "Stock-it ingoing picking %s"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:339
+#, python-format
+msgid "Stock-it ingoing picking import failed "
+"with error:\n"
+"%s"
+msgstr "Stock-it ingoing picking import failed "
+"with error:\n"
+"%s"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/in_picking_import.py:339
+#, python-format
+msgid "Stock-it ingoing picking import failed on file: %s "
+"with error:\n"
+"%s"
+msgstr "Stock-it ingoing picking import failed on file: %s "
+"with error:\n"
+"%s"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/inventory_import.py:211
+#, python-format
+msgid "Stock-it inventory %s"
+msgstr "Stock-it inventory %s"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/inventory_import.py:178
+#, python-format
+msgid "Stock-it inventory import failed "
+"with error:\n"
+"%s"
+msgstr "Stock-it inventory import failed "
+"with error:\n"
+"%s"
+
+#. module: stockit_synchro
+#: code:addons/stockit_synchro/wizard/inventory_import.py:213
+#, python-format
+msgid "Stock-it inventory import failed on file : %s "
+"with error:\n"
+"%s"
+msgstr "Stock-it inventory import failed on file : %s "
+"with error:\n"
+"%s"

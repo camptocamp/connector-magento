@@ -8,6 +8,7 @@
              <field name="arch" type="xml">
                 <form string="Incoming Pickings Import for Stock iT" version="7.0">
                     <group>
+                        <field name="filename" readonly="1" invisible="1"/>
                         <field name="data" filename="filename" />
                     </group>
                     <footer>

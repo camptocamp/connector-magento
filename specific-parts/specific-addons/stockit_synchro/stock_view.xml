@@ -43,5 +43,31 @@
                 </data>
             </field>
         </record>
+
+        <record id="action_stockit_error_claim" model="ir.actions.act_window">
+            <field name="name">Delivery Anomalies</field>
+            <field name="res_model">crm.claim</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{}</field>
+            <field name="domain" eval="[('section_id', '=', ref('section_stockit_error')), ('stage_id.state', 'in', ('draft', 'open'))]"/>
+        </record>
+
+        <menuitem
+            name="Anomalies"
+            id="menu_stockit_anomaly"
+            parent="base.menu_purchase_root"
+            sequence="14"
+            />
+
+        <menuitem
+            icon="STOCK_EXECUTE"
+            name="Delivery"
+            action="action_stockit_error_claim"
+            id="menu_stockit_error_claim"
+            parent="menu_stockit_anomaly"
+            sequence="115"
+            />
     </data>
 </openerp>
