@@ -7,10 +7,6 @@ Feature: upgrade to 1.2.0
     Given I update the module list
     Given I install the required modules with dependencies:
       | name                                 |
-      | connector                            |
-      | magentoerpconnect                    |
-      | server_env_magentoerpconnect         |
-      | specific_magento                     |
       | elasticsearch_view_export            |
       | sql_view                             |
       | sql_view_purchase                    |
