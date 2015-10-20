@@ -258,18 +258,16 @@ class StockItInventoryImport(orm.TransientModel):
                 finally:
                     mycursor.close()
             except orm.except_orm as e:
-                self.post_error(cr, uid, filename, data, e.value, context)
-                archive_file(filename, in_error=True)
+                errors_report.append(e.value)
             except Exception as e:
-                self.post_error(cr, uid, filename, data, str(e), context)
-                archive_file(filename, in_error=True)
+                errors_report.append(unicode(e))
             finally:
                 if errors_report:
                     self.post_error(
                         cr, uid, filename, data, "\n".join(errors_report),
                         context)
                     archive_file(filename, in_error=True)
+                elif inventory_id:
+                    archive_file(filename)
                 data_file.close()
-            if inventory_id and not errors_report:
-                archive_file(filename)
         return True
