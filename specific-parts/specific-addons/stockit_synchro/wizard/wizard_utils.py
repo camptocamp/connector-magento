@@ -19,7 +19,8 @@ def archive_file(filepath, in_error=False):
         archive_path = os.path.join(path, 'ERREUR', new_filename)
     else:
         archive_path = os.path.join(path, 'Archive', new_filename)
-    return os.renames(filepath, archive_path)
+    os.renames(filepath, archive_path)
+    return archive_path
 
 
 def post_message(self, cr, uid, message,

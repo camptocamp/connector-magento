@@ -263,10 +263,10 @@ class StockItInventoryImport(orm.TransientModel):
                 errors_report.append(unicode(e))
             finally:
                 if errors_report:
+                    error_filename = archive_file(filename, in_error=True)
                     self.post_error(
-                        cr, uid, filename, data, "\n".join(errors_report),
-                        context)
-                    archive_file(filename, in_error=True)
+                        cr, uid, error_filename, data,
+                        "\n".join(errors_report), context)
                 elif inventory_id:
                     archive_file(filename)
                 data_file.close()
