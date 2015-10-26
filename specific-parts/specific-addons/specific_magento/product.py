@@ -63,6 +63,19 @@ class magento_product_product(orm.Model):
         'magento_cost': fields.float('Computed Cost',
                                      help="Last computed cost to send "
                                           "on Magento."),
+        'magento_universe': fields.selection([
+            ('909', 'EPI'),
+            ('911', 'Jardin'),
+            ('913', 'Quincaillerie'),
+            ('923', 'Sanitaire'),
+            ('931', 'Outillage'),
+            ('935', 'Outillage à main'),
+            ('953', 'Servante et rangement d''outillage'),
+            ('965', 'Soudage'),
+            ('967', 'Electricite'),
+            ('991', 'Levage manutention'),
+            ('993', 'Domotique'),
+        ], 'Magento Universe'),
     }
 
     def product_type_get(self, cr, uid, context=None):
@@ -336,7 +349,8 @@ class DebonixProductImportMapper(ProductImportMapper):
     direct = [(source, target) for source, target in
               ProductImportMapper.direct if
               target not in ('standard_price', 'weight')] + \
-             [('weight', 'weight_net')]
+             [('weight', 'weight_net'),
+              ('universe', 'magento_universe')]
 
     @mapping
     def country(self, record):
