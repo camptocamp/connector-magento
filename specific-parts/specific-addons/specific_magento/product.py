@@ -72,7 +72,7 @@ class magento_product_product(orm.Model):
             ('935', 'Outillage à main'),
             ('953', 'Servante et rangement d''outillage'),
             ('965', 'Soudage'),
-            ('967', 'Electricite'),
+            ('967', 'Electricité'),
             ('991', 'Levage manutention'),
             ('993', 'Domotique'),
         ], 'Magento Universe'),
