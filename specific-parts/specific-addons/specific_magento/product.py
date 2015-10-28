@@ -59,6 +59,16 @@ _logger = logging.getLogger(__name__)
 
 class magento_product_product(orm.Model):
     _inherit = 'magento.product.product'
+
+    def _get_universe(self, cr, uid, ids, field_name, arg, context=None):
+        # Store text value from selection, to be used by SQL views
+        res = {}
+        universe_map = dict(self._columns['magento_universe'].selection)
+        for product in self.browse(cr, uid, ids, context=context):
+            res[product.id] = universe_map.get(product.magento_universe,
+                                               False)
+        return res
+
     _columns = {
         'magento_cost': fields.float('Computed Cost',
                                      help="Last computed cost to send "
@@ -76,6 +86,10 @@ class magento_product_product(orm.Model):
             ('991', 'Levage manutention'),
             ('993', 'Domotique'),
         ], 'Magento Universe'),
+        'universe': fields.function(_get_universe,
+                                    string='Universe',
+                                    type='char',
+                                    store=True),
     }
 
     def product_type_get(self, cr, uid, context=None):
