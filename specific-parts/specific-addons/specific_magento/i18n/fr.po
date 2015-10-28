@@ -50,6 +50,12 @@ msgid "Computed Cost"
 msgstr "Coût calculé"
 
 #. module: specific_magento
+#: field:magento.product.product,magento_universe:0
+#: field:magento.product.product,universe:0
+msgid "Magento Universe"
+msgstr "Univers Magento"
+
+#. module: specific_magento
 #: field:stock.export.all.magento,check_confirm:0
 msgid "Confirm Export"
 msgstr "Confirmer Export"
