@@ -66,7 +66,7 @@ class magento_product_product(orm.Model):
         universe_map = dict(self._columns['magento_universe'].selection)
         for product in self.browse(cr, uid, ids, context=context):
             res[product.id] = universe_map.get(product.magento_universe,
-                                               False)
+                                               'Non défini')
         return res
 
     _columns = {
@@ -74,6 +74,7 @@ class magento_product_product(orm.Model):
                                      help="Last computed cost to send "
                                           "on Magento."),
         'magento_universe': fields.selection([
+            ('', 'Non défini'),
             ('909', 'EPI'),
             ('911', 'Jardin'),
             ('913', 'Quincaillerie'),
@@ -90,6 +91,10 @@ class magento_product_product(orm.Model):
                                     string='Universe',
                                     type='char',
                                     store=True),
+    }
+
+    _defaults = {
+        'magento_universe': '',
     }
 
     def product_type_get(self, cr, uid, context=None):
@@ -363,8 +368,7 @@ class DebonixProductImportMapper(ProductImportMapper):
     direct = [(source, target) for source, target in
               ProductImportMapper.direct if
               target not in ('standard_price', 'weight')] + \
-             [('weight', 'weight_net'),
-              ('universe', 'magento_universe')]
+             [('weight', 'weight_net')]
 
     @mapping
     def country(self, record):
@@ -384,6 +388,11 @@ class DebonixProductImportMapper(ProductImportMapper):
         binder = self.get_binder_for_model('magento.product.brand')
         brand_id = binder.to_openerp(record['marque'], unwrap=True)
         return {'product_brand_id': brand_id}
+
+    @mapping
+    def universe(self, record):
+        # Default value must be ''
+        return {'magento_universe': record.get('universe', '')}
 
     @mapping
     @only_create
