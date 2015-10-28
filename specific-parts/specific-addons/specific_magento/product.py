@@ -88,7 +88,7 @@ class magento_product_product(orm.Model):
             ('993', 'Domotique'),
         ], 'Magento Universe'),
         'universe': fields.function(_get_universe,
-                                    string='Universe',
+                                    string='Magento Universe',
                                     type='char',
                                     store=True),
     }

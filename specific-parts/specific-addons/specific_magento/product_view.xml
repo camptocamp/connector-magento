@@ -8,7 +8,7 @@
       <field name="inherit_id" ref="magentoerpconnect.view_magento_product_form"/>
       <field name="arch" type="xml">
         <field name="product_type" position="after">
-          <field name="magento_universe" readonly="1"/>
+          <field name="universe" readonly="1"/>
         </field>
         <form position="inside">
           <group string="Pricing">
