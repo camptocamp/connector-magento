@@ -404,6 +404,7 @@ class StockItInPickingImport(orm.TransientModel):
                                     company.stockit_in_picking_import)
         files = glob.glob(os.path.join(files_folder, '*.*'))
         for filename in files:
+            errors_report = []
             imported_picking_ids = False
             data_file = open(filename, 'r')
             try:
@@ -425,18 +426,16 @@ class StockItInPickingImport(orm.TransientModel):
                 finally:
                     mycursor.close()
             except orm.except_orm as e:
-                self.post_error(cr, uid, filename, data, e.value, context)
-                archive_file(filename, in_error=True)
+                errors_report.append(e.value)
             except Exception as e:
-                self.post_error(cr, uid, filename, data, unicode(e), context)
-                archive_file(filename, in_error=True)
+                errors_report.append(unicode(e))
             finally:
                 if errors_report:
+                    error_filename = archive_file(filename, in_error=True)
                     self.post_error(
-                        cr, uid, filename, data, "\n".join(errors_report),
-                        context)
-                    archive_file(filename, in_error=True)
+                        cr, uid, error_filename, data,
+                        "\n".join(errors_report), context)
+                else:
+                    archive_file(filename)
                 data_file.close()
-            if not errors_report:
-                archive_file(filename)
         return True
