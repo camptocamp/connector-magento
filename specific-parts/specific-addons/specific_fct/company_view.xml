@@ -18,6 +18,8 @@
             <field name="edifact_purchase_user"/>
             <field name="edifact_purchase_password"/>
             <field name="edifact_purchase_path"/>
+            <field name="edifact_purchase_import_path"/>
+            <field name="edifact_purchase_import_file"/>
           </group>
           <group string="EDIFACT Email Error Regex">
             <field name="edifact_regex_ref"/>

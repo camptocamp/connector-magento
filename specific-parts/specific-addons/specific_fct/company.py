@@ -100,6 +100,16 @@ class res_company(orm.Model):
             string="Path",
             type='char',
             multi='server_env'),
+        'edifact_purchase_import_path': fields.function(
+            _get_environment_config_by_id,
+            string="Import Path",
+            type='char',
+            multi='server_env'),
+        'edifact_purchase_import_file': fields.function(
+            _get_environment_config_by_id,
+            string="Import File Pattern",
+            type='char',
+            multi='server_env'),
         'edifact_regex_ref': fields.function(
             _get_environment_config_by_id,
             string="Regex EDI file ref",
