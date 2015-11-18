@@ -58,10 +58,15 @@ class EdiImportTracking(orm.Model):
             csv_data = csv.reader(data, delimiter='|', quotechar='"')
             for row in csv_data:
                 po_number = row[3]
-                if po_number not in res:
-                    res[po_number] = [row[6]]
+                date_done = datetime.strptime(row[2], "%Y/%m/%d %H:%M:%S.%f")
+                tracking_ref = row[6].strip() and row[6] or row[0]
+                if (po_number not in res or
+                        'carrier_tracking_ref' not in res[po_number]):
+                    res[po_number] = {'carrier_tracking_ref': tracking_ref,
+                                      'date_done': date_done}
                 else:
-                    res[po_number].append(row[6])
+                    res[po_number]['carrier_tracking_ref'] += ";"
+                    res[po_number]['carrier_tracking_ref'] += tracking_ref
 
             # Write number in pickings + approve them
             for po_number in res:
@@ -70,9 +75,7 @@ class EdiImportTracking(orm.Model):
                 picking_ids = picking_obj.search(
                     cr, uid, [('purchase_id', 'in', po_ids)], context=context)
                 picking_obj.write(
-                    cr, uid, picking_ids,
-                    {'carrier_tracking_ref': ";".join(res[po_number])},
-                    context=context)
+                    cr, uid, picking_ids, res[po_number], context=context)
                 # Validate picking
                 picking_obj.action_move(
                     cr, uid, picking_ids, context=context)
