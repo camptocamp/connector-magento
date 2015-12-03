@@ -13,6 +13,18 @@
             <field eval="'()'" name="args"/>
             <field eval="False" name="active"/>
         </record>
+
+        <record id="ir_cron_edifact_import_tracking" model="ir.cron">
+            <field name="name">Import tracking for SOGEDESCA orders</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'edi.import.tracking'" name="model"/>
+            <field eval="'import_csv_tracking'" name="function"/>
+            <field eval="'()'" name="args"/>
+            <field eval="False" name="active"/>
+        </record>
     </data>
-    
 </openerp>
