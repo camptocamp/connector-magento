@@ -30,6 +30,13 @@ class ResPartner(orm.Model):
         'siret': fields.char('Siret', size=14),
         'origin_country_id': fields.many2one('res.country',
                                              'Country origin of products'),
+        'edifact_message': fields.boolean(
+            'Send EDIFACT message to SOGEDESCA for this supplier'),
+        'code_filiale': fields.char('Code Filiale', size=3),
+        'siret_filiale': fields.char('Siret Filiale', size=14),
+        'code_agence': fields.char('Code Agence', size=3),
+        'siret_agence': fields.char('Siret Agence', size=14),
+        'compte_debonix': fields.char('Compte Debonix', size=10),
     }
 
     _defaults = {

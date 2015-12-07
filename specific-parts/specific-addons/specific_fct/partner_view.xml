@@ -4,17 +4,37 @@
 
     <!-- Add siret on partner view -->
     <record id="view_partner_form_custom" model="ir.ui.view">
-      <field name="name">res.partner.form.custom</field>
-      <field name="model">res.partner</field>
-      <field name="inherit_id" ref="base.view_partner_form"/>
-      <field name="arch" type="xml">
-        <data>
-          <field name="website" position="after">
-            <field name="siret"/>
-            <field name="origin_country_id"/>
-          </field>
-        </data>
-      </field>
+        <field name="name">res.partner.form.custom</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <data>
+                <field name="website" position="after">
+                    <field name="siret"/>
+                    <field name="origin_country_id"/>
+                </field>
+                <xpath expr="//page[@string='Sales &amp; Purchases']//field[@name='supplier']" position="after">
+                    <field name="edifact_message"/>
+                </xpath>
+                <page string="Sales &amp; Purchases" position="after">
+                    <page string="EDIFACT message parameters" attrs="{'invisible': [('edifact_message', '=', False)]}">
+                        <group>
+                            <group>
+                                <field name="code_filiale"/>
+                                <field name="siret_filiale"/>
+                            </group>
+                            <group>
+                                <field name="code_agence"/>
+                                <field name="siret_agence"/>
+                            </group>
+                            <group>
+                                <field name="compte_debonix"/>
+                            </group>
+                        </group>
+                    </page>
+                </page>
+            </data>
+        </field>
     </record>
 
     <!-- Add siret on partner view -->

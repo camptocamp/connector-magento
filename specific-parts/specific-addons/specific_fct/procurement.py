@@ -37,7 +37,7 @@ class ProcurementOrder(orm.Model):
                               line_vals, context=None):
         # redefining function from sale_dropshipping
         sogedesca_ids = self.pool['res.partner'].search(
-            cr, uid, [('name', '=', 'SOGEDESCA')], context=context)
+            cr, uid, [('edifact_message', '=', True)], context=context)
         if po_vals.get('dest_address_id', False) and \
            po_vals.get('partner_id', False) in sogedesca_ids:
             return True
