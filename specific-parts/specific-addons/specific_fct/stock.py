@@ -38,3 +38,38 @@ class StockPickingout(orm.Model):
     _columns = {
         'partner_id': fields.many2one('res.partner', 'Partner'),
     }
+
+
+class StockMove(orm.Model):
+
+    _inherit = "stock.move"
+
+    def _update_average_price(self, cr, uid, move, context=None):
+        super(StockMove, self)._update_average_price(
+            cr, uid, move, context=context)
+
+        product_obj = self.pool['product.product']
+        uom_obj = self.pool['product.uom']
+        product = move.product_id
+        if (move.picking_id.type == 'out') and \
+                (product.cost_method == 'average') and \
+                (len(product.seller_ids) > 0):
+
+            product_qty = move.product_qty
+            product_uom = move.product_uom.id
+            supplier = product.seller_ids[0]
+
+            qty = uom_obj._compute_qty(cr, uid, product_uom, product_qty,
+                                       product.uom_id.id)
+            if (product.qty_available - qty) <= 0:
+                # Quantity will be 0 : put supplier price as standard price
+                cr.execute('SELECT price '
+                           'FROM pricelist_partnerinfo '
+                           'WHERE suppinfo_id = %s'
+                           'ORDER BY min_quantity DESC LIMIT 1',
+                           supplier.id)
+                res = cr.dictfetchone()
+                if res:
+                    product_obj.write(cr, uid, [product.id],
+                                      {'standard_price': res['price']},
+                                      context=context)
