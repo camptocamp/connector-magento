@@ -85,6 +85,6 @@ class EdiImportTracking(orm.Model):
         finally:
             # Test for variable, None if connection failed
             if ftp:
-                ftp.quit()
+                ftp.close()
         return True
 
