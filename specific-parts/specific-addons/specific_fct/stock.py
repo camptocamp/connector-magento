@@ -67,7 +67,7 @@ class StockMove(orm.Model):
                            'FROM pricelist_partnerinfo '
                            'WHERE suppinfo_id = %s'
                            'ORDER BY min_quantity DESC LIMIT 1',
-                           supplier.id)
+                           (supplier.id,)
                 res = cr.dictfetchone()
                 if res:
                     product_obj.write(cr, uid, [product.id],
