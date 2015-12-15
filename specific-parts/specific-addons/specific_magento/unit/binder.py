@@ -31,4 +31,5 @@ class DebonixBinder(MagentoModelBinder):
         'magento.supplier',
         'magento.bundle.bom',
         'magento.bundle.bom.product',
+        'magento.product.universe',
     ]

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-06-19 12:46+0000\n"
-"PO-Revision-Date: 2014-06-19 12:46+0000\n"
+"POT-Creation-Date: 2015-12-15 13:30+0000\n"
+"PO-Revision-Date: 2015-12-15 13:30+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -33,9 +33,47 @@ msgid "A product brand with same ID on Magento already exists."
 msgstr ""
 
 #. module: specific_magento
+#: sql_constraint:magento.product.universe:0
+msgid "A product universe with same ID on Magento already exists."
+msgstr ""
+
+#. module: specific_magento
+#: code:addons/specific_magento/sale.py:224
+#, python-format
+msgid "Already imported"
+msgstr ""
+
+#. module: specific_magento
 #: field:magento.bundle.bom,openerp_id:0
 #: field:magento.bundle.bom.product,openerp_id:0
 msgid "Bill of Material"
+msgstr ""
+
+#. module: specific_magento
+#: view:stock.export.all.magento:0
+msgid "Cancel"
+msgstr ""
+
+#. module: specific_magento
+#: code:addons/specific_magento/stock.py:117
+#: code:addons/specific_magento/stock.py:139
+#, python-format
+msgid "Canceled: the delivery order already exists on Magento (fault 102)."
+msgstr ""
+
+#. module: specific_magento
+#: field:res.partner,code_agence:0
+msgid "Code Agence"
+msgstr ""
+
+#. module: specific_magento
+#: field:res.partner,code_filiale:0
+msgid "Code Filiale"
+msgstr ""
+
+#. module: specific_magento
+#: field:res.partner,compte_debonix:0
+msgid "Compte Debonix"
 msgstr ""
 
 #. module: specific_magento
@@ -44,17 +82,56 @@ msgid "Computed Cost"
 msgstr ""
 
 #. module: specific_magento
-#: field:pricelist.partnerinfo,from_magento:0
-#: field:product.supplierinfo,from_magento:0
-msgid "From Magento"
+#: field:stock.export.all.magento,check_confirm:0
+msgid "Confirm Export"
+msgstr ""
+
+#. module: specific_magento
+#: view:stock.export.all.magento:0
+msgid "Create job"
+msgstr ""
+
+#. module: specific_magento
+#: code:addons/specific_magento/related_action.py:42
+#, python-format
+msgid "Error"
+msgstr ""
+
+#. module: specific_magento
+#: code:_description:0
+#: model:ir.model,name:specific_magento.model_stock_export_all_magento
+#, python-format
+msgid "Export Stock values for all products"
+msgstr ""
+
+#. module: specific_magento
+#: model:ir.actions.act_window,name:specific_magento.action_export_all_stock
+msgid "Export current stock of all products to Magento"
+msgstr ""
+
+#. module: specific_magento
+#: model:ir.ui.menu,name:specific_magento.menu_stock_values_export
+#: view:stock.export.all.magento:0
+msgid "Export stock values for all products to Magento"
+msgstr ""
+
+#. module: specific_magento
+#: model:product.template,name:specific_magento.product_product_debonix_admin_costs_product_template
+msgid "Frais administratifs"
 msgstr ""
 
 #. module: specific_magento
 #: field:magento.bundle.bom,magento_id:0
 #: field:magento.bundle.bom.product,magento_id:0
 #: field:magento.product.brand,magento_id:0
+#: field:magento.product.universe,magento_id:0
 #: field:magento.supplier,magento_id:0
 msgid "ID on Magento"
+msgstr ""
+
+#. module: specific_magento
+#: help:stock.export.all.magento,check_confirm:0
+msgid "If the Confirm Export field is set to True, Stock values for all products will be exported to Magento."
 msgstr ""
 
 #. module: specific_magento
@@ -73,6 +150,7 @@ msgstr ""
 #: field:magento.bundle.bom,sync_date:0
 #: field:magento.bundle.bom.product,sync_date:0
 #: field:magento.product.brand,sync_date:0
+#: field:magento.product.universe,sync_date:0
 #: field:magento.supplier,sync_date:0
 msgid "Last synchronization date"
 msgstr ""
@@ -83,6 +161,7 @@ msgstr ""
 #: field:magento.bundle.bom,backend_id:0
 #: field:magento.bundle.bom.product,backend_id:0
 #: field:magento.product.brand,backend_id:0
+#: field:magento.product.universe,backend_id:0
 #: field:magento.supplier,backend_id:0
 #, python-format
 msgid "Magento Backend"
@@ -123,6 +202,13 @@ msgstr ""
 
 #. module: specific_magento
 #: code:_description:0
+#: model:ir.model,name:specific_magento.model_magento_product_universe
+#, python-format
+msgid "Magento Product Universe"
+msgstr ""
+
+#. module: specific_magento
+#: code:_description:0
 #: model:ir.model,name:specific_magento.model_magento_supplier
 #, python-format
 msgid "Magento Supplier"
@@ -131,6 +217,29 @@ msgstr ""
 #. module: specific_magento
 #: field:res.partner,magento_supplier_bind_ids:0
 msgid "Magento Supplier Bindings"
+msgstr ""
+
+#. module: specific_magento
+#: field:magento.product.product,magento_universe_id:0
+#: field:magento.product.product,universe:0
+msgid "Magento Universe"
+msgstr ""
+
+#. module: specific_magento
+#: field:magento.product.universe,name:0
+msgid "Name"
+msgstr ""
+
+#. module: specific_magento
+#: code:addons/specific_magento/stock.py:164
+#, python-format
+msgid "No tracking number to send."
+msgstr ""
+
+#. module: specific_magento
+#: code:addons/specific_magento/stock_move.py:105
+#, python-format
+msgid "Not a Magento order line"
 msgstr ""
 
 #. module: specific_magento
@@ -152,6 +261,57 @@ msgid "Product Brand"
 msgstr ""
 
 #. module: specific_magento
+#: code:addons/specific_magento/related_action.py:35
+#, python-format
+msgid "Related Record"
+msgstr ""
+
+#. module: specific_magento
+#: field:res.partner,edifact_message:0
+msgid "Send EDIFACT message to SOGEDESCA for this supplier"
+msgstr ""
+
+#. module: specific_magento
+#: field:res.partner,siret_agence:0
+msgid "Siret Agence"
+msgstr ""
+
+#. module: specific_magento
+#: field:res.partner,siret_filiale:0
+msgid "Siret Filiale"
+msgstr ""
+
+#. module: specific_magento
+#: code:_description:0
+#: model:ir.model,name:specific_magento.model_stock_move
+#, python-format
+msgid "Stock Move"
+msgstr ""
+
+#. module: specific_magento
+#: code:addons/specific_magento/stock.py:161
+#, python-format
+msgid "The carrier %s does not export tracking numbers."
+msgstr ""
+
+#. module: specific_magento
+#: code:addons/specific_magento/product.py:215
+#, python-format
+msgid "The configurable product is not imported in OpenERP, because only the simple products are used in the sales orders."
+msgstr ""
+
+#. module: specific_magento
+#: code:addons/specific_magento/related_action.py:43
+#, python-format
+msgid "The record has been deleted"
+msgstr ""
+
+#. module: specific_magento
+#: view:stock.export.all.magento:0
+msgid "This action will export stock values for all products to Magento, check the box to confirm "
+msgstr ""
+
+#. module: specific_magento
 #: view:magento.backend:0
 msgid "Update"
 msgstr ""
@@ -159,6 +319,11 @@ msgstr ""
 #. module: specific_magento
 #: view:magento.backend:0
 msgid "Update all cost prices"
+msgstr ""
+
+#. module: specific_magento
+#: view:stock.export.all.magento:0
+msgid "or"
 msgstr ""
 
 #. module: specific_magento

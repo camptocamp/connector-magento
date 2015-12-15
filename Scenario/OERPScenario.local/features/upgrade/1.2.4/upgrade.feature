@@ -9,6 +9,7 @@ Feature: upgrade to 1.2.4
       | name                 |
       | debonix_purchase_edi |
       | specific_fct         |
+      | specific_magento     |
     Then my modules should have been installed and models reloaded
 
   Scenario: update SOGEDESCA partner for new EDI functionality

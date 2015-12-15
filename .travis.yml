@@ -1,3 +1,11 @@
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - libcups2-dev
+    - expect-dev  # provides unbuffer utility
+
 language: python
 
 python:
@@ -21,15 +29,14 @@ virtualenv:
 before_install:
   - echo -e "Host bazaar.launchpad.net\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
   - echo -e "Host bazaar.camptocamp.net\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-  - mkdir ~/.bazaar
+  - mkdir -p ~/.bazaar
   - echo -e "[DEFAULT]\nlaunchpad_username = camptocamp-business-robot\n" > ~/.bazaar/bazaar.conf
   - echo -e "[Launchpad]\nhost = .launchpad.net\nuser = camptocamp-business-robot\n" > ~/.bazaar/authentication.conf
   - echo -e "[c2cbazaar]\nhost = bazaar.camptocamp.net\nuser = openerp\n" >> ~/.bazaar/authentication.conf
   - git config --global user.name "TravisCI"
   - git config --global user.email "travis@camptocamp.com"
   - pip install -q flake8 flake8-debugger flake8-print coverage
-  - sudo apt-get -q -y install expect-dev # provides unbuffer utility
-  - mkdir ${HOME}/.buildout
+  - mkdir -p ${HOME}/.buildout
   - echo -e "[buildout]\neggs-directory = "${HOME}"/.eggs-cache\n" > ~/.buildout/default.cfg
 
 install:
@@ -44,4 +51,4 @@ before_script:
 
 script:
   - if [ -z "$RUNTESTS" ] ; then flake8 ${TRAVIS_BUILD_DIR}/specific-parts/specific-addons --exclude=__init__.py; fi
-  - if [ -n "$RUNTESTS" ] ; then ./test_server; fi
+  - if [ -n "$RUNTESTS" ] ; then ${TRAVIS_BUILD_DIR}/test_server; fi

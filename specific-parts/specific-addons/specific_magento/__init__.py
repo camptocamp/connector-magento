@@ -27,6 +27,7 @@ from . import product_state
 from . import product
 from . import product_bundle
 from . import product_attribute
+from . import product_universe
 from . import unit
 from . import sale
 from . import partner
