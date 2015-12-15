@@ -61,40 +61,42 @@ class magento_product_product(orm.Model):
     _inherit = 'magento.product.product'
 
     def _get_universe(self, cr, uid, ids, field_name, arg, context=None):
-        # Store text value from selection, to be used by SQL views
+        """ Used in SQL views """
         res = {}
-        universe_map = dict(self._columns['magento_universe'].selection)
         for product in self.browse(cr, uid, ids, context=context):
-            res[product.id] = universe_map.get(product.magento_universe,
-                                               'Non défini')
+            if product.magento_universe_id:
+                res[product.id] = product.magento_universe_id.name
+            else:
+                res[product.id] = 'Non défini'
         return res
+
+    def _magento_product_from_universe(self, cr, uid, ids, context=None):
+        return self.pool['magento.product.product'].search(
+            cr, uid,
+            [('magento_universe_id', 'in', ids)],
+            context=context
+        )
+
+    _universe_store_triggers = {
+        'magento.product.product': (
+            lambda self, cr, uid, ids, context=None: ids,
+            ['magento_universe_id'], 10
+        ),
+        'magento.product.universe': (
+            _magento_product_from_universe, ['name'], 10
+        )
+    }
 
     _columns = {
         'magento_cost': fields.float('Computed Cost',
                                      help="Last computed cost to send "
                                           "on Magento."),
-        'magento_universe': fields.selection([
-            ('', 'Non défini'),
-            ('909', 'EPI'),
-            ('911', 'Jardin'),
-            ('913', 'Quincaillerie'),
-            ('923', 'Sanitaire'),
-            ('931', 'Outillage'),
-            ('935', 'Outillage à main'),
-            ('953', 'Servante et rangement d''outillage'),
-            ('965', 'Soudage'),
-            ('967', 'Electricité'),
-            ('991', 'Levage manutention'),
-            ('993', 'Domotique'),
-        ], 'Magento Universe'),
+        'magento_universe_id': fields.many2one('magento.product.universe',
+                                               string='Magento Universe'),
         'universe': fields.function(_get_universe,
                                     string='Magento Universe',
                                     type='char',
-                                    store=True),
-    }
-
-    _defaults = {
-        'magento_universe': '',
+                                    store=_universe_store_triggers),
     }
 
     def product_type_get(self, cr, uid, context=None):
@@ -173,6 +175,9 @@ class DebonixProductImport(ProductImport):
         if record.get('openerp_supplier_name'):
             self._import_dependency(record['openerp_supplier_name'],
                                     'magento.supplier')
+        if record.get('universe'):
+            self._import_dependency(record['universe'],
+                                    'magento.product.universe')
 
     def _get_binding_id(self):
         """Return the binding id from the Magento id
@@ -391,8 +396,11 @@ class DebonixProductImportMapper(ProductImportMapper):
 
     @mapping
     def universe(self, record):
-        # Default value must be ''
-        return {'magento_universe': record.get('universe', '')}
+        if not record.get('universe'):
+            return {'magento_universe_id': False}
+        binder = self.get_binder_for_model('magento.product.universe')
+        universe_id = binder.to_openerp(record['universe'])
+        return {'magento_universe_id': universe_id}
 
     @mapping
     @only_create
