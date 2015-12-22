@@ -66,7 +66,7 @@ class StockMove(orm.Model):
                 cr.execute('SELECT price '
                            'FROM pricelist_partnerinfo '
                            'WHERE suppinfo_id = %s'
-                           'ORDER BY min_quantity DESC LIMIT 1',
+                           'ORDER BY min_quantity ASC LIMIT 1',
                            (supplier.id, ))
                 res = cr.dictfetchone()
                 if res:
