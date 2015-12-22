@@ -59,7 +59,7 @@ class purchase_order(osv.Model):
                       "if supplier is SOGEDESCA and customer address "
                       "is present (indicates drop-shipping).")
         for order in self.browse(cr, uid, ids, context=context):
-            if order.dest_address_id and order.partner_id.name == 'SOGEDESCA':
+            if order.dest_address_id and order.partner_id.edifact_message:
                 self.generate_edifact(cr, uid, ids, context)
 
     def check_removed_edifact_files(self, cr, uid, ids=None, context=None):
@@ -183,6 +183,7 @@ class purchase_order(osv.Model):
     def _build_mapping(self, order):
         """ generate data mapping needed for template rendering """
 
+        supplier = order.partner_id
         dest_address = order.dest_address_id
 
         def convert_unit(name):
@@ -196,12 +197,12 @@ class purchase_order(osv.Model):
                 raise NotImplementedError("mapping for uom %s" % name)
 
         mapping = {
-            'codefiliale': 'PLN',
-            'siretFiliale': '52789590800012',
+            'codefiliale': supplier and supplier.code_filiale or '',
+            'siretFiliale': supplier and supplier.siret_filiale or '',
             'dateCmd': datetime.now().strftime('%Y%m%d'),
             'heureCmd': datetime.now().strftime('%H%M%S'),
-            'codeAgence': '928',
-            'siretAgence': '52789590800012',
+            'codeAgence': supplier and supplier.code_agence or '',
+            'siretAgence': supplier and supplier.siret_agence or '',
             'siretDebonix': '49039922700035',
             'noCmd': order and order.name or '',
             'refCmd': order and order.name or '',
@@ -209,7 +210,7 @@ class purchase_order(osv.Model):
             and order.minimum_planned_date
             and order.minimum_planned_date.replace('-', '')
             or '',
-            'compteDebonix': '0000175000',
+            'compteDebonix': supplier and supplier.compte_debonix or '',
             'adr1': dest_address
             and dest_address.name
             and dest_address.name[:35]

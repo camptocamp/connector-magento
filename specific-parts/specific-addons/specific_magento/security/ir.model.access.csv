@@ -19,3 +19,6 @@ access_magento_bundle_bom_product_stockuser,magento.bundle.bom.product,model_mag
 access_magento_bundle_bom_product_purchase_manager,magento.bundle.bom.product,model_magento_bundle_bom_product,purchase.group_purchase_manager,1,0,0,0
 access_magento_bundle_bom_product_manager,magento.bundle.bom.product.manager,model_magento_bundle_bom_product,mrp.group_mrp_manager,1,1,1,1
 access_magento_bundle_bom_connector,magento.bundle.bom.product.manager connector,model_magento_bundle_bom_product,connector.group_connector_manager,1,1,1,1
+"access_magento_product_universe_user","magento_product_universe user","model_magento_product_universe","base.group_sale_salesman",1,0,0,0
+"access_magento_product_universe_sale_manager","magento_product_universe sale manager","model_magento_product_universe","base.group_sale_manager",1,1,1,1
+"access_magento_product_universe","magento_product_universe connector manager","model_magento_product_universe","connector.group_connector_manager",1,1,1,1

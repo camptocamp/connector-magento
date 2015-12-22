@@ -20,7 +20,7 @@
 ##############################################################################
 
 {'name': 'Magento Connector Customization',
- 'version': '1.0',
+ 'version': '1.1',
  'author': 'Camptocamp',
  'license': 'AGPL-3',
  'category': 'Connector',

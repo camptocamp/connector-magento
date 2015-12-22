@@ -417,3 +417,8 @@ msgstr "Les partenaires sélectionnés ne peuvent pas être fusionnés car ils s
 #: view:product.product:0
 msgid "Prices History"
 msgstr "Historique des prix"
+
+#. module: specific_fct
+#: field:res.partner,edifact_message:0
+msgid "Send EDIFACT message to SOGEDESCA for this supplier"
+msgstr "Envoyer message EDI à SOGEDESCA pour ce fournisseur"
