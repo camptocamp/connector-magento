@@ -130,6 +130,8 @@ class StockValuesExport(orm.TransientModel):
                 u'total',
                 u'supplier_price',
                 u'total_supplier_price',
+                u'last_purchase_price',
+                u'total_purchase_price',
                 ]
 
     def _get_rows(self, cr, uid, ids, products_qty, context=None):
@@ -144,6 +146,7 @@ class StockValuesExport(orm.TransientModel):
                                           context=context):
             quantity = products_qty[product.id]
             total = quantity * product.standard_price
+            total_purchase_price = quantity * product.last_purchase_price
 
             supplier_price = 0.0
             if product.seller_ids:
@@ -164,6 +167,8 @@ class StockValuesExport(orm.TransientModel):
                 str(total),
                 str(supplier_price),
                 str(total_supplier_price),
+                str(product.last_purchase_price),
+                str(total_purchase_price),
             ]
             rows.append(row)
         return rows
