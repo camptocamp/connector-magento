@@ -19,7 +19,7 @@
             <field name="model">product.product</field>
             <field name="inherit_id" ref="product.product_product_tree_view" />
             <field name="arch" type="xml">
-                <field name="cost_method" position="after">
+                <field name="standard_price" position="before">
                     <field name="last_purchase_price"/>
                 </field>
             </field>
