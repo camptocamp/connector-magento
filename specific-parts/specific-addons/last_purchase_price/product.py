@@ -23,6 +23,21 @@ from openerp.addons.product_get_cost_field.product_get_cost_field \
     import product_product as cost_field_product
 
 
+# Monkey-patch to use last_purchase_price (needed to be used
+# by the super() in product_cost_incl_bom)
+def _compute_purchase_price(self, cr, uid, ids, context=None):
+    res = {}
+    if isinstance(ids, (int, long)):
+        ids = [ids]
+    for product in self.read(cr, uid, ids,
+                             ['id', 'last_purchase_price'],
+                             context=context):
+        res[product['id']] = product['last_purchase_price']
+    return res
+
+cost_field_product._compute_purchase_price = _compute_purchase_price
+
+
 class ProductProduct(orm.Model):
     _inherit = 'product.product'
 
@@ -63,29 +78,10 @@ class ProductProduct(orm.Model):
         return super(ProductProduct, self)._cost_price(
             cr, uid, ids, field_name, arg, context=context)
 
-    def _product_value(self, cr, uid, ids, field_names=None,
-                       arg=False, context=None):
-        return super(ProductProduct, self)._product_value(
-            cr, uid, ids, field_names, arg, context=context)
-
     def _compute_all_markup(self, cr, uid, ids, field_name,
                             arg, context=None):
         return super(ProductProduct, self)._compute_all_markup(
             cr, uid, ids, field_name, arg, context=context)
-
-    # Monkey-patch to use last_purchase_price (needed to be used
-    # by the super() in product_cost_incl_bom)
-    def _compute_purchase_price(self, cr, uid, ids, context=None):
-        res = {}
-        if isinstance(ids, (int, long)):
-            ids = [ids]
-        for product in self.read(cr, uid, ids,
-                                 ['id', 'last_purchase_price'],
-                                 context=context):
-            res[product['id']] = product['last_purchase_price']
-        return res
-
-    cost_field_product._compute_purchase_price = _compute_purchase_price
 
     def _get_product3(self, cr, uid, ids, context=None):
         prod_obj = self.pool['product.product']
@@ -160,15 +156,6 @@ class ProductProduct(orm.Model):
                  "information, for example Bills of Materials or latest "
                  "Purchases. By default, the Replenishment cost is the same "
                  "as the Cost Price."),
-        'value_available': fields.function(
-            _product_value,
-            type='float', digits_compute=dp.get_precision('Product Price'),
-            group_operator="sum",
-            string='Value',
-            help="Current value of products available.\n"
-                 "This is using the product historize price incl. BoM."
-                 "In a context with a single Stock Location, this includes "
-                 "goods stored at this Location, or any of its children."),
         'commercial_margin': fields.function(
             _compute_all_markup,
             string='Margin',
