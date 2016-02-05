@@ -33,6 +33,6 @@
     use the supplier price.
  """,
  'website': 'http://www.camptocamp.com',
- 'data': ['product_view.xml',],
+ 'data': [],
  'installable': True,
  }
