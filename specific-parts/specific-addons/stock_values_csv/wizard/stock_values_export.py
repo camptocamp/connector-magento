@@ -75,57 +75,145 @@ class StockValuesExport(orm.TransientModel):
                          context=None):
         stop_date = stop_date or time.strftime('%Y-%m-%d %H:%M:%S')
         cr.execute("""
-                    SELECT pp.id,
-                           SUM(qty) AS qty
-                      FROM (SELECT p.id AS product_id,
-                                   t.id AS template_id,
-                                   s_in.qty
-                              FROM (SELECT SUM(product_qty) AS qty,
-                                           product_id
-                                      FROM stock_move
-                                     WHERE location_id != %(location_id)s
-                                       AND location_dest_id = %(location_id)s
-                                       AND state = 'done'
-                                       AND date <= %(stop_date)s
-                                     GROUP BY product_id) AS s_in
-                             INNER JOIN product_product p
-                                ON p.id = s_in.product_id
-                             INNER JOIN product_template t
-                                ON t.id = p.product_tmpl_id
-                             UNION
-                            SELECT p.id AS product_id,
-                                   t.id AS template_id,
-                                   -s_out.qty AS qty
-                              FROM (SELECT SUM(product_qty) AS qty,
-                                           product_id
-                                      FROM stock_move
-                                     WHERE location_id = %(location_id)s
-                                       AND location_dest_id != %(location_id)s
-                                       AND state = 'done'
-                                       AND date <= %(stop_date)s
-                                     GROUP BY product_id) AS s_out
-                             INNER JOIN product_product p
-                                ON p.id = s_out.product_id
-                             INNER JOIN product_template t
-                                ON t.id = p.product_tmpl_id) AS in_out
-                     INNER JOIN product_template pt
-                        ON pt.id = in_out.template_id
-                     INNER JOIN product_product pp
-                        ON pp.id = in_out.product_id
-                     WHERE pt.type = 'product'
-                       AND pp.active = true
-                     GROUP BY pp.id
-                    HAVING SUM(qty) <> 0""",
-                   {'location_id': location_id,
-                    'stop_date': stop_date,
-                    })
-        return dict(cr.fetchall())
+            SELECT in_out_summed.product_id,
+                   in_out_summed.quantity,
+                   COALESCE(in_year.qty, 0)
+                       AS in_year_qty,
+                   COALESCE(out_year.qty, 0)
+                       AS out_year_qty,
+                   COALESCE(in_year_1.qty, 0)
+                       AS in_year_1_qty,
+                   COALESCE(out_year_1.qty, 0)
+                       AS out_year_1_qty,
+                   COALESCE(in_year_2.qty, 0)
+                       AS in_year_2_qty,
+                   COALESCE(out_year_2.qty, 0)
+                       AS out_year_2_qty
+            FROM (
+                SELECT product_id, SUM(qty) AS quantity
+                FROM (
+                    SELECT s_in.product_id AS product_id,
+                           s_in.qty AS qty
+                    FROM (
+                        SELECT SUM(product_qty) AS qty,
+                               product_id
+                        FROM stock_move
+                        WHERE location_id != %(location_id)s
+                        AND location_dest_id = %(location_id)s
+                        AND state = 'done'
+                        AND date <= %(stop_date)s
+                        GROUP BY product_id
+                    ) AS s_in
+                    UNION
+                    SELECT s_out.product_id AS product_id,
+                           -s_out.qty AS qty
+                    FROM (
+                        SELECT SUM(product_qty) AS qty,
+                               product_id
+                        FROM stock_move
+                        WHERE location_id = %(location_id)s
+                        AND location_dest_id != %(location_id)s
+                        AND state = 'done'
+                        AND date <= %(stop_date)s
+                        GROUP BY product_id
+                    ) AS s_out
+                ) AS in_out
+                INNER JOIN product_product pp
+                ON pp.id = in_out.product_id
+                INNER JOIN product_template pt
+                ON pt.id = pp.product_tmpl_id
+                WHERE pt.type = 'product'
+                AND pp.active = true
+                GROUP BY product_id
+                HAVING SUM(in_out.qty) <> 0
+            ) AS in_out_summed
+            LEFT JOIN (
+                SELECT SUM(product_qty) AS qty,
+                       product_id
+                FROM stock_move
+                WHERE location_id != %(location_id)s
+                    AND location_dest_id = %(location_id)s
+                    AND state = 'done'
+                    AND date <= %(stop_date)s
+                    AND date > (date %(stop_date)s - INTERVAL '1 YEAR')
+                    GROUP BY product_id
+            ) AS in_year
+            ON in_year.product_id = in_out_summed.product_id
+            LEFT JOIN (
+                SELECT SUM(product_qty) AS qty,
+                       product_id
+                FROM stock_move
+                WHERE location_id = %(location_id)s
+                AND location_dest_id != %(location_id)s
+                AND state = 'done'
+                AND date <= %(stop_date)s
+                AND date > (date %(stop_date)s - INTERVAL '1 YEAR')
+                GROUP BY product_id
+            ) AS out_year
+            ON out_year.product_id = in_out_summed.product_id
+            LEFT JOIN (
+                SELECT SUM(product_qty) AS qty,
+                       product_id
+                FROM stock_move
+                WHERE location_id != %(location_id)s
+                AND location_dest_id = %(location_id)s
+                AND state = 'done'
+                AND date <= (date %(stop_date)s - INTERVAL '1 YEAR')
+                AND date > (date %(stop_date)s - INTERVAL '2 YEARS')
+                GROUP BY product_id
+            ) AS in_year_1
+            ON in_year_1.product_id = in_out_summed.product_id
+            LEFT JOIN (
+                SELECT SUM(product_qty) AS qty,
+                       product_id
+                FROM stock_move
+                WHERE location_id = %(location_id)s
+                AND location_dest_id != %(location_id)s
+                AND state = 'done'
+                AND date <= (date %(stop_date)s - INTERVAL '1 YEAR')
+                AND date > (date %(stop_date)s - INTERVAL '2 YEARS')
+                GROUP BY product_id
+            ) AS out_year_1
+            ON out_year_1.product_id = in_out_summed.product_id
+            LEFT JOIN (
+                SELECT SUM(product_qty) AS qty,
+                       product_id
+                FROM stock_move
+                WHERE location_id != %(location_id)s
+                AND location_dest_id = %(location_id)s
+                AND state = 'done'
+                AND date <= (date %(stop_date)s - INTERVAL '2 YEARS')
+                AND date > (date %(stop_date)s - INTERVAL '3 YEARS')
+                GROUP BY product_id
+            ) AS in_year_2
+            ON in_year_2.product_id = in_out_summed.product_id
+            LEFT JOIN (
+                SELECT SUM(product_qty) AS qty,
+                       product_id
+                FROM stock_move
+                WHERE location_id = %(location_id)s
+                AND location_dest_id != %(location_id)s
+                AND state = 'done'
+                AND date <= (date %(stop_date)s - INTERVAL '2 YEARS')
+                AND date > (date %(stop_date)s - INTERVAL '3 YEARS')
+                GROUP BY product_id
+            ) AS out_year_2
+            ON out_year_2.product_id = in_out_summed.product_id
+        """, {'location_id': location_id,
+              'stop_date': stop_date})
+        return dict([(x[0], list(x[1:])) for x in cr.fetchall()])
 
     def _get_header(self, cr, uid, ids, context=None):
         return [u'default_code',
                 u'name',
                 u'brand',
                 u'quantity',
+                u'in_year',
+                u'out_year',
+                u'in_year-1',
+                u'out_year-1',
+                u'in_year-2',
+                u'out_year-2',
                 u'standard_price',
                 u'total',
                 u'supplier_price',
@@ -144,7 +232,8 @@ class StockValuesExport(orm.TransientModel):
         rows = []
         for product in product_obj.browse(cr, uid, products_qty.keys(),
                                           context=context):
-            quantity = products_qty[product.id]
+            quantities = products_qty[product.id]
+            quantity = quantities[0]
             total = quantity * product.standard_price
             total_purchase_price = quantity * product.last_purchase_price
 
@@ -161,8 +250,8 @@ class StockValuesExport(orm.TransientModel):
             row = [
                 product.default_code,
                 product.name,
-                product.product_brand_id.name,
-                str(quantity),
+                product.product_brand_id.name
+            ] + quantities + [
                 str(product.standard_price),
                 str(total),
                 str(supplier_price),
