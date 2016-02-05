@@ -26,14 +26,12 @@ from openerp.addons.product_get_cost_field.product_get_cost_field \
 # Monkey-patch to use last_purchase_price (needed to be used
 # by the super() in product_cost_incl_bom)
 def _compute_purchase_price(self, cr, uid, ids, context=None):
-    res = {}
+    if not ids:
+        return {}
     if isinstance(ids, (int, long)):
         ids = [ids]
-    for product in self.read(cr, uid, ids,
-                             ['id', 'last_purchase_price'],
-                             context=context):
-        res[product['id']] = product['last_purchase_price']
-    return res
+    return self._last_purchase_price(cr, uid, ids, field_name=False,
+                                     arg=False, context=context)
 
 cost_field_product._compute_purchase_price = _compute_purchase_price
 
@@ -88,6 +86,12 @@ class ProductProduct(orm.Model):
         res = prod_obj._get_product2(cr, uid, ids, context=context)
         return res
 
+    def _get_product_from_template3(self, cr, uid, ids, context=None):
+        prod_obj = self.pool['product.product']
+        return prod_obj._get_product_from_template2(cr, uid,
+                                                    ids,
+                                                    context=context)
+
     def _get_bom_product3(self, cr, uid, ids, context=None):
         prod_obj = self.pool['product.product']
         res = prod_obj._get_bom_product2(cr, uid, ids, context=context)
@@ -96,19 +100,21 @@ class ProductProduct(orm.Model):
     def _get_product_from_invoice(self, cr, uid, ids, context=None):
         res = set()
         invoice_obj = self.pool['account.invoice']
+        prod_obj = self.pool['product.product']
         for invoice in invoice_obj.browse(cr, uid, ids, context=context):
             for line in invoice.invoice_line:
                 if line.product_id:
                     res.add(line.product_id.id)
-        return list(res)
+        return prod_obj._get_bom_product3(cr, uid, list(res), context=context)
 
     def _get_product_from_invoice_line(self, cr, uid, ids, context=None):
         res = set()
         line_obj = self.pool['account.invoice.line']
+        prod_obj = self.pool['product.product']
         for line in line_obj.browse(cr, uid, ids, context=context):
             if line.product_id:
                 res.add(line.product_id.id)
-        return list(res)
+        return prod_obj._get_bom_product3(cr, uid, list(res), context=context)
 
     _last_purchase_price_triggers = {
         'account.invoice': (_get_product_from_invoice,
@@ -121,6 +127,7 @@ class ProductProduct(orm.Model):
 
     _cost_price_triggers = {
         'product.product': (_get_bom_product3, None, 10),
+        'product.template': (_get_product_from_template3, None, 10),
         'mrp.bom': (_get_product3,
                     ['bom_id',
                      'bom_lines',
