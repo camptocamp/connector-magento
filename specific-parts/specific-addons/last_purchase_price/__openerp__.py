@@ -24,6 +24,7 @@
              'product_cost_incl_bom_price_history',
              'product_price_history',
              'sale_markup',
+             'stock',
              ],
  'author': 'Camptocamp',
  'description': """
@@ -33,6 +34,8 @@
     use the supplier price.
  """,
  'website': 'http://www.camptocamp.com',
- 'data': [],
+ 'data': [
+     'product_view.xml'
+     ],
  'installable': True,
  }
