@@ -57,7 +57,8 @@ class ProductProduct(orm.Model):
             AND state in ('open', 'paid')
             AND price_unit > 0.0
             AND date_invoice >= CURRENT_DATE - INTERVAL '1 year'
-            ORDER BY product_id, date_invoice DESC;
+            ORDER BY product_id, date_invoice DESC,
+                     account_invoice.write_date DESC;
         """, (tuple(ids), ))
         invoice_prices = dict(cr.fetchall())
         for product in self.browse(cr, uid, ids, context=context):
