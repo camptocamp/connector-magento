@@ -25,6 +25,7 @@
  'category': 'Others',
  'complexity': "normal",
  'depends': ['stock',
+             'last_purchase_price',
              ],
  'description': """Debonix Specific.
 
