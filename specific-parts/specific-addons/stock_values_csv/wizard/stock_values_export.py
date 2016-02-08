@@ -214,8 +214,6 @@ class StockValuesExport(orm.TransientModel):
                 u'out_year-1',
                 u'in_year-2',
                 u'out_year-2',
-                u'standard_price',
-                u'total',
                 u'supplier_price',
                 u'total_supplier_price',
                 u'cost_price',
@@ -234,7 +232,6 @@ class StockValuesExport(orm.TransientModel):
                                           context=context):
             quantities = products_qty[product.id]
             quantity = quantities[0]
-            total = quantity * product.standard_price
             total_cost_price = quantity * product.cost_price
 
             supplier_price = 0.0
@@ -252,8 +249,6 @@ class StockValuesExport(orm.TransientModel):
                 product.name,
                 product.product_brand_id.name
             ] + quantities + [
-                str(product.standard_price),
-                str(total),
                 str(supplier_price),
                 str(total_supplier_price),
                 str(product.cost_price),
