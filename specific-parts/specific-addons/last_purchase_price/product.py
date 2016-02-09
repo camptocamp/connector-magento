@@ -62,7 +62,10 @@ class ProductProduct(orm.Model):
         """, (tuple(ids), ))
         invoice_prices = dict(cr.fetchall())
         for product in self.browse(cr, uid, ids, context=context):
-            if product.id in invoice_prices:
+            # Use standard price if cost_method is 'standard'
+            if product.cost_method == 'standard':
+                res[product.id] = product.standard_price
+            elif product.id in invoice_prices:
                 res[product.id] = invoice_prices[product.id]
             else:
                 # Get supplier price

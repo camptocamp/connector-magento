@@ -8,12 +8,11 @@
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
                 <field name="standard_price" position="replace" version="7.0">
-                    <label string="Cost Price" for="standard_price" align="1.0" invisible="1"/>
-                    <div groups="base.group_user" invisible="1">
-                        <field name="standard_price" attrs="{'readonly':[('cost_method','=','average')]}" nolabel="1"/>
+                    <label string="Standard price" for="standard_price" align="1.0" attrs="{'invisible':[('cost_method','=','average')]}"/>
+                    <div groups="base.group_user" attrs="{'invisible':[('cost_method','=','average')]}" >
+                        <field name="standard_price" readonly="1" nolabel="1"/>
                         <button name="%(stock.action_view_change_standard_price)d" string="- update"
-                                type="action" attrs="{'invisible':[('cost_method','&lt;&gt;','average')]}"
-                                class="oe_link" groups="product.group_costing_method"/>
+                                type="action" class="oe_link" groups="product.group_costing_method"/>
                     </div>
                 </field>
             </field>

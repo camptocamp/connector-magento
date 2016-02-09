@@ -1,0 +1,38 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#   * last_purchase_price
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 7.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-02-09 10:45+0000\n"
+"PO-Revision-Date: 2016-02-09 10:45+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: last_purchase_price
+#: field:product.product,last_purchase_price:0
+msgid "Last purchase price"
+msgstr "Dernier prix d'achat"
+
+#. module: last_purchase_price
+#: view:product.product:0
+msgid "Standard price"
+msgstr "Prix standard"
+
+#. module: last_purchase_price
+#: help:product.product,last_purchase_price:0
+msgid "Last purchase price (used for Cost price)"
+msgstr "Dernier prix d'achat (utilisé pour prix coûtant)"
+
+#. module: last_purchase_price
+#: code:_description:0
+#: model:ir.model,name:last_purchase_price.model_product_product
+#, python-format
+msgid "Product"
+msgstr "Article"
