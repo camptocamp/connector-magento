@@ -56,6 +56,7 @@ class ProductProduct(orm.Model):
             AND type = 'in_invoice'
             AND state in ('open', 'paid')
             AND price_unit > 0.0
+            AND quantity > 0.0
             AND date_invoice >= CURRENT_DATE - INTERVAL '1 year'
             ORDER BY product_id, date_invoice DESC,
                      account_invoice.id DESC;
