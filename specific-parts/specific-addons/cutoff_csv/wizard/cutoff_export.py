@@ -93,6 +93,7 @@ class cutoff_report_wizard(orm.TransientModel):
               AND sp.invoice_state = '2binvoiced'
               AND sm.product_qty != 0
               AND sp.date_done <= %(cutoff_date)s
+             AND pp.default_code != '0000'
             ORDER BY sp.name""",
                    {'cutoff_date': cutoff_date})
         return cr.fetchall()
@@ -129,6 +130,7 @@ class cutoff_report_wizard(orm.TransientModel):
             AND (ai.state IS NULL
               OR ai.state NOT IN ('draft', 'proforma2', 'cancel')
             )
+            AND pp.default_code != '0000'
             ORDER BY sp.name""",
                    {'cutoff_date': cutoff_date})
         return cr.fetchall()

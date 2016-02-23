@@ -326,22 +326,25 @@ class ProductSupplierInfoMapper(ImportMapper):
         mag_product_id = map_record.parent.source['product_id']
         binder = self.get_binder_for_model('magento.product.product')
         product_id = binder.to_openerp(mag_product_id, unwrap=True)
+        product = self.session.browse('product.product', product_id)
+        product_tmpl_id = product.product_tmpl_id and \
+            product.product_tmpl_id.id or False
         line_options = self.options.copy()
         for_create = True
-        if product_id:
+        if product_tmpl_id:
             # existing product, search for an existing supplier info
             # from Magento
             suppinfo_ids = self.session.search(
                 'product.supplierinfo',
                 [('from_magento', '=', True),
-                 ('product_id', '=', product_id)])
+                 ('product_id', '=', product_tmpl_id)])
             if not suppinfo_ids:
                 # from_magento has been introduced lately, try
                 # to remap if the supplier is the same
                 suppinfo_ids = self.session.search(
                     'product.supplierinfo',
                     [('name', '=', values['name']),  # means partner_id
-                     ('product_id', '=', product_id)])
+                     ('product_id', '=', product_tmpl_id)])
 
             if suppinfo_ids:
                 # supplier info already exists, keeps the id
