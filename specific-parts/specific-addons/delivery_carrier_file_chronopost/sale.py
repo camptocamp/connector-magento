@@ -27,7 +27,7 @@ class sale_order(orm.Model):
     _inherit = 'sale.order'
 
     _columns = {
-        'sms_phone': fields.char('SMS Phone', size=10),
+        'sms_phone': fields.char('SMS Phone', size=20),
     }
 
     def _prepare_order_picking(self, cr, uid, order, context=None):
