@@ -35,10 +35,20 @@ msgstr ""
 msgid "Cash on delivery"
 msgstr ""
 
+#. module: base
+#: view:res.partner:0
+msgid "Code..."
+msgstr ""
+
 #. module: specific_fct
 #: code:_description:0
 #, python-format
 msgid "Companies"
+msgstr ""
+
+#. module: base
+#: view:res.partner:0
+msgid "Company..."
 msgstr ""
 
 #. module: specific_fct

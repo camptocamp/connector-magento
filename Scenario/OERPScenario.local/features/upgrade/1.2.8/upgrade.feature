@@ -8,6 +8,7 @@ Feature: upgrade to 1.2.8
     Given I install the required modules with dependencies:
       | name                             |
       | delivery_carrier_file_chronopost |
+      | specific_fct                     |
     Then my modules should have been installed and models reloaded
 
     Given I set the version of the instance to "1.2.8"

@@ -173,11 +173,21 @@ msgstr "Référence de suivi du transporteur"
 msgid "Cash on delivery"
 msgstr "Livraison contre remboursement"
 
+#. module: base
+#: view:res.partner:0
+msgid "Code..."
+msgstr "Code..."
+
 #. module: specific_fct
 #: code:_description:0
 #, python-format
 msgid "Companies"
 msgstr "Sociétés"
+
+#. module: base
+#: view:res.partner:0
+msgid "Company..."
+msgstr "Société..."
 
 #. module: specific_fct
 #: view:sale.order:0

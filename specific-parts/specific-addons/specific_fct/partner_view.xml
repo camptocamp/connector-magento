@@ -9,6 +9,13 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
             <data>
+                <field name="website" position="before">
+                    <label for="mag_chronorelais_company" string="Chrono Relais"/>
+                    <div class="address_format">
+                        <field name="mag_chronorelais_code" placeholder="Code..." nolabel="1" style="width: 20%%"/>
+                        <field name="mag_chronorelais_company" placeholder="Company..." nolabel="1" style="width: 79%%"/>
+                    </div>
+                </field>
                 <field name="website" position="after">
                     <field name="siret"/>
                     <field name="origin_country_id"/>
