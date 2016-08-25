@@ -101,7 +101,7 @@ class ChronopostRows(object):
 
         line.ref1 = picking.name
         line.ref2 = picking.sale_id and picking.sale_id.name or False
-        line.weight = picking.weight or 0.5  # minimal weight
+        line.weight = 0.5  # minimal weight
         line.rep_amount = "%.2f" % picking.cash_on_delivery_amount
         line.customs_amount = "%.2f" % picking.cash_on_delivery_amount_untaxed
         return line
