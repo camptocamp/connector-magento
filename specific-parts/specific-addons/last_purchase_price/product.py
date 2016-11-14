@@ -41,7 +41,7 @@ class ProductProduct(orm.Model):
 
     def _last_purchase_price(self, cr, uid, ids,
                              field_name, arg, context=None):
-        """"Use last invoice price if less than a year ; otherwise,
+        """"Use last invoice price if less than 3 years ; otherwise,
             use supplier price"""
         res = {}
         if isinstance(ids, (int, long)):
@@ -57,7 +57,7 @@ class ProductProduct(orm.Model):
             AND state in ('open', 'paid')
             AND price_unit > 0.0
             AND quantity > 0.0
-            AND date_invoice >= CURRENT_DATE - INTERVAL '1 year'
+            AND date_invoice >= CURRENT_DATE - INTERVAL '3 years'
             ORDER BY product_id, date_invoice DESC,
                      account_invoice.id DESC;
         """, (tuple(ids), ))
