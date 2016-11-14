@@ -98,7 +98,7 @@ def impl(ctx):
             AND years.price_unit != year.price_unit;
         """)
         rows = cr.fetchall()
-    rows = dict((row[0], row[1]) for row in rows)
+    rows = [row[0] for row in rows]
 
     Product = model('product.product')
     products = Product.browse(rows)
