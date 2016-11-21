@@ -52,7 +52,8 @@ def impl(ctx):
                     AND quantity > 0.0
                     AND date_invoice >= CURRENT_DATE - INTERVAL '3 years'
                     ORDER BY product_id, date_invoice DESC,
-                             account_invoice.id DESC) AS years, (
+                             account_invoice.id DESC) AS years
+                LEFT JOIN (
                     SELECT DISTINCT ON (product_id)
                     product_id, price_unit
                     FROM account_invoice_line
@@ -65,42 +66,12 @@ def impl(ctx):
                     AND date_invoice >= CURRENT_DATE - INTERVAL '1 year'
                     ORDER BY product_id, date_invoice DESC,
                              account_invoice.id DESC) AS year
-                WHERE years.product_id = year.product_id
-                AND years.price_unit != year.price_unit) AS new_years
+                ON years.product_id = year.product_id
+                WHERE years.price_unit IS NOT NULL
+                AND years.product_id IS NOT NULL
+                AND (
+                    years.price_unit != year.price_unit
+                    OR year.price_unit IS NULL
+                )) AS new_years
             WHERE id = new_years.product_id;
-
-            SELECT years.product_id FROM (
-                SELECT DISTINCT ON (product_id)
-                product_id, price_unit
-                FROM account_invoice_line
-                LEFT JOIN account_invoice
-                ON account_invoice_line.invoice_id = account_invoice.id
-                WHERE type = 'in_invoice'
-                AND state in ('open', 'paid')
-                AND price_unit > 0.0
-                AND quantity > 0.0
-                AND date_invoice >= CURRENT_DATE - INTERVAL '3 years'
-                ORDER BY product_id, date_invoice DESC,
-                         account_invoice.id DESC) AS years, (
-                SELECT DISTINCT ON (product_id)
-                product_id, price_unit
-                FROM account_invoice_line
-                LEFT JOIN account_invoice
-                ON account_invoice_line.invoice_id = account_invoice.id
-                WHERE type = 'in_invoice'
-                AND state in ('open', 'paid')
-                AND price_unit > 0.0
-                AND quantity > 0.0
-                AND date_invoice >= CURRENT_DATE - INTERVAL '1 year'
-                ORDER BY product_id, date_invoice DESC,
-                         account_invoice.id DESC) AS year
-            WHERE years.product_id = year.product_id
-            AND years.price_unit != year.price_unit;
         """)
-        rows = cr.fetchall()
-    rows = [row[0] for row in rows]
-
-    Product = model('product.product')
-    products = Product.browse(rows)
-    for product in products:
-        product.write({'name': product.name})
