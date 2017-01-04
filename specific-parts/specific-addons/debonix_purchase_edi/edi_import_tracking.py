@@ -19,11 +19,18 @@
 #
 ##############################################################################
 from openerp.osv import orm
+from openerp import pooler
+from contextlib import closing
+import psycopg2
 import ftplib
 import socket
 import csv
+import time
 from datetime import datetime
 from StringIO import StringIO
+
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class EdiImportTracking(orm.Model):
@@ -69,16 +76,35 @@ class EdiImportTracking(orm.Model):
                     res[po_number]['carrier_tracking_ref'] += tracking_ref
 
             # Write number in pickings + approve them
-            for po_number in res:
-                po_ids = purchase_obj.search(
-                    cr, uid, [('name', '=', po_number)], context=context)
-                picking_ids = picking_obj.search(
-                    cr, uid, [('purchase_id', 'in', po_ids)], context=context)
-                picking_obj.write(
-                    cr, uid, picking_ids, res[po_number], context=context)
-                # Validate picking
-                picking_obj.action_move(
-                    cr, uid, picking_ids, context=context)
+            with closing(pooler.get_db(cr.dbname).cursor()) as new_cr:
+                for po_number in res:
+                    retries = 1
+                    while retries <= 5:
+                        try:
+                            po_ids = purchase_obj.search(
+                                new_cr, uid, [('name', '=', po_number)],
+                                context=context)
+                            picking_ids = picking_obj.search(
+                                new_cr, uid, [('purchase_id', 'in', po_ids)],
+                                context=context)
+                            picking_obj.write(
+                                new_cr, uid, picking_ids, res[po_number],
+                                context=context)
+                            # Validate picking
+                            picking_obj.action_move(
+                                new_cr, uid, picking_ids, context=context)
+                            new_cr.commit()
+                            _logger.warning("SOGEDESCA PO %s validated",
+                                            po_number)
+                            break
+                        except psycopg2.OperationalError:
+                            _logger.warning("Failed to validate picking for "
+                                            "SOGEDESCA PO %s: retry %s/5",
+                                            po_number, retries, exc_info=True)
+                            retries = retries + 1
+                            new_cr.rollback()
+                            time.sleep(2)
+
         except (socket.error, IOError) as err:
             raise Warning("Could not retrieve tracking file on FTP server: %s"
                           % err.message)

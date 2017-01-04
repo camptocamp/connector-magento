@@ -479,6 +479,16 @@ class DebonixProductImportMapper(ProductImportMapper):
 
         return {'uom_id': uom_id, 'uom_po_id': uom_id}
 
+    @mapping
+    def conditionnement(self, record):
+        """ This field is defined for certain PLN products, in order to
+            factor into the quantity sold (ex: 1 unit of a 20m product will
+            be set as '20'). The field can contain spaces, hence the strip()
+        """
+        conditionnement = int(record['conditionnement'].strip(' ', ''))
+        if conditionnement:
+            return {'magento_conditionnement': conditionnement}
+
     @only_create
     @mapping
     def orderpoint(self, record):
