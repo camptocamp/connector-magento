@@ -485,7 +485,10 @@ class DebonixProductImportMapper(ProductImportMapper):
             factor into the quantity sold (ex: 1 unit of a 20m product will
             be set as '20'). The field can contain spaces, hence the strip()
         """
-        conditionnement = int(record['conditionnement'].strip(' ', ''))
+        conditionnement = record.get('conditionnement', False)
+        if not conditionnement:
+            return
+        conditionnement = int(conditionnement.strip(' ', ''))
         if conditionnement:
             return {'magento_conditionnement': conditionnement}
 

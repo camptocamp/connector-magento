@@ -23,6 +23,9 @@
         <xpath expr="/form/sheet/notebook/page[@string='Procurements']" position="attributes">
           <attribute name="groups">product.group_product_manager</attribute>
         </xpath>
+        <field name="mes_type" position="after">
+          <field name="magento_conditionnement"/>
+        </field>
       </field>
     </record>
 
