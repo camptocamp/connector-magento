@@ -328,9 +328,10 @@ class purchase_order(osv.Model):
             uom = product.uom_id
             supplier_product_code = product.seller_ids\
                 and product.seller_ids[0]\
+                and product.seller_ids[0].product_code\
                 and product.seller_ids[0].product_code[:9]\
                 or product.code[:9]
-            quantity = int(order_line.price_subtotal * 1000)
+            quantity = int(order_line.product_qty * 1000)
             if product.magento_conditionnement:
                 quantity *= product.magento_conditionnement
             line = {
