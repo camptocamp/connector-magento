@@ -22,6 +22,15 @@ from openerp.osv import orm, fields
 from openerp.tools.translate import _
 
 
+class ProductTemplate(orm.Model):
+    _inherit = 'product.template'
+
+    _columns = {
+        'magento_conditionnement': fields.integer('Magento Conditionnement',
+                                                  default=0),
+    }
+
+
 class Product(orm.Model):
     """ Inherit product for small customisations"""
 
