@@ -184,7 +184,10 @@ class purchase_order(osv.Model):
         """ generate data mapping needed for template rendering """
 
         supplier = order.partner_id
-        dest_address = order.dest_address_id
+        invoice_address = order.sale_id \
+            and order.sale_id.partner_invoice_id \
+            or order.dest_address_id
+        shipping_address = order.dest_address_id
 
         def convert_unit(name):
             if name == 'PCE':
@@ -211,53 +214,134 @@ class purchase_order(osv.Model):
             and order.minimum_planned_date.replace('-', '')
             or '',
             'compteDebonix': supplier and supplier.compte_debonix or '',
-            'adr1': dest_address
-            and dest_address.name
-            and dest_address.name[:35]
+            'invoiceAddr1': invoice_address
+            and invoice_address.name
+            and invoice_address.name[:35]
             or '',
-            'adr2': dest_address
-            and dest_address.name
-            and dest_address.name[35:70]
+            'invoiceAddr2': invoice_address
+            and invoice_address.name
+            and invoice_address.name[35:70]
             or '',
-            'adr3': dest_address
-            and dest_address.street
-            and dest_address.street[:35]
+            'invoiceAddr3': invoice_address
+            and invoice_address.street
+            and invoice_address.street[:35]
             or '',
-            'adr4': dest_address
-            and dest_address.street
-            and dest_address.street[35:70]
+            'invoiceAddr4': invoice_address
+            and invoice_address.street
+            and invoice_address.street[35:70]
             or '',
-            'adr5': dest_address
-            and dest_address.street2
-            and dest_address.street2[:35]
+            'invoiceAddr5': invoice_address
+            and invoice_address.street2
+            and invoice_address.street2[:35]
             or '',
-            'cp': dest_address and dest_address.zip or '',
-            'ville': dest_address and dest_address.city or '',
-            'tel': dest_address and dest_address.phone or '',
-            'fax': dest_address and dest_address.fax or '',
-            'commentaire': order and order.notes or '',
+            'invoiceZipCode': invoice_address and invoice_address.zip or '',
+            'invoiceCity': invoice_address and invoice_address.city or '',
+            'invoiceTel': invoice_address and invoice_address.phone or '',
+            'invoiceFax': invoice_address and invoice_address.fax or '',
+            'commentaire': invoice_address and invoice_address.email or '',
             'totalHT': int(order.amount_untaxed * 1000),
             'totalTVA': int(order.amount_tax * 1000),
             'totalTTC': int(order.amount_total * 1000)
         }
 
+        if shipping_address.mag_chronorelais_company:
+            mapping.update({
+                'codeOrigine': 'DR',
+                'shippingAddr1': shipping_address
+                and shipping_address.name
+                and shipping_address.name[:35]
+                or '',
+                'shippingAddr2': shipping_address
+                and shipping_address.mag_chronorelais_company
+                and shipping_address.mag_chronorelais_company[:35]
+                or '',
+                'shippingAddr3': shipping_address
+                and shipping_address.street
+                and shipping_address.street[:35]
+                or '',
+                'shippingAddr4': shipping_address
+                and shipping_address.street
+                and shipping_address.street[35:70]
+                or '',
+                'shippingAddr5': shipping_address
+                and shipping_address.street2
+                and shipping_address.street2[:35]
+                or '',
+                'shippingZipCode': shipping_address
+                and shipping_address.zip
+                or '',
+                'shippingCity': shipping_address
+                and shipping_address.city
+                or '',
+                'shippingTel': shipping_address
+                and shipping_address.phone
+                or '',
+                'shippingFax': shipping_address
+                and shipping_address.fax
+                or '',
+                'codeServiceVendeur': shipping_address
+                and shipping_address.mag_chronorelais_code
+                or ''
+            })
+        else:
+            mapping.update({
+                'codeOrigine': 'DB',
+                'shippingAddr1': shipping_address
+                and shipping_address.name
+                and shipping_address.name[:35]
+                or '',
+                'shippingAddr2': shipping_address
+                and shipping_address.name
+                and shipping_address.name[35:70]
+                or '',
+                'shippingAddr3': shipping_address
+                and shipping_address.street
+                and shipping_address.street[:35]
+                or '',
+                'shippingAddr4': shipping_address
+                and shipping_address.street
+                and shipping_address.street[35:70]
+                or '',
+                'shippingAddr5': shipping_address
+                and shipping_address.street2
+                and shipping_address.street2[:35]
+                or '',
+                'shippingZipCode': shipping_address
+                and shipping_address.zip
+                or '',
+                'shippingCity': shipping_address
+                and shipping_address.city
+                or '',
+                'shippingTel': shipping_address
+                and shipping_address.phone
+                or '',
+                'shippingFax': shipping_address
+                and shipping_address.fax
+                or '',
+                'codeServiceVendeur': ''
+            })
         lines = []
 
         total_qty = 0
         for line_index, order_line in enumerate(order.order_line):
             product = order_line.product_id
             uom = product.uom_id
+            supplier_product_code = product.seller_ids\
+                and product.seller_ids[0]\
+                and product.seller_ids[0].product_code\
+                and product.seller_ids[0].product_code[:9]\
+                or product.code[:9]
+            quantity = int(order_line.product_qty * 1000)
+            if product.magento_conditionnement:
+                quantity *= product.magento_conditionnement
             line = {
-                'codag': product
-                and product.code
-                and product.code[:9]
-                or '',
+                'codag': supplier_product_code,
                 'libelle': product
                 and product.name
                 and product.name[:70]
                 or '',
                 'prixUnitaireNet': int(order_line.price_unit * 10000),
-                'qte': int(order_line.product_qty * 1000),
+                'qte': quantity,
                 'refarticleFournisseur': product and product.code or '',
                 'ligne': line_index+1,
                 'montantLigne': int(order_line.price_subtotal * 1000),
