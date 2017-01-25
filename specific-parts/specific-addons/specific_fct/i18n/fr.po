@@ -432,3 +432,8 @@ msgstr "Historique des prix"
 #: field:res.partner,edifact_message:0
 msgid "Send EDIFACT message to SOGEDESCA for this supplier"
 msgstr "Envoyer message EDI à SOGEDESCA pour ce fournisseur"
+
+#. module: specific_fct
+#: view:stock.picking.out:0
+msgid "Generate Carrier Files"
+msgstr "Générer les fichiers de livraison"

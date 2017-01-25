@@ -400,3 +400,8 @@ msgstr ""
 #, python-format
 msgid "The selected partners cannot be merged together because they are linked with different customers on Magento"
 msgstr ""
+
+#. module: specific_fct
+#: view:stock.picking.out:0
+msgid "Generate Carrier Files"
+msgstr ""

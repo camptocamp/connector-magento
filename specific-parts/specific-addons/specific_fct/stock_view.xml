@@ -46,5 +46,26 @@
       </field>
   </record>
 
+  <delete model="ir.values"
+          id="base_delivery_carrier_files.delivery_carrier_file_generate_ir_values"/>
+
+  <record id="base_delivery_carrier_files.action_delivery_carrier_file_generate" model="ir.actions.act_window">
+      <field name="groups_id" eval="[(6, 0, [ref('stock.group_stock_user')])]"/>
+  </record>
+
+  <record model="ir.ui.view" id="view_picking_out_form">
+      <field name="name">stock.picking.out.form</field>
+      <field name="model">stock.picking.out</field>
+      <field name="inherit_id" ref="stock.view_picking_out_form"/>
+      <field name="arch" type="xml">
+          <button name="button_cancel" position="after">
+              <button
+                      name="%(base_delivery_carrier_files.action_delivery_carrier_file_generate)d"
+                      string="Generate Carrier Files" states="done"
+                      type="action" groups="stock.group_stock_user"/>
+          </button>
+      </field>
+  </record>
+
   </data>
 </openerp>
