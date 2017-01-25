@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-@upgrade_to_1.2.10 @debonix
+@upgrade_to_1.2.13 @debonix
 
-Feature: upgrade to 1.2.10
+Feature: upgrade to 1.2.13
 
   Scenario: upgrade application version
     Given I update the module list
@@ -10,4 +10,4 @@ Feature: upgrade to 1.2.10
       | mail_cleanup                     |
     Then my modules should have been installed and models reloaded
 
-    Given I set the version of the instance to "1.2.10"
+    Given I set the version of the instance to "1.2.13"
