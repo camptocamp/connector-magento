@@ -35,6 +35,7 @@
              'product_multi_ean',
              'point_of_sale',
              'account_constraints',
+             'base_delivery_carrier_files'
              ],
  'author': 'Camptocamp',
  'description': """Code customisation module

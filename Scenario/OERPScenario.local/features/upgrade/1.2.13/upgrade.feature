@@ -8,6 +8,7 @@ Feature: upgrade to 1.2.13
     Given I install the required modules with dependencies:
       | name                             |
       | mail_cleanup                     |
+      | specific_fct                     |
     Then my modules should have been installed and models reloaded
 
     Given I set the version of the instance to "1.2.13"
