@@ -461,7 +461,7 @@ class DebonixProductImportMapper(ProductImportMapper):
         uom_id = None
         if uom:
             uom_ids = self.session.search('product.uom',
-                                          [('name', '=ilike', uom)])
+                                          [('magento_name', '=', uom)])
             if uom_ids:
                 uom_id = uom_ids[0]
         if not uom_id:

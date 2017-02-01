@@ -189,16 +189,6 @@ class purchase_order(osv.Model):
             or order.dest_address_id
         shipping_address = order.dest_address_id
 
-        def convert_unit(name):
-            if name == 'PCE':
-                return 'P'
-            elif name == 'KGM':
-                return 'K'
-            elif name == 'm':
-                return 'M'
-            else:
-                raise NotImplementedError("mapping for uom %s" % name)
-
         mapping = {
             'codefiliale': supplier and supplier.code_filiale or '',
             'siretFiliale': supplier and supplier.siret_filiale or '',
@@ -345,7 +335,7 @@ class purchase_order(osv.Model):
                 'refarticleFournisseur': product and product.code or '',
                 'ligne': line_index+1,
                 'montantLigne': int(order_line.price_subtotal * 1000),
-                'uq': convert_unit(uom.name),
+                'uq': uom.edi_code and uom.edi_code or 'P',
                 'dateLiv': order_line
                 and order_line.date_planned
                 and order_line.date_planned.replace('-', '')
