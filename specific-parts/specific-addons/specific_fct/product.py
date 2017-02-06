@@ -160,3 +160,17 @@ class product_supplierinfo(orm.Model):
         return super(product_supplierinfo, self).create(cr, uid,
                                                         vals,
                                                         context=context)
+
+
+class ProductUom(orm.Model):
+    _inherit = 'product.uom'
+
+    _columns = {
+        'magento_name': fields.char('UoM name from Magento', size=64),
+        'edi_code': fields.char('EDI character to use for this UoM', size=1),
+    }
+
+    _sql_constraints = [
+        ('magento_name_uniq', 'unique(magento_name)', 'Magento name for UoM '
+                                                      'must be unique'),
+    ]
