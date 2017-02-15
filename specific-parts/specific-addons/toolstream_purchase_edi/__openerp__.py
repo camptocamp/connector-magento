@@ -26,7 +26,7 @@
  'category': 'Purchase',
  'depends': ['purchase', 'specific_fct'],
  'website': 'http://www.camptocamp.com',
- 'data': [],
+ 'data': ['purchase_view.xml'],
  'tests': [],
  'installable': True,
  'auto_install': False,

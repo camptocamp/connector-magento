@@ -28,17 +28,19 @@ class PurchaseOrder(orm.Model):
     def wkf_confirm_order(self, cr, uid, ids, context=None):
         result = super(PurchaseOrder, self).wkf_confirm_order(cr, uid, ids,
                                                               context=context)
-        # Check if supplier is Toolstream ; if so, send the XML via mail
+        self.action_toolstream_emails(cr, uid, ids, context=context)
+        return result
+
+    def action_toolstream_emails(self, cr, uid, ids, context=None):
         toolstream_supplier_ids = self.pool['res.partner'].search(cr, uid,
             [('name', '=', 'TOOLSTREAM'), ('supplier', '=', True)],
             context=context)
         for purchase in self.browse(cr, uid, ids, context=context):
             if purchase.partner_id.id in toolstream_supplier_ids:
-                self.send_xml_message(cr, uid, purchase, context=context)
+                self._send_toolstream_email(cr, uid, purchase, context=context)
+        return True
 
-        return result
-
-    def send_xml_message(self, cr, uid, purchase, context=None):
+    def _send_toolstream_email(self, cr, uid, purchase, context=None):
         # Create XML message for Toolstream and send it by e-mail
         order = ET.Element('order')
         message = ET.SubElement(order, 'message', {'type': 'order'})

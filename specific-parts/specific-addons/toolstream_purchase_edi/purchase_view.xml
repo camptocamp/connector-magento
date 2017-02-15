@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="send_toolstream_email" model="ir.actions.server">
+            <field name="code">self.action_toolstream_emails(cr, uid, context.get('active_ids', []), context=context)</field>
+            <field name="state">code</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="purchase.model_purchase_order"/>
+            <field name="condition">True</field>
+            <field name="name">Send e-mails for Toolstream orders</field>
+        </record>
+
+        <record id="ir_button_cancel_procurements" model="ir.values">
+            <field eval="'action'" name="key"/>
+            <field eval="'client_action_multi'" name="key2"/>
+            <field eval="'purchase.order'" name="model"/>
+            <field name="name">Send e-mails for Toolstream orders</field>
+            <field eval="'ir.actions.server,%d'%send_toolstream_email" name="value"/>
+        </record>
+    </data>
+</openerp>
+
