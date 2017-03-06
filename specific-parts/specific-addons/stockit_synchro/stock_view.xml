@@ -13,6 +13,9 @@
                     <button name="button_cancel" position="replace">
                         <button name="button_cancel" states="assigned,confirmed,draft,stockit_confirm" string="_Cancel" icon="gtk-cancel"/>
                     </button>
+                    <field name="date_done" position="after">
+                        <field name="stockit_export_date"/>
+                    </field>
                 </data>
             </field>
         </record>

@@ -28,6 +28,7 @@ from openerp.osv import orm, fields
 from openerp.tools.translate import _
 from ..stockit_exporter.exporter import StockitExporter
 from .wizard_utils import post_message
+from datetime import datetime
 
 
 _logger = logging.getLogger()
@@ -48,15 +49,25 @@ class StockItInPickingExport(orm.TransientModel):
                                    ('empty', 'Empty'),
                                    ('done', 'Done')],
                                   string='State'),
+        'force_export': fields.boolean(string='Force export',
+                                       help="If this field is checked, "
+                                            "picking IN with stockit export "
+                                            "date will be exported")
     }
 
     _defaults = {
         'state': 'draft',
+        'force_export': True,
     }
 
     def action_manual_export(self, cr, uid, ids, context=None):
         assert len(ids) == 1
-        rows = self.get_data(cr, uid, ids, context)
+        export_pickings = self.browse(cr, uid, ids, context=context)
+        force_export = export_pickings and export_pickings[0].force_export or \
+            False
+        rows, picking_ids = self.get_data(cr, uid, ids,
+                                          force_export=force_export,
+                                          context=context)
         exporter = StockitExporter()
         data = exporter.get_csv_data(rows)
         if data:
@@ -64,6 +75,10 @@ class StockItInPickingExport(orm.TransientModel):
                        {'data': base64.encodestring(data),
                         'state': 'done'},
                        context=context)
+            self.pool.get('stock.picking').write(cr, uid, picking_ids,
+                                                 {'stockit_export_date': str(
+                                                     datetime.now())},
+                                                 context=context)
         else:
             self.write(cr, uid, ids,
                        {'state': 'empty'},
@@ -91,10 +106,15 @@ class StockItInPickingExport(orm.TransientModel):
                                 company.stockit_in_picking_export,
                                 filename)
         try:
-            rows = self.get_data(cr, uid, [], context)
+            rows, picking_ids = self.get_data(cr, uid, [], force_export=False,
+                                              context=context)
             exporter = StockitExporter(filepath)
             data = exporter.get_csv_data(rows)
             exporter.export_file(data)
+            self.pool.get('stock.picking').write(
+                cr, uid, picking_ids,
+                {'stockit_export_date': str(datetime.now())},
+                context=context)
         except Exception as e:
             _logger.exception("Error exporting ingoing pickings file")
             message = _("Stock-it ingoing pickings failed "
@@ -103,17 +123,17 @@ class StockItInPickingExport(orm.TransientModel):
             post_message(self, cr, uid, message, context=context)
         return True
 
-    def get_data(self, cr, uid, ids, context=None):
+    def get_data(self, cr, uid, ids, force_export=False, context=None):
         """Export incoming pickings in Stock iT format"""
         picking_obj = self.pool.get('stock.picking')
         context = context or {}
         context['lang'] = 'fr_FR'
 
         rows = []
-        picking_ids = picking_obj.search(cr, uid,
-                                         [('type', '=', 'in'),
-                                          ('state', '=', 'assigned')],
-                                         context=context)
+        search_args = [('type', '=', 'in'), ('state', '=', 'assigned')]
+        if not force_export:
+            search_args.extend([('stockit_export_date', '=', False)])
+        picking_ids = picking_obj.search(cr, uid, search_args, context=context)
         for picking in picking_obj.browse(cr, uid, picking_ids,
                                           context=context):
             address = picking.partner_id
@@ -145,4 +165,4 @@ class StockItInPickingExport(orm.TransientModel):
                     '',
                 ]
                 rows.append(row)
-        return rows
+        return rows, picking_ids
