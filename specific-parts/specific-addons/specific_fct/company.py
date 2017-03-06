@@ -119,5 +119,15 @@ class res_company(orm.Model):
             _get_environment_config_by_id,
             string="Regex EDI file errors",
             type='char',
+            multi='server_env'),
+        'edifact_purchase_success_path': fields.function(
+            _get_environment_config_by_id,
+            string="Success path",
+            type='char',
+            multi='server_env'),
+        'edifact_purchase_error_path': fields.function(
+            _get_environment_config_by_id,
+            string="Error path",
+            type='char',
             multi='server_env')
         }
