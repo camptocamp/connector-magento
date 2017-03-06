@@ -26,5 +26,12 @@
             <field eval="'()'" name="args"/>
             <field eval="False" name="active"/>
         </record>
+
+        <record model="crm.case.categ" id="categ_claim_pln_incident">
+            <field name="name">PLN Incident</field>
+            <field name="section_id"
+                   ref="stockit_synchro.section_stockit_error"/>
+            <field name="object_id" search="[('model','=','crm.claim')]" model="ir.model"/>
+        </record>
     </data>
 </openerp>
