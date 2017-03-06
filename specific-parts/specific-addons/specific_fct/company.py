@@ -130,4 +130,9 @@ class res_company(orm.Model):
             string="Error path",
             type='char',
             multi='server_env')
+        'toolstream_email_address': fields.function(
+            _get_environment_config_by_id,
+            string="Toolstream email address",
+            type='char',
+            multi='server_env')
         }
