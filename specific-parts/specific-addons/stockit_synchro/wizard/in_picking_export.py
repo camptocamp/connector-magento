@@ -75,7 +75,7 @@ class StockItInPickingExport(orm.TransientModel):
                        {'data': base64.encodestring(data),
                         'state': 'done'},
                        context=context)
-            self.pool.get('stock.picking').write(cr, uid, picking_ids,
+            self.pool['stock.picking'].write(cr, uid, picking_ids,
                                                  {'stockit_export_date': str(
                                                      datetime.now())},
                                                  context=context)
@@ -111,7 +111,7 @@ class StockItInPickingExport(orm.TransientModel):
             exporter = StockitExporter(filepath)
             data = exporter.get_csv_data(rows)
             exporter.export_file(data)
-            self.pool.get('stock.picking').write(
+            self.pool['stock.picking'].write(
                 cr, uid, picking_ids,
                 {'stockit_export_date': str(datetime.now())},
                 context=context)
@@ -125,7 +125,7 @@ class StockItInPickingExport(orm.TransientModel):
 
     def get_data(self, cr, uid, ids, force_export=False, context=None):
         """Export incoming pickings in Stock iT format"""
-        picking_obj = self.pool.get('stock.picking')
+        picking_obj = self.pool['stock.picking']
         context = context or {}
         context['lang'] = 'fr_FR'
 
