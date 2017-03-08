@@ -90,6 +90,21 @@ class purchase_order(orm.Model):
                                           context=context)
         return True
 
+    def _prepare_order_picking(self, cr, uid, order, context=None):
+        """
+            Give the tracking number to Magento
+            TODO put the change in OCA
+        """
+        _super = super(purchase_order, self)
+        vals = _super._prepare_order_picking(cr, uid, order, context=context)
+        if order.sale_flow in ('direct_delivery',
+                               'direct_invoice_and_delivery'):
+            sale = order.sale_id
+            carrier = sale and sale.carrier_id or False
+            if carrier:
+                vals['carrier_id'] = carrier.id
+        return vals
+
 
 class purchase_order_line(orm.Model):
     _inherit = 'purchase.order.line'
