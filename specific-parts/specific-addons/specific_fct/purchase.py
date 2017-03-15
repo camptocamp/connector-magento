@@ -103,8 +103,10 @@ class purchase_order(orm.Model):
             carrier = sale and sale.carrier_id or False
             if carrier:
                 vals['carrier_id'] = carrier.id
+            # for dropshipping orders, set carrier file as generated
+            # (since the delivery / tracking is done by the supplier)
+            vals['carrier_file_generated'] = True
         return vals
-
 
 class purchase_order_line(orm.Model):
     _inherit = 'purchase.order.line'
