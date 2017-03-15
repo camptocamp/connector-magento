@@ -29,6 +29,7 @@ Feature: upgrade to 1.2.15
       | specific_fct            |
       | toolstream_purchase_edi |
       | debonix_purchase_edi    |
+      | stockit_synchro         |
     Then my modules should have been installed and models reloaded
 
     Given I set the version of the instance to "1.2.15"
