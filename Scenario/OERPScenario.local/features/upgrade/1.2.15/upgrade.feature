@@ -3,14 +3,6 @@
 
 Feature: upgrade to 1.2.15
 
-  Scenario: upgrade application version
-    Given I update the module list
-    Given I install the required modules with dependencies:
-      | name                    |
-      | specific_fct            |
-      | toolstream_purchase_edi |
-    Then my modules should have been installed and models reloaded
-
   Scenario: assign xml_id to crm categ
     Given I execute the SQL commands
     """
@@ -29,5 +21,14 @@ Feature: upgrade to 1.2.15
           70
         );
     """
+
+  Scenario: upgrade application version
+    Given I update the module list
+    Given I install the required modules with dependencies:
+      | name                    |
+      | specific_fct            |
+      | toolstream_purchase_edi |
+      | debonix_purchase_edi    |
+    Then my modules should have been installed and models reloaded
 
     Given I set the version of the instance to "1.2.15"
