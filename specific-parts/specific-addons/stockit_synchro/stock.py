@@ -57,6 +57,10 @@ class stock_picking_in(orm.Model):
         if stockit_state not in self._columns['state'].selection:
             self._columns['state'].selection.append(stockit_state)
 
+    _columns = {
+        'stockit_export_date': fields.datetime('Stockit export date'),
+    }
+
 
 class stock_picking_out(orm.Model):
 
