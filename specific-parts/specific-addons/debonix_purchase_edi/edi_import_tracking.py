@@ -131,7 +131,7 @@ class EdiImportTracking(orm.Model):
                                                  % (po_number, filename)
 
                     # Move file to error or success folder
-                    old_filename = importpath + "/" + filename
+                    old_filename = filename
                     if error_message:
                         self.create_error_claim(cr, uid, error_message,
                                                 context=context)
