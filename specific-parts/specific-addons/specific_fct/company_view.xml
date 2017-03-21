@@ -25,6 +25,9 @@
             <field name="edifact_regex_ref"/>
             <field name="edifact_regex_errors"/>
           </group>
+          <group string="Toolstream export">
+            <field name="toolstream_email_address"/>
+          </group>
         </page>
       </field>
     </record>
