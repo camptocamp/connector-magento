@@ -104,7 +104,9 @@ class EdiImportTracking(orm.Model):
                                         context=context)
                                     picking_ids = picking_obj.search(
                                         new_cr, uid, [('purchase_id', 'in',
-                                                       po_ids)],
+                                                       po_ids),
+                                                      ('carrier_tracking_ref',
+                                                       '=', False)],
                                         context=context)
                                     picking_obj.write(
                                         new_cr, uid, picking_ids, res[po_number],
