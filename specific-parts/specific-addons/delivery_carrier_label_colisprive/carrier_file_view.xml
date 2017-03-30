@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="colis_prive_delivery_carrier_form" model="ir.ui.view">
+            <field name="name">colis_prive_delivery_carrier_form</field>
+            <field name="model">delivery.carrier</field>
+            <field name="inherit_id" ref="base_delivery_carrier_label.view_delivery_carrier_form" />
+            <field name="arch" type="xml">
+                <xpath expr="/form/group/group[last()]" position="after">
+                    <group name="ws_options"
+                           attrs="{'invisible': [('type', '!=', 'colisprive')]}"
+                           colspan="4" col="4">
+                        <separator string="Web Service Options" colspan="4"/>
+                        <field name="ws_url" attrs="{'required': [('type', '=', 'colisprive')]}"/>
+                        <field name="ws_customer_id" attrs="{'required': [('type', '=', 'colisprive')]}"/>
+                        <field name="ws_username" attrs="{'required': [('type', '=', 'colisprive')]}"/>
+                        <field name="ws_account_id" attrs="{'required': [('type', '=', 'colisprive')]}"/>
+                        <field name="ws_password" attrs="{'required': [('type', '=', 'colisprive')]}"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="colis_prive_delivery_file_carrier_form" model="ir.ui.view">
+            <field name="name">colis_prive_delivery_file_carrier_form</field>
+            <field name="model">delivery.carrier.file</field>
+            <field name="inherit_id" ref="base_delivery_carrier_files.view_delivery_carrier_file_form" />
+            <field name="arch" type="xml">
+                <data>
+                    <form position="inside">
+                        <group name="colis_prive" string="Colis prive Web Service" attrs="{'invisible': [('type', '!=', 'colisprive')]}">
+                            <field name="destype"/>
+                            <field name="ispcl_withpod"/>
+                        </group>
+                    </form>
+                </data>
+            </field>
+        </record>
+
+    </data>
+</openerp>

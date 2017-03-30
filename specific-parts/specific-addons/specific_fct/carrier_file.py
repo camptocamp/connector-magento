@@ -75,8 +75,9 @@ class delivery_carrier_file(orm.Model):
         """
         result = super(delivery_carrier_file, self)._write_file(
             cr, uid, carrier_file, filename, file_content, context=context)
-        full_path = os.path.join(carrier_file.export_path, filename)
-        # chronopost needs to drop the file so we have to put the write
-        # permission for all users
-        cr.add_transaction_action(os.chmod, full_path, 0666)
+        if carrier_file.export_path and carrier_file.write_mode == 'disk':
+            full_path = os.path.join(carrier_file.export_path, filename)
+            # chronopost needs to drop the file so we have to put the write
+            # permission for all users
+            cr.add_transaction_action(os.chmod, full_path, 0666)
         return result
