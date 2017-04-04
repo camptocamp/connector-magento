@@ -51,8 +51,8 @@ class stock_picking(orm.Model):
             partial receipt
         """
         res = super(stock_picking, self).do_partial(cr, uid, ids,
-                                                     partial_datas,
-                                                     context=context)
+                                                    partial_datas,
+                                                    context=context)
         for pick in self.browse(cr, uid, ids, context=context):
             if pick.stockit_export_date and pick.state != 'done':
                 pick.write({'stockit_export_date': False})

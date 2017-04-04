@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
+#    Author: Charline Dumontet
+#    Copyright 2017 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,8 +19,9 @@
 #
 ##############################################################################
 
-from openerp.osv import osv,fields
+from openerp.osv import osv
 import re
+
 
 class stock_return_picking(osv.osv_memory):
     _inherit = 'stock.return.picking'
@@ -30,7 +31,7 @@ class stock_return_picking(osv.osv_memory):
             Remove the stockit_export_date of the returned picking
         """
         res = super(stock_return_picking, self).create_returns(cr, uid, ids,
-                                                        context=context)
+                                                               context=context)
         if res.get('domain'):
             return_ids = map(int, re.findall(r'\d+', res['domain']))
             self.pool['stock.picking'].write(cr, uid, return_ids,
