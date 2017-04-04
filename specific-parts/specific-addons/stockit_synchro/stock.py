@@ -45,6 +45,19 @@ class stock_picking(orm.Model):
                 pick.write({'stockit_outdated': True})
         return res
 
+    def do_partial(self, cr, uid, ids, partial_datas, context=None):
+        """
+            Remove the stockit_export_date of the source IN picking if we do
+            partial receipt
+        """
+        res = super(stock_picking, self).do_partial(cr, uid, ids,
+                                                     partial_datas,
+                                                     context=context)
+        for pick in self.browse(cr, uid, ids, context=context):
+            if pick.stockit_export_date and pick.state != 'done':
+                pick.write({'stockit_export_date': False})
+        return res
+
 
 class stock_picking_in(orm.Model):
 
