@@ -41,6 +41,6 @@ This module generate labels with the 'Colis Prive Webservice'
  'license': 'AGPL-3',
  'application': True,
  'external_dependencies': {
-     'python': ['suds-jurko'],
+     'python': ['suds'],
  }
  }
