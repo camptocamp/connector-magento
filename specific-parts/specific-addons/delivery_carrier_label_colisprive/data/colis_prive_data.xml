@@ -2,6 +2,13 @@
 <openerp>
   <data noupdate="1">
 
+      <!-- Add colis prive claim category -->
+      <record model="crm.case.categ" id="categ_claim_colisprive_incident">
+          <field name="name">Colis prive - Incident WS</field>
+          <field name="section_id" ref="stockit_synchro.section_stockit_error"/>
+          <field name="object_id" search="[('model','=','crm.claim')]" model="ir.model"/>
+      </record>
+
       <!-- Add colis prive partner -->
       <record id="colis_prive_partner" model="res.partner">
           <field name="name">COLIS PRIVE</field>
@@ -13,8 +20,8 @@
           <field name="name">Colisprive PUDO shipping</field>
           <field name="type">colisprive</field>
           <field name="auto_export" eval="True"/>
-          <field name="write_mode">document</field>
-          <field name="document_directory_id" search="[('name', '=', 'Documents (filesystem storage)')]" model="document.directory"/>
+          <field name="write_mode">disk</field>
+          <field name="export_path">/srv/openerp/instances</field>
           <field name="destype">PUDO</field>
           <field name="ispcl_withpod" eval="False"/>
       </record>
@@ -23,8 +30,8 @@
           <field name="name">Colisprive LOCKER shipping</field>
           <field name="type">colisprive</field>
           <field name="auto_export" eval="True"/>
-          <field name="write_mode">document</field>
-          <field name="document_directory_id" search="[('name', '=', 'Documents (filesystem storage)')]" model="document.directory"/>
+          <field name="write_mode">disk</field>
+          <field name="export_path">/srv/openerp/instances</field>
           <field name="destype">LOCKER</field>
           <field name="ispcl_withpod" eval="False"/>
       </record>
@@ -33,8 +40,8 @@
           <field name="name">Colisprive DOMICILE shipping</field>
           <field name="type">colisprive</field>
           <field name="auto_export" eval="True"/>
-          <field name="write_mode">document</field>
-          <field name="document_directory_id" search="[('name', '=', 'Documents (filesystem storage)')]" model="document.directory"/>
+          <field name="write_mode">disk</field>
+          <field name="export_path">/srv/openerp/instances</field>
           <field name="ispcl_withpod" eval="False"/>
       </record>
 
@@ -42,8 +49,8 @@
           <field name="name">Colisprive DOMICILE with POD shipping</field>
           <field name="type">colisprive</field>
           <field name="auto_export" eval="True"/>
-          <field name="write_mode">document</field>
-          <field name="document_directory_id" search="[('name', '=', 'Documents (filesystem storage)')]" model="document.directory"/>
+          <field name="write_mode">disk</field>
+          <field name="export_path">/srv/openerp/instances</field>
           <field name="ispcl_withpod" eval="True"/>
       </record>
 
@@ -110,7 +117,7 @@
           <field name="email_from">contact@debonix.fr</field>
           <field name="email_recipients"></field>
           <field name="subject">Error with Colis Privé Web Service</field>
-          <field name="email_to">fscalese@descours-cabaud.com</field>
+          <field name="email_to">info-dsi@debonix.fr</field>
           <field name="model_id" ref="crm_claim.model_crm_claim"/>
           <field name="auto_delete" eval="True"/>
           <field name="lang">${user.lang or 'fr_FR'}</field>

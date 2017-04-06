@@ -21,6 +21,9 @@
 
 from openerp.addons.base_delivery_carrier_files.generator \
     import CarrierFileGenerator
+from openerp.tools.translate import _
+from openerp.exceptions import Warning
+import time
 
 
 class ColisPriveFileGenerator(CarrierFileGenerator):
@@ -43,7 +46,12 @@ class ColisPriveFileGenerator(CarrierFileGenerator):
                   ('filename2', file2, [picking ids])]
         """
         files = []
+        today = time.strftime('%Y-%m-%d')
         for picking in pickings:
+            if picking.date_done and picking.date_done[:10] < today:
+                raise Warning(_("You can't print again a label the day after "
+                                "it had been delivered"))
+
             filename = self._get_filename_single(
                 picking, configuration, extension='pdf'
             )
@@ -67,6 +75,6 @@ class ColisPriveFileGenerator(CarrierFileGenerator):
         """
         file_content = ''
         label = picking._generate_colisprive_label()
-        if label and label[0].get('file'):
-            file_content = label[0]['file']
+        if label and label[0][0].get('file'):
+            file_content = label[0][0]['file']
         return file_content
