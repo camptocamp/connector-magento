@@ -99,7 +99,7 @@ class ColisPriveWebService(object):
         zc = customer.zip
         city = customer.city
         country = customer.country_id and \
-                  customer.country_id.name or ''
+            customer.country_id.name or ''
         DestName = customer.mag_chronorelais_code
         csgadd_info = {
             'DlvrName': customer.name,
