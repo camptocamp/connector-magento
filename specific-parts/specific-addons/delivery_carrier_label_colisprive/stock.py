@@ -21,14 +21,22 @@
 from openerp.osv import orm, fields
 from openerp.tools.translate import _
 from colisprive.web_service import ColisPriveWebService
+import openerp.pooler as pooler
 import urllib2
+from openerp.exceptions import Warning
 
 
 class stock_picking(orm.Model):
     _inherit = 'stock.picking'
 
+    _columns = {
+        'colisprive_label_url': fields.char('Created label', size=128),
+    }
+
     def _send_mail_label_errors(self, cr, uid, claim_id, context=None):
-        # TODO comments
+        """
+            Send a mail if there is an error with the label
+        """
         data_obj = self.pool['ir.model.data']
         email_obj = self.pool['email.template']
         __, template_id = data_obj.get_object_reference(
@@ -38,12 +46,15 @@ class stock_picking(orm.Model):
         return True
 
     def _create_claim_errors(self, cr, uid, picking, errors, context=None):
-        # TODO comments
+        """
+            Create a claim if there is an error with the label
+        """
         __, categ_id = self.pool['ir.model.data'].get_object_reference(
-            cr, uid, 'debonix_purchase_edi', 'categ_claim_pln_incident')
+            cr, uid, 'delivery_carrier_label_colisprive',
+            'categ_claim_colisprive_incident')
         description = _("There is an error with the Web service for the "
-                        "picking %s: %s")%(picking.name, errors.decode('utf-8'))
-        name = _('WS error with %s')%(picking.name)
+                        "picking %s: %s") % (picking.name, errors)
+        name = _('WS error with %s') % (picking.name)
         claim_vals = {'name': name,
                       'description': description,
                       'categ_id': categ_id,
@@ -53,7 +64,6 @@ class stock_picking(orm.Model):
         return claim_id
 
     def _manage_label_errors(self, cr, uid, picking, errors, context=None):
-        # TODO comments
         claim_id = self._create_claim_errors(cr, uid, picking, errors,
                                              context=context)
         if claim_id:
@@ -68,8 +78,8 @@ class stock_picking(orm.Model):
         data_file = open_file.read()
         return data_file
 
-    def _generate_colisprive_label(self, cr, uid, pick,
-                                      tracking_ids=None, context=None):
+    def _generate_colisprive_label(self, cr, uid, pick, tracking_ids=None,
+                                   context=None):
         """
             Generate labels and write tracking numbers received
         """
@@ -86,23 +96,34 @@ class stock_picking(orm.Model):
         web_service = webservice_class(carrier)
         res = web_service.generate_label(picking, carrier, cpplcode)
         if 'errors' in res:
-            self._manage_label_errors(cr, uid, picking,
-                                      res['errors'], context=context)
-            return label
+            # We used a new cr to create a mail and a claim but send a raise
+            # to the delivery
+            errors = res['errors'].decode('utf-8')
+            new_cr = pooler.get_db(cr.dbname).cursor()
+            self._manage_label_errors(new_cr, uid, picking,
+                                      errors, context=context)
+            new_cr.commit()
+            new_cr.close()
+            error_msg = _("Impossible delivery: There is an error with the "
+                          "Web service '%s'. Please contact your "
+                          "administrator") % (errors)
+            raise Warning(error_msg)
         # Write tracking_number on picking
         gen_label = res['value']
         tracking_number = gen_label['carrier_code']
         self.write(cr, uid, picking.id,
                    {'carrier_tracking_ref': tracking_number},
                    context=context)
-        if gen_label.get('label_url'):
+        label_url = gen_label.get('label_url', '')
+        if label_url:
+            picking.write({'colisprive_label_url': label_url})
             filename = tracking_number + '.' + 'pdf'
             data_file = self.recup_label_data_file(gen_label['label_url'])
             label = {'file': data_file,
                      'file_type': 'pdf',
-                      'name': filename,
-                      }
-        return [label]
+                     'name': filename,
+                     }
+        return [label], label_url
 
     def generate_shipping_labels(self, cr, uid, ids, tracking_ids=None,
                                  context=None):
@@ -114,10 +135,26 @@ class stock_picking(orm.Model):
         assert len(ids) == 1
         picking = self.browse(cr, uid, ids[0], context=context)
         if picking.carrier_id.type == 'colisprive':
-            return self._generate_colisprive_label(
+            label, label_url = self._generate_colisprive_label(
                 cr, uid, picking,
                 tracking_ids=tracking_ids,
                 context=context)
+            return label
         return super(stock_picking, self).\
             generate_shipping_labels(cr, uid, ids, tracking_ids=tracking_ids,
                                      context=context)
+
+    def copy(self, cr, uid, id, default=None, context=None):
+        if default is None:
+            default = {}
+        default.update({'colisprive_label_url': ''})
+        return super(stock_picking, self).copy(cr, uid, id, default=default,
+                                               context=context)
+
+
+class stock_picking_out(orm.Model):
+    _inherit = 'stock.picking.out'
+
+    _columns = {
+        'colisprive_label_url': fields.char('Created label', size=128),
+    }

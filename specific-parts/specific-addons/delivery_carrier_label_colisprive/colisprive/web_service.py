@@ -35,7 +35,9 @@ class ColisPriveWebService(object):
     """
 
     def _add_security_header(self, client, carrier):
-        # TODO comments
+        """
+            Send the security info for the connection
+        """
         username = carrier.ws_username
         password = carrier.ws_password
         auth = client.factory.create('AuthenticationHeader')
@@ -47,7 +49,9 @@ class ColisPriveWebService(object):
         self.init_connection(carrier)
 
     def init_connection(self, carrier):
-        # TODO comments
+        """
+            This method made the connection with the web service colis prive
+        """
         try:
             self.client = Client(
                 carrier.ws_url)
@@ -64,7 +68,6 @@ class ColisPriveWebService(object):
         :param **kwargs: params forwarded to the callback
 
         """
-        # TODO: Envoi mail si pas possible de se connecter au WS
         res = {}
         try:
             res['value'] = request(**kwargs)
@@ -75,7 +78,9 @@ class ColisPriveWebService(object):
         return res
 
     def _prepare_security(self, carrier):
-        # TODO comments
+        """
+            Set the security part of the envelope sent to colis prive
+        """
         envelope = {
             'SecurityID':
                 {'CPCustoID': carrier.ws_customer_id,
@@ -85,14 +90,16 @@ class ColisPriveWebService(object):
         return envelope
 
     def _prepare_customer_info(self, picking):
-        # TODO comments
+        """
+            Set the common envelope part sent to colis prive
+        """
         customer = picking.partner_id
         street1 = customer.street
         street2 = customer.street2
         zc = customer.zip
         city = customer.city
         country = customer.country_id and \
-                  customer.country_id.name or ''
+            customer.country_id.name or ''
         DestName = customer.mag_chronorelais_code
         csgadd_info = {
             'DlvrName': customer.name,
@@ -116,7 +123,10 @@ class ColisPriveWebService(object):
         return customer_info
 
     def _prepare_label_info(self, picking, carrier_file):
-        # TODO comments
+        """
+            Set the specific envelope part sent to colis prive
+            We find the info in the delivery files
+        """
         if carrier_file:
             DestType = carrier_file.destype
             IsPclWithPOD = carrier_file.ispcl_withpod
@@ -128,7 +138,7 @@ class ColisPriveWebService(object):
         label_info = {
             'OrderID': picking.name,
             'PclShipDate': datetime.today(),
-            'PclWeight': weight,
+            'PclWeight': weight or 500,
             'IsPclWithPOD': IsPclWithPOD,
             'LabelFormat': 'PDF_ZEBRA',
             'DestType': DestType,
@@ -136,10 +146,13 @@ class ColisPriveWebService(object):
         return label_info
 
     def _prepare_envelope(self, picking, carrier):
-        # TODO comments
+        """
+            Call all the methods to create the envelope for colis prive
+        """
         envelope = self._prepare_security(carrier)
         envelope.update(self._prepare_customer_info(picking))
-        envelope.update(self._prepare_label_info(picking, carrier.carrier_file_id))
+        envelope.update(self._prepare_label_info(picking,
+                                                 carrier.carrier_file_id))
         return envelope
 
     def _cancel_parcel(self, cpplcode, carrier):
@@ -157,7 +170,6 @@ class ColisPriveWebService(object):
 
     def generate_label(self, picking, carrier, cpplcode):
         """
-        TODO : better comments
             Generate a label for a picking
         """
         envelope = self._prepare_envelope(picking, carrier)

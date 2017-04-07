@@ -26,7 +26,8 @@
  'complexity': "normal",
  'depends': ['base_delivery_carrier_label',
              'base_delivery_carrier_files_document',
-             'specific_fct'],
+             'specific_fct',
+             'stockit_synchro'],
  'description': """Debonix Specific.
 
 This module generate labels with the 'Colis Prive Webservice'
@@ -34,7 +35,8 @@ This module generate labels with the 'Colis Prive Webservice'
  'website': 'http://www.camptocamp.com',
  'data': ['data/colis_prive_data.xml',
           'carrier_file_view.xml',
-          'stock_view.xml',],
+          'stock_view.xml',
+          ],
  'tests': [],
  'installable': True,
  'auto_install': False,

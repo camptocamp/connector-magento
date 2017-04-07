@@ -59,4 +59,5 @@ class DeliveryCarrier(orm.Model):
         'ws_password': fields.char(string='WS password', size=24),
         'ws_customer_id': fields.char(string='WS Customer ID', size=24),
         'ws_account_id': fields.char(string='WS account ID', size=24),
+
     }
