@@ -78,6 +78,48 @@ class stock_picking(orm.Model):
         data_file = open_file.read()
         return data_file
 
+    def generate_carrier_files(self, cr, uid, ids, auto=True,
+                               recreate=False, context=None):
+        """
+            Replace base method to check if there is edifact sent
+        """
+        carrier_file_obj = self.pool.get('delivery.carrier.file')
+        carrier_file_ids = {}
+        for picking in self.browse(cr, uid, ids, context):
+            # Check the edifact_sent of the purchase
+            purchase_edi = False
+            sale_id = picking.sale_id and picking.sale_id.id or False
+            if sale_id:
+                purchase_obj = self.pool['purchase.order']
+                purchase_order_ids = purchase_obj.search(
+                    cr, uid, [('sale_id', '=', sale_id)], context=context)
+                for purchase in purchase_obj.browse(
+                        cr, uid,purchase_order_ids, context=context):
+                    if purchase.edifact_sent:
+                        purchase_edi = True
+                        break
+            if purchase_edi:
+                continue
+            if picking.type != 'out':
+                continue
+            if not recreate and picking.carrier_file_generated:
+                continue
+            carrier = picking.carrier_id
+            if not carrier or not carrier.carrier_file_id:
+                continue
+            if auto and not carrier.carrier_file_id.auto_export:
+                continue
+            p_carrier_file_id = picking.carrier_id.carrier_file_id.id
+            carrier_file_ids.setdefault(p_carrier_file_id, []).\
+                append(picking.id)
+
+        for carrier_file_id, carrier_picking_ids\
+                in carrier_file_ids.iteritems():
+            carrier_file_obj.generate_files(cr, uid, carrier_file_id,
+                                            carrier_picking_ids,
+                                            context=context)
+        return True
+
     def _generate_colisprive_label(self, cr, uid, pick, tracking_ids=None,
                                    context=None):
         """
