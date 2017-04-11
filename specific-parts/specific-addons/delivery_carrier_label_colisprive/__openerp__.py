@@ -27,7 +27,8 @@
  'depends': ['base_delivery_carrier_label',
              'base_delivery_carrier_files_document',
              'specific_fct',
-             'stockit_synchro'],
+             'stockit_synchro',
+             'debonix_purchase_edi'],
  'description': """Debonix Specific.
 
 This module generate labels with the 'Colis Prive Webservice'
