@@ -94,7 +94,7 @@ class stock_picking(orm.Model):
                 purchase_order_ids = purchase_obj.search(
                     cr, uid, [('sale_id', '=', sale_id)], context=context)
                 for purchase in purchase_obj.browse(
-                        cr, uid,purchase_order_ids, context=context):
+                        cr, uid, purchase_order_ids, context=context):
                     if purchase.edifact_sent:
                         purchase_edi = True
                         break
