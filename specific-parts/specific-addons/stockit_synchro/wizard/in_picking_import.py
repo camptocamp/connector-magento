@@ -323,7 +323,8 @@ class StockItInPickingImport(orm.TransientModel):
         # assign the backorder
         if new_picking:
             pick_obj.write(cr, uid,
-                           [picking.id], {'backorder_id': new_picking},
+                           [picking.id], {'backorder_id': new_picking,
+                                          'stockit_export_date': False},
                            context=context)
 
         wf_service = netsvc.LocalService("workflow")
