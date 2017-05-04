@@ -101,6 +101,19 @@ class ColisPriveWebService(object):
         country = customer.country_id and \
             customer.country_id.name or ''
         DestName = customer.mag_chronorelais_code
+        valid_number = True
+        if customer.mobile:
+            mobile_num = customer.mobile
+        elif customer.phone:
+            mobile_num = customer.phone
+        else:
+            valid_number = False
+        if valid_number:
+            if (not mobile_num[:2] in ['06', '07']) and (
+            not mobile_num[:4] in ['+336', '+337']):
+                valid_number = False
+        if not valid_number:
+            mobile_num = '06'
         csgadd_info = {
             'DlvrName': customer.name,
             'DlvrAddress': {
@@ -114,7 +127,7 @@ class ColisPriveWebService(object):
             },
             'DlvrEmail': customer.email if customer.email else '',
             'DlvrPhon': customer.phone if customer.phone else '',
-            'DlvrGsm': customer.mobile if customer.mobile else '',
+            'DlvrGsm': mobile_num,
         }
         customer_info = {
             'CsgAdd': csgadd_info,
