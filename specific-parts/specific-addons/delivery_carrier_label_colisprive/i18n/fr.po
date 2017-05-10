@@ -1,0 +1,182 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* delivery_carrier_label_colisprive
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 7.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-04-06 13:54+0000\n"
+"PO-Revision-Date: 2017-04-06 13:54+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: delivery_carrier_label_colisprive
+#: model:email.template,body_html:delivery_carrier_label_colisprive.web_service_error_template_mail
+msgid "\n"
+"<div style=\"font-family: 'Lucida Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; \">\n"
+"\n"
+"    <p>Hello,</p>\n"
+"\n"
+"    <p>${object.description or ''}</p>\n"
+"\n"
+"</div>\n"
+""
+msgstr "\n"
+"<div style=\"font-family: 'Lucida Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; \">\n"
+"\n"
+"    <p>Bonjour,</p>\n"
+"\n"
+"    <p>${object.description or ''}</p>\n"
+"\n"
+"</div>\n"
+""
+
+#. module: delivery_carrier_label_colisprive
+#: code:_description:0
+#, python-format
+msgid "Carrier"
+msgstr "Transporteur"
+
+#. module: delivery_carrier_label_colisprive
+#: model:ir.model,name:delivery_carrier_label_colisprive.model_delivery_carrier
+msgid "Carrier and delivery grids"
+msgstr "Transporteur et tarifs de livraison"
+
+#. module: delivery_carrier_label_colisprive
+#: model:crm.case.categ,name:delivery_carrier_label_colisprive.categ_claim_colisprive_incident
+msgid "Colis prive - Incident WS"
+msgstr "Colis prive - Incident WS"
+
+#. module: delivery_carrier_label_colisprive
+#: view:delivery.carrier.file:0
+msgid "Colis prive Web Service"
+msgstr "Colis prive Web Service"
+
+#. module: delivery_carrier_label_colisprive
+#: code:_description:0
+#, python-format
+msgid "Companies"
+msgstr "Sociétés"
+
+#. module: delivery_carrier_label_colisprive
+#: field:stock.picking,colisprive_label_url:0
+#: field:stock.picking.out,colisprive_label_url:0
+msgid "Created label"
+msgstr "Étiquette créée"
+
+#. module: delivery_carrier_label_colisprive
+#: code:_description:0
+#: model:ir.model,name:delivery_carrier_label_colisprive.model_stock_picking_out
+#, python-format
+msgid "Delivery Orders"
+msgstr "Bons de livraison"
+
+#. module: delivery_carrier_label_colisprive
+#: field:delivery.carrier.file,destype:0
+msgid "DestType"
+msgstr "DestType"
+
+#. module: delivery_carrier_label_colisprive
+#: code:addons/delivery_carrier_label_colisprive/colisprive/web_service.py:61
+#, python-format
+msgid "Error"
+msgstr "Erreur"
+
+#. module: delivery_carrier_label_colisprive
+#: model:email.template,subject:delivery_carrier_label_colisprive.web_service_error_template_mail
+msgid "Error with Colis Privé Web Service"
+msgstr "Erreur avec le Web Service Colis Privé"
+
+#. module: delivery_carrier_label_colisprive
+#: code:addons/delivery_carrier_label_colisprive/stock.py:106
+#, python-format
+msgid "Impossible delivery: There is an error with the Web service '%s'. Please contact your administrator"
+msgstr "Livraison impossible: Il y a une erreur avec le Web service '%s'. Merci de contacter votre administrateur"
+
+#. module: delivery_carrier_label_colisprive
+#: field:delivery.carrier.file,ispcl_withpod:0
+msgid "IsPclWithPOD"
+msgstr "IsPclWithPOD"
+
+#. module: delivery_carrier_label_colisprive
+#: model:ir.model,name:delivery_carrier_label_colisprive.model_stock_picking
+msgid "Packing List"
+msgstr "Liste de colisage"
+
+#. module: delivery_carrier_label_colisprive
+#: code:_description:0
+#, python-format
+msgid "Picking List"
+msgstr "Liste de colisage"
+
+#. module: delivery_carrier_label_colisprive
+#: code:addons/delivery_carrier_label_colisprive/stock.py:54
+#, python-format
+msgid "There is an error with the Web service for the picking %s: %s"
+msgstr "Il y a une erreur avec le Web service pour le bon de livraison %s: %s"
+
+#. module: delivery_carrier_label_colisprive
+#: code:addons/delivery_carrier_label_colisprive/colisprive/web_service.py:62
+#, python-format
+msgid "There is an error with the web service url"
+msgstr "Il y a une erreur avec l'url du web service"
+
+#. module: delivery_carrier_label_colisprive
+#: field:delivery.carrier,ws_url:0
+msgid "URL for the WS"
+msgstr "URL pour le WS"
+
+#. module: delivery_carrier_label_colisprive
+#: field:delivery.carrier,ws_customer_id:0
+msgid "WS Customer ID"
+msgstr "ID Client WS"
+
+#. module: delivery_carrier_label_colisprive
+#: field:delivery.carrier,ws_account_id:0
+msgid "WS account ID"
+msgstr "ID Compte WS"
+
+#. module: delivery_carrier_label_colisprive
+#: code:addons/delivery_carrier_label_colisprive/stock.py:56
+#, python-format
+msgid "WS error with %s"
+msgstr "Erreur WS avec %s"
+
+#. module: delivery_carrier_label_colisprive
+#: field:delivery.carrier,ws_password:0
+msgid "WS password"
+msgstr "Mot de passe WS"
+
+#. module: delivery_carrier_label_colisprive
+#: field:delivery.carrier,ws_username:0
+msgid "WS username"
+msgstr "login WS"
+
+#. module: delivery_carrier_label_colisprive
+#: view:delivery.carrier:0
+msgid "Web Service Options"
+msgstr "Options Web Service"
+
+#. module: delivery_carrier_label_colisprive
+#: code:addons/delivery_carrier_label_colisprive/generator/colisprive_generator.py:52
+#, python-format
+msgid "You can't print again a label the day after it had been delivered"
+msgstr "Vous ne pouvez pas réimprimer l'étiquette du bon après le jour de sa livraison"
+
+#. module: delivery_carrier_label_colisprive
+#: code:_description:0
+#: model:ir.model,name:delivery_carrier_label_colisprive.model_delivery_carrier_file
+#, python-format
+msgid "delivery.carrier.file"
+msgstr "delivery.carrier.file"
+
+#. module: delivery_carrier_label_colisprive
+#: model:ir.model,name:delivery_carrier_label_colisprive.model_res_company
+msgid "res.company"
+msgstr "res.company"
+
