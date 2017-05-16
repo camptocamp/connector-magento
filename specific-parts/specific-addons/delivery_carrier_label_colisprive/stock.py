@@ -89,7 +89,7 @@ class stock_picking(orm.Model):
             # Check the edifact_sent of the purchase
             purchase_edi = False
             sale_id = picking.sale_id and picking.sale_id.id or False
-            if sale_id:
+            if sale_id and picking.name and picking.name.startswith('in_'):
                 purchase_obj = self.pool['purchase.order']
                 purchase_order_ids = purchase_obj.search(
                     cr, uid, [('sale_id', '=', sale_id)], context=context)
