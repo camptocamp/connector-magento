@@ -54,7 +54,7 @@ def _write_file(self, cr, uid, carrier_file, filename, file_content,
     cr.add_transaction_action(write_file, full_path, file_content)
     return True
 
-base_carrier_file = base_delivery_carrier_files.carrier_file.carrier_file
+base_carrier_file = base_delivery_carrier_files.carrier_file.CarrierFile
 base_carrier_file._write_file = _write_file
 
 
