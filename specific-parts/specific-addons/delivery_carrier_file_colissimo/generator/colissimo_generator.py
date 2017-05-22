@@ -19,95 +19,141 @@
 #
 ##############################################################################
 
-import csv
-
 from openerp.addons.base_delivery_carrier_files.generator \
     import CarrierFileGenerator
 from openerp.addons.base_delivery_carrier_files.generator import BaseLine
 from openerp.addons.base_delivery_carrier_files.csv_writer \
     import UnicodeWriter
+from datetime import datetime
+from openerp.osv import orm
+from tools.translate import _
+
+REQUIRED_FIELDS = {
+    'record_type':  _('Record type'),
+    'product_code': _('Product code'),
+    'recipient_name': _('Recipient name'),
+    'address_1': _('Recipient first address'),
+    'recipient_zip': _('Recipient zip'),
+    'recipient_town': _('Recipient city'),
+    'exped_trading_name': _('Expeditor trading name'),
+}
+
+MR = ['Monsieur', 'M.', 'M', 'Mr.', 'Mr']
+MME = ['Madame', 'Mme', 'Mme.']
+MLLE = ['Mademoiselle', 'Mlle', 'Mlle.']
 
 
 class ColissimoLine(BaseLine):
-    fields = (('record_type', 3),
-              ('parcel_reference', 35),
-              ('exped_date', 8),
-              ('product_code', 4),
-              ('recipient_name', 35),
-              ('address_1', 35),
-              ('address_2', 35),
-              ('address_3', 35),
-              ('recipient_zip', 9),
-              ('recipient_town', 35),
-              ('recipient_country_code', 3),
-              ('delivery_instructions', 70),
-              ('weight', 15),
-              ('phone_nb', 25),
-              ('recipient_mail', 75),
-              ('address_4', 35),
-              ('order_nb', 35),
-              ('recipient_title', 1),
-              ('recipient_first_name', 29),
-              ('recipient_busi_name', 38),
-              ('recipient_mobile', 10),
-              ('parcel_point', 6),
-              ('exped_trading_name', 38),)
+    fields = (('record_type', [3, 1]),
+              ('parcel_reference', [35, 4]),
+              ('exped_date', [8, 39]),
+              ('product_code', [4, 47]),
+              ('recipient_name', [35, 74]),
+              ('address_1', [35, 109]),
+              ('address_2', [35, 144]),
+              ('address_3', [35, 179]),
+              ('recipient_zip', [9, 214]),
+              ('recipient_town', [35, 223]),
+              ('recipient_country_code', [3, 258]),
+              ('delivery_instructions', [70, 261]),
+              ('weight', [15, 343]),
+              ('phone_nb', [25, 412]),
+              ('recipient_mail', [75, 445]),
+              ('address_4', [35, 600]),
+              ('order_nb', [35, 670]),
+              ('recipient_title', [1, 778]),
+              ('recipient_first_name', [29, 779]),
+              ('recipient_busi_name', [38, 808]),
+              ('recipient_mobile', [10, 846]),
+              ('parcel_point', [6, 902]),
+              ('exped_trading_name', [38, 909]),)
 
 
 class ColissimoRows(object):
 
-    def __init__(self, picking, configuration):
+    def __init__(self, picking, configuration, package_nb):
         self.picking = picking
         self.configuration = configuration
+        self.package_nb = package_nb
 
     def _line(self):
-        configuration = self.configuration
         picking = self.picking
+        package_nb = self.package_nb
+        carrier = picking.carrier_id
+        datetime_date_done = datetime.strptime(picking.date_done,
+                                               '%Y-%m-%d %H:%M:%S')
+        date_done = datetime.strftime(datetime_date_done, '%Y-%m-%d %H:%M:%S')
 
         line = ColissimoLine()
-        line.subaccount = configuration.subaccount_number
-        line.chrono_product = configuration.chronopost_code
-        line.saturday_delivery = configuration.saturday_delivery_code
-        line.insurance_amount = configuration.chronopost_insurance or '0.0'
-
-        address = picking.partner_id
-        if address:
-            if address.parent_id:
-                line.client_code = address.parent_id.id
+        # Configuration line (from delivery.carrier.file)
+        line.product_code = carrier.product_code or ''
+        line.exped_trading_name = carrier.expeditor_name
+        line.record_type = 'EXP'
+        # Information from picking
+        line.parcel_reference = picking.name
+        line.exped_date = '%s%s%s' % (
+            date_done[:4],
+            date_done[5:7],
+            date_done[8:10]
+        )
+        partner = picking.partner_id
+        if partner:
+            title = 0
+            busi_name = ''
+            # To find the partner's first name and last name, we split the
+            # complete name of the partner. First string is considered first
+            # name
+            if partner.is_company:
+                busi_name = partner.title and partner.title.name or ''
+                partner_name = partner.name
+                partner_first_name = ''
             else:
-                line.client_code = address.id
-            line.name1 = address.name
+                split_name = partner.name.split(' ', 1)
+                if len(split_name) > 1:
+                    partner_first_name = split_name[0]
+                    partner_name = split_name[1]
+                else:
+                    partner_first_name = ''
+                    partner_name = partner.name
+                shortcut = partner.title and\
+                    partner.title.shortcut.lower() or False
+                if shortcut:
+                    if shortcut in [part_title.lower() for part_title in MR]:
+                        title = 2
+                    elif shortcut in [part_title.lower() for part_title
+                                      in MME]:
+                        title = 3
+                    elif shortcut in [part_title.lower() for part_title
+                                      in MLLE]:
+                        title = 4
+            line.recipient_title = title
+            line.recipient_busi_name = busi_name
+            line.address_1 = partner.street2 or ''
+            line.address_2 = partner.company or ''
+            line.address_3 = partner.street or ''
+            line.address_4 = ''
+            line.recipient_zip = partner.zip or ''
+            line.recipient_town = partner.city or ''
+            line.recipient_name = partner_name or ''
+            line.recipient_first_name = partner_first_name
+            line.recipient_country_code = partner.country_id and \
+                partner.country_id.code or ''
 
-            if address.company:
-                line.name2 = address.company
-            else:
-                if address.parent_id:
-                    parent = address.parent_id
-                    name = (address.name or '').strip().lower()
-                    parent_name = (parent.name or '').strip().lower()
-                    bindings = parent.magento_bind_ids
-                    if (name != parent_name and
-                        (not bindings or
-                         any(bind.consider_as_company for bind in bindings))):
-                        # probably a company name
-                        line.name2 = parent.name
+            line.phone_nb = partner.phone or ''
+            line.recipient_mail = partner.email or ''
+            line.recipient_mobile = partner.mobile or ''
+            line.parcel_point = ''
+            line.exped_trading_name = carrier.expeditor_name or ''
 
-            line.street1 = address.street
-            line.street2 = address.street2
-            line.zip = address.zip
-            line.city = address.city
-            country = address.country_id.code if address.country_id else False
-            line.country = country
-            line.phone = picking.sms_phone
-            line.email = address.email
-            if not line.email and address.parent_id:
-                line.email = address.parent_id.email
-
-        line.ref1 = picking.name
-        line.ref2 = picking.sale_id and picking.sale_id.name or False
-        line.weight = 0.5  # minimal weight
-        line.rep_amount = "%.2f" % picking.cash_on_delivery_amount
-        line.customs_amount = "%.2f" % picking.cash_on_delivery_amount_untaxed
+        sale = picking.sale_id
+        if sale:
+            line.delivery_instructions = 'COMMANDE : [%s] %s/%s' % (
+                sale.transaction_id,
+                package_nb,
+                picking.number_of_packages or 1,
+            )
+            line.order_nb = sale.transaction_id
+        line.weight = str(int((picking.weight or 500) * 1000)).rjust(15, '0')
         return line
 
     def rows(self):
@@ -120,13 +166,25 @@ class ColissimoRows(object):
                                             file to generate
         :return: list of rows
         """
-        line = self._line()
         lines = []
-        # output as many lines as number of packages
-        for x in xrange(self.picking.number_of_packages or 1):
-            lines.append(line.get_fields())
-
-        return lines
+        line_values = self._line()
+        last_position = 3
+        for field_def in line_values.fields:
+            value = str(getattr(line_values, field_def[0]))
+            if not value and field_def[0] in REQUIRED_FIELDS.keys():
+                raise orm.except_orm(_("Error"),
+                                     _("The field '%s' is required to print "
+                                       " Colissimo labels") % REQUIRED_FIELDS[
+                                         field_def[0]])
+            width = field_def[1][0]
+            position = field_def[1][1]
+            len_diff = (position - last_position)
+            if len_diff > 0:
+                lines.append(u'%*s' % (len_diff, ''))
+            lines.append(u'%-*.*s' % (width, width, value))
+            last_position = position + width
+        line = u''.join(lines)
+        return [[line]]
 
 
 class ColissimoFileGenerator(CarrierFileGenerator):
@@ -135,8 +193,8 @@ class ColissimoFileGenerator(CarrierFileGenerator):
     def carrier_for(cls, carrier_name):
         return carrier_name == 'colissimo'
 
-    def _get_rows(self, picking, configuration):
-        gen = ColissimoRows(picking, configuration)
+    def _get_rows(self, picking, configuration, package_nb):
+        gen = ColissimoRows(picking, configuration, package_nb)
         return gen.rows()
 
     def _write_rows(self, file_handle, rows, configuration):
@@ -149,8 +207,42 @@ class ColissimoFileGenerator(CarrierFileGenerator):
                                             file to generate
         :return: the file_handle as StringIO with the rows written in it
         """
-        writer = UnicodeWriter(file_handle, delimiter=';', quotechar='"',
-                               lineterminator='\n', quoting=csv.QUOTE_ALL)
+        writer = UnicodeWriter(file_handle)
         writer.writerows(rows)
         return file_handle
 
+    def generate_files(self, pickings, configuration):
+        """
+        Forbid to group pickings printing with the carrier type 'colissimo'
+        """
+        if configuration.group_pickings:
+            if configuration.type == 'colissimo':
+                raise orm.except_orm(_("Error"),
+                                     _("You can't group pickings with carrier "
+                                       "type 'colissimo' because we need one "
+                                       "file per package"))
+            return self._generate_files_grouped(pickings, configuration)
+        else:
+            return self._generate_files_single(pickings, configuration)
+
+    def _generate_files_single(self, pickings, configuration):
+        """
+        Create one file per picking package
+        """
+        files = []
+        for picking in pickings:
+            total_packages = picking.number_of_packages or 1
+            for x in xrange(1, total_packages + 1):
+                filename = self._get_filename_single(picking, configuration)
+                filename = filename % (x)
+                filename = self.sanitize_filename(filename)
+                rows = self._get_rows(picking, configuration, x)
+                file_content = self._get_file(rows, configuration)
+                files.append((filename, file_content, [picking.id]))
+        return files
+
+    def _get_filename_single(self, picking, configuration, extension='txt'):
+        """
+        No date for colissimo files
+        """
+        return "%s_%s.%s" % (picking.name, '%s', extension)

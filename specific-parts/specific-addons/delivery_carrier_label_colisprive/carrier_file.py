@@ -25,7 +25,7 @@ from openerp.osv import orm, fields
 class carrier_file(orm.Model):
     _inherit = 'delivery.carrier.file'
 
-    def _get_type_selection(self, cr, uid, context=None):
+    def get_type_selection(self, cr, uid, context=None):
         """
             Add colis prive type
         """
@@ -36,7 +36,6 @@ class carrier_file(orm.Model):
         return result
 
     _columns = {
-        'type': fields.selection(_get_type_selection, 'Type', required=True),
         'destype': fields.char(string='DestType', size=12),
         'ispcl_withpod': fields.boolean(string='IsPclWithPOD'),
     }

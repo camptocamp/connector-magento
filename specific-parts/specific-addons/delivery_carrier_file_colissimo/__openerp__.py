@@ -33,8 +33,13 @@ Definition of the delivery carrier file for "Colissimo".
     'license': 'AGPL-3',
     'website': 'http://www.camptocamp.com',
     'depends': ['base_delivery_carrier_files',
-                'connector_ecommerce'],
-    'data': ['carrier_file_view.xml'],
+                'connector_ecommerce',
+                'import_tracking'],
+    'data': [
+        'data/colissimo_data.xml',
+        'carrier_file_view.xml',
+        'res_company_view.xml'
+    ],
     'test': [],
     'images': [],
     'installable': True,

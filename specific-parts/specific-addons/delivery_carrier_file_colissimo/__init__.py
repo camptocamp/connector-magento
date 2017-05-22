@@ -20,3 +20,6 @@
 ##############################################################################
 
 import carrier_file
+import generator
+import res_company
+import stock

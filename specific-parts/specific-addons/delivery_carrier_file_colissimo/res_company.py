@@ -19,35 +19,35 @@
 #
 ##############################################################################
 
+import os
+
 from openerp.osv import orm, fields
 
 
-class carrier_file(orm.Model):
-    _inherit = 'delivery.carrier.file'
+class res_company(orm.Model):
 
-    def get_type_selection(self, cr, uid, context=None):
-        """
-            Add colissimo type
-        """
-        result = super(carrier_file, self).get_type_selection(
-            cr, uid, context=context)
-        if 'colissimo' not in result:
-            result.append(('colissimo', 'Colissimo'))
-        return result
-
-
-class DeliveryCarrier(orm.Model):
-    _inherit = 'delivery.carrier'
-
-    def _get_carrier_type_selection(self, cr, uid, context=None):
-        """ Add colissimo type """
-        res = super(DeliveryCarrier, self)._get_carrier_type_selection(
-            cr, uid, context=context)
-        if 'colissimo' not in res:
-            res.append(('colissimo', 'Colissimo'))
-        return res
+    _inherit = 'res.company'
 
     _columns = {
-        'product_code': fields.char('Product code', size=4),
-        'expeditor_name': fields.char('Expeditor name', size=128),
+        'colissimo_file_path_in': fields.char(
+            'Path for Colissimo tracking number files',
+            help='Absolute path where the .txt files will be read to '
+                 'update the tracking reference.'),
+        'colissimo_archive_path': fields.char(
+            'Colissimo archives path'),
+        'colissimo_error_path': fields.char(
+            'Colissimo errors path'),
     }
+
+    def _check_colissimo_in_path(self, cr, uid, ids):
+        for company in self.browse(cr, uid, ids):
+            if not company.colissimo_file_path_in:
+                continue
+            if not os.path.exists(company.colissimo_file_path_in):
+                return False
+        return True
+
+    _constraints = [
+        (_check_colissimo_in_path,
+         'Error: the path for tracking number files does not exist.',
+         ['colissimo_file_path_in'])]
