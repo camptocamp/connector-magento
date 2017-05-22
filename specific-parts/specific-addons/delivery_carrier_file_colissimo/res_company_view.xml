@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+    <record model="ir.ui.view" id="company_colissimo_config">
+      <field name="name">res.company.colissimo.config</field>
+      <field name="model">res.company</field>
+      <field name="inherit_id" ref="import_tracking.company_csv_config"/>
+      <field name="arch" type="xml">
+        <page string="Debonix Specific Configuration" position="inside">
+            <group string="Colissimo">
+                <field name="colissimo_file_path_in"/>
+                <field name="colissimo_archive_path"/>
+                <field name="colissimo_error_path"/>
+            </group>
+        </page>
+      </field>
+    </record>
+
+  </data>
+</openerp>

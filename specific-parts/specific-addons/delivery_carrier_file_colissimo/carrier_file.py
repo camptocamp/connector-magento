@@ -27,36 +27,27 @@ class carrier_file(orm.Model):
 
     def get_type_selection(self, cr, uid, context=None):
         """
-            Add colis prive type
+            Add colissimo type
         """
         result = super(carrier_file, self).get_type_selection(
             cr, uid, context=context)
-        if 'colisprive' not in result:
-            result.append(('colisprive', 'Colisprive'))
+        if 'colissimo' not in result:
+            result.append(('colissimo', 'Colissimo'))
         return result
-
-    _columns = {
-        'destype': fields.char(string='DestType', size=12),
-        'ispcl_withpod': fields.boolean(string='IsPclWithPOD'),
-    }
 
 
 class DeliveryCarrier(orm.Model):
     _inherit = 'delivery.carrier'
 
     def _get_carrier_type_selection(self, cr, uid, context=None):
-        """ Add colisprive carrier type """
-        res = super(DeliveryCarrier, self
-                    )._get_carrier_type_selection(cr, uid, context=context)
-        if 'colisprive' not in res:
-            res.append(('colisprive', 'Colisprive'))
+        """ Add colissimo type """
+        res = super(DeliveryCarrier, self)._get_carrier_type_selection(
+            cr, uid, context=context)
+        if 'colissimo' not in res:
+            res.append(('colissimo', 'Colissimo'))
         return res
 
     _columns = {
-        'ws_url': fields.char(string='URL for the WS', size=120),
-        'ws_username': fields.char(string='WS username', size=24),
-        'ws_password': fields.char(string='WS password', size=24),
-        'ws_customer_id': fields.char(string='WS Customer ID', size=24),
-        'ws_account_id': fields.char(string='WS account ID', size=24),
-
+        'product_code': fields.char('Product code', size=4),
+        'expeditor_name': fields.char('Expeditor name', size=128),
     }

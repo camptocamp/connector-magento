@@ -25,7 +25,7 @@ from openerp.osv import orm, fields
 class carrier_file(orm.Model):
     _inherit = 'delivery.carrier.file'
 
-    def _get_type_selection(self, cr, uid, context=None):
+    def get_type_selection(self, cr, uid, context=None):
         result = super(carrier_file, self).get_type_selection(
             cr, uid, context=context)
         if 'chronopost' not in result:
@@ -35,7 +35,6 @@ class carrier_file(orm.Model):
         return result
 
     _columns = {
-        'type': fields.selection(_get_type_selection, 'Type', required=True),
         'subaccount_number':
             fields.char('Sub-Account Number',
                         size=3,
