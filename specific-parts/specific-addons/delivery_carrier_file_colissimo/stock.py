@@ -237,6 +237,20 @@ class stock_picking(orm.Model):
 
     def _manage_colissimo_errors(self, cr, uid, no_picking=False,
                                  errors='', context=None):
-        self._create_colissimo_claim_errors(cr, uid, no_picking, errors,
+        claim_id = self._create_colissimo_claim_errors(cr, uid, no_picking, errors,
                                             context=context)
+        if claim_id:
+            self._send_mail_colissimo_errors(cr, uid, claim_id, context=context)
+        return True
+
+    def _send_mail_colissimo_errors(self, cr, uid, claim_id, context=None):
+        """
+            Send a mail if there is an error with the colissimo import
+        """
+        data_obj = self.pool['ir.model.data']
+        email_obj = self.pool['email.template']
+        __, template_id = data_obj.get_object_reference(
+            cr, uid, 'delivery_carrier_file_colissimo',
+            'colissimo_import_error_template_mail')
+        email_obj.send_mail(cr, uid, template_id, claim_id, context=context)
         return True

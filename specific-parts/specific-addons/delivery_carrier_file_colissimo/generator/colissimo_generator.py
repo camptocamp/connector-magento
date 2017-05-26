@@ -27,12 +27,13 @@ from openerp.addons.base_delivery_carrier_files.csv_writer \
 from datetime import datetime
 from openerp.osv import orm
 from tools.translate import _
+from unidecode import unidecode
 
 REQUIRED_FIELDS = {
     'record_type':  _('Record type'),
     'product_code': _('Product code'),
     'recipient_name': _('Recipient name'),
-    'address_1': _('Recipient first address'),
+    'address_3': _('Recipient first address'),
     'recipient_zip': _('Recipient zip'),
     'recipient_town': _('Recipient city'),
     'exped_trading_name': _('Expeditor trading name'),
@@ -49,9 +50,9 @@ class ColissimoLine(BaseLine):
               ('exped_date', [8, 39]),
               ('product_code', [4, 47]),
               ('recipient_name', [35, 74]),
-              ('address_1', [35, 109]),
+              ('address_3', [35, 109]),
               ('address_2', [35, 144]),
-              ('address_3', [35, 179]),
+              ('address_1', [35, 179]),
               ('recipient_zip', [9, 214]),
               ('recipient_town', [35, 223]),
               ('recipient_country_code', [3, 258]),
@@ -104,10 +105,11 @@ class ColissimoRows(object):
             # complete name of the partner. First string is considered first
             # name
             if partner.is_company:
-                busi_name = partner.title and partner.title.name or ''
+                busi_name = partner.company or ''
                 partner_name = partner.name
                 partner_first_name = ''
             else:
+                busi_name = partner.company or ''
                 split_name = partner.name.split(' ', 1)
                 if len(split_name) > 1:
                     partner_first_name = split_name[0]
@@ -128,12 +130,16 @@ class ColissimoRows(object):
                         title = 4
             line.recipient_title = title
             line.recipient_busi_name = busi_name
-            line.address_1 = partner.street2 or ''
-            line.address_2 = partner.company or ''
+            line.address_1 = ''
+            line.address_2 = partner.street2 or ''
             line.address_3 = partner.street or ''
             line.address_4 = ''
             line.recipient_zip = partner.zip or ''
-            line.recipient_town = partner.city or ''
+            if partner.city:
+                city = unidecode(partner.city.upper())
+            else:
+                city = ''
+            line.recipient_town = city
             line.recipient_name = partner_name or ''
             line.recipient_first_name = partner_first_name
             line.recipient_country_code = partner.country_id and \
@@ -141,19 +147,19 @@ class ColissimoRows(object):
 
             line.phone_nb = partner.phone or ''
             line.recipient_mail = partner.email or ''
-            line.recipient_mobile = partner.mobile or ''
-            line.parcel_point = ''
+            line.recipient_mobile = partner.mobile or partner.phone or ''
+            line.parcel_point = partner.mag_chronorelais_code or ''
             line.exped_trading_name = carrier.expeditor_name or ''
 
         sale = picking.sale_id
         if sale:
-            line.delivery_instructions = 'COMMANDE : [%s] %s/%s' % (
-                sale.transaction_id,
+            line.delivery_instructions = 'COMMANDE : %s %s/%s' % (
+                sale.name,
                 package_nb,
                 picking.number_of_packages or 1,
             )
-            line.order_nb = sale.transaction_id
-        line.weight = str(int((picking.weight or 500) * 1000)).rjust(15, '0')
+            line.order_nb = sale.name
+        line.weight = str(int((picking.weight or 0.500) * 1000)).rjust(15, '0')
         return line
 
     def rows(self):
@@ -170,7 +176,10 @@ class ColissimoRows(object):
         line_values = self._line()
         last_position = 3
         for field_def in line_values.fields:
-            value = str(getattr(line_values, field_def[0]))
+            if isinstance(getattr(line_values, field_def[0]), (int, float)):
+                value = str(getattr(line_values, field_def[0]))
+            else:
+                value = u''.join(getattr(line_values, field_def[0]))
             if not value and field_def[0] in REQUIRED_FIELDS.keys():
                 raise orm.except_orm(_("Error"),
                                      _("The field '%s' is required to print "
