@@ -100,7 +100,6 @@ class ColissimoRows(object):
         partner = picking.partner_id
         if partner:
             title = 0
-            busi_name = ''
             # To find the partner's first name and last name, we split the
             # complete name of the partner. First string is considered first
             # name

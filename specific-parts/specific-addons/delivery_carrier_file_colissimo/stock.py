@@ -150,13 +150,8 @@ class stock_picking(orm.Model):
         file_error = False
         with open(filepath, 'r') as trackfile:
             reader = csv.reader(trackfile, delimiter=';')
-            line_nb = 0
             for line in reader:
                 if not line:  # handle empty lines
-                    continue
-                # Ignore first line
-                if line_nb == 0:
-                    line_nb += 1
                     continue
                 try:
                     tracking_ref = line[0].strip()
