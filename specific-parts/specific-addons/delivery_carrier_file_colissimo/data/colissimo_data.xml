@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+
+        <!-- Add colissimo claim category -->
+        <record model="crm.case.categ" id="categ_claim_colissimo_incident">
+            <field name="name">Colissimo - Erreur expedition</field>
+            <field name="section_id" ref="stockit_synchro.section_stockit_error"/>
+            <field name="object_id" search="[('model','=','crm.claim')]" model="ir.model"/>
+        </record>
+
+        <!-- Add colissimo partner -->
+        <record id="colissimo_partner" model="res.partner">
+            <field name="name">COLISSIMO</field>
+            <field name="country_id" search="[('code','=','FR')]" model="res.country"/>
+        </record>
+
+        <record id="ir_cron_colissimo_tracking_ref_update" model="ir.cron">
+            <field name="name">Import Colissimo tracking references</field>
+            <field name="interval_number">6</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'stock.picking'" name="model"/>
+            <field eval="'import_colissimo_tracking_references'" name="function"/>
+            <field eval="'()'" name="args"/>
+        </record>
+
+        <!--Colissimo error Email template -->
+        <record id="colissimo_import_error_template_mail" model="email.template">
+            <field name="name">Colissimo tracking errors</field>
+            <field name="email_from">contact@debonix.fr</field>
+            <field name="email_recipients"></field>
+            <field name="subject">Error with Colissimo tracking </field>
+            <field name="email_to">info-dsi@debonix.fr</field>
+            <field name="model_id" ref="crm_claim.model_crm_claim"/>
+            <field name="auto_delete" eval="True"/>
+            <field name="lang">${user.lang or 'fr_FR'}</field>
+            <field name="body_html"><![CDATA[
+            <div style="font-family: 'Lucida Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; ">
+
+            <p>Hello,</p>
+
+            <p>There was an error with the colissimo import tracking number</p>
+
+            </div>
+            ]]></field>
+        </record>
+
+    </data>
+</openerp>
