@@ -115,7 +115,9 @@ class ColisPriveWebService(object):
                     mobile_num = mobile_num[1:]
                 elif mobile_num[:4] in ['+336', '+337']:
                     mobile_num = mobile_num[3:]
-            if (not mobile_num[:2] in ['06', '07']) and (
+                else:
+                    mobile_num = '06'
+            elif (not mobile_num[:2] in ['06', '07']) and (
             not mobile_num[:4] in ['+336', '+337']):
                 valid_number = False
         if not valid_number:
