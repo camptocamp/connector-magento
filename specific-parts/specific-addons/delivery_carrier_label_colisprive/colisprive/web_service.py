@@ -89,7 +89,7 @@ class ColisPriveWebService(object):
         }
         return envelope
 
-    def _prepare_customer_info(self, picking, carrier_file):
+    def _prepare_customer_info(self, picking):
         """
             Set the common envelope part sent to colis prive
         """
@@ -109,15 +109,7 @@ class ColisPriveWebService(object):
         else:
             valid_number = False
         if valid_number:
-            DestType = carrier_file and carrier_file.destype or ''
-            if DestType == 'LOCKER':
-                if mobile_num[:2] in ['06', '07']:
-                    mobile_num = mobile_num[1:]
-                elif mobile_num[:4] in ['+336', '+337']:
-                    mobile_num = mobile_num[3:]
-                else:
-                    mobile_num = '06'
-            elif (not mobile_num[:2] in ['06', '07']) and (
+            if (not mobile_num[:2] in ['06', '07']) and (
             not mobile_num[:4] in ['+336', '+337']):
                 valid_number = False
         if not valid_number:
@@ -171,8 +163,7 @@ class ColisPriveWebService(object):
             Call all the methods to create the envelope for colis prive
         """
         envelope = self._prepare_security(carrier)
-        envelope.update(self._prepare_customer_info(picking,
-                                                    carrier.carrier_file_id))
+        envelope.update(self._prepare_customer_info(picking))
         envelope.update(self._prepare_label_info(picking,
                                                  carrier.carrier_file_id))
         return envelope
