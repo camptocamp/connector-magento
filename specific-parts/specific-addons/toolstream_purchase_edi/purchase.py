@@ -96,9 +96,10 @@ class PurchaseOrder(orm.Model):
                  'name': filename,
                  'datas_fname': filename},
                 context=context)
-            message_id = mail_obj.create(
-                cr, uid,  {'subject': toolstream_account_id,
+            mail_values = {'subject': toolstream_account_id,
                            'email_to': company.toolstream_email_address,
-                           'attachment_ids': [(6, 0, [attachment_id])]},
-                context=context)
+                           'attachment_ids': [(6, 0, [attachment_id])]}
+            if company.toolstream_email_cc_address:
+                mail_values['email_cc'] = company.toolstream_email_cc_address
+            message_id = mail_obj.create(cr, uid, mail_values, context=context)
             mail_obj.send(cr, uid, [message_id], context=context)
