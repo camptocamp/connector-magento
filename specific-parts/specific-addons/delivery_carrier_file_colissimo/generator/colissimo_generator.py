@@ -215,7 +215,7 @@ class ColissimoFileGenerator(CarrierFileGenerator):
                                             file to generate
         :return: the file_handle as StringIO with the rows written in it
         """
-        writer = UnicodeWriter(file_handle)
+        writer = UnicodeWriter(file_handle, delimiter=';')
         writer.writerows(rows)
         return file_handle
 
