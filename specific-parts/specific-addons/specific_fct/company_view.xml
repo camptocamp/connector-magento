@@ -27,6 +27,7 @@
           </group>
           <group string="Toolstream export">
             <field name="toolstream_email_address"/>
+            <field name="toolstream_email_cc_address"/>
           </group>
         </page>
       </field>
