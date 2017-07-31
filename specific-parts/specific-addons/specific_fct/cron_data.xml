@@ -13,6 +13,18 @@
       <field eval="'()'" name="args"/>
     </record>
 
+    <record id="ir_cron_sogedesca_suppliers" model="ir.cron">
+      <field name="name">Remove other suppliers from SOGEDESCA products</field>
+      <field name="interval_number">1</field>
+      <field name="interval_type">days</field>
+      <field name="numbercall">-1</field>
+      <field eval="False" name="doall"/>
+      <field eval="True" name="active"/>
+      <field eval="'product.supplierinfo'" name="model"/>
+      <field eval="'remove_other_suppliers_sogedesca_products'" name="function"/>
+      <field eval="'()'" name="args"/>
+    </record>
+
     <record model="mail.group" id="group_sftp_invoice">
       <field name="name">SFTP connection issues</field>
       <field name="group_ids" eval="[(4, ref('stock.group_stock_manager'))]"/>

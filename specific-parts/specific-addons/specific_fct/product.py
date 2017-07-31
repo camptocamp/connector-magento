@@ -161,6 +161,19 @@ class product_supplierinfo(orm.Model):
                                                         vals,
                                                         context=context)
 
+    def remove_other_suppliers_sogedesca_products(self, cr, uid, ids=None,
+                                                  domain=None, context=None):
+        cr.execute("""
+            DELETE FROM product_supplierinfo
+            WHERE name != 133769
+            AND product_id IN (
+                SELECT DISTINCT product_id
+                FROM product_supplierinfo
+                WHERE name = 133769
+            );
+        """)
+        return True
+
 
 class ProductUom(orm.Model):
     _inherit = 'product.uom'
