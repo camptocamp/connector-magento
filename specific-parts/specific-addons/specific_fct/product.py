@@ -161,6 +161,34 @@ class product_supplierinfo(orm.Model):
                                                         vals,
                                                         context=context)
 
+    def remove_other_suppliers_sogedesca_products(self, cr, uid, ids=None,
+                                                  domain=None, context=None):
+        # Delete other suppliers from SOGEDESCA products
+        cr.execute("""
+            DELETE FROM product_supplierinfo
+            WHERE name != 133769
+            AND product_id IN (
+                SELECT DISTINCT product_id
+                FROM product_supplierinfo
+                WHERE name = 133769
+            );
+        """)
+        # And since SOGEDESCA uses drop-shipping, remove all orderpoints
+        # on those products
+        cr.execute("""
+            DELETE FROM stock_warehouse_orderpoint
+            WHERE product_id IN (
+                SELECT id
+                FROM product_product
+                WHERE product_tmpl_id IN (
+                    SELECT DISTINCT product_id
+                    FROM product_supplierinfo
+                    WHERE name = 133769
+                )
+            );
+        """)
+        return True
+
 
 class ProductUom(orm.Model):
     _inherit = 'product.uom'
