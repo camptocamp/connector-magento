@@ -54,9 +54,9 @@ function create_virtualenv() {
 }
 
 function ensure_cfg(){
-    if [ ! -e buildout.cfg ]
+    if [ ! -a buildout.cfg ]
     then
-        if [ -e $1 ]
+        if [ -a $1 ]
         then
             (cat <<EOF
 [buildout]
@@ -75,6 +75,7 @@ function bootstrap() {
     ensure_cfg $1
     sandbox/bin/python bootstrap.py --setuptools-version=33.1.1
 }
+ 
 
 
 bootstrap $*
