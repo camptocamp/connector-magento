@@ -24,7 +24,8 @@
  'author': 'Camptocamp',
  'maintainter': 'Camptocamp',
  'category': 'Purchase',
- 'depends': ['purchase'],
+ 'depends': ['purchase',
+             'stockit_synchro'],
  'description': """
 
 Generate EDIFACT messages from purchase_orders
