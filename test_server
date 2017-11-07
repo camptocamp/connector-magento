@@ -147,6 +147,7 @@ def main():
     test_loghandler = None
     options += ["--test-enable"]
     test_loglevel = 'test'
+    python_path = os.path.join(travis_home, 'sandbox', 'bin', 'python')
     server_path = os.path.join(travis_home, 'bin', 'start_openerp')
 
     if odoo_include:
@@ -177,7 +178,8 @@ def main():
     subprocess.check_call(["createdb", dbtemplate])
 
     preinstall_modules = 'mail' if odoo_unittest else tested_addons
-    cmd_odoo = [server_path,
+    cmd_odoo = [python_path,
+                server_path,
                 "-d", dbtemplate,
                 "--log-level=warn",
                 "--stop-after-init",
@@ -189,13 +191,14 @@ def main():
     # Running tests
     if odoo_unittest:
         to_test_list = tested_addons_list
-        cmd_odoo_install = [server_path,
+        cmd_odoo_install = [python_path,
+                            server_path,
                             "-d", database,
                             "--stop-after-init",
                             "--log-level=warn",
                             ] + install_options + ["--init", None]
 
-        cmd_odoo_test = ["coverage", "run",
+        cmd_odoo_test = [python_path,
                          server_path,
                          "-d", database,
                          "--stop-after-init",
@@ -210,7 +213,7 @@ def main():
                     )
     else:
         to_test_list = [tested_addons]
-        cmd_odoo_test = ["coverage", "run",
+        cmd_odoo_test = [python_path,
                          server_path,
                          "-d", database,
                          "--stop-after-init",
