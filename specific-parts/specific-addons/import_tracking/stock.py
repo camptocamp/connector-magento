@@ -48,12 +48,15 @@ class stock_picking(orm.Model):
         """ Update the tracking reference of a packing
             tracking reference is updated only for packing (Outgoing Products)
             update only tracking references not already set
+            
+            Return flag indicating if the file must be archived
         """
         picking_out_obj = self.pool['stock.picking.out']
         picking_ids = picking_out_obj.search(
             cr, uid,
             [('name', '=', packing_name),
-             ('carrier_tracking_ref', '=', False)],
+             '|', ('carrier_tracking_ref', '=', False),
+             ('carrier_tracking_ref', '=', '')],
             context=context)
         if picking_ids:
             picking_out_obj.write(
@@ -61,7 +64,20 @@ class stock_picking(orm.Model):
                 picking_ids,
                 {'carrier_tracking_ref': tracking_ref},
                 context=context)
-
+            # file will be archived
+            return True
+        else:
+            picking_ids = picking_out_obj.search(
+                cr, uid,
+                [('name', '=', packing_name)],
+                context=context)
+            if picking_ids:
+                # picking exists with a tracking ref
+                return True
+            else:
+                # picking not present
+                return False
+            
     def import_tracking_references(self, cr, uid, ids, context=None):
         """ Read the Chronopost file and update
             the stock picking with the tracking reference
@@ -93,8 +109,8 @@ class stock_picking(orm.Model):
                 total += 1
                 filepath = os.path.join(path, filename)
                 try:
-                    self._import_tracking_from_file(local_cr, uid, filepath,
-                                                    context=context)
+                    to_archive = self._import_tracking_from_file(
+                        local_cr, uid, filepath, context=context)
                 except Exception as err:
                     local_cr.rollback()
                     _logger.exception(
@@ -107,12 +123,14 @@ class stock_picking(orm.Model):
                         cr, uid, message, context=context)
                     continue
                 else:
-                    from_path = os.path.join(path, filename)
-                    to_path = os.path.join(archive_path, filename)
-                    shutil.move(from_path, to_path)
-                    # commit so if next file fails we won't lose
-                    # the imported trackings
-                    imported += 1
+                    if to_archive:
+                        from_path = os.path.join(path, filename)
+                        to_path = os.path.join(archive_path, filename)
+                        shutil.move(from_path, to_path)
+                        # commit so if next file fails we won't lose
+                        # the imported trackings
+                        imported += 1
+                    # else : the file stays in the input location
                     local_cr.commit()
 
         _logger.info('Processed %s tracking files out of %s. %s files '
@@ -138,6 +156,8 @@ class stock_picking(orm.Model):
 
     def _import_tracking_from_file(self, cr, uid, filepath, context=None):
         _logger.info('Started to import tracking number file %s', filepath)
+        
+        to_archive = True
         with open(filepath, 'r') as trackfile:
             reader = csv.reader(trackfile, delimiter=';')
 
@@ -166,9 +186,10 @@ class stock_picking(orm.Model):
                         context=context)
                     raise
                 if packing_name:
-                    self._update_tracking_references(
+                    to_archive = self._update_tracking_references(
                         cr, uid, packing_name, tracking_ref,
                         context=context)
+        return to_archive
 
     def run_import_tracking_references_scheduler(self, cr, uid, context=None):
         """ Scheduler for import tracking references """
