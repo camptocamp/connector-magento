@@ -226,6 +226,9 @@ class purchase_order(osv.Model):
             or '',
             'invoiceZipCode': invoice_address and invoice_address.zip or '',
             'invoiceCity': invoice_address and invoice_address.city or '',
+            'invoiceCountryCode': invoice_address
+            and invoice_address.country_id
+            and invoice_address.country_id.code or '',
             'invoiceTel': invoice_address and invoice_address.phone or '',
             'invoiceFax': invoice_address and invoice_address.fax or '',
             'commentaire': invoice_address and invoice_address.email or '',
@@ -263,6 +266,9 @@ class purchase_order(osv.Model):
                 'shippingCity': shipping_address
                 and shipping_address.city
                 or '',
+                'shippingCountryCode': shipping_address
+                and shipping_address.country_id
+                and shipping_address.country_id.code or '',
                 'shippingTel': shipping_address
                 and shipping_address.phone
                 or '',
