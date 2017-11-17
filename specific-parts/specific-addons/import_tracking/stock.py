@@ -48,7 +48,7 @@ class stock_picking(orm.Model):
         """ Update the tracking reference of a packing
             tracking reference is updated only for packing (Outgoing Products)
             update only tracking references not already set
-            
+
             Return flag indicating if the file must be archived
         """
         picking_out_obj = self.pool['stock.picking.out']
@@ -71,13 +71,9 @@ class stock_picking(orm.Model):
                 cr, uid,
                 [('name', '=', packing_name)],
                 context=context)
-            if picking_ids:
-                # picking exists with a tracking ref
-                return True
-            else:
-                # picking not present
-                return False
-            
+            # file kept in input if picking not present
+            return bool(picking_ids)
+
     def import_tracking_references(self, cr, uid, ids, context=None):
         """ Read the Chronopost file and update
             the stock picking with the tracking reference
@@ -127,10 +123,11 @@ class stock_picking(orm.Model):
                         from_path = os.path.join(path, filename)
                         to_path = os.path.join(archive_path, filename)
                         shutil.move(from_path, to_path)
-                        # commit so if next file fails we won't lose
-                        # the imported trackings
                         imported += 1
                     # else : the file stays in the input location
+
+                    # commit so if next file fails we won't lose
+                    # the imported trackings
                     local_cr.commit()
 
         _logger.info('Processed %s tracking files out of %s. %s files '
@@ -156,7 +153,7 @@ class stock_picking(orm.Model):
 
     def _import_tracking_from_file(self, cr, uid, filepath, context=None):
         _logger.info('Started to import tracking number file %s', filepath)
-        
+
         to_archive = True
         with open(filepath, 'r') as trackfile:
             reader = csv.reader(trackfile, delimiter=';')
