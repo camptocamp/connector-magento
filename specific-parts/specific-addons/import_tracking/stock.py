@@ -84,6 +84,9 @@ class stock_picking(orm.Model):
         archive_path = os.path.join(path, 'archives')
         if not os.path.exists(archive_path):
             os.mkdir(archive_path)
+        error_path = os.path.join(path, 'errors')
+        if not os.path.exists(error_path):
+            os.mkdir(error_path)
 
         _logger.info('Started to import tracking number files')
         # read each file and each line in directory
@@ -109,7 +112,10 @@ class stock_picking(orm.Model):
                                  "imported due to: %s") % (filepath, err))
                     self._post_import_tracking_error_message(
                         cr, uid, message, context=context)
-                    continue
+
+                    from_path = os.path.join(path, filename)
+                    to_path = os.path.join(error_path, filename)
+                    shutil.move(from_path, to_path)
                 else:
                     from_path = os.path.join(path, filename)
                     to_path = os.path.join(archive_path, filename)
