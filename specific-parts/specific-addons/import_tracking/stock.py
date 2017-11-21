@@ -64,15 +64,9 @@ class stock_picking(orm.Model):
                 picking_ids,
                 {'carrier_tracking_ref': tracking_ref},
                 context=context)
-            # file will be archived
-            return True
         else:
-            picking_ids = picking_out_obj.search(
-                cr, uid,
-                [('name', '=', packing_name)],
-                context=context)
-            # file kept in input if picking not present
-            return bool(picking_ids)
+            raise Exception('No suitable picking found for name %s' %
+                            packing_name)
 
     def import_tracking_references(self, cr, uid, ids, context=None):
         """ Read the Chronopost file and update
@@ -105,7 +99,7 @@ class stock_picking(orm.Model):
                 total += 1
                 filepath = os.path.join(path, filename)
                 try:
-                    to_archive = self._import_tracking_from_file(
+                    self._import_tracking_from_file(
                         local_cr, uid, filepath, context=context)
                 except Exception as err:
                     local_cr.rollback()
@@ -119,15 +113,12 @@ class stock_picking(orm.Model):
                         cr, uid, message, context=context)
                     continue
                 else:
-                    if to_archive:
-                        from_path = os.path.join(path, filename)
-                        to_path = os.path.join(archive_path, filename)
-                        shutil.move(from_path, to_path)
-                        imported += 1
-                    # else : the file stays in the input location
-
+                    from_path = os.path.join(path, filename)
+                    to_path = os.path.join(archive_path, filename)
+                    shutil.move(from_path, to_path)
                     # commit so if next file fails we won't lose
                     # the imported trackings
+                    imported += 1
                     local_cr.commit()
 
         _logger.info('Processed %s tracking files out of %s. %s files '
@@ -154,7 +145,6 @@ class stock_picking(orm.Model):
     def _import_tracking_from_file(self, cr, uid, filepath, context=None):
         _logger.info('Started to import tracking number file %s', filepath)
 
-        to_archive = True
         with open(filepath, 'r') as trackfile:
             reader = csv.reader(trackfile, delimiter=';')
 
@@ -183,10 +173,9 @@ class stock_picking(orm.Model):
                         context=context)
                     raise
                 if packing_name:
-                    to_archive = self._update_tracking_references(
+                    self._update_tracking_references(
                         cr, uid, packing_name, tracking_ref,
                         context=context)
-        return to_archive
 
     def run_import_tracking_references_scheduler(self, cr, uid, context=None):
         """ Scheduler for import tracking references """
