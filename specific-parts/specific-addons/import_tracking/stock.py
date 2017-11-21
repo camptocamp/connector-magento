@@ -48,8 +48,6 @@ class stock_picking(orm.Model):
         """ Update the tracking reference of a packing
             tracking reference is updated only for packing (Outgoing Products)
             update only tracking references not already set
-
-            Return flag indicating if the file must be archived
         """
         picking_out_obj = self.pool['stock.picking.out']
         picking_ids = picking_out_obj.search(
