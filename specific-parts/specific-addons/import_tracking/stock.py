@@ -53,7 +53,8 @@ class stock_picking(orm.Model):
         picking_ids = picking_out_obj.search(
             cr, uid,
             [('name', '=', packing_name),
-             ('carrier_tracking_ref', '=', False)],
+             '|', ('carrier_tracking_ref', '=', False),
+             ('carrier_tracking_ref', '=', '')],
             context=context)
         if picking_ids:
             picking_out_obj.write(
@@ -61,6 +62,9 @@ class stock_picking(orm.Model):
                 picking_ids,
                 {'carrier_tracking_ref': tracking_ref},
                 context=context)
+        else:
+            raise Exception('No suitable picking found for name %s' %
+                            packing_name)
 
     def import_tracking_references(self, cr, uid, ids, context=None):
         """ Read the Chronopost file and update
@@ -80,6 +84,9 @@ class stock_picking(orm.Model):
         archive_path = os.path.join(path, 'archives')
         if not os.path.exists(archive_path):
             os.mkdir(archive_path)
+        error_path = os.path.join(path, 'errors')
+        if not os.path.exists(error_path):
+            os.mkdir(error_path)
 
         _logger.info('Started to import tracking number files')
         # read each file and each line in directory
@@ -93,8 +100,8 @@ class stock_picking(orm.Model):
                 total += 1
                 filepath = os.path.join(path, filename)
                 try:
-                    self._import_tracking_from_file(local_cr, uid, filepath,
-                                                    context=context)
+                    self._import_tracking_from_file(
+                        local_cr, uid, filepath, context=context)
                 except Exception as err:
                     local_cr.rollback()
                     _logger.exception(
@@ -105,7 +112,10 @@ class stock_picking(orm.Model):
                                  "imported due to: %s") % (filepath, err))
                     self._post_import_tracking_error_message(
                         cr, uid, message, context=context)
-                    continue
+
+                    from_path = os.path.join(path, filename)
+                    to_path = os.path.join(error_path, filename)
+                    shutil.move(from_path, to_path)
                 else:
                     from_path = os.path.join(path, filename)
                     to_path = os.path.join(archive_path, filename)
@@ -138,6 +148,7 @@ class stock_picking(orm.Model):
 
     def _import_tracking_from_file(self, cr, uid, filepath, context=None):
         _logger.info('Started to import tracking number file %s', filepath)
+
         with open(filepath, 'r') as trackfile:
             reader = csv.reader(trackfile, delimiter=';')
 
