@@ -35,7 +35,7 @@ from openerp.tools.translate import _
 _logger = logging.getLogger(__name__)
 
 
-class ImportError(Exception):
+class FileImportError(Exception):
     pass
 
 
@@ -76,8 +76,8 @@ class stock_picking(orm.Model):
                         {'carrier_tracking_ref': carrier_tracking_ref},
                         context=context)
         else:
-            raise ImportError('No suitable picking found for name %s' %
-                              packing_name)
+            raise FileImportError('No suitable picking found for name %s' %
+                                  packing_name)
 
     def import_tracking_references(self, cr, uid, ids, context=None):
         """ Read the Chronopost file and update
