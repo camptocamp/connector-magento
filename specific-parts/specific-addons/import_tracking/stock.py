@@ -59,22 +59,25 @@ class stock_picking(orm.Model):
             context=context)
 
         if picking_ids:
-            pickings = picking_out_obj.browse(cr, uid, picking_ids)
+            pickings = picking_out_obj.browse(cr, uid, picking_ids,
+                                              context=context)
             for picking in pickings:
-                carrier_tracking_ref = picking.carrier_tracking_ref or ''
-                if tracking_ref not in carrier_tracking_ref:
-                    # tracking ref not already there : add
-                    if carrier_tracking_ref:
-                        carrier_tracking_ref += ' ; '
-                    carrier_tracking_ref += tracking_ref
+                if picking.carrier_tracking_ref:
+                    refs = [ref.strip() for ref in
+                            picking.carrier_tracking_ref.split(';')]
+                else:
+                    refs = []
+                if tracking_ref not in refs:
+                    refs.append(tracking_ref)
+                    carrier_tracking_ref = ' ; '.join(refs)
                     picking_out_obj.write(
                         cr, uid,
                         picking.id,
                         {'carrier_tracking_ref': carrier_tracking_ref},
                         context=context)
         else:
-            raise Exception('No suitable picking found for name %s' %
-                            packing_name)
+            raise ImportError('No suitable picking found for name %s' %
+                              packing_name)
 
     def import_tracking_references(self, cr, uid, ids, context=None):
         """ Read the Chronopost file and update
