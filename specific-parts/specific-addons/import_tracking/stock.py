@@ -35,7 +35,7 @@ from openerp.tools.translate import _
 _logger = logging.getLogger(__name__)
 
 
-class ImportError(Exception):
+class FileImportError(Exception):
     pass
 
 
@@ -47,24 +47,37 @@ class stock_picking(orm.Model):
                                     tracking_ref, context=None):
         """ Update the tracking reference of a packing
             tracking reference is updated only for packing (Outgoing Products)
-            update only tracking references not already set
+            if tracking reference is already set, concatenate new ref with ;
+            as requested by BIZ-824
         """
         picking_out_obj = self.pool['stock.picking.out']
+
+        # fetch the pickings even with a tracking ref already filled
         picking_ids = picking_out_obj.search(
             cr, uid,
-            [('name', '=', packing_name),
-             '|', ('carrier_tracking_ref', '=', False),
-             ('carrier_tracking_ref', '=', '')],
+            [('name', '=', packing_name)],
             context=context)
+
         if picking_ids:
-            picking_out_obj.write(
-                cr, uid,
-                picking_ids,
-                {'carrier_tracking_ref': tracking_ref},
-                context=context)
+            pickings = picking_out_obj.browse(cr, uid, picking_ids,
+                                              context=context)
+            for picking in pickings:
+                if picking.carrier_tracking_ref:
+                    refs = [ref.strip() for ref in
+                            picking.carrier_tracking_ref.split(';')]
+                else:
+                    refs = []
+                if tracking_ref not in refs:
+                    refs.append(tracking_ref)
+                    carrier_tracking_ref = ' ; '.join(refs)
+                    picking_out_obj.write(
+                        cr, uid,
+                        picking.id,
+                        {'carrier_tracking_ref': carrier_tracking_ref},
+                        context=context)
         else:
-            raise Exception('No suitable picking found for name %s' %
-                            packing_name)
+            raise FileImportError('No suitable picking found for name %s' %
+                                  packing_name)
 
     def import_tracking_references(self, cr, uid, ids, context=None):
         """ Read the Chronopost file and update
