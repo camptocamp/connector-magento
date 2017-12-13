@@ -69,7 +69,7 @@ class stock_picking(orm.Model):
                     refs = []
                 if tracking_ref not in refs:
                     refs.append(tracking_ref)
-                    carrier_tracking_ref = ' ; '.join(refs)
+                    carrier_tracking_ref = ';'.join(refs)
                     picking_out_obj.write(
                         cr, uid,
                         picking.id,
