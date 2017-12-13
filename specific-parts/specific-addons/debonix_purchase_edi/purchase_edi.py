@@ -308,6 +308,9 @@ class purchase_order(osv.Model):
                 'shippingCity': shipping_address
                 and shipping_address.city
                 or '',
+                'shippingCountryCode': shipping_address
+                and shipping_address.country_id
+                and shipping_address.country_id.code or '',
                 'shippingTel': shipping_address
                 and shipping_address.phone
                 or '',
