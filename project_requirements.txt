@@ -6,4 +6,3 @@ unicodecsv==0.9.4
 elasticsearch==1.6.0
 suds-jurko==0.6
 pystache==0.5.4
-pyPDF2==1.18
