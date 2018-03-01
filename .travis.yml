@@ -21,6 +21,7 @@ env:
 cache:
   directories:
     - ${HOME}/.eggs-cache
+    - parts
 
 virtualenv:
   system_site_packages: true
@@ -39,8 +40,7 @@ before_install:
   - echo -e "[buildout]\neggs-directory = "${HOME}"/.eggs-cache\n" > ~/.buildout/default.cfg
 
 install:
-  - echo -e "[buildout]\nextends = profiles/travis.cfg\n" > ${TRAVIS_BUILD_DIR}/buildout.cfg
-  - ${TRAVIS_BUILD_DIR}/bootstrap.sh
+  - ${TRAVIS_BUILD_DIR}/bootstrap.sh ${TRAVIS_BUILD_DIR}/profiles/travis.cfg
   - ${TRAVIS_BUILD_DIR}/bin/buildout
 
 before_script:

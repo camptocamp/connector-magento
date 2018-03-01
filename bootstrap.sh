@@ -54,9 +54,9 @@ function create_virtualenv() {
 }
 
 function ensure_cfg(){
-    if [ ! -a buildout.cfg ]
+    if [ ! -e buildout.cfg ]
     then
-        if [ -a $1 ]
+        if [ -e $1 ]
         then
             (cat <<EOF
 [buildout]
@@ -64,7 +64,7 @@ extends = $1
 EOF
             ) > buildout.cfg
         else
-            echo "No buildout.cfg found. Please supply one or pass the name of the file to extend on the command line"
+            echo "Please create the buildout.cfg file or pass the profile to use as argument, example: $ ./bootstrap.sh profiles/dev.cfg"
             exit 1
         fi
     fi
@@ -73,9 +73,8 @@ EOF
 function bootstrap() {
     create_virtualenv
     ensure_cfg $1
-    sandbox/bin/python bootstrap.py --setuptools-version=33.1.1
+    sandbox/bin/python bootstrap.py --version=2.3.1 --setuptools-version=33.1.0
 }
- 
 
 
 bootstrap $*
