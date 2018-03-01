@@ -4,8 +4,7 @@ addons:
   apt:
     packages:
     - libcups2-dev
-    - expect-dev
-    - wget
+    - expect-dev  # provides unbuffer utility
 
 language: python
 
@@ -19,19 +18,30 @@ python:
 env:
   - RUNTESTS=1 INCLUDE=last_sale_price
 
+cache:
+  directories:
+    - ${HOME}/.eggs-cache
+    - parts
+
 virtualenv:
   system_site_packages: true
 
 before_install:
-  - pip install invoke
+  - echo -e "Host bazaar.launchpad.net\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  - echo -e "Host bazaar.camptocamp.net\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  - mkdir -p ~/.bazaar
+  - echo -e "[DEFAULT]\nlaunchpad_username = camptocamp-business-robot\n" > ~/.bazaar/bazaar.conf
+  - echo -e "[Launchpad]\nhost = .launchpad.net\nuser = camptocamp-business-robot\n" > ~/.bazaar/authentication.conf
+  - echo -e "[c2cbazaar]\nhost = bazaar.camptocamp.net\nuser = openerp\n" >> ~/.bazaar/authentication.conf
   - git config --global user.name "TravisCI"
   - git config --global user.email "travis@camptocamp.com"
   - pip install -q flake8 flake8-debugger flake8-print coverage
+  - mkdir -p ${HOME}/.buildout
+  - echo -e "[buildout]\neggs-directory = "${HOME}"/.eggs-cache\n" > ~/.buildout/default.cfg
 
 install:
-  - git submodule update --init
-  - invoke env.init -s -r profiles/travis.cfg
-  - bin/buildout -N
+  - ${TRAVIS_BUILD_DIR}/bootstrap.sh ${TRAVIS_BUILD_DIR}/profiles/travis.cfg
+  - ${TRAVIS_BUILD_DIR}/bin/buildout
 
 before_script:
   - export DB_NAME=$(grep db_name ${TRAVIS_BUILD_DIR}/etc/openerp.cfg | cut -d ' ' -f 3)
@@ -40,4 +50,4 @@ before_script:
 
 script:
   - if [ -z "$RUNTESTS" ] ; then flake8 ${TRAVIS_BUILD_DIR}/specific-parts/specific-addons --exclude=__init__.py; fi
-  - if [ -n "$RUNTESTS" ] ; then ${TRAVIS_BUILD_DIR}/sandbox/bin/python ${TRAVIS_BUILD_DIR}/test_server; fi
+  - if [ -n "$RUNTESTS" ] ; then ${TRAVIS_BUILD_DIR}/test_server; fi
