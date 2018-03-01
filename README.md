@@ -4,6 +4,16 @@
 
 Private and customer specific branches for Debonix.
 
+# BE CAREFUL: THIS MASTER BRANCH IS TEMPORARY!
+
+In waiting that the customer switch on a new server, we can't use wheels.
+So, the wheels have been deleted from master, and the master with wheels have been saved here:
+https://github.com/camptocamp/debonix_openerp/tree/master_with_wheels
+
+When the customer will have this new server,
+we will need to add all commits done in master on the master_with_wheels branch,
+and to replace the master branch by master_with_wheels branch.
+
 ## Installation:
 
 Steps:
