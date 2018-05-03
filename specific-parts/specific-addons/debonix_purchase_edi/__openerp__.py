@@ -25,7 +25,8 @@
  'maintainter': 'Camptocamp',
  'category': 'Purchase',
  'depends': ['purchase',
-             'stockit_synchro'],
+             'stockit_synchro',
+             'delivery',],
  'description': """
 
 Generate EDIFACT messages from purchase_orders
@@ -47,7 +48,8 @@ vers les filiales souhaitées (TODO).
 """,
  'website': 'http://www.camptocamp.com',
  'data': ['purchase_edi_view.xml',
-          'purchase_edi_data.xml'],
+          'purchase_edi_data.xml',
+          'delivery_view.xml'],
  'tests': [],
  'installable': True,
  'auto_install': False,
