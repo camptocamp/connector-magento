@@ -239,7 +239,6 @@ class purchase_order(osv.Model):
 
         if shipping_address.mag_chronorelais_company:
             mapping.update({
-                'codeOrigine': 'DR',
                 'shippingAddr1': shipping_address
                 and shipping_address.name
                 and shipping_address.name[:35]
@@ -281,7 +280,6 @@ class purchase_order(osv.Model):
             })
         else:
             mapping.update({
-                'codeOrigine': 'DB',
                 'shippingAddr1': shipping_address
                 and shipping_address.name
                 and shipping_address.name[:35]
@@ -320,7 +318,13 @@ class purchase_order(osv.Model):
                 'codeServiceVendeur': ''
             })
         lines = []
-
+        if order.sale_id and order.sale_id.carrier_id \
+                and order.sale_id.carrier_id.origin_edi_code:
+            # We will get codeOrigine occording to value inside reference
+            mapping.update({'codeOrigine':
+                            order.sale_id.carrier_id.origin_edi_code})
+        else:
+            mapping.update({'codeOrigine': 'DB'})
         total_qty = 0
         for line_index, order_line in enumerate(order.order_line):
             product = order_line.product_id
