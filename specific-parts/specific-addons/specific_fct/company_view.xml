@@ -23,6 +23,11 @@
             <field name="edifact_purchase_import_path"/>
             <field name="edifact_purchase_import_file"/>
           </group>
+          <group string="EDIFACT Supplier Invoice">
+            <field name="edifact_supplier_invoice_import_path"/>
+            <field name="edifact_supplier_invoice_import_success_path"/>
+            <field name="edifact_supplier_invoice_import_error_path"/>
+          </group>
           <group string="EDIFACT Email Error Regex">
             <field name="edifact_regex_ref"/>
             <field name="edifact_regex_errors"/>

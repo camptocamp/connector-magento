@@ -126,7 +126,22 @@ class res_company(orm.Model):
             multi='server_env'),
         'edifact_purchase_error_path': fields.function(
             _get_environment_config_by_id,
-            string="Error path",
+            string="Purchase error path",
+            type='char',
+            multi='server_env'),
+        'edifact_supplier_invoice_import_path': fields.function(
+            _get_environment_config_by_id,
+            string="Supplier invoice import path",
+            type='char',
+            multi='server_env'),
+        'edifact_supplier_invoice_import_success_path': fields.function(
+            _get_environment_config_by_id,
+            string="Supplier invoice success path",
+            type='char',
+            multi='server_env'),
+        'edifact_supplier_invoice_import_error_path': fields.function(
+            _get_environment_config_by_id,
+            string="Supplier invoice error path",
             type='char',
             multi='server_env'),
         'toolstream_email_address': fields.function(
