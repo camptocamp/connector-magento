@@ -4,6 +4,7 @@ import base64
 import yaml
 
 import openerp
+from support.tools import model
 
 #---------
 #from openerp.tools import yaml_import
@@ -55,9 +56,10 @@ def yaml_import(ctx, cr, module_name, fp, kind, mode='init'):
 
 def _fileopen(ctx, filename, mode='r'):
     tmp_path = ctx.feature.filename.split(os.path.sep)
-    tmp_path = tmp_path[1: tmp_path.index('features')] + ['data', '%s'%filename]
+    tmp_path = tmp_path[0: tmp_path.index('features')] + ['data', '%s'%filename]
     tmp_path = [str(x) for x in tmp_path]
     path = os.path.join('/', *tmp_path)
+    path = os.getcwd() + path
     assert os.path.exists(path)
     return open(path, mode)
 
