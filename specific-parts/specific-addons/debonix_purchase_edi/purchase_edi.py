@@ -69,9 +69,9 @@ class purchase_order(osv.Model):
         """
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         company = user.company_id
-        host = company.edifact_purchase_host
-        ftpuser = company.edifact_purchase_user
-        ftppass = company.edifact_purchase_password
+        host = company.edifact_host
+        ftpuser = company.edifact_user
+        ftppass = company.edifact_password
         droppath = company.edifact_purchase_path
 
         ids = self.search(cr, uid, ['&', ('edifact_sent', '=', True),
@@ -136,9 +136,9 @@ class purchase_order(osv.Model):
 
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         company = user.company_id
-        host = company.edifact_purchase_host
-        ftpuser = company.edifact_purchase_user
-        ftppass = company.edifact_purchase_password
+        host = company.edifact_host
+        ftpuser = company.edifact_user
+        ftppass = company.edifact_password
         droppath = company.edifact_purchase_path
 
         filename = '%s.edi' % order.name
