@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data noupdate="1">
-        <record model="crm.case.categ" id="crm_category_descours_cabaud">
-            <field name="name">Descours &amp; Cabaud</field>
+        <record model="crm.case.categ" id="crm_category_sogedesca">
+            <field name="name">SOGEDESCA</field>
         </record>
     </data>
 </openerp>
