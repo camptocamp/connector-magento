@@ -7,7 +7,8 @@ Feature: upgrade to 1.2.21
     Given I update the module list
     Given I install the required modules with dependencies:
       | name                                 |
-      | debonix_supplier_invoice_edi                 |
+      | specific_fct                         |
+      | debonix_supplier_invoice_edi         |
     Then my modules should have been installed and models reloaded
 
   Scenario: define supplier invoice EDI values for company debonix
