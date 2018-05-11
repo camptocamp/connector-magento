@@ -11,6 +11,7 @@
  'website': 'http://www.camptocamp.com',
  'data': [
      'data/crm_case_categ.xml',
+     'data/ir_cron.xml',
  ],
  'installable': True,
  }
