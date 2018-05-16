@@ -1,7 +1,12 @@
 <?xml version="1.0" ?>
 <openerp>
+  <data noupdate="1">
+      <!-- This group did exist on openerp v5 but still exists in the prod DB -->
+    <record id="product.group_product_manager" model="res.groups">
+        <field name="name">Product / Manager</field>
+    </record>
+  </data>
   <data noupdate="0">
-
     <record model="res.groups" id="group_debonix_purchase_user">
       <field name="name">Debonix Purchase User</field>
       <field name="implied_ids" eval="[

@@ -35,7 +35,15 @@
              'product_multi_ean',
              'point_of_sale',
              'account_constraints',
-             'base_delivery_carrier_files'
+             'base_delivery_carrier_files',
+             'intrastat_base',
+             'delivery_carrier_file_chronopost',
+             'mrp',
+             'document',
+             'account_payment',
+             'crm',
+             'hr',
+             'sale_dropshipping',
              ],
  'author': 'Camptocamp',
  'description': """Code customisation module
