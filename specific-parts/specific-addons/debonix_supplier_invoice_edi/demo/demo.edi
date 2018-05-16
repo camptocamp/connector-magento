@@ -1,0 +1,7 @@
+# Lines beginning with 100 represent header
+100INV00000001                                F 20180516                      20180615
+# Lines beginning with 200 represent lines
+200                                   TEST_EDI_01                                                                                                                                                                                                                                                                                              000000000001000                                          000000000111000000000000011000                                                                                                                                                                                              111111111
+200                                   TEST_EDI_01                                                                                                                                                                                                                                                                                              000000000002000                                          000000000444000000000000022000                                                                                                                                                                                              222222222
+# Lines beginning with FIN represent end of invoice
+FIN
