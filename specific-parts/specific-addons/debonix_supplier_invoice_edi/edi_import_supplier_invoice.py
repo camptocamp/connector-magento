@@ -138,6 +138,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                 'account_id': account.id,
                 'uos_id': product.uos_id.id,
                 'invoice_line_tax_id': [(6, 0, taxes_ids)],
+                'edi_line_amount': edi_line.get('line_amount')
             }
             invoice_line_vals.append(vals)
         return invoice_line_vals
