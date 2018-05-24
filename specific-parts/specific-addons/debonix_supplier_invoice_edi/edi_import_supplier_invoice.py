@@ -7,7 +7,12 @@ from datetime import datetime, timedelta
 from contextlib import contextmanager
 from StringIO import StringIO
 from openerp.osv import orm, fields, osv
+from openerp.tools import float_compare
 from openerp.tools.translate import _
+
+
+class EdifactPurchaseInvoiceParsingError(Exception):
+    pass
 
 
 class EdifactPurchaseInvoiceNotFound(Exception):
@@ -26,8 +31,28 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
 
     _name = 'edi.import.supplier.invoice'
 
+    @contextmanager
+    def ftp_connect(self, cr, uid, context=None):
+        """Yield an FTP connection according to edifact settings on company."""
+        company = self._get_company(cr, uid, context=context)
+        ftp_host = company.edifact_host
+        ftp_user = company.edifact_user
+        ftp_pw = company.edifact_password
+        ftp_import_path = company.edifact_supplier_invoice_import_path
+        ftp = False
+        try:
+            # Connect to FTP
+            ftp = ftplib.FTP(ftp_host, ftp_user, ftp_pw)
+            ftp.cwd(ftp_import_path)
+            yield ftp
+        except (socket.error, ftplib.Error) as err:
+            raise UserWarning("Could not connect to FTP : %s" % err.message)
+        finally:
+            if ftp:
+                ftp.close()
+
     def cron_import_edi_files(self, cr, uid, context=None):
-        """Connect to FTP, retrieve EDI files and update invoices."""
+        """Connect to FTP, retrieve EDI files and create/update invoices."""
         edi_file_invoices = {}
         with self.ftp_connect(cr, uid, context) as ftp:
             for filename in ftp.nlst():
@@ -36,207 +61,11 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                 data = StringIO()
                 ftp.retrbinary('RETR ' + filename, data.write)
                 data.seek(0)
-                edi_file_invoices[filename] = self.import_edi_file(data)
-        self.update_invoices(cr, uid, edi_file_invoices, context=context)
+                edi_file_invoices[filename] = self.parse_edi_file(data)
+        self.create_or_update_invoices(cr, uid, edi_file_invoices,
+                                       context=context)
 
-    def _find_invoice(self, cr, uid, purchase_number, context=None):
-        """Find the existing invoice from the purchase order number.
-        Raise an error if not found or multiple invoices found."""
-
-        company = self._get_company(cr, uid, context=context)
-        today_string = fields.date.context_today(self, cr, uid,
-                                                 context=context)
-        today = datetime.strptime(today_string, '%Y-%m-%d')
-        date_approve_limit = (
-                today - timedelta(days=company.edifact_supplier_invoice_days)
-        ).strftime('%Y-%m-%d')
-        purchase_order_obj = self.pool['purchase.order']
-        purchase_order_ids = purchase_order_obj.search(cr, uid, [
-            ('name', '=', purchase_number),
-            ('state', 'in', ('approved', 'except_picking',
-                             'except_invoice')),
-            ('shipped', '=', True),
-            ('date_approve', '>', date_approve_limit),
-            ('company_id', '=', company.id)
-        ], context=context)
-        if not purchase_order_ids:
-            raise EdifactPurchaseInvoiceNotFound(
-                _('Purchase order not found'))
-        purchase_order = purchase_order_obj.browse(
-            cr, uid, purchase_order_ids[0], context=context)
-        invoices = purchase_order.invoice_ids
-        if not invoices:
-            raise EdifactPurchaseInvoiceNotFound(
-                _('No invoice found for the purchase order'))
-        elif len(invoices) > 1:
-            raise EdifactPurchaseInvoiceNotFound(
-                _('Multiple invoices found for the same purchase order'))
-        return invoices[0]
-
-    def _get_code_products_dict(self, cr, uid, invoice, edi_values,
-                                context=None):
-        """Return a dict matching product_code from the EDI values with the
-        products from the invoice.
-        Raise an error if no existing product is found for the product_code
-        or if the product is not on the invoice.
-        """
-        edi_product_codes = [
-            l.get('product_code') for l in edi_values.get('lines')]
-        product_obj = self.pool['product.product']
-        product_ids = product_obj.search(cr, uid, [
-            ('default_code', 'in', edi_product_codes)], context=context)
-        products = product_obj.read(cr, uid, product_ids, ['default_code'],
-                                    context=context)
-        edi_products_codes_dict = {p['default_code']: p['id'] for p in
-                                   products}
-        not_found_product_codes = set(edi_product_codes) - set(
-            edi_products_codes_dict.keys())
-        if not_found_product_codes:
-            raise EdifactPurchaseInvoiceProductNotFound(
-                _('EDI products not found in the system'),
-                list(not_found_product_codes)
-            )
-        invoice_product_ids = [l.product_id.id for l in invoice.invoice_line]
-        not_found_products = set(edi_products_codes_dict.values()) - set(
-            invoice_product_ids)
-        if not_found_products:
-            raise EdifactPurchaseInvoiceProductNotFound(
-                _('EDI products not found on the invoice'),
-                not_found_products
-            )
-        return edi_products_codes_dict
-
-    def _prepare_new_invoice_lines(self, cr, uid, invoice, edi_lines,
-                                   edi_products_codes_dict, context=None):
-        """Prepare invoice line to create according to EDI lines"""
-        invoice_line_vals = []
-        for edi_line in edi_lines:
-            product_id = edi_products_codes_dict.get(
-                edi_line.get('product_code'))
-            product = self.pool['product.product'].browse(cr, uid, product_id,
-                                                          context=context)
-            account = product.property_account_expense or \
-                product.categ_id.property_account_expense_categ
-            if not account:
-                raise osv.except_osv(
-                    _('Error!'),
-                    _('Define expense account for this product: '
-                      '"%s" (id:%d).') % (product.name, product.id,))
-
-            supplier_taxes = product.supplier_taxes_id
-            # TODO Check because I'm not sure about this one
-            # TODO ? Define taxes and fiscal position on the test partner ?
-            fiscal_position = invoice.fiscal_position or \
-                invoice.partner_id.property_account_position
-            taxes_ids = self.pool['account.fiscal.position'].map_tax(
-                cr, uid, fiscal_position, supplier_taxes, context=context)
-            vals = {
-                'name': product.description,
-                'product_id': product.id,
-                'quantity': edi_line.get('quantity'),
-                'price_unit': edi_line.get('price_unit'),
-                'account_id': account.id,
-                'uos_id': product.uos_id.id,
-                'invoice_line_tax_id': [(6, 0, taxes_ids)],
-                'edi_line_amount': edi_line.get('line_amount')
-            }
-            invoice_line_vals.append(vals)
-        return invoice_line_vals
-
-    def update_invoices(self, cr, uid, edi_file_invoice_dict, context=None):
-        """Update existing invoices with new lines from the EDI files dict.
-        Raise an error if something unexpected happens."""
-        invoice_obj = self.pool['account.invoice']
-        invoice_line_obj = self.pool['account.invoice.line']
-        created_invoices = []
-        for filename, edi_invoices in edi_file_invoice_dict.iteritems():
-            for edi_invoice_values in edi_invoices:
-
-                invoice = self._find_invoice(cr, uid, edi_invoice_values.get(
-                    'purchase_number'), context=context)
-                invoice_obj.write(cr, uid, invoice.id, {
-                    'supplier_invoice_number': edi_invoice_values.get(
-                        'supplier_invoice_number'),
-                    'date_invoice': edi_invoice_values.get('date_invoice'),
-                    'date_due': edi_invoice_values.get('date_due'),
-                })
-
-                edi_products_codes_dict = self._get_code_products_dict(
-                    cr, uid, invoice, edi_invoice_values, context=context)
-
-                invoice_line_ids = [il.id for il in invoice.invoice_line]
-                invoice_obj.unlink(cr, uid, invoice_line_ids, context=context)
-
-                invoice_lines_vals = self._prepare_new_invoice_lines(
-                    cr, uid, invoice, edi_invoice_values.get('lines'),
-                    edi_products_codes_dict, context=context)
-
-                changed_invoice_lines_vals = []
-                # Call product onchange
-                for invoice_line_vals in invoice_lines_vals:
-                    changed_vals = invoice_line_obj.product_id_change(
-                        cr, uid, [], invoice_line_vals.get('product_id'),
-                        invoice_line_vals.get('uos_id'),
-                        qty=invoice_line_vals.get('quantity'),
-                        type=invoice.type,
-                        partner_id=invoice.partner_id.id,
-                        fposition_id=invoice.fiscal_position.id,
-                        price_unit=invoice_line_vals.get('price_unit'),
-                        currency_id=invoice.currency_id.id,
-                        context=context, company_id=invoice.company_id.id
-                    ).get('value')
-                    changed_invoice_lines_vals.append(changed_vals)
-
-                invoice_obj.write(cr, uid, invoice.id, {
-                    'invoice_line': [
-                        (0, False, vals) for vals in changed_invoice_lines_vals
-                    ],
-                }, context=context)
-
-                # Check totals
-                # As we can't match the newly created invoice line with the
-                # values coming from the EDI, we'll sum subtotals for each
-                # products
-                invoice_subtotals = {}
-                for invoice_line in invoice.invoice_line:
-                    default_code = invoice_line.product_id.default_code
-                    if default_code in invoice_subtotals.keys():
-                        invoice_subtotals[
-                            default_code] += invoice_line.price_subtotal
-                    else:
-                        invoice_subtotals[
-                            default_code] = invoice_line.price_subtotal
-                edi_subtotals = {}
-                for edi_line in edi_invoice_values.get('lines'):
-                    default_code = edi_line.get('product_code')
-                    if default_code in edi_subtotals:
-                        edi_subtotals[default_code] += edi_line.get(
-                            'line_amount')
-                    else:
-                        edi_subtotals[default_code] = edi_line.get(
-                            'line_amount')
-                if invoice_subtotals != edi_subtotals:
-                    subtotals_dict = self._get_subtotals_differences(
-                        invoice_subtotals, edi_subtotals)
-                    allowed_difference = self._get_company(
-                        cr, uid, context=context
-                    ).edifact_supplier_invoice_amount_difference
-                    diff_product_codes = {}
-                    for code, difference in subtotals_dict.iteritems():
-                        if difference > allowed_difference:
-                            diff_product_codes[code] = difference
-                    if diff_product_codes:
-                        raise EdifactPurchaseInvoiceTotalDifference(_(
-                            'Different subtotals between the imported EDI and '
-                            'updated invoice for these product codes',
-                            diff_product_codes
-                        ))
-                invoice_obj.invoice_validate(cr, uid, [invoice.id],
-                                             context=context)
-                created_invoices.append(invoice)
-        return created_invoices
-
-    def import_edi_file(self, data):
+    def parse_edi_file(self, data):
         """Parse the EDI file and return a dict with invoices values."""
         invoice_values = []
         temp_invoice_values = {}
@@ -282,39 +111,282 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                 temp_invoice_line_values = []
         return invoice_values
 
-    @contextmanager
-    def ftp_connect(self, cr, uid, context=None):
-        company = self._get_company(cr, uid, context=context)
-        ftp_host = company.edifact_host
-        ftp_user = company.edifact_user
-        ftp_pw = company.edifact_password
-        ftp_import_path = company.edifact_supplier_invoice_import_path
-        ftp = False
-        try:
-            # Connect to FTP
-            ftp = ftplib.FTP(ftp_host, ftp_user, ftp_pw)
-            ftp.cwd(ftp_import_path)
-            yield ftp
-        except (socket.error, ftplib.Error) as err:
-            raise UserWarning("Could not connect to FTP : %s" % err.message)
-        finally:
-            if ftp:
-                ftp.close()
+    def create_or_update_invoices(self, cr, uid, edi_file_invoice_dict,
+                                  context=None):
+        """Update invoice or create refund according to the invoice type."""
+        updated_invoices = []
+        created_refunds = []
+        for filename, edi_invoices in edi_file_invoice_dict.iteritems():
+            for edi_invoice_values in edi_invoices:
+                if edi_invoice_values.get('invoice_type') == 'out_invoice':
+                    invoice = self.update_invoices(cr, uid, edi_invoice_values,
+                                                   context=context)
+                    if invoice:
+                        updated_invoices.append(invoice)
+                elif edi_invoice_values.get('invoice_type') == 'out_refund':
+                    refund = self.create_refund(cr, uid, edi_invoice_values,
+                                                context=context)
+                    if refund:
+                        created_refunds.append(refund)
+                else:
+                    raise EdifactPurchaseInvoiceParsingError(
+                        'Invoice type on the EDI file is incorrect.')
+
+    def update_invoices(self, cr, uid, edi_invoice_values, context=None):
+        """Update existing invoices with new lines from the EDI files dict.
+        Validate if ok or raise an error if something unexpected happens."""
+        invoice_obj = self.pool['account.invoice']
+        invoice_line_obj = self.pool['account.invoice.line']
+        # Find the invoice and update it
+        invoice = self._find_invoice(cr, uid, edi_invoice_values.get(
+            'purchase_number'), context=context)
+        invoice_vals = self._prepare_invoice_values(cr, uid,
+                                                    edi_invoice_values)
+        # Check if products are on the invoice
+        edi_products_codes_dict = self._get_code_products_dict(
+            cr, uid, edi_invoice_values.get('lines'), context=context)
+        self._check_products_on_invoice(
+            cr, uid, invoice, edi_products_codes_dict, context=context)
+        # Delete existing invoice lines
+        invoice_line_ids = [il.id for il in invoice.invoice_line]
+        invoice_line_obj.unlink(cr, uid, invoice_line_ids, context=context)
+        # Rebrowse the invoice record to refresh the recordset so it does not
+        # contain the unlinked lines
+        invoice = invoice_obj.browse(cr, uid, invoice.id, context=context)
+        # Prepare and write new invoice lines
+        invoice_lines_vals = self._prepare_new_invoice_lines(
+            cr, uid, edi_invoice_values.get('lines'),
+            edi_products_codes_dict, context=context)
+        for invoice_line_vals in invoice_lines_vals:
+            invoice_line_vals.update(self._call_line_onchanges(
+                cr, uid, invoice_line_vals, 'out_invoice', context=context))
+        invoice_vals.update({
+            'invoice_line': [(0, False, vals) for vals in invoice_lines_vals],
+        })
+        invoice_obj.write(cr, uid, invoice.id, invoice_vals, context=context)
+        # Check subtotals
+        different_subtotals = self._check_different_lines_subtotals(
+            cr, uid, invoice, context=context)
+        if different_subtotals:
+            raise EdifactPurchaseInvoiceTotalDifference(_(
+                'Different subtotals between the imported EDI and '
+                'updated invoice for these product codes',
+                different_subtotals
+            ))
+        # Validate if all went well
+        invoice_obj.invoice_validate(cr, uid, [invoice.id],
+                                     context=context)
+        return invoice
+
+    def create_refund(self, cr, uid, edi_invoice_values, context=None):
+        invoice_obj = self.pool['account.invoice']
+        refund_vals = self._prepare_refund(cr, uid, edi_invoice_values,
+                                           context=context)
+        # call onchange_partner_id
+        refund_vals.update(invoice_obj.onchange_partner_id(
+            cr, uid, [], 'out_refund', refund_vals.get('partner_id'),
+            date_invoice=refund_vals.get('date_invoice'),
+            company_id=self._get_company(cr, uid, context=context).id
+        ).get('value'))
+        # prepare lines
+        edi_products_codes_dict = self._get_code_products_dict(
+            cr, uid, edi_invoice_values.get('lines'), context=context)
+        refund_lines_vals = self._prepare_refund_lines(
+            cr, uid, edi_invoice_values.get('lines'), edi_products_codes_dict,
+            context=context)
+        for refund_line_vals in refund_lines_vals:
+            refund_line_vals.update(self._call_line_onchanges(
+                cr, uid, refund_line_vals, 'out_refund', context=context))
+        refund_vals.update({
+            'invoice_line': [(0, False, vals) for vals in refund_lines_vals],
+        })
+        # create and return
+        return invoice_obj.create(cr, uid, refund_vals, context=context)
 
     def _get_company(self, cr, uid, context=None):
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         return user.company_id
 
-    def _get_subtotals_differences(self, dict1, dict2):
-        """Return a dict with absolute value difference for each key in dicts.
+    def _find_invoice(self, cr, uid, purchase_number, context=None):
+        """Find the existing invoice from the purchase order number.
+        Raise an error if not found or multiple invoices found."""
+
+        company = self._get_company(cr, uid, context=context)
+        today_string = fields.date.context_today(self, cr, uid,
+                                                 context=context)
+        today = datetime.strptime(today_string, '%Y-%m-%d')
+        date_approve_limit = (
+            today - timedelta(days=company.edifact_supplier_invoice_days)
+        ).strftime('%Y-%m-%d')
+        purchase_order_obj = self.pool['purchase.order']
+        purchase_order_ids = purchase_order_obj.search(cr, uid, [
+            ('name', '=', purchase_number),
+            ('state', 'in', ('approved', 'except_picking',
+                             'except_invoice')),
+            ('shipped', '=', True),
+            ('date_approve', '>', date_approve_limit),
+            ('company_id', '=', company.id)
+        ], context=context)
+        if not purchase_order_ids:
+            raise EdifactPurchaseInvoiceNotFound(
+                _('Purchase order not found'))
+        purchase_order = purchase_order_obj.browse(
+            cr, uid, purchase_order_ids[0], context=context)
+        invoices = purchase_order.invoice_ids
+        if not invoices:
+            raise EdifactPurchaseInvoiceNotFound(
+                _('No invoice found for the purchase order'))
+        elif len(invoices) > 1:
+            raise EdifactPurchaseInvoiceNotFound(
+                _('Multiple invoices found for the same purchase order'))
+        return invoices[0]
+
+    def _prepare_invoice_values(self, cr, uid, edi_invoice_values,
+                                context=None):
+        return {
+            'supplier_invoice_number': edi_invoice_values.get(
+                'supplier_invoice_number'),
+            'date_invoice': edi_invoice_values.get('date_invoice'),
+            'date_due': edi_invoice_values.get('date_due'),
+        }
+
+    def _get_code_products_dict(self, cr, uid, edi_line_values, context=None):
+        """Return a dict matching product_code from the EDI values with the
+        products from the invoice.
+        Raise an error if no existing product is found for the product_code.
         """
-        new_dict = {}
-        for key, value in dict1:
-            new_dict[key] = value
-            if dict2.get(key):
-                new_dict[key] = abs(new_dict[key] - dict2.get(key))
-        for key, value in dict2:
-            if key in new_dict.keys():
-                continue
-            new_dict[key] = value
-        return new_dict
+        edi_product_codes = [l.get('product_code') for l in edi_line_values]
+        product_obj = self.pool['product.product']
+        product_ids = product_obj.search(cr, uid, [
+            ('default_code', 'in', edi_product_codes)], context=context)
+        products = product_obj.read(cr, uid, product_ids, ['default_code'],
+                                    context=context)
+        edi_products_codes_dict = {p['default_code']: p['id'] for p in
+                                   products}
+        not_found_product_codes = set(edi_product_codes) - set(
+            edi_products_codes_dict.keys())
+        if not_found_product_codes:
+            raise EdifactPurchaseInvoiceProductNotFound(
+                _('EDI products not found in the system'),
+                list(not_found_product_codes)
+            )
+        return edi_products_codes_dict
+
+    def _check_products_on_invoice(self, cr, uid, invoice,
+                                   edi_products_codes_dict, context=None):
+        """Raise an error if the product is not on the invoice."""
+        invoice_product_ids = [l.product_id.id for l in invoice.invoice_line]
+        not_found_products = set(edi_products_codes_dict.values()) - set(
+            invoice_product_ids)
+        if not_found_products:
+            raise EdifactPurchaseInvoiceProductNotFound(
+                _('EDI products not found on the invoice'),
+                not_found_products
+            )
+
+    def _prepare_new_invoice_lines(self, cr, uid, edi_lines,
+                                   edi_products_codes_dict, context=None):
+        """Prepare invoice line to create according to EDI lines"""
+        invoice_line_vals = []
+        for edi_line in edi_lines:
+            product_id = edi_products_codes_dict.get(
+                edi_line.get('product_code'))
+            product = self.pool['product.product'].browse(cr, uid, product_id,
+                                                          context=context)
+            account = product.property_account_expense or \
+                product.categ_id.property_account_expense_categ
+            if not account:
+                raise osv.except_osv(
+                    _('Error!'),
+                    _('Define expense account for this product: '
+                      '"%s" (id:%d).') % (product.name, product.id,))
+            vals = {
+                'product_id': product.id,
+                'quantity': edi_line.get('quantity'),
+                'price_unit': edi_line.get('price_unit'),
+                'account_id': account.id,
+                'uos_id': product.uos_id.id,
+                'edi_line_amount': edi_line.get('line_amount')
+            }
+            invoice_line_vals.append(vals)
+        return invoice_line_vals
+
+    def _call_line_onchanges(self, cr, uid, line_vals, invoice_type,
+                              context=None):
+        """Plays product_id_change on prepared line vals."""
+        invoice_line_obj = self.pool['account.invoice.line']
+        company = self._get_company(cr, uid, context=context)
+        partner = company.edifact_supplier_invoice_partner_id
+        currency_eur_id = self.pool['ir.model.data'].get_object_reference(
+            cr, uid, 'base', 'EUR')[1]
+        # Call product onchange
+        changed_vals = invoice_line_obj.product_id_change(
+            cr, uid, [], line_vals.get('product_id'),
+            line_vals.get('uos_id'),
+            qty=line_vals.get('quantity'),
+            type=invoice_type,
+            partner_id=partner.id,
+            fposition_id=partner.property_account_position.id,
+            price_unit=line_vals.get('price_unit'),
+            currency_id=currency_eur_id,
+            context=context, company_id=company.id
+        ).get('value')
+        # Remove changed price unit to ensure the price in EDI file is used
+        changed_vals.pop('price_unit')
+        return changed_vals
+
+    def _check_different_lines_subtotals(self, cr, uid, invoice, context=None):
+        """Check if price_subtotal of lines matches theirs edi_line_amount."""
+        error_lines = []
+        precision = self.pool.get('decimal.precision').precision_get(
+            cr, uid, 'Account')
+        for invoice_line in invoice.invoice_line:
+            if float_compare(invoice_line.edi_line_amount,
+                             invoice_line.price_subtotal,
+                             precision_digits=precision) != 0:
+                error_lines.append(invoice_line)
+        return error_lines
+
+    def _prepare_refund(self, cr, uid, edi_invoice, context=None):
+        """Prepare refund to create according to EDI file"""
+        company = self._get_company(cr, uid, context=context)
+        currency_eur_id = self.pool['ir.model.data'].get_object_reference(
+            cr, uid, 'base', 'EUR')[1]
+        return {
+            'partner_id': company.edifact_supplier_invoice_partner_id.id,
+            'origin': edi_invoice.get('purchase_number'),
+            'supplier_invoice_number': edi_invoice.get(
+                'supplier_invoice_number'),
+            'reference_type': 'none',
+            'name': edi_invoice.get('purchase_number'),
+            'date_invoice': edi_invoice.get('date_invoice'),
+            'date_due': edi_invoice.get('date_due'),
+            'currency_id': currency_eur_id
+        }
+
+    def _prepare_refund_lines(self, cr, uid, edi_lines,
+                              edi_products_codes_dict, context=None):
+        """Prepare refund line to create according to EDI lines"""
+        lines_vals = []
+        for edi_line in edi_lines:
+            product_id = edi_products_codes_dict.get(
+                edi_line.get('product_code'))
+            product = self.pool['product.product'].browse(cr, uid, product_id,
+                                                          context=context)
+            account = product.property_account_expense or \
+                      product.categ_id.property_account_expense_categ
+            if not account:
+                raise osv.except_osv(
+                    _('Error!'),
+                    _('Define expense account for this product: '
+                      '"%s" (id:%d).') % (product.name, product.id,))
+
+            vals = {
+                'product_id': product.id,
+                'quantity': edi_line.get('quantity'),
+                'price_unit': edi_line.get('price_unit'),
+                'account_id': account.id,
+                'uos_id': product.uos_id.id,
+            }
+            lines_vals.append(vals)
+        return lines_vals

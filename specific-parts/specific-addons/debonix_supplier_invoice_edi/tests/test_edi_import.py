@@ -2,6 +2,7 @@
 # Copyright 2018 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 from StringIO import StringIO
+from openerp.modules import get_module_resource
 from openerp.tests.common import TransactionCase
 from openerp import netsvc
 
@@ -88,15 +89,21 @@ class TestEDIImport(TransactionCase):
     def test_edi_import(self):
         cr, uid = self.cr, self.uid
         invoice_values = {}
-        demo_edi_path = '../../specific-parts/specific-addons/' \
-                        'debonix_supplier_invoice_edi/demo/demo.edi'
+        demo_edi_path = get_module_resource('debonix_supplier_invoice_edi', 'demo', 'demo_ok.edi')
         with open(demo_edi_path, 'r') as edi_file:
             data = StringIO()
             data.write(edi_file.read())
             data.seek(0)
-            invoice_values['demo.edi'] = self.edi_import_obj.import_edi_file(
+            invoice_values['demo_ok.edi'] = self.edi_import_obj.parse_edi_file(
                 data)
-        self.edi_import_obj.update_invoices(cr, uid, invoice_values)
+        self.edi_import_obj.create_or_update_invoices(cr, uid, invoice_values)
+
         self.assertEqual(self.invoice.supplier_invoice_number, 'INV00000001')
         self.assertEqual(self.invoice.state, 'open')
         self.assertEqual(len(self.invoice.invoice_line), 2)
+
+        # Get the refund
+        refund_id = self.account_invoice_obj.search(cr, uid, [
+            ('supplier_invoice_number', '=', 'REF00000001')])
+        refund = self.account_invoice_obj.browse(cr, uid, refund_id)[0]
+        self.assertEqual(len(refund.invoice_line), 2)

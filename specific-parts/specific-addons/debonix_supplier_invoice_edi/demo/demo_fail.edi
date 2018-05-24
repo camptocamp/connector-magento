@@ -1,3 +1,4 @@
+# Following is an customer invoice example failing because price unit x qty != line amount
 # Lines beginning with 100 represent header
 100INV00000001                                F 20180516                      20180615
 # Lines beginning with 200 represent lines
