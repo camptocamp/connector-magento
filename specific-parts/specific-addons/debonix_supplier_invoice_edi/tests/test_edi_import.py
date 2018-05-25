@@ -5,6 +5,12 @@ from StringIO import StringIO
 from openerp.modules import get_module_resource
 from openerp.tests.common import TransactionCase
 from openerp import netsvc
+from ..edi_import_supplier_invoice import (
+    EdifactPurchaseInvoiceParsingError,
+    EdifactPurchaseInvoiceNotFound,
+    EdifactPurchaseInvoiceProductNotFound,
+    EdifactPurchaseInvoiceTotalDifference,
+)
 
 
 class TestEDIImport(TransactionCase):
@@ -86,24 +92,55 @@ class TestEDIImport(TransactionCase):
             cr, uid, purchase_order_id)
         self.invoice = self.purchase_order.invoice_ids[0]
 
-    def test_edi_import(self):
+    def test_create_or_update_invoices(self):
         cr, uid = self.cr, self.uid
         invoice_values = {}
-        demo_edi_path = get_module_resource('debonix_supplier_invoice_edi', 'demo', 'demo_ok.edi')
-        with open(demo_edi_path, 'r') as edi_file:
+        demo_edi_ok_path = get_module_resource(
+            'debonix_supplier_invoice_edi', 'demo', 'demo_ok.edi')
+        with open(demo_edi_ok_path, 'r') as edi_file:
             data = StringIO()
             data.write(edi_file.read())
             data.seek(0)
             invoice_values['demo_ok.edi'] = self.edi_import_obj.parse_edi_file(
                 data)
-        self.edi_import_obj.create_or_update_invoices(cr, uid, invoice_values)
-
+        demo_edi_fail_path = get_module_resource(
+            'debonix_supplier_invoice_edi', 'demo', 'demo_fail.edi')
+        with open(demo_edi_fail_path, 'r') as edi_file:
+            data = StringIO()
+            data.write(edi_file.read())
+            data.seek(0)
+            invoice_values[
+                'demo_fail.edi'] = self.edi_import_obj.parse_edi_file(data)
+        res = self.edi_import_obj.create_or_update_invoices(cr, uid,
+                                                            invoice_values)
+        # Test processed
+        processed = res.get('processed')
+        self.assertEqual(len(processed), 2)
+        self.assertIn('demo_ok.edi', processed)
+        self.assertIn('demo_fail.edi', processed)
+        # Test successful
+        successful = res.get('successful')
+        self.assertEqual(len(successful), 2)
+        success_invoices = [tpl[1] for tpl in successful]
+        self.assertIn(self.invoice, success_invoices)
         self.assertEqual(self.invoice.supplier_invoice_number, 'INV00000001')
         self.assertEqual(self.invoice.state, 'open')
         self.assertEqual(len(self.invoice.invoice_line), 2)
-
-        # Get the refund
         refund_id = self.account_invoice_obj.search(cr, uid, [
             ('supplier_invoice_number', '=', 'REF00000001')])
         refund = self.account_invoice_obj.browse(cr, uid, refund_id)[0]
+        self.assertIn(refund, success_invoices)
         self.assertEqual(len(refund.invoice_line), 2)
+        # Test failed
+        failing = res.get('failing')
+        self.assertEqual(len(failing), 4)
+        errors = [fail[1] for fail in failing]
+        errors_order = [
+            EdifactPurchaseInvoiceTotalDifference,
+            EdifactPurchaseInvoiceParsingError,
+            EdifactPurchaseInvoiceNotFound,
+            EdifactPurchaseInvoiceProductNotFound
+        ]
+        for cnt, error in enumerate(errors):
+            self.assertTrue(isinstance(
+                error, errors_order[cnt]))
