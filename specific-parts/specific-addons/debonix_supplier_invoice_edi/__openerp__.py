@@ -13,5 +13,8 @@
      'data/crm_case_categ.xml',
      'data/ir_cron.xml',
  ],
+ 'demo': [
+     'demo/demo.xml'
+ ],
  'installable': True,
  }
