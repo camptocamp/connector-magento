@@ -28,7 +28,7 @@ class EdifactPurchaseInvoiceProductNotFound(Exception):
 
     def __str__(self):
         res = super(EdifactPurchaseInvoiceProductNotFound, self).__str__()
-        return '%s : %s' % (res, ','.join(self.products))
+        return '%s : %s' % (res, ', '.join(self.products))
 
 
 class EdifactPurchaseInvoiceTotalDifference(Exception):
@@ -39,7 +39,13 @@ class EdifactPurchaseInvoiceTotalDifference(Exception):
 
     def __str__(self):
         res = super(EdifactPurchaseInvoiceTotalDifference, self).__str__()
-        return '%s : %s' % (res, ','.join(self.lines))
+        lines_texts = []
+        for line in self.lines:
+            lines_texts.append('(%s : EDI %s - Subtotal %s)' % (
+                line.name.replace('\n', ' '),
+                line.edi_line_amount,
+                line.price_subtotal))
+        return '%s : %s' % (res, ', '.join(lines_texts))
 
 
 class EDIImportSupplierInvoice(orm.AbstractModel):
@@ -180,11 +186,12 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                             cr, uid, edi_invoice_values, context=context)
                     else:
                         raise EdifactPurchaseInvoiceParsingError(
-                            'Purchase %s / Invoice %s : Invoice type on the '
-                            'EDI file is incorrect.' % (
+                            _('Purchase %s / Invoice %s : Invoice type on the '
+                              'EDI file is incorrect.') % (
                                 edi_invoice_values.get('purchase_number'),
                                 edi_invoice_values.get(
-                                    'supplier_invoice_number')))
+                                    'supplier_invoice_number')
+                            ))
                 except Exception as e:
                     cr.execute('ROLLBACK TO SAVEPOINT edi_invoice')
                     failing.append((chunk, e))
@@ -241,16 +248,17 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         if different_subtotals:
             raise EdifactPurchaseInvoiceTotalDifference(_(
                 'Purchase %s / Invoice %s : Different subtotals between the '
-                'imported EDI and updated invoice for these product codes' % (
+                'imported EDI and updated invoice for these product codes') % (
                     edi_invoice_values.get('purchase_number'),
-                    edi_invoice_values.get(
-                        'supplier_invoice_number'))), different_subtotals)
+                    edi_invoice_values.get('supplier_invoice_number')
+            ), different_subtotals)
         # Validate if all went well
         invoice_obj.invoice_validate(cr, uid, [invoice.id],
                                      context=context)
         return invoice
 
     def create_refund(self, cr, uid, edi_invoice_values, context=None):
+        """Create new refund with data from the EDI files dict"""
         invoice_obj = self.pool['account.invoice']
         refund_vals = self._prepare_refund(cr, uid, edi_invoice_values,
                                            context=context)
@@ -279,16 +287,20 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         return invoice_obj.browse(cr, uid, refund_id, context=context)
 
     def handle_failures(self, cr, uid, failures, context=None):
+        """Create a crm.claim with error message and add failed EDI chunks
+        as attachment."""
         company = self._get_company(cr, uid, context=context)
         categ_id = self.pool['ir.model.data'].get_object_reference(
             cr, uid, 'debonix_supplier_invoice_edi',
             'crm_category_sogedesca')[1]
         edi_error_file = StringIO()
+        # Merge failed chunks and error messages
         error_messages = []
         for chunk, error in failures:
             edi_error_file.write(chunk)
             error_messages.append(str(error))
         edi_error_file.seek(0)
+        # Create a claim
         claim_vals = {
             'name': _('EDI supplier invoice error'),
             'categ_id': categ_id,
@@ -297,7 +309,8 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             'claim_type': 'other',
         }
         claim_id = self.pool['crm.claim'].create(cr, uid, claim_vals,
-                                              context=context)
+                                                 context=context)
+        # Add merged chunks as attachment
         self.pool['ir.attachment'].create(cr, uid, {
             'name': '%s-fail.edi' % fields.date.today(),
             'res_model': 'crm.claim',
@@ -309,6 +322,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         return edi_error_file
 
     def handle_successes(self, cr, uid, successes, context=None):
+        """Merge successful chunks"""
         edi_success_file = StringIO()
         for chunk, doc in successes:
             edi_success_file.write(chunk)
@@ -342,21 +356,22 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         ], context=context)
         if not purchase_order_ids:
             raise EdifactPurchaseInvoiceNotFound(
-                _('Purchase %s / Invoice %s : Purchase order not found' % (
-                    purchase_number, supplier_invoice_number)))
+                _('Purchase %s / Invoice %s : Purchase order not found') % (
+                    purchase_number, supplier_invoice_number))
+
         purchase_order = purchase_order_obj.browse(
             cr, uid, purchase_order_ids[0], context=context)
         invoices = purchase_order.invoice_ids
         if not invoices:
             raise EdifactPurchaseInvoiceNotFound(
                 _('Purchase %s / Invoice %s : No invoice found for the '
-                  'purchase order' % (purchase_number,
-                                      supplier_invoice_number)))
+                  'purchase order') % (purchase_number,
+                                       supplier_invoice_number))
         elif len(invoices) > 1:
             raise EdifactPurchaseInvoiceNotFound(
                 _('Purchase %s / Invoice %s : Multiple invoices found for the '
-                  'same purchase order' % (purchase_number,
-                                           supplier_invoice_number)))
+                  'same purchase order') % (purchase_number,
+                                            supplier_invoice_number))
         return invoices[0]
 
     def _prepare_invoice_values(self, cr, uid, edi_invoice_values,
@@ -388,7 +403,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         if not_found_product_codes:
             raise EdifactPurchaseInvoiceProductNotFound(
                 _('Purchase %s / Invoice %s : EDI products codes not found in '
-                  'the system' % (purchase_number, supplier_invoice_number)),
+                  'the system') % (purchase_number, supplier_invoice_number),
                 list(not_found_product_codes)
             )
         return edi_products_codes_dict
@@ -403,7 +418,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         if not_found_products:
             raise EdifactPurchaseInvoiceProductNotFound(
                 _('Purchase %s / Invoice %s : EDI products not found on the '
-                  'invoice' % (purchase_number, supplier_invoice_number,)),
+                  'invoice') % (purchase_number, supplier_invoice_number,),
                 list(not_found_products)
             )
 
@@ -435,7 +450,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         return invoice_line_vals
 
     def _call_line_onchanges(self, cr, uid, line_vals, invoice_type,
-                              context=None):
+                             context=None):
         """Plays product_id_change on prepared line vals."""
         invoice_line_obj = self.pool['account.invoice.line']
         company = self._get_company(cr, uid, context=context)
@@ -497,7 +512,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             product = self.pool['product.product'].browse(cr, uid, product_id,
                                                           context=context)
             account = product.property_account_expense or \
-                      product.categ_id.property_account_expense_categ
+                product.categ_id.property_account_expense_categ
             if not account:
                 raise osv.except_osv(
                     _('Error!'),
