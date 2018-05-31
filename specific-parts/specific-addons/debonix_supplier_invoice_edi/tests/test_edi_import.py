@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
 # Copyright 2018 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+import base64
 from StringIO import StringIO
 from openerp.modules import get_module_resource
 from openerp.tests.common import TransactionCase
 from openerp import netsvc
+from ..edi_import_supplier_invoice import (
+    EdifactPurchaseInvoiceParsingError,
+    EdifactPurchaseInvoiceNotFound,
+    EdifactPurchaseInvoiceProductNotFound,
+    EdifactPurchaseInvoiceTotalDifference,
+)
 
 
 class TestEDIImport(TransactionCase):
@@ -21,14 +28,15 @@ class TestEDIImport(TransactionCase):
         self.account_invoice_obj = self.registry('account.invoice')
         self.product_obj = self.registry('product.product')
         self.edi_import_obj = self.registry('edi.import.supplier.invoice')
-
+        self.claim_obj = self.registry('crm.claim')
+        self.attachment_obj = self.registry('ir.attachment')
         # Company settings
         admin_user = res_users_obj.browse(cr, uid, uid)
         company = admin_user.company_id
-        claim_user_id = res_users_obj.copy(cr, uid, uid)
+        self.claim_user_id = res_users_obj.copy(cr, uid, uid)
         country_france_id = self.model_data_obj.get_object_reference(
             cr, uid, 'base', 'fr')[1]
-        crm_case_categ_id = self.model_data_obj.get_object_reference(
+        self.crm_case_categ_id = self.model_data_obj.get_object_reference(
             cr, uid, 'debonix_supplier_invoice_edi',
             'crm_category_sogedesca')[1]
         self.sogedesca_partner_id = self.model_data_obj.get_object_reference(
@@ -39,8 +47,8 @@ class TestEDIImport(TransactionCase):
             'edifact_supplier_invoice_days': 90,
             'edifact_supplier_invoice_user_id': uid,
             'edifact_supplier_invoice_intrastat_country_id': country_france_id,
-            'edifact_supplier_invoice_claim_cat_id': crm_case_categ_id,
-            'edifact_supplier_invoice_claim_user_id': claim_user_id,
+            'edifact_supplier_invoice_claim_cat_id': self.crm_case_categ_id,
+            'edifact_supplier_invoice_claim_user_id': self.claim_user_id,
         })
 
         # Create the purchase order
@@ -86,24 +94,74 @@ class TestEDIImport(TransactionCase):
             cr, uid, purchase_order_id)
         self.invoice = self.purchase_order.invoice_ids[0]
 
-    def test_edi_import(self):
+    def _prepare_import(self, edi_files_list):
         cr, uid = self.cr, self.uid
         invoice_values = {}
-        demo_edi_path = get_module_resource('debonix_supplier_invoice_edi', 'demo', 'demo_ok.edi')
-        with open(demo_edi_path, 'r') as edi_file:
-            data = StringIO()
-            data.write(edi_file.read())
-            data.seek(0)
-            invoice_values['demo_ok.edi'] = self.edi_import_obj.parse_edi_file(
-                data)
-        self.edi_import_obj.create_or_update_invoices(cr, uid, invoice_values)
+        for edi_file_name in edi_files_list:
+            edi_file_path = get_module_resource(
+                'debonix_supplier_invoice_edi', 'demo', edi_file_name)
+            with open(edi_file_path, 'r') as edi_file:
+                data = StringIO()
+                data.write(edi_file.read())
+                data.seek(0)
+                invoice_values[edi_file_name] = self.edi_import_obj.\
+                    parse_edi_file(data)
+        res = self.edi_import_obj.create_or_update_invoices(cr, uid,
+                                                            invoice_values)
+        return res, invoice_values
 
+    def test_processed(self):
+        res, invoice_values = self._prepare_import(['demo_ok.edi',
+                                                    'demo_fail.edi'])
+        processed = res.get('processed')
+        self.assertEqual(len(processed), 2)
+        self.assertIn('demo_ok.edi', processed)
+        self.assertIn('demo_fail.edi', processed)
+
+    def test_successful(self):
+        cr, uid = self.cr, self.uid
+        res, invoice_values = self._prepare_import(['demo_ok.edi'])
+        successful = res.get('successful')
+        self.assertEqual(len(successful), 2)
+        success_invoices = [tpl[1] for tpl in successful]
+        self.assertIn(self.invoice, success_invoices)
         self.assertEqual(self.invoice.supplier_invoice_number, 'INV00000001')
         self.assertEqual(self.invoice.state, 'open')
         self.assertEqual(len(self.invoice.invoice_line), 2)
-
-        # Get the refund
         refund_id = self.account_invoice_obj.search(cr, uid, [
             ('supplier_invoice_number', '=', 'REF00000001')])
         refund = self.account_invoice_obj.browse(cr, uid, refund_id)[0]
+        self.assertIn(refund, success_invoices)
         self.assertEqual(len(refund.invoice_line), 2)
+
+    def test_failing(self):
+        cr, uid = self.cr, self.uid
+        res, invoice_values = self._prepare_import(['demo_fail.edi'])
+        failing = res.get('failing')
+        failed_edi_file = self.edi_import_obj.handle_failures(cr, uid, failing)
+        self.assertEqual(len(failing), 4)
+        errors = [fail[1] for fail in failing]
+        errors_order = [
+            EdifactPurchaseInvoiceTotalDifference,
+            EdifactPurchaseInvoiceParsingError,
+            EdifactPurchaseInvoiceNotFound,
+            EdifactPurchaseInvoiceProductNotFound
+        ]
+        for cnt, error in enumerate(errors):
+            self.assertTrue(isinstance(
+                error, errors_order[cnt]))
+        claim_id = self.claim_obj.search(
+            cr, uid, [('categ_id', '=', self.crm_case_categ_id)])[0]
+        claim = self.claim_obj.browse(cr, uid, claim_id)
+        self.assertEqual(claim.user_id.id, self.claim_user_id)
+        self.assertEqual(claim.claim_type, 'other')
+        self.assertEqual(claim.description,
+                         '\n'.join([str(err) for err in errors]))
+        # Check attachment
+        attachement_id = self.attachment_obj.search(
+            cr, uid, [('res_id', '=', claim_id),
+                      ('res_model', '=', 'crm.claim')])[0]
+        att = base64.decodestring(
+            self.attachment_obj._data_get(cr, uid, [attachement_id], False,
+                                          False)[attachement_id])
+        self.assertEqual(att, failed_edi_file.read())

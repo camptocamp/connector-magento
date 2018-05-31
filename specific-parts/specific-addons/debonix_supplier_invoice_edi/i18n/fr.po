@@ -1,0 +1,165 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+# 	* debonix_supplier_invoice_edi
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 7.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-05-29 15:21+0000\n"
+"PO-Revision-Date: 2018-05-29 17:29+0200\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: fr\n"
+"X-Generator: Poedit 1.8.7.1\n"
+
+#. module: debonix_supplier_invoice_edi
+#: code:_description:0
+#, python-format
+msgid "Companies"
+msgstr "Sociétés"
+
+#. module: debonix_supplier_invoice_edi
+#: code:addons/debonix_supplier_invoice_edi/edi_import_supplier_invoice.py:439
+#: code:addons/debonix_supplier_invoice_edi/edi_import_supplier_invoice.py:519
+#, python-format
+msgid "Define expense account for this product: \"%s\" (id:%d)."
+msgstr "Définir le compte de dépense pour cet article : \"%s\" (id. : %d)."
+
+#. module: debonix_supplier_invoice_edi
+#: model:crm.case.categ,name:debonix_supplier_invoice_edi.crm_category_descours_cabaud
+msgid "Descours & Cabaud"
+msgstr "Descours & Cabaud"
+
+#. module: debonix_supplier_invoice_edi
+#: field:account.invoice.line,edi_line_amount:0
+msgid "EDI line amount"
+msgstr "Montant ligne EDI"
+
+#. module: debonix_supplier_invoice_edi
+#: code:addons/debonix_supplier_invoice_edi/edi_import_supplier_invoice.py:305
+#, python-format
+msgid "EDI supplier invoice error"
+msgstr "Erreur facture fournisseur EDI"
+
+#. module: debonix_supplier_invoice_edi
+#: code:addons/debonix_supplier_invoice_edi/edi_import_supplier_invoice.py:438
+#: code:addons/debonix_supplier_invoice_edi/edi_import_supplier_invoice.py:518
+#, python-format
+msgid "Error!"
+msgstr "Erreur!"
+
+#. module: debonix_supplier_invoice_edi
+#: field:res.company,edifact_host:0
+msgid "Host"
+msgstr "Hôte"
+
+#. module: debonix_supplier_invoice_edi
+#: code:_description:0
+#, python-format
+msgid "Invoice Line"
+msgstr "Ligne de facture"
+
+#. module: debonix_supplier_invoice_edi
+#: model:ir.model,name:debonix_supplier_invoice_edi.model_account_invoice_line
+msgid "Invoice line"
+msgstr "Ligne de facture"
+
+#. module: debonix_supplier_invoice_edi
+#: field:res.company,edifact_password:0
+msgid "Password"
+msgstr "Mot de passe"
+
+#. module: debonix_supplier_invoice_edi
+#: code:addons/debonix_supplier_invoice_edi/edi_import_supplier_invoice.py:249
+#, python-format
+msgid "Purchase %s / Invoice %s : Different subtotals between the imported EDI and updated invoice for these product codes"
+msgstr "Achat %s / Facture %s : Ecart sur les sous-totaux entre Open ERP et la facture SOGEDESCA"
+
+#. module: debonix_supplier_invoice_edi
+#: code:addons/debonix_supplier_invoice_edi/edi_import_supplier_invoice.py:405
+#, python-format
+msgid "Purchase %s / Invoice %s : EDI products codes not found in the system"
+msgstr "Achat %s / Facture %s : Article de la facture SOGEDESCA non présent dans Open ERP"
+
+#. module: debonix_supplier_invoice_edi
+#: code:addons/debonix_supplier_invoice_edi/edi_import_supplier_invoice.py:420
+#, python-format
+msgid "Purchase %s / Invoice %s : EDI products not found on the invoice"
+msgstr "Achat %s / Facture %s : Article de la commande HA non présent dans la facture SOGEDESCA"
+
+#. module: debonix_supplier_invoice_edi
+#: code:addons/debonix_supplier_invoice_edi/edi_import_supplier_invoice.py:189
+#, python-format
+msgid "Purchase %s / Invoice %s : Invoice type on the EDI file is incorrect."
+msgstr "Purchase %s / Invoice %s : Type de facture incorrect sur la facture SOGEDESCA."
+
+#. module: debonix_supplier_invoice_edi
+#: code:addons/debonix_supplier_invoice_edi/edi_import_supplier_invoice.py:372
+#, python-format
+msgid "Purchase %s / Invoice %s : Multiple invoices found for the same purchase order"
+msgstr "Purchase %s / Invoice %s : Différentes factures pour la même commande d'achat."
+
+#. module: debonix_supplier_invoice_edi
+#: code:addons/debonix_supplier_invoice_edi/edi_import_supplier_invoice.py:367
+#, python-format
+msgid "Purchase %s / Invoice %s : No invoice found for the purchase order"
+msgstr "Purchase %s / Invoice %s : Pas de facture trouvée pour la commande d'achat."
+
+#. module: debonix_supplier_invoice_edi
+#: code:addons/debonix_supplier_invoice_edi/edi_import_supplier_invoice.py:359
+#, python-format
+msgid "Purchase %s / Invoice %s : Purchase order not found"
+msgstr "Purchase %s / Invoice %s : Commande d'achat non trouvée."
+
+#. module: debonix_supplier_invoice_edi
+#: model:crm.case.categ,name:debonix_supplier_invoice_edi.crm_category_sogedesca
+msgid "SOGEDESCA"
+msgstr "SOGEDESCA"
+
+#. module: debonix_supplier_invoice_edi
+#: field:res.company,edifact_supplier_invoice_import_error_path:0
+msgid "Supplier invoice error path"
+msgstr "Chemin d'erreur des factures SOGEDESCA"
+
+#. module: debonix_supplier_invoice_edi
+#: field:res.company,edifact_supplier_invoice_import_path:0
+msgid "Supplier invoice import path"
+msgstr "Chemin d'import des factures SOGEDESCA"
+
+#. module: debonix_supplier_invoice_edi
+#: field:res.company,edifact_supplier_invoice_import_success_path:0
+msgid "Supplier invoice success path"
+msgstr "Chemin de réussite des factures SOGEDESCA"
+
+#. module: debonix_supplier_invoice_edi
+#: field:res.company,edifact_user:0
+msgid "Username"
+msgstr "Nom d'utilisateur"
+
+#. module: debonix_supplier_invoice_edi
+#: code:_description:0
+#: model:ir.model,name:debonix_supplier_invoice_edi.model_edi_import_supplier_invoice
+#, python-format
+msgid "edi.import.supplier.invoice"
+msgstr "edi.import.supplier.invoice"
+
+#. module: debonix_supplier_invoice_edi
+#: model:ir.model,name:debonix_supplier_invoice_edi.model_res_company
+msgid "res.company"
+msgstr "res.company"
+
+#. module: debonix_supplier_invoice_edi
+#: field:res.company,edifact_supplier_invoice_amount_difference:0
+#: field:res.company,edifact_supplier_invoice_claim_cat_id:0
+#: field:res.company,edifact_supplier_invoice_claim_user_id:0
+#: field:res.company,edifact_supplier_invoice_days:0
+#: field:res.company,edifact_supplier_invoice_intrastat_country_id:0
+#: field:res.company,edifact_supplier_invoice_partner_id:0
+#: field:res.company,edifact_supplier_invoice_user_id:0
+msgid "unknown"
+msgstr "inconnu"

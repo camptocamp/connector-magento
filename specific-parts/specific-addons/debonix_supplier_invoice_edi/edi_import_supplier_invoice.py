@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 # Copyright 2018 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+import base64
 import ftplib
 import socket
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 from StringIO import StringIO
 from openerp.osv import orm, fields, osv
-from openerp.tools import float_compare
+from openerp.tools import float_compare, DEFAULT_SERVER_DATE_FORMAT
 from openerp.tools.translate import _
 
 
@@ -20,11 +21,31 @@ class EdifactPurchaseInvoiceNotFound(Exception):
 
 
 class EdifactPurchaseInvoiceProductNotFound(Exception):
-    pass
+
+    def __init__(self, msg, product_list=None):
+        super(EdifactPurchaseInvoiceProductNotFound, self).__init__(msg)
+        self.products = product_list
+
+    def __str__(self):
+        res = super(EdifactPurchaseInvoiceProductNotFound, self).__str__()
+        return '%s : %s' % (res, ', '.join(self.products))
 
 
 class EdifactPurchaseInvoiceTotalDifference(Exception):
-    pass
+
+    def __init__(self, msg, lines_list=None):
+        super(EdifactPurchaseInvoiceTotalDifference, self).__init__(msg)
+        self.lines = lines_list
+
+    def __str__(self):
+        res = super(EdifactPurchaseInvoiceTotalDifference, self).__str__()
+        lines_texts = []
+        for line in self.lines:
+            lines_texts.append('(%s : EDI %s - Subtotal %s)' % (
+                line.name.replace('\n', ' '),
+                line.edi_line_amount,
+                line.price_subtotal))
+        return '%s : %s' % (res, ', '.join(lines_texts))
 
 
 class EDIImportSupplierInvoice(orm.AbstractModel):
@@ -53,6 +74,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
 
     def cron_import_edi_files(self, cr, uid, context=None):
         """Connect to FTP, retrieve EDI files and create/update invoices."""
+        company = self._get_company(cr, uid, context=context)
         edi_file_invoices = {}
         with self.ftp_connect(cr, uid, context) as ftp:
             for filename in ftp.nlst():
@@ -62,15 +84,46 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                 ftp.retrbinary('RETR ' + filename, data.write)
                 data.seek(0)
                 edi_file_invoices[filename] = self.parse_edi_file(data)
-        self.create_or_update_invoices(cr, uid, edi_file_invoices,
-                                       context=context)
+        results = self.create_or_update_invoices(
+            cr, uid, edi_file_invoices, context=context)
+        fails = results.get('failing')
+        if fails:
+            failed_edi_file = self.handle_failures(
+                cr, uid, fails, context=context)
+        successes = results.get('successful')
+        if successes:
+            success_edi_file = self.handle_successes(
+                cr, uid, successes, context=context)
+        with self.ftp_connect(cr, uid, context) as ftp:
+            if successes:
+                # Write successful chunks
+                ftp.cwd(company.edifact_supplier_invoice_import_success_path)
+                ftp.storbinary('STOR %s-success.edi' % fields.date.today(),
+                               success_edi_file)
+            if fails:
+                # Write failing chunks
+                ftp.cwd(company.edifact_supplier_invoice_import_error_path)
+                ftp.storbinary('STOR %s-fail.edi' % fields.date.today(),
+                               failed_edi_file)
+            # Commit here to ensure we don't delete original files before
+            # changes are persisted in DB
+            cr.commit()
+            # Delete processed files
+            ftp.cwd(company.edifact_supplier_invoice_import_path)
+            for filename in ftp.nlst():
+                if not filename.endswith('.edi'):
+                    continue
+                elif filename in results.get('processed'):
+                    ftp.delete(filename)
 
     def parse_edi_file(self, data):
         """Parse the EDI file and return a dict with invoices values."""
         invoice_values = []
         temp_invoice_values = {}
         temp_invoice_line_values = []
+        chunk = ''
         for line in data.readlines():
+            chunk += line
             if line.startswith('100'):
                 supplier_invoice_number = line[3:38].rstrip()
                 edi_raw_invoice_type = line[46:47]
@@ -78,6 +131,8 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                     invoice_type = 'out_invoice'
                 elif edi_raw_invoice_type == 'A':
                     invoice_type = 'out_refund'
+                else:
+                    invoice_type = False
                 date_invoice = line[48:56]
                 date_due = line[78:86]
                 temp_invoice_values.update({
@@ -105,32 +160,50 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                 temp_invoice_values.update({
                     'lines': temp_invoice_line_values
                 })
-                invoice_values.append(temp_invoice_values)
-
+                invoice_values.append((temp_invoice_values, chunk))
+                chunk = ''
                 temp_invoice_values = {}
                 temp_invoice_line_values = []
+
         return invoice_values
 
     def create_or_update_invoices(self, cr, uid, edi_file_invoice_dict,
                                   context=None):
         """Update invoice or create refund according to the invoice type."""
-        updated_invoices = []
-        created_refunds = []
+        processed = []
+        successful = []
+        failing = []
         for filename, edi_invoices in edi_file_invoice_dict.iteritems():
-            for edi_invoice_values in edi_invoices:
-                if edi_invoice_values.get('invoice_type') == 'out_invoice':
-                    invoice = self.update_invoices(cr, uid, edi_invoice_values,
-                                                   context=context)
-                    if invoice:
-                        updated_invoices.append(invoice)
-                elif edi_invoice_values.get('invoice_type') == 'out_refund':
-                    refund = self.create_refund(cr, uid, edi_invoice_values,
-                                                context=context)
-                    if refund:
-                        created_refunds.append(refund)
+            for edi_invoice_values, chunk in edi_invoices:
+                cr.execute('SAVEPOINT edi_invoice')
+                try:
+                    if edi_invoice_values.get('invoice_type') == 'out_invoice':
+                        document = self.update_invoices(
+                            cr, uid, edi_invoice_values, context=context)
+                    elif edi_invoice_values.get('invoice_type') == \
+                            'out_refund':
+                        document = self.create_refund(
+                            cr, uid, edi_invoice_values, context=context)
+                    else:
+                        raise EdifactPurchaseInvoiceParsingError(
+                            _('Purchase %s / Invoice %s : Invoice type on the '
+                              'EDI file is incorrect.') % (
+                                edi_invoice_values.get('purchase_number'),
+                                edi_invoice_values.get(
+                                    'supplier_invoice_number')
+                            ))
+                except Exception as e:
+                    cr.execute('ROLLBACK TO SAVEPOINT edi_invoice')
+                    failing.append((chunk, e))
                 else:
-                    raise EdifactPurchaseInvoiceParsingError(
-                        'Invoice type on the EDI file is incorrect.')
+                    cr.execute('RELEASE SAVEPOINT edi_invoice')
+                    successful.append((chunk, document))
+            processed.append(filename)
+        return {
+            'processed': processed,
+            'successful': successful,
+            'failing': failing,
+        }
 
     def update_invoices(self, cr, uid, edi_invoice_values, context=None):
         """Update existing invoices with new lines from the EDI files dict.
@@ -139,14 +212,19 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         invoice_line_obj = self.pool['account.invoice.line']
         # Find the invoice and update it
         invoice = self._find_invoice(cr, uid, edi_invoice_values.get(
-            'purchase_number'), context=context)
+            'purchase_number'), edi_invoice_values.get(
+            'supplier_invoice_number'), context=context)
         invoice_vals = self._prepare_invoice_values(cr, uid,
                                                     edi_invoice_values)
         # Check if products are on the invoice
         edi_products_codes_dict = self._get_code_products_dict(
-            cr, uid, edi_invoice_values.get('lines'), context=context)
+            cr, uid, edi_invoice_values.get('lines'),
+            edi_invoice_values.get('purchase_number'),
+            edi_invoice_values.get('supplier_invoice_number'), context=context)
         self._check_products_on_invoice(
-            cr, uid, invoice, edi_products_codes_dict, context=context)
+            cr, uid, invoice, edi_products_codes_dict,
+            edi_invoice_values.get('purchase_number'),
+            edi_invoice_values.get('supplier_invoice_number'), context=context)
         # Delete existing invoice lines
         invoice_line_ids = [il.id for il in invoice.invoice_line]
         invoice_line_obj.unlink(cr, uid, invoice_line_ids, context=context)
@@ -169,16 +247,18 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             cr, uid, invoice, context=context)
         if different_subtotals:
             raise EdifactPurchaseInvoiceTotalDifference(_(
-                'Different subtotals between the imported EDI and '
-                'updated invoice for these product codes',
-                different_subtotals
-            ))
+                'Purchase %s / Invoice %s : Different subtotals between the '
+                'imported EDI and updated invoice for these product codes') % (
+                    edi_invoice_values.get('purchase_number'),
+                    edi_invoice_values.get('supplier_invoice_number')
+            ), different_subtotals)
         # Validate if all went well
         invoice_obj.invoice_validate(cr, uid, [invoice.id],
                                      context=context)
         return invoice
 
     def create_refund(self, cr, uid, edi_invoice_values, context=None):
+        """Create new refund with data from the EDI files dict"""
         invoice_obj = self.pool['account.invoice']
         refund_vals = self._prepare_refund(cr, uid, edi_invoice_values,
                                            context=context)
@@ -190,7 +270,9 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         ).get('value'))
         # prepare lines
         edi_products_codes_dict = self._get_code_products_dict(
-            cr, uid, edi_invoice_values.get('lines'), context=context)
+            cr, uid, edi_invoice_values.get('lines'),
+            edi_invoice_values.get('purchase_number'),
+            edi_invoice_values.get('supplier_invoice_number'), context=context)
         refund_lines_vals = self._prepare_refund_lines(
             cr, uid, edi_invoice_values.get('lines'), edi_products_codes_dict,
             context=context)
@@ -201,13 +283,58 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             'invoice_line': [(0, False, vals) for vals in refund_lines_vals],
         })
         # create and return
-        return invoice_obj.create(cr, uid, refund_vals, context=context)
+        refund_id = invoice_obj.create(cr, uid, refund_vals, context=context)
+        return invoice_obj.browse(cr, uid, refund_id, context=context)
+
+    def handle_failures(self, cr, uid, failures, context=None):
+        """Create a crm.claim with error message and add failed EDI chunks
+        as attachment."""
+        company = self._get_company(cr, uid, context=context)
+        categ_id = self.pool['ir.model.data'].get_object_reference(
+            cr, uid, 'debonix_supplier_invoice_edi',
+            'crm_category_sogedesca')[1]
+        edi_error_file = StringIO()
+        # Merge failed chunks and error messages
+        error_messages = []
+        for chunk, error in failures:
+            edi_error_file.write(chunk)
+            error_messages.append(str(error))
+        edi_error_file.seek(0)
+        # Create a claim
+        claim_vals = {
+            'name': _('EDI supplier invoice error'),
+            'categ_id': categ_id,
+            'user_id': company.edifact_supplier_invoice_claim_user_id.id,
+            'description': '\n'.join(error_messages),
+            'claim_type': 'other',
+        }
+        claim_id = self.pool['crm.claim'].create(cr, uid, claim_vals,
+                                                 context=context)
+        # Add merged chunks as attachment
+        self.pool['ir.attachment'].create(cr, uid, {
+            'name': '%s-fail.edi' % fields.date.today(),
+            'res_model': 'crm.claim',
+            'res_id': claim_id,
+            'datas': base64.encodestring(edi_error_file.read()),
+            'datas_fname': '%s-fail.edi' % fields.date.today(),
+        }, context=context)
+        edi_error_file.seek(0)
+        return edi_error_file
+
+    def handle_successes(self, cr, uid, successes, context=None):
+        """Merge successful chunks"""
+        edi_success_file = StringIO()
+        for chunk, doc in successes:
+            edi_success_file.write(chunk)
+        edi_success_file.seek(0)
+        return edi_success_file
 
     def _get_company(self, cr, uid, context=None):
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         return user.company_id
 
-    def _find_invoice(self, cr, uid, purchase_number, context=None):
+    def _find_invoice(self, cr, uid, purchase_number, supplier_invoice_number,
+                      context=None):
         """Find the existing invoice from the purchase order number.
         Raise an error if not found or multiple invoices found."""
 
@@ -229,16 +356,22 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         ], context=context)
         if not purchase_order_ids:
             raise EdifactPurchaseInvoiceNotFound(
-                _('Purchase order not found'))
+                _('Purchase %s / Invoice %s : Purchase order not found') % (
+                    purchase_number, supplier_invoice_number))
+
         purchase_order = purchase_order_obj.browse(
             cr, uid, purchase_order_ids[0], context=context)
         invoices = purchase_order.invoice_ids
         if not invoices:
             raise EdifactPurchaseInvoiceNotFound(
-                _('No invoice found for the purchase order'))
+                _('Purchase %s / Invoice %s : No invoice found for the '
+                  'purchase order') % (purchase_number,
+                                       supplier_invoice_number))
         elif len(invoices) > 1:
             raise EdifactPurchaseInvoiceNotFound(
-                _('Multiple invoices found for the same purchase order'))
+                _('Purchase %s / Invoice %s : Multiple invoices found for the '
+                  'same purchase order') % (purchase_number,
+                                            supplier_invoice_number))
         return invoices[0]
 
     def _prepare_invoice_values(self, cr, uid, edi_invoice_values,
@@ -250,7 +383,9 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             'date_due': edi_invoice_values.get('date_due'),
         }
 
-    def _get_code_products_dict(self, cr, uid, edi_line_values, context=None):
+    def _get_code_products_dict(self, cr, uid, edi_line_values,
+                                purchase_number, supplier_invoice_number,
+                                context=None):
         """Return a dict matching product_code from the EDI values with the
         products from the invoice.
         Raise an error if no existing product is found for the product_code.
@@ -267,21 +402,24 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             edi_products_codes_dict.keys())
         if not_found_product_codes:
             raise EdifactPurchaseInvoiceProductNotFound(
-                _('EDI products not found in the system'),
+                _('Purchase %s / Invoice %s : EDI products codes not found in '
+                  'the system') % (purchase_number, supplier_invoice_number),
                 list(not_found_product_codes)
             )
         return edi_products_codes_dict
 
     def _check_products_on_invoice(self, cr, uid, invoice,
-                                   edi_products_codes_dict, context=None):
+                                   edi_products_codes_dict, purchase_number,
+                                   supplier_invoice_number, context=None):
         """Raise an error if the product is not on the invoice."""
         invoice_product_ids = [l.product_id.id for l in invoice.invoice_line]
         not_found_products = set(edi_products_codes_dict.values()) - set(
             invoice_product_ids)
         if not_found_products:
             raise EdifactPurchaseInvoiceProductNotFound(
-                _('EDI products not found on the invoice'),
-                not_found_products
+                _('Purchase %s / Invoice %s : EDI products not found on the '
+                  'invoice') % (purchase_number, supplier_invoice_number,),
+                list(not_found_products)
             )
 
     def _prepare_new_invoice_lines(self, cr, uid, edi_lines,
@@ -312,7 +450,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         return invoice_line_vals
 
     def _call_line_onchanges(self, cr, uid, line_vals, invoice_type,
-                              context=None):
+                             context=None):
         """Plays product_id_change on prepared line vals."""
         invoice_line_obj = self.pool['account.invoice.line']
         company = self._get_company(cr, uid, context=context)
@@ -374,7 +512,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             product = self.pool['product.product'].browse(cr, uid, product_id,
                                                           context=context)
             account = product.property_account_expense or \
-                      product.categ_id.property_account_expense_categ
+                product.categ_id.property_account_expense_categ
             if not account:
                 raise osv.except_osv(
                     _('Error!'),

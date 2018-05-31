@@ -4,7 +4,8 @@
 {'name': 'Debonix Supplier Invoice EDI',
  'version': '1',
  'depends': [
-     'specific_fct'
+     'crm_claim_rma',
+     'specific_fct',
  ],
  'author': 'Camptocamp SA',
  'description': """import supplier invoices from supplier SOGEDESCA""",
