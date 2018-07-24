@@ -85,8 +85,12 @@ Following courtesy of : `Docker Pure-ftpd Server <https://hub.docker.com/r/still
 
     ftp -p localhost 21
 
+   Enter credentials defined above.
+
 4. Create folders ::
 
+    mkdir edi_supplier
+    cd edi_supplier
     mkdir archive
     mkdir erreur
 

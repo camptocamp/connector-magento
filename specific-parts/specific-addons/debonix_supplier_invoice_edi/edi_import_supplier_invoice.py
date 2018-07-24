@@ -298,7 +298,10 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         error_messages = []
         for chunk, error in failures:
             edi_error_file.write(chunk)
-            error_messages.append(str(error))
+            error_message = error.message
+            if not isinstance(error_message, str):
+                error_message = error_message.encode('utf-8')
+            error_messages.append(error_message)
         edi_error_file.seek(0)
         # Create a claim
         claim_vals = {
