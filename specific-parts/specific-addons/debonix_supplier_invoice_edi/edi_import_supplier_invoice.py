@@ -133,7 +133,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                     invoice_type = 'out_refund'
                 else:
                     invoice_type = False
-                date_invoice = line[48:56]
+                date_invoice = line[38:46]
                 date_due = line[78:86]
                 temp_invoice_values.update({
                     'supplier_invoice_number': supplier_invoice_number,
