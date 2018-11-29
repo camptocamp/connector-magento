@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from contextlib import contextmanager
 from StringIO import StringIO
 from openerp.osv import orm, fields, osv
-from openerp.tools import float_compare, DEFAULT_SERVER_DATE_FORMAT
+from openerp.tools import float_compare
 from openerp.tools.translate import _
 
 
@@ -394,13 +394,23 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         Raise an error if no existing product is found for the product_code.
         """
         edi_product_codes = [l.get('product_code') for l in edi_line_values]
-        product_obj = self.pool['product.product']
-        product_ids = product_obj.search(cr, uid, [
-            ('default_code', 'in', edi_product_codes)], context=context)
-        products = product_obj.read(cr, uid, product_ids, ['default_code'],
-                                    context=context)
-        edi_products_codes_dict = {p['default_code']: p['id'] for p in
-                                   products}
+        product_supplierinfo_obj = self.pool['product.supplierinfo']
+        product_supplier_ids = product_supplierinfo_obj.search(cr, uid, [
+            ('product_code', 'in', edi_product_codes)], context=context)
+        if len(product_supplier_ids) == 1:
+            products_sup = product_supplierinfo_obj.read(
+                cr, uid, product_supplier_ids, ['product_code', 'product_id'],
+                context=context)
+            edi_products_codes_dict = {products_sup[0]['product_code']:
+                                       products_sup[0]['product_id'][0]}
+        else:
+            product_obj = self.pool['product.product']
+            product_ids = product_obj.search(cr, uid, [
+                ('default_code', 'in', edi_product_codes)], context=context)
+            products = product_obj.read(cr, uid, product_ids, ['default_code'],
+                                        context=context)
+            edi_products_codes_dict = {p['default_code']: p['id'] for p in
+                                       products}
         not_found_product_codes = set(edi_product_codes) - set(
             edi_products_codes_dict.keys())
         if not_found_product_codes:
