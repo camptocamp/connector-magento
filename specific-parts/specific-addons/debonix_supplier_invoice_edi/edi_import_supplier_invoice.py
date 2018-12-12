@@ -394,23 +394,25 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         Raise an error if no existing product is found for the product_code.
         """
         edi_product_codes = [l.get('product_code') for l in edi_line_values]
+        # search on product.supplierinfo product_code first
         product_supplierinfo_obj = self.pool['product.supplierinfo']
         product_supplier_ids = product_supplierinfo_obj.search(cr, uid, [
             ('product_code', 'in', edi_product_codes)], context=context)
-        if len(product_supplier_ids) == 1:
-            products_sup = product_supplierinfo_obj.read(
-                cr, uid, product_supplier_ids, ['product_code', 'product_id'],
-                context=context)
-            edi_products_codes_dict = {products_sup[0]['product_code']:
-                                       products_sup[0]['product_id'][0]}
-        else:
+        products_sup = product_supplierinfo_obj.read(
+            cr, uid, product_supplier_ids, ['product_code', 'product_id'], context=context)
+        edi_products_codes_dict = {p['product_code']: p['product_id'] for p in products_sup}
+        # Get the products not found
+        not_found_on_supplierinfo = [code for code in edi_product_codes if code not in edi_products_codes_dict]
+        if not_found_on_supplierinfo:
+            # search on product.product default_code
             product_obj = self.pool['product.product']
             product_ids = product_obj.search(cr, uid, [
-                ('default_code', 'in', edi_product_codes)], context=context)
+                ('default_code', 'in', not_found_on_supplierinfo)], context=context)
             products = product_obj.read(cr, uid, product_ids, ['default_code'],
                                         context=context)
-            edi_products_codes_dict = {p['default_code']: p['id'] for p in
-                                       products}
+            # add found products to edi_products_code_dict
+            for p in products:
+                edi_products_codes_dict['p.default_code'] = p.id
         not_found_product_codes = set(edi_product_codes) - set(
             edi_products_codes_dict.keys())
         if not_found_product_codes:
