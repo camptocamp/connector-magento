@@ -393,21 +393,27 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         products from the invoice.
         Raise an error if no existing product is found for the product_code.
         """
-        edi_product_codes = [l.get('product_code') for l in edi_line_values]
+        edi_product_codes = [
+                l.get('product_code').lstrip('0') for l in edi_line_values]
         # search on product.supplierinfo product_code first
         product_supplierinfo_obj = self.pool['product.supplierinfo']
         product_supplier_ids = product_supplierinfo_obj.search(cr, uid, [
             ('product_code', 'in', edi_product_codes)], context=context)
         products_sup = product_supplierinfo_obj.read(
-            cr, uid, product_supplier_ids, ['product_code', 'product_id'], context=context)
-        edi_products_codes_dict = {p['product_code']: p['product_id'] for p in products_sup}
+            cr, uid, product_supplier_ids, [
+                'product_code', 'product_id'], context=context)
+        edi_products_codes_dict = {
+                p['product_code']: p['product_id'] for p in products_sup}
         # Get the products not found
-        not_found_on_supplierinfo = [code for code in edi_product_codes if code not in edi_products_codes_dict]
+        not_found_on_supplierinfo = [
+                code for code in edi_product_codes
+                if code not in edi_products_codes_dict]
         if not_found_on_supplierinfo:
             # search on product.product default_code
             product_obj = self.pool['product.product']
             product_ids = product_obj.search(cr, uid, [
-                ('default_code', 'in', not_found_on_supplierinfo)], context=context)
+                ('default_code', 'in', not_found_on_supplierinfo)],
+                context=context)
             products = product_obj.read(cr, uid, product_ids, ['default_code'],
                                         context=context)
             # add found products to edi_products_code_dict
@@ -428,7 +434,9 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                                    supplier_invoice_number, context=None):
         """Raise an error if the product is not on the invoice."""
         invoice_product_ids = [l.product_id.id for l in invoice.invoice_line]
-        not_found_products = set(edi_products_codes_dict.values()) - set(
+        edi_product_codes_ids = [
+                l[0] for l in edi_products_codes_dict.values()]
+        not_found_products = set(edi_product_codes_ids) - set(
             invoice_product_ids)
         if not_found_products:
             raise EdifactPurchaseInvoiceProductNotFound(
