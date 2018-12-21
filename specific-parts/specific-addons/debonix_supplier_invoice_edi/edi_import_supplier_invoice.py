@@ -400,11 +400,14 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         product_supplierinfo_obj = self.pool['product.supplierinfo']
         product_supplier_ids = product_supplierinfo_obj.search(cr, uid, [
             ('product_code', 'in', edi_product_codes)], context=context)
-        products_sup = product_supplierinfo_obj.read(
-            cr, uid, product_supplier_ids, [
-                'product_code', 'product_id'], context=context)
-        edi_products_codes_dict = {
-                p['product_code']: p['product_id'][0] for p in products_sup}
+        if len(product_supplier_ids) == 1:
+            products_sup = product_supplierinfo_obj.read(
+                cr, uid, product_supplier_ids, [
+                    'product_code', 'product_id'], context=context)
+            edi_products_codes_dict = {
+                    p['product_code']: p['product_id'][0] for p in products_sup}
+        else:
+            edi_products_codes_dict = {}
         # Get the products not found
         not_found_on_supplierinfo = [
                 code for code in edi_product_codes
@@ -418,7 +421,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                                         context=context)
             # add found products to edi_products_code_dict
             for p in products:
-                edi_products_codes_dict['p.default_code'] = p.id
+                edi_products_codes_dict[p['default_code']] = p['id']
         else:
             # We will get the product.product instead of the product_template
             for product_default_code, template_id in edi_products_codes_dict.iteritems():
