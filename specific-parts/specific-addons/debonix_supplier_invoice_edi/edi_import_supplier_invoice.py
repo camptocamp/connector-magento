@@ -507,6 +507,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         ).get('value')
         # Remove changed price unit to ensure the price in EDI file is used
         changed_vals.pop('price_unit')
+        changed_vals.pop('account_id')
         return changed_vals
 
     def _check_different_lines_subtotals(self, cr, uid, invoice, context=None):
