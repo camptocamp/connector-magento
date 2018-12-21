@@ -545,7 +545,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         lines_vals = []
         for edi_line in edi_lines:
             product_id = edi_products_codes_dict.get(
-                edi_line.get('product_code'))
+                edi_line.get('product_code').lstrip('0'))
             product = self.pool['product.product'].browse(cr, uid, product_id,
                                                           context=context)
             account = product.property_account_expense or \
