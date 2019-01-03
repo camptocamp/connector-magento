@@ -268,6 +268,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             date_invoice=refund_vals.get('date_invoice'),
             company_id=self._get_company(cr, uid, context=context).id
         ).get('value'))
+
         # prepare lines
         edi_products_codes_dict = self._get_code_products_dict(
             cr, uid, edi_invoice_values.get('lines'),
@@ -536,6 +537,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             'name': edi_invoice.get('purchase_number'),
             'date_invoice': edi_invoice.get('date_invoice'),
             'date_due': edi_invoice.get('date_due'),
+            'type': 'out_refund',
             'currency_id': currency_eur_id
         }
 
