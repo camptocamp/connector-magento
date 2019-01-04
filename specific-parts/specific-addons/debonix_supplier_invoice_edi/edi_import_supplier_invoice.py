@@ -130,7 +130,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                 if edi_raw_invoice_type == 'F':
                     invoice_type = 'out_invoice'
                 elif edi_raw_invoice_type == 'A':
-                    invoice_type = 'out_refund'
+                    invoice_type = 'in_refund'
                 else:
                     invoice_type = False
                 date_invoice = line[38:46]
@@ -181,7 +181,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                         document = self.update_invoices(
                             cr, uid, edi_invoice_values, context=context)
                     elif edi_invoice_values.get('invoice_type') == \
-                            'out_refund':
+                            'in_refund':
                         document = self.create_refund(
                             cr, uid, edi_invoice_values, context=context)
                     else:
@@ -264,7 +264,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                                            context=context)
         # call onchange_partner_id
         refund_vals.update(invoice_obj.onchange_partner_id(
-            cr, uid, [], 'out_refund', refund_vals.get('partner_id'),
+            cr, uid, [], 'in_refund', refund_vals.get('partner_id'),
             date_invoice=refund_vals.get('date_invoice'),
             company_id=self._get_company(cr, uid, context=context).id
         ).get('value'))
@@ -279,7 +279,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             context=context)
         for refund_line_vals in refund_lines_vals:
             refund_line_vals.update(self._call_line_onchanges(
-                cr, uid, refund_line_vals, 'out_refund', context=context))
+                cr, uid, refund_line_vals, 'in_refund', context=context))
         refund_vals.update({
             'invoice_line': [(0, False, vals) for vals in refund_lines_vals],
         })
@@ -537,7 +537,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             'name': edi_invoice.get('purchase_number'),
             'date_invoice': edi_invoice.get('date_invoice'),
             'date_due': edi_invoice.get('date_due'),
-            'type': 'out_refund',
+            'type': 'in_refund',
             'currency_id': currency_eur_id
         }
 
