@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="sogedesca" model="res.partner">
+            <field name="name">SOGEDESCA</field>
+            <field name="lang">en_US</field>
+        </record>
+        <record id="product_template_111111111" model="product.template">
+            <field name="name">111111111</field>
+            <field name="categ_id" ref="product.product_category_2"/>
+            <field name="standard_price">11.10</field>
+            <field name="list_price">22.20</field>
+            <field name="type">consu</field>
+            <field name="uom_id" ref="product.product_uom_unit"/>
+            <field name="uom_po_id" ref="product.product_uom_unit"/>
+            <field name="description">This product template is 111111111.</field>
+            <field name="description_sale">This product template to sell is 111111111.</field>
+        </record>
+        <record id="product_edi_111111111" model="product.product">
+            <field name="product_tmpl_id" ref="product_template_111111"/>
+            <field name="default_code">111111111</field>
+        </record>
+        <record id="product_template_222222222" model="product.template">
+            <field name="name">222222222</field>
+            <field name="categ_id" ref="product.product_category_2"/>
+            <field name="standard_price">22.20</field>
+            <field name="list_price">44.40</field>
+            <field name="type">consu</field>
+            <field name="uom_id" ref="product.product_uom_unit"/>
+            <field name="uom_po_id" ref="product.product_uom_unit"/>
+            <field name="description">This product template is 222222222.</field>
+            <field name="description_sale">This product template to sell is 222222222.</field>
+        </record>
+        <record id="product_edi_222222222" model="product.product" >
+            <field name="product_tmpl_id" ref="product_template_222222222"/>
+            <field name="default_code">222222222</field>
+        </record>
+    </data>
+</openerp>

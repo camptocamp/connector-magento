@@ -79,35 +79,34 @@ class res_company(orm.Model):
             string='Path',
             type='char',
             multi='server_env'),
-
-        'edifact_purchase_host': fields.function(
+        'edifact_host': fields.function(
             _get_environment_config_by_id,
             string='Host',
             type='char',
             multi='server_env'),
-        'edifact_purchase_user': fields.function(
+        'edifact_user': fields.function(
             _get_environment_config_by_id,
             string='Username',
             type='char',
             multi='server_env'),
-        'edifact_purchase_password': fields.function(
+        'edifact_password': fields.function(
             _get_environment_config_by_id,
             string='Password',
             type='char',
             multi='server_env'),
         'edifact_purchase_path': fields.function(
             _get_environment_config_by_id,
-            string="Path",
+            string="Purchase path",
             type='char',
             multi='server_env'),
         'edifact_purchase_import_path': fields.function(
             _get_environment_config_by_id,
-            string="Import Path",
+            string="Purchase import Path",
             type='char',
             multi='server_env'),
         'edifact_purchase_import_file': fields.function(
             _get_environment_config_by_id,
-            string="Import File Pattern",
+            string="Purchase import File Pattern",
             type='char',
             multi='server_env'),
         'edifact_regex_ref': fields.function(
@@ -122,12 +121,27 @@ class res_company(orm.Model):
             multi='server_env'),
         'edifact_purchase_success_path': fields.function(
             _get_environment_config_by_id,
-            string="Success path",
+            string="Purchase success path",
             type='char',
             multi='server_env'),
         'edifact_purchase_error_path': fields.function(
             _get_environment_config_by_id,
-            string="Error path",
+            string="Purchase error path",
+            type='char',
+            multi='server_env'),
+        'edifact_supplier_invoice_import_path': fields.function(
+            _get_environment_config_by_id,
+            string="Supplier invoice import path",
+            type='char',
+            multi='server_env'),
+        'edifact_supplier_invoice_import_success_path': fields.function(
+            _get_environment_config_by_id,
+            string="Supplier invoice success path",
+            type='char',
+            multi='server_env'),
+        'edifact_supplier_invoice_import_error_path': fields.function(
+            _get_environment_config_by_id,
+            string="Supplier invoice error path",
             type='char',
             multi='server_env'),
         'toolstream_email_address': fields.function(

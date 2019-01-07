@@ -56,9 +56,9 @@ class EdiImportTracking(orm.Model):
 
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         company = user.company_id
-        host = company.edifact_purchase_host
-        ftpuser = company.edifact_purchase_user
-        ftppass = company.edifact_purchase_password
+        host = company.edifact_host
+        ftpuser = company.edifact_user
+        ftppass = company.edifact_password
         importpath = company.edifact_purchase_import_path
         successpath = company.edifact_purchase_success_path
         errorpath = company.edifact_purchase_error_path

@@ -1,0 +1,32 @@
+# Following is an customer invoice example failing because price unit x qty != line amount
+# Lines beginning with 100 represent header
+100INV00000001                                F 20180516                      20180615
+# Lines beginning with 200 represent lines
+200                                   TEST_EDI_01                                                                                                                                                                                                                                                                                              000000000001000                                          000000000111000000000000011000                                                                                                                                                                                              111111111
+200                                   TEST_EDI_01                                                                                                                                                                                                                                                                                              000000000002000                                          000000000444000000000000022000                                                                                                                                                                                              222222222
+# Lines beginning with FIN represent end of invoice
+FIN
+# Following is an customer invoice example failing because invoice type is wrong
+# Lines beginning with 100 represent header
+100INV00000001                                X 20180516                      20180615
+# Lines beginning with 200 represent lines
+200                                   TEST_EDI_01                                                                                                                                                                                                                                                                                              000000000001000                                          000000000111000000000000111000                                                                                                                                                                                              111111111
+200                                   TEST_EDI_01                                                                                                                                                                                                                                                                                              000000000002000                                          000000000444000000000000222000                                                                                                                                                                                              222222222
+# Lines beginning with FIN represent end of invoice
+FIN
+# Following is an customer invoice example failing because purchase order is not found
+# Lines beginning with 100 represent header
+100INV00000001                                F 20180516                      20180615
+# Lines beginning with 200 represent lines
+200                                   TEST_EDI_0X                                                                                                                                                                                                                                                                                              000000000001000                                          000000000111000000000000111000                                                                                                                                                                                              111111111
+200                                   TEST_EDI_0X                                                                                                                                                                                                                                                                                              000000000002000                                          000000000444000000000000222000                                                                                                                                                                                              222222222
+# Lines beginning with FIN represent end of invoice
+FIN
+# Following is an customer invoice example failing because products are not found
+# Lines beginning with 100 represent header
+100INV00000001                                F 20180516                      20180615
+# Lines beginning with 200 represent lines
+200                                   TEST_EDI_01                                                                                                                                                                                                                                                                                              000000000001000                                          000000000111000000000000111000                                                                                                                                                                                              XXXXXXXXX
+200                                   TEST_EDI_01                                                                                                                                                                                                                                                                                              000000000002000                                          000000000444000000000000222000                                                                                                                                                                                              YYYYYYYYY
+# Lines beginning with FIN represent end of invoice
+FIN
