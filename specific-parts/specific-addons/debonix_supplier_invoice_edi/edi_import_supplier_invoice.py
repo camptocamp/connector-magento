@@ -128,7 +128,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                 supplier_invoice_number = line[3:38].rstrip()
                 edi_raw_invoice_type = line[46:47]
                 if edi_raw_invoice_type == 'F':
-                    invoice_type = 'out_invoice'
+                    invoice_type = 'in_invoice'
                 elif edi_raw_invoice_type == 'A':
                     invoice_type = 'in_refund'
                 else:
@@ -177,7 +177,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             for edi_invoice_values, chunk in edi_invoices:
                 cr.execute('SAVEPOINT edi_invoice')
                 try:
-                    if edi_invoice_values.get('invoice_type') == 'out_invoice':
+                    if edi_invoice_values.get('invoice_type') == 'in_invoice':
                         document = self.update_invoices(
                             cr, uid, edi_invoice_values, context=context)
                     elif edi_invoice_values.get('invoice_type') == \
@@ -237,7 +237,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             edi_products_codes_dict, context=context)
         for invoice_line_vals in invoice_lines_vals:
             invoice_line_vals.update(self._call_line_onchanges(
-                cr, uid, invoice_line_vals, 'out_invoice', context=context))
+                cr, uid, invoice_line_vals, 'in_invoice', context=context))
         invoice_vals.update({
             'invoice_line': [(0, False, vals) for vals in invoice_lines_vals],
         })
@@ -253,6 +253,10 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                     edi_invoice_values.get('supplier_invoice_number')
             ), different_subtotals)
         # Validate if all went well
+        invoice_obj.action_move_create(cr, uid, [invoice.id],
+                                       context=context)
+        invoice_obj.action_number(cr, uid, [invoice.id],
+                                  context=context)
         invoice_obj.invoice_validate(cr, uid, [invoice.id],
                                      context=context)
         return invoice
@@ -406,7 +410,8 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                 cr, uid, product_supplier_ids, [
                     'product_code', 'product_id'], context=context)
             edi_products_codes_dict = {
-                    p['product_code']: p['product_id'][0] for p in products_sup}
+                    p['product_code']: p['product_id'][
+                        0] for p in products_sup}
         else:
             edi_products_codes_dict = {}
         # Get the products not found
@@ -425,11 +430,13 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                 edi_products_codes_dict[p['default_code']] = p['id']
         else:
             # We will get the product.product instead of the product_template
-            for product_default_code, template_id in edi_products_codes_dict.iteritems():
+            for product_default_code, template_id in\
+                    edi_products_codes_dict.iteritems():
                 product_id = product_obj.search(cr, uid, [('product_tmpl_id',
                                                           '=', template_id)],
                                                 context=context)
-                edi_products_codes_dict.update({product_default_code: product_id[0]})
+                edi_products_codes_dict.update(
+                    {product_default_code: product_id[0]})
 
         not_found_product_codes = set(edi_product_codes) - set(
             edi_products_codes_dict.keys())
@@ -469,7 +476,9 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             account = product.property_account_expense
 
             if not account:
-                account = product.categ_id and product.categ_id.property_account_expense_categ or False
+                account = product.categ_id and \
+                          product.categ_id.property_account_expense_categ\
+                          or False
             if not account:
                 raise osv.except_osv(
                     _('Error!'),
@@ -507,6 +516,9 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             context=context, company_id=company.id
         ).get('value')
         # Remove changed price unit to ensure the price in EDI file is used
+        if 'invoice_line_tax_id' in changed_vals:
+            changed_vals.update({'invoice_line_tax_id': [
+                (6, 0, changed_vals['invoice_line_tax_id'])]})
         changed_vals.pop('price_unit')
         changed_vals.pop('account_id')
         return changed_vals
