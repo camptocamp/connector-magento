@@ -10,6 +10,7 @@ from StringIO import StringIO
 from openerp.osv import orm, fields, osv
 from openerp.tools import float_compare
 from openerp.tools.translate import _
+from openerp import netsvc
 
 
 class EdifactPurchaseInvoiceParsingError(Exception):
@@ -253,12 +254,9 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                     edi_invoice_values.get('supplier_invoice_number')
             ), different_subtotals)
         # Validate if all went well
-        invoice_obj.action_move_create(cr, uid, [invoice.id],
-                                       context=context)
-        invoice_obj.action_number(cr, uid, [invoice.id],
-                                  context=context)
-        invoice_obj.invoice_validate(cr, uid, [invoice.id],
-                                     context=context)
+        wf_service = netsvc.LocalService("workflow")
+        wf_service.trg_validate(uid, 'account.invoice',
+                                invoice.id, 'invoice_open', cr)
         return invoice
 
     def create_refund(self, cr, uid, edi_invoice_values, context=None):
