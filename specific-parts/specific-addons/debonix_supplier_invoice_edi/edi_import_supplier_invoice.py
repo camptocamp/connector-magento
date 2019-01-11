@@ -261,6 +261,8 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
 
     def create_refund(self, cr, uid, edi_invoice_values, context=None):
         """Create new refund with data from the EDI files dict"""
+        ir_values_obj = self.pool.get('ir.values')
+        journal_obj = self.pool.get('account.journal')
         invoice_obj = self.pool['account.invoice']
         refund_vals = self._prepare_refund(cr, uid, edi_invoice_values,
                                            context=context)
@@ -271,6 +273,18 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             company_id=self._get_company(cr, uid, context=context).id
         ).get('value'))
 
+        journal_type = 'purchase_refund'
+        journal_ids = journal_obj.search(cr, uid,
+                                         [('company_id', '=', company_id),
+                                          ('type', '=', journal_type)])
+        if journal_ids:
+            refund_vals['journal_id'] = journal_ids[0]
+        res_journal_default = ir_values_obj.get(cr, uid, 'default',
+                                                'type=%s' % (type),
+                                                ['account.invoice'])
+        for r in res_journal_default:
+            if r[1] == 'journal_id' and r[2] in journal_ids:
+                refund_vals['journal_id'] = r[2]
         # prepare lines
         edi_products_codes_dict = self._get_code_products_dict(
             cr, uid, edi_invoice_values.get('lines'),
