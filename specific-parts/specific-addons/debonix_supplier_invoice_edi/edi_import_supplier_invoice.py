@@ -301,7 +301,9 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         })
         # create and return
         refund_id = invoice_obj.create(cr, uid, refund_vals, context=context)
-        return invoice_obj.browse(cr, uid, refund_id, context=context)
+        refund = invoice_obj.browse(cr, uid, refund_id, context=context)
+        invoice_obj.write(cr, uid, refund_id, {'check_total': refund.amount_total}, context=context)
+        return refund
 
     def handle_failures(self, cr, uid, failures, context=None):
         """Create a crm.claim with error message and add failed EDI chunks
