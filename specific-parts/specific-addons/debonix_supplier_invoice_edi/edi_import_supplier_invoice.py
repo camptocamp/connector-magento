@@ -275,7 +275,9 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
 
         journal_type = 'purchase_refund'
         journal_ids = journal_obj.search(cr, uid,
-                                         [('company_id', '=', self._get_company(cr, uid, context=context).id),
+                                         [('company_id', '=',
+                                           self._get_company(
+                                               cr, uid, context=context).id),
                                           ('type', '=', journal_type)])
         if journal_ids:
             refund_vals['journal_id'] = journal_ids[0]
@@ -302,7 +304,9 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         # create and return
         refund_id = invoice_obj.create(cr, uid, refund_vals, context=context)
         refund = invoice_obj.browse(cr, uid, refund_id, context=context)
-        invoice_obj.write(cr, uid, refund_id, {'check_total': refund.amount_total}, context=context)
+        invoice_obj.write(cr, uid, refund_id,
+                          {'check_total': refund.amount_total},
+                          context=context)
         return refund
 
     def handle_failures(self, cr, uid, failures, context=None):
