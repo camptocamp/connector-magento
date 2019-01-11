@@ -275,7 +275,7 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
 
         journal_type = 'purchase_refund'
         journal_ids = journal_obj.search(cr, uid,
-                                         [('company_id', '=', company_id),
+                                         [('company_id', '=', self._get_company(cr, uid, context=context).id),
                                           ('type', '=', journal_type)])
         if journal_ids:
             refund_vals['journal_id'] = journal_ids[0]
