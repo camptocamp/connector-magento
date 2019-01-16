@@ -253,6 +253,8 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
                     edi_invoice_values.get('purchase_number'),
                     edi_invoice_values.get('supplier_invoice_number')
             ), different_subtotals)
+        invoice_obj.button_reset_taxes(cr, uid, [invoice.id], context=context)
+        invoice_obj.write(cr, uid, invoice.id, {'check_total': invoice.amount_total}, context=context)
         # Validate if all went well
         wf_service = netsvc.LocalService("workflow")
         wf_service.trg_validate(uid, 'account.invoice',
@@ -423,15 +425,18 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
         product_supplierinfo_obj = self.pool['product.supplierinfo']
         product_supplier_ids = product_supplierinfo_obj.search(cr, uid, [
             ('product_code', 'in', edi_product_codes)], context=context)
-        if len(product_supplier_ids) == 1:
-            products_sup = product_supplierinfo_obj.read(
-                cr, uid, product_supplier_ids, [
-                    'product_code', 'product_id'], context=context)
-            edi_products_codes_dict = {
-                    p['product_code']: p['product_id'][
-                        0] for p in products_sup}
-        else:
-            edi_products_codes_dict = {}
+        products_sup = product_supplierinfo_obj.read(
+            cr, uid, product_supplier_ids, [
+                'product_code', 'product_id'], context=context)
+        to_remove_dict = {}
+        edi_products_codes_dict = {}
+        for p in products_sup:
+            if p['product_code'] in edi_products_codes_dict:
+                to_remove_dict.update({p['product_code']: p['product_id'][0]})
+            edi_products_codes_dict.update({p['product_code']: p['product_id'][0]})
+        # Then we will remove duplicated
+        map(edi_products_codes_dict.pop, to_remove_dict)
+
         # Get the products not found
         not_found_on_supplierinfo = [
                 code for code in edi_product_codes
