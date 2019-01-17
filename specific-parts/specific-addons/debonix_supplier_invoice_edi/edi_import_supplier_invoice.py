@@ -434,7 +434,8 @@ class EDIImportSupplierInvoice(orm.AbstractModel):
             if p['product_code'] in edi_products_codes_dict:
                 to_remove_dict.update({p['product_code']: p['product_id'][0]})
             edi_products_codes_dict.update({p['product_code']: p['product_id'][0]})
-        # Then we will remove duplicated
+        # If a product_supplierinfo match multiple time for a product, we remove the record from the dict
+        # to check this product code on the product default_code
         map(edi_products_codes_dict.pop, to_remove_dict)
 
         # Get the products not found
