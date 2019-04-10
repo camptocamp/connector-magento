@@ -1,0 +1,10 @@
+customer_name: debonix
+odoo_version: '12.0'
+customer_shortname: debonix
+repo_name: debonix_odoo
+project_id: '2534'
+project_name: debonix_odoo
+odoo_company_name: Debonix
+odoo_main_lang: fr_FR
+odoo_aux_langs: 
+platform_name: fr

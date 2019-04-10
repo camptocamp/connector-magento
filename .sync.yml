@@ -1,0 +1,33 @@
+# List of files to sync
+sync:
+  include:
+    - ./.cookiecutter.context.yml
+    - ./.flake8
+    - ./.isort.cfg
+    - ./.pre-commit-config.yaml
+    - ./pyproject.toml
+    - ./tasks/*
+    - ./docs/*
+    - ./travis/docker-compose.yml
+    - ./travis/git_submodule_update.py
+    - ./travis/minion-client.py
+    - ./travis/publish.sh
+    - ./odoo/.dockerignore
+    - ./odoo/before-migrate-entrypoint.d/*
+    - ./odoo/start-entrypoint.d/*
+    - ./odoo/local-src/camptocamp_tools/*
+    - ./odoo/local-src/camptocamp_website_tools/*
+    - ./cups-test-server/*
+    - ./Dangerfile
+    - ./Gemfile
+    - ./Gemfile.lock
+  exclude:
+    - ./docs/README.local.md
+  # content of the comment added in files on sync
+  comment: |
+    This file has been generated with 'invoke project.sync'.
+    Do not modify. Any manual change will be lost.
+    Please propose your modification on
+    https://github.com/camptocamp/odoo-template instead.
+  pinned_version: stable
+  last_sync:
