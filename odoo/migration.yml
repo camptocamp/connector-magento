@@ -7,9 +7,7 @@ migration:
           - anthem songs.install.pre::main
         post:
           ## PLATFORM
-          ## Choose between the two options : ovh or exoscale
-          #- anthem openerp.addons.cloud_platform.songs::install_exoscale
-          #- anthem openerp.addons.cloud_platform.songs::install_ovh
+          - anthem openerp.addons.cloud_platform.songs::install_ovh
           - anthem songs.install.accounting::main
           - anthem songs.install.logistics::main
           - anthem songs.install.data_all::main
@@ -28,10 +26,7 @@ migration:
       addons:
         upgrade:
           ## PLATFORM
-          #- cloud_platform_exoscale or cloud_platform_ovh
-          ## Only if v9.0 and using attachment_s3 (exoscale) and `delivery_carrier_label`:
-          #- delivery_carrier_label_s3
-          # ---
+          - cloud_platform_ovh
           #### oca/server-ux
           - base_technical_features
           #### oca/server-env
