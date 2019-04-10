@@ -14,10 +14,10 @@
 ;	branch = 12.0
 
 ; Enterprise
-;[submodule "odoo/external-src/enterprise"]
-;	path = odoo/external-src/enterprise
-;	url = git@github.com:odoo/enterprise.git
-;	branch = 12.0
+[submodule "odoo/external-src/enterprise"]
+	path = odoo/external-src/enterprise
+	url = git@github.com:odoo/enterprise.git
+	branch = 12.0
 
 ; OCA
 ;[submodule "odoo/external-src/account-closing"]

@@ -64,10 +64,11 @@ RUN cd /odoo && pip install -r src_requirements.txt
 ## Environment
 # frequency: sometimes
 # cost:      very light
-ENV ADDONS_PATH="/odoo/src/addons, \
+ENV ADDONS_PATH="/odoo/external-src/enterprise, \
   /odoo/external-src/server-env, \
   /odoo/external-src/server-ux, \
   /odoo/external-src/web, \
+  /odoo/src/addons, \
   /odoo/local-src" \
   LIMIT_TIME_CPU=86400 \
   LIMIT_TIME_REAL=86400 \
