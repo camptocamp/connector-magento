@@ -60,21 +60,13 @@ def set_default_partner_language(ctx):
 @anthem.log
 def admin_user_password(ctx):
     """ Changing admin password """
-    # TODO: default admin password, must be changed.
-    # Please add your new password in lastpass with the following name:
-    # [odoo-test] debonix test admin user
-    # In the lastpass directory: Shared-C2C-Odoo-External
-    # To get an encrypted password:
-    # $ docker-compose run --rm odoo python -c \
-    # "from passlib.context import CryptContext; \
-    #  print CryptContext(['pbkdf2_sha512']).encrypt('my_password')"
     if os.environ.get('RUNNING_ENV') == 'dev':
         ctx.log_line('Not changing password for dev RUNNING_ENV')
         return
     ctx.env['res.users']._set_encrypted_password(
         ctx.env.ref('base.user_admin').id,
-        '$pbkdf2-sha512$19000$tVYq5dwbI0Tofc85RwiBcA$a1tNyzZ0hxW9kXKIyEwN1'
-        'j84z5gIIi1PQmvtFHuxQ4rNA2RaXSGLjXnEifl6ZQZ/wiBJK6fZkeaGgF3DW9A2Bg',
+        '$pbkdf2-sha512$25000$7Z2zNsaYE6I0JmRsDUGI8Q$AZdvQOL7A1ZYjwXWZzCCu'
+        'zLF7rjZGFDVDpkA3mR8gC2.vuy0oxg5FUTXlbP55SQNh2fPdJbXvoCNnpYjRnTDfw',
     )
 
 
