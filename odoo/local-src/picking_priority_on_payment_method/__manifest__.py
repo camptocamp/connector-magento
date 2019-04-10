@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author: Charline Dumontet
-#    Copyright 2017 Camptocamp SA
+#    Author: Guewen Baconnier
+#    Copyright 2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,30 +19,33 @@
 #
 ##############################################################################
 
-{
-    'name': 'Delivery Carrier File: Colissimo',
-    'version': '1.0',
-    'category': 'Generic Modules/Warehouse',
-    'description': """
-Sub-module for Base Delivery Carrier Files.
+{'name': 'Picking Priority on Payment Method',
+ 'version': '1.0',
+ 'author': 'Camptocamp',
+ 'maintainer': 'Camptocamp',
+ 'license': 'AGPL-3',
+ 'category': 'Stock',
+ 'depends': ['stock_picking_priority',  # stock-logistic-flows
+             'sale_payment_method',  # e-commerce-addons
+             ],
+ 'description': """
 
-Definition of the delivery carrier file for "Colissimo".
+THIS MODULE IS NO LONGER USED. IT IS STILL THERE SO IT COULD BE
+UNINSTALLED PROPERLY
 
-    """,
-    'author': 'Camptocamp',
-    'license': 'AGPL-3',
-    'website': 'http://www.camptocamp.com',
-    'depends': ['base_delivery_carrier_files',
-                'connector_ecommerce',
-                'import_tracking',
-                'crm_claim',],
-    'data': [
-        'data/colissimo_data.xml',
-        'carrier_file_view.xml',
-        'res_company_view.xml'
-    ],
-    'test': [],
-    'images': [],
-    'installable': True,
-    'auto_install': False,
-}
+
+Picking Priority on Payment Method
+==================================
+
+Add a priority on each payment methods.
+Delivery orders are created with the priority of the payment method
+used on the origin sales order.
+ """,
+ 'website': 'http://www.camptocamp.com',
+ 'data': ['sale_view.xml',
+          'payment_method_view.xml',
+          ],
+ 'test': [],
+ 'installable': False,
+ 'auto_install': False,
+ }

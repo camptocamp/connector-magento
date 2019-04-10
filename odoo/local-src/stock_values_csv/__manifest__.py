@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author: Guewen Baconnier
+#    Author Guewen Baconnier. Copyright Camptocamp SA
 #    Copyright 2012 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -18,29 +18,25 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-{'name': "Advanced Reconcile with TID",
- 'version': '1.0',
+{'name': 'Stock Values at Date',
+ 'version': '1.2',
  'author': 'Camptocamp',
  'maintainer': 'Camptocamp',
- 'category': 'Finance',
- 'complexity': 'normal',
- 'depends': ['account_advanced_reconcile'],
- 'description': """
- Add specific reconciliation method which searches by:
- On: *payment*  => *invoice*
-     credit     => debit
-     partner_id => partner_id
-     ref        => name or ref or
-                   "tid_" + name or "tid_mag_" + name or
-                   "tid_" + ref or "tid_mag_" + ref or
+ 'category': 'Others',
+ 'complexity': "normal",
+ 'depends': ['stock',
+             'last_purchase_price',
+             ],
+ 'description': """Debonix Specific.
 
- """,
+Add a wizard to export the stock value for each product in a location at
+a given date.  The data is exported as a CSV file
+""",
  'website': 'http://www.camptocamp.com',
- 'data': ['easy_reconcile_view.xml'],
- 'test': [],
- 'images': [],
- 'installable': True,
+ 'data': ['wizard/stock_values_view.xml'],
+ 'tests': [],
+ 'installable': False,
  'auto_install': False,
  'license': 'AGPL-3',
+ 'application': True,
  }

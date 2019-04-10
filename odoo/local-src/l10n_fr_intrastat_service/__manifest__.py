@@ -45,7 +45,7 @@ Please contact Alexis de Lattre from Akretion <alexis.delattre@akretion.com> for
         'security/intrastat_service_security.xml',
     ],
     'demo': [],
-    'installable': True,
+    'installable': False,
     'active': False,
     'application': True,
 }

@@ -37,7 +37,7 @@ Please contact Alexis de Lattre from Akretion <alexis.delattre@akretion.com> for
     'init_xml': [],
     'update_xml': ['report.xml'],
     'demo_xml': [],
-    'installable': True,
+    'installable': False,
     'active': False,
 }
 

@@ -55,5 +55,6 @@ included in the reported amounts.
         'view/l10n_nl_intrastat.xml',
         'security/ir.model.access.csv',
     ],
+    'installable': False,
 }
 

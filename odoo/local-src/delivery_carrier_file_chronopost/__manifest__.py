@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author: Vincent Renaville (Camptocamp)
-#    Copyright 2010-2014 Camptocamp SA
+#    Author: Guewen Baconnier
+#    Copyright 2012 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,34 +18,28 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{'name': 'Balance on lines',
- 'summary': 'Display balance totals in move line view',
- 'version': '1.1',
- 'author': 'Camptocamp',
- 'maintainter': 'Camptocamp',
- 'category': 'Accounting',
- 'depends': ['account'],
- 'description': """
-Balance for a line
-==================
 
-Add a balance total for grouped lines in move line view.
+{
+    'name': 'Delivery Carrier File: Chronopost',
+    'version': '1.0',
+    'category': 'Generic Modules/Warehouse',
+    'description': """
+Sub-module for Base Delivery Carrier Files.
 
-Balance field will only be shown when move lines are grouped by account
-or filtered by account.
+Definition of the delivery carrier file for "Chronopost".
 
-Contributors
-------------
-
-* Vincent revaville <vincent.renaville@camptocamp.com>
-* Yannick Vaucher <yannick.vaucher@camptocamp.com>
-""",
- 'website': 'http://www.camptocamp.com',
- 'data': ['account_move_line_view.xml',
-          ],
- 'tests': [],
- 'installable': True,
- 'auto_install': False,
- 'license': 'AGPL-3',
- 'application': False,
- }
+    """,
+    'author': 'Camptocamp',
+    'license': 'AGPL-3',
+    'website': 'http://www.camptocamp.com',
+    'depends': ['base_delivery_carrier_files',
+                'connector_ecommerce'],
+    'data': ['carrier_file_view.xml',
+             'stock_view.xml',
+             'sale_view.xml',
+             ],
+    'test': [],
+    'images': [],
+    'installable': False,
+    'auto_install': False,
+}

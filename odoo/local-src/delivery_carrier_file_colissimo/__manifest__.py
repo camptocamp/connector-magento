@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author: Joel Grand-Guillaume
-#    Copyright 2010-2012 Camptocamp SA
+#    Author: Charline Dumontet
+#    Copyright 2017 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,22 +18,31 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{'name': 'Packing Product Change',
- 'version': '1.0',
- 'depends': ['sale_stock',
-             ],
- 'author': 'Camptocamp',
- 'description': """
-This module will allow you to change a product during the packing
-operation. The replaced product will be shown on the generated
-invoices, so the customer will be informed of the operation.
 
-This will work only if the invoice was not generated before the
-packing was made.
-""",
- 'website': 'http://www.camptocamp.com',
- 'data': ["wizard/replace_product_view.xml",
-          "stock_view.xml",
-          ],
- 'installable': True,
+{
+    'name': 'Delivery Carrier File: Colissimo',
+    'version': '1.0',
+    'category': 'Generic Modules/Warehouse',
+    'description': """
+Sub-module for Base Delivery Carrier Files.
+
+Definition of the delivery carrier file for "Colissimo".
+
+    """,
+    'author': 'Camptocamp',
+    'license': 'AGPL-3',
+    'website': 'http://www.camptocamp.com',
+    'depends': ['base_delivery_carrier_files',
+                'connector_ecommerce',
+                'import_tracking',
+                'crm_claim',],
+    'data': [
+        'data/colissimo_data.xml',
+        'carrier_file_view.xml',
+        'res_company_view.xml'
+    ],
+    'test': [],
+    'images': [],
+    'installable': False,
+    'auto_install': False,
 }

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author: Guewen Baconnier
-#    Copyright 2012-2014 Camptocamp SA
+#    Author: Yannick Vaucher
+#    Copyright 2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,23 +18,30 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-{'name': 'Specific Sale Exceptions',
+{'name': 'Last Sale Price',
+ 'summary': 'Show last price defined for customer on sale order line',
  'version': '1.0',
+ 'category': 'Sales',
+ 'description': """
+Last Sale Price
+===============
+
+Add price and date of a product of the last time it was sold to a partner.
+
+Those information will be shown next to the price in sale order Form.
+
+Only confirmed and done sale orders are considered.
+
+If multiple sale order lines for the same partner where made on the same
+date, the mean will be displayed.
+""",
  'author': 'Camptocamp',
  'maintainer': 'Camptocamp',
- 'license': 'AGPL-3',
- 'category': 'Generic Modules/Sale',
- 'complexity': "easy",
- 'depends': ['sale_exceptions',
-             'sale_markup',
-             ],
- 'description': """Custom and specific exceptions for the sale workflow""",
- 'website': 'http://www.camptocamp.com',
- 'data': ['sale_exception_data.xml',
-          'res_partner_view.xml',
-          ],
- 'test': [],
- 'installable': True,
+ 'website': 'http://www.camptocamp.com/',
+ 'depends': ['base', 'sale'],
+ 'data': ['sale_view.xml'],
+ 'test': ['test/last_sale_price.yml'],
+ 'installable': False,
  'auto_install': False,
+ 'application': True,
  }

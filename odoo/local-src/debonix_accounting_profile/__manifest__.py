@@ -58,5 +58,5 @@ but `invoicing_voucher_killer`.
      'l10n_fr_fec',
  ],
  'data': [],
- 'installable': True
+ 'installable': False
  }

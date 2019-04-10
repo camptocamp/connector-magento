@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author: Nicolas Bessi
-#    Copyright 2010-2014 Camptocamp SA
+#    Copyright 2009-2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,22 +17,19 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{'name': 'Product Equivalences',
- 'version': '1.0',
- 'depends': ['base',
-             'product',
-             'packing_product_change',
-             ],
- 'author': 'Camptocamp',
- 'description': """
-Simple module which adds an link on products to:
- - an equivalent product
- - a list of compatibles products (no business logic for this list)
 
-If a product has an equivalent, it will be automatically
-replaced by its equivalent in delivery orders.
-""",
- 'website': 'http://www.camptocamp.com',
- 'data': ['product_view.xml',],
- 'installable': True,
-}
+{'name': 'Cut-off Reports',
+ 'version': '1.0',
+ 'depends': ['sale',
+             'purchase'],
+ 'author': 'Camptocamp',
+ 'description': """2 cut-off reports:
+     * "Outgoing cut-off": reports all uninvoiced products which were sent
+       to the customer, but not yet invoiced (drop-shipping items are
+       not accounted for).
+     * "Incoming cut-off": reports all uninvoiced products which were
+       received but not yet invoiced.""",
+ 'category': 'Generic Modules/Accounting',
+ 'data': ['wizard/cutoff_view.xml'],
+ 'installable': False,
+ }

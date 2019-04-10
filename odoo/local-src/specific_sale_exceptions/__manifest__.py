@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Copyright 2009-2014 Camptocamp SA
+#    Author: Guewen Baconnier
+#    Copyright 2012-2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,20 +19,22 @@
 #
 ##############################################################################
 
-{'name': 'Specific Reports',
+{'name': 'Specific Sale Exceptions',
  'version': '1.0',
- 'depends': ['account',
-             'sale',
-             'purchase',
-             'report_webkit',
-             'packing_product_change',
-             'magentoerpconnect',
-             ],
  'author': 'Camptocamp',
- 'description': """Debonix Reports""",
- 'category': 'Generic Modules/Accounting',
- 'data': ['report.xml',
-          'account_view.xml',
+ 'maintainer': 'Camptocamp',
+ 'license': 'AGPL-3',
+ 'category': 'Generic Modules/Sale',
+ 'complexity': "easy",
+ 'depends': ['sale_exceptions',
+             'sale_markup',
+             ],
+ 'description': """Custom and specific exceptions for the sale workflow""",
+ 'website': 'http://www.camptocamp.com',
+ 'data': ['sale_exception_data.xml',
+          'res_partner_view.xml',
           ],
- 'installable': True,
+ 'test': [],
+ 'installable': False,
+ 'auto_install': False,
  }

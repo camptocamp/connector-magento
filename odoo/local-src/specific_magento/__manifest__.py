@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author Guewen Baconnier. Copyright Camptocamp SA
+#    Author: Guewen Baconnier
 #    Copyright 2012 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -18,25 +18,37 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{'name': 'Stock Values at Date',
- 'version': '1.2',
- 'author': 'Camptocamp',
- 'maintainer': 'Camptocamp',
- 'category': 'Others',
- 'complexity': "normal",
- 'depends': ['stock',
-             'last_purchase_price',
-             ],
- 'description': """Debonix Specific.
 
-Add a wizard to export the stock value for each product in a location at
-a given date.  The data is exported as a CSV file
-""",
- 'website': 'http://www.camptocamp.com',
- 'data': ['wizard/stock_values_view.xml'],
- 'tests': [],
- 'installable': True,
- 'auto_install': False,
+{'name': 'Magento Connector Customization',
+ 'version': '1.1',
+ 'author': 'Camptocamp',
  'license': 'AGPL-3',
- 'application': True,
+ 'category': 'Connector',
+ 'depends': ['magentoerpconnect',
+             'mrp',
+             'product_brand',
+             'base_transaction_id',
+             'delivery_carrier_file_chronopost',
+             'base_transaction_id',
+             'product_cost_incl_bom',  # for cost_price, lp:margin-analysis
+             'packing_product_change',  # lp:c2c-ecom-addons
+             'l10n_fr_intrastat_product',  # lp:new-report-intrastat
+             ],
+ 'description': """
+Magento Connector Customization
+===============================
+
+ """,
+ 'website': 'http://www.camptocamp.com',
+ 'data': ['magento_data.xml',
+          'product_data.xml',
+          'product_view.xml',
+          'magento_model_view.xml',
+          'security/ir.model.access.csv',
+          'wizard/export_all_stock_view.xml',
+          'cron_data.xml',
+          ],
+ 'test': [],
+ 'installable': False,
+ 'auto_install': False,
  }

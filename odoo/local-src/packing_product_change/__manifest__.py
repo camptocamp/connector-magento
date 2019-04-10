@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author: Matthieu Dietrich (Camptocamp)
-#    Copyright 2017 Camptocamp SA
+#    Author: Joel Grand-Guillaume
+#    Copyright 2010-2012 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,18 +18,22 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{'name': 'XML messages from Toolstream purchase orders',
- 'summary': 'Generate XML files on purchase order confirmation for Toolstream',
- 'version': '0.3',
+{'name': 'Packing Product Change',
+ 'version': '1.0',
+ 'depends': ['sale_stock',
+             ],
  'author': 'Camptocamp',
- 'maintainter': 'Camptocamp',
- 'category': 'Purchase',
- 'depends': ['purchase', 'specific_fct'],
+ 'description': """
+This module will allow you to change a product during the packing
+operation. The replaced product will be shown on the generated
+invoices, so the customer will be informed of the operation.
+
+This will work only if the invoice was not generated before the
+packing was made.
+""",
  'website': 'http://www.camptocamp.com',
- 'data': ['purchase_view.xml'],
- 'tests': [],
- 'installable': True,
- 'auto_install': False,
- 'license': 'AGPL-3',
- 'application': False,
- }
+ 'data': ["wizard/replace_product_view.xml",
+          "stock_view.xml",
+          ],
+ 'installable': False,
+}

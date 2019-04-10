@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-#    Report intrastat base module for OpenERP
-#    Copyright (C) 2011-2013 Akretion (http://www.akretion.com)
+#    Report intrastat product module for OpenERP
+#    Copyright (C) 2010-2014 Akretion (http://www.akretion.com)
 #    @author Alexis de Lattre <alexis.delattre@akretion.com>
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -22,35 +22,34 @@
 
 
 {
-    'name': 'Intrastat Reporting Base',
+    'name': 'France Intrastat Product',
     'version': '1.1',
     'category': 'Localisation/Report Intrastat',
     'license': 'AGPL-3',
-    'summary': 'Base module for Intrastat reporting',
-    'description': """This module contains the common functions for 2 other modules :
-- l10n_fr_intrastat_service : the module for the "Déclaration Européenne des Services" (DES)
-- l10n_fr_intrastat_product : the module for the "Déclaration d'Echange de Biens" (DEB)
-This module is not usefull if it's not used together with one of those 2 modules or other country-specific intrastat modules.
+    'summary': 'Module for Intrastat product reporting (DEB) for France',
+    'description': """This module adds support for the "Déclaration d'Echange de Biens" (DEB).
 
-This module doesn't have any France-specific stuff. So it can be used as a basis for other intrastat modules for other EU countries.
-
-WARNING : this module conflicts with the module "report_intrastat" from the addons. If you have already installed the module "report_intrastat", you should uninstall it first before installing this module.
+More information about the DEB is available on this official web page : http://www.douane.gouv.fr/page.asp?id=322
 
 Please contact Alexis de Lattre from Akretion <alexis.delattre@akretion.com> for any help or question about this module.
     """,
     'author': 'Akretion',
     'website': 'http://www.akretion.com',
-    'depends': ['base_vat'],
+    'depends': ['intrastat_base', 'sale_stock', 'purchase'],
     'data': [
-        'country_data.xml',
-        'product_view.xml',
-        'partner_view.xml',
-        'country_view.xml',
-        'tax_view.xml',
+        'security/intrastat_product_security.xml',
+        'security/ir.model.access.csv',
+        'intrastat_product_view.xml',
+        'intrastat_type_view.xml',
+        'intrastat_product_reminder.xml',
         'company_view.xml',
-        'intrastat_menu.xml',
+        'partner_view.xml',
+        'product_view.xml',
+        'stock_view.xml',
+        'invoice_view.xml',
     ],
     'demo': ['intrastat_demo.xml'],
-    'installable': True,
+    'installable': False,
     'active': False,
+    'application': True,
 }

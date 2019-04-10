@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author Charline Dumontet. Copyright Camptocamp SA
-#    Copyright 2017 Camptocamp SA
+#    Copyright 2009-2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,32 +17,21 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{'name': 'Colis Prive Labels WebService',
- 'version': '1.1',
- 'author': 'Camptocamp',
- 'maintainer': 'Camptocamp',
- 'category': 'Others',
- 'complexity': "normal",
- 'depends': ['base_delivery_carrier_label',
-             'base_delivery_carrier_files_document',
-             'specific_fct',
-             'stockit_synchro',
-             'debonix_purchase_edi'],
- 'description': """Debonix Specific.
 
-This module generate labels with the 'Colis Prive Webservice'
-""",
- 'website': 'http://www.camptocamp.com',
- 'data': ['data/colis_prive_data.xml',
-          'carrier_file_view.xml',
-          'stock_view.xml',
+{'name': 'Specific Reports',
+ 'version': '1.0',
+ 'depends': ['account',
+             'sale',
+             'purchase',
+             'report_webkit',
+             'packing_product_change',
+             'magentoerpconnect',
+             ],
+ 'author': 'Camptocamp',
+ 'description': """Debonix Reports""",
+ 'category': 'Generic Modules/Accounting',
+ 'data': ['report.xml',
+          'account_view.xml',
           ],
- 'tests': [],
- 'installable': True,
- 'auto_install': False,
- 'license': 'AGPL-3',
- 'application': True,
- 'external_dependencies': {
-     'python': ['suds'],
- }
+ 'installable': False,
  }

@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Copyright 2011-2012 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -20,26 +20,32 @@
 ##############################################################################
 
 {
-    'name': 'Delivery Carrier File: Chronopost',
-    'version': '1.0',
-    'category': 'Generic Modules/Warehouse',
-    'description': """
-Sub-module for Base Delivery Carrier Files.
-
-Definition of the delivery carrier file for "Chronopost".
-
+    "name": "Stock-it synchro",
+    "version": "1.0",
+    "depends": ['product',
+                'stock',
+                'delivery',
+                'product_multi_ean',
+                'product_brand',  # openerp-product-attributes
+                ],
+    "author": "Camptocamp",
+    "license": 'AGPL-3',
+    "description": """Synchro with stock-it (stock management)
     """,
-    'author': 'Camptocamp',
-    'license': 'AGPL-3',
-    'website': 'http://www.camptocamp.com',
-    'depends': ['base_delivery_carrier_files',
-                'connector_ecommerce'],
-    'data': ['carrier_file_view.xml',
+    "website": "http://www.camptocamp.com",
+    "category": "Others",
+    "data": ['stockit_data.xml',
+             'stock_workflow.xml',
+             'wizard/product_export_view.xml',
+             'wizard/ean_export_view.xml',
+             'wizard/out_picking_export_view.xml',
+             'wizard/in_picking_export_view.xml',
+             'wizard/in_picking_import_view.xml',
+             'wizard/inventory_import_view.xml',
+             'stockit_menu.xml',
+             'company_view.xml',
              'stock_view.xml',
-             'sale_view.xml',
+             'mail_data.xml',
              ],
-    'test': [],
-    'images': [],
-    'installable': True,
-    'auto_install': False,
+    'installable': False,
 }

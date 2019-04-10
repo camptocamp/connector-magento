@@ -51,7 +51,7 @@ vers les filiales souhaitées (TODO).
           'purchase_edi_data.xml',
           'delivery_view.xml'],
  'tests': [],
- 'installable': True,
+ 'installable': False,
  'auto_install': False,
  'license': 'AGPL-3',
  'application': False,

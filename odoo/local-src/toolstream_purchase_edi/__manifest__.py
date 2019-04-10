@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author: Yannick Vaucher
-#    Copyright 2014 Camptocamp SA
+#    Author: Matthieu Dietrich (Camptocamp)
+#    Copyright 2017 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,30 +18,18 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{'name': 'Last Sale Price',
- 'summary': 'Show last price defined for customer on sale order line',
- 'version': '1.0',
- 'category': 'Sales',
- 'description': """
-Last Sale Price
-===============
-
-Add price and date of a product of the last time it was sold to a partner.
-
-Those information will be shown next to the price in sale order Form.
-
-Only confirmed and done sale orders are considered.
-
-If multiple sale order lines for the same partner where made on the same
-date, the mean will be displayed.
-""",
+{'name': 'XML messages from Toolstream purchase orders',
+ 'summary': 'Generate XML files on purchase order confirmation for Toolstream',
+ 'version': '0.3',
  'author': 'Camptocamp',
- 'maintainer': 'Camptocamp',
- 'website': 'http://www.camptocamp.com/',
- 'depends': ['base', 'sale'],
- 'data': ['sale_view.xml'],
- 'test': ['test/last_sale_price.yml'],
- 'installable': True,
+ 'maintainter': 'Camptocamp',
+ 'category': 'Purchase',
+ 'depends': ['purchase', 'specific_fct'],
+ 'website': 'http://www.camptocamp.com',
+ 'data': ['purchase_view.xml'],
+ 'tests': [],
+ 'installable': False,
  'auto_install': False,
- 'application': True,
+ 'license': 'AGPL-3',
+ 'application': False,
  }

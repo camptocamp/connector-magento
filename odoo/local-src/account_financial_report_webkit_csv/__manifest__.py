@@ -18,5 +18,5 @@
         'wizard/partner_balance_wizard_view.xml',
     ],
     'active': False,
-    'installable': True,
+    'installable': False,
 }

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Copyright 2009-2014 Camptocamp SA
+#    Author: Guewen Baconnier
+#    Copyright 2012 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,18 +19,28 @@
 #
 ##############################################################################
 
-{'name': 'Cut-off Reports',
+{'name': "Advanced Reconcile with TID",
  'version': '1.0',
- 'depends': ['sale',
-             'purchase'],
  'author': 'Camptocamp',
- 'description': """2 cut-off reports:
-     * "Outgoing cut-off": reports all uninvoiced products which were sent
-       to the customer, but not yet invoiced (drop-shipping items are
-       not accounted for).
-     * "Incoming cut-off": reports all uninvoiced products which were
-       received but not yet invoiced.""",
- 'category': 'Generic Modules/Accounting',
- 'data': ['wizard/cutoff_view.xml'],
- 'installable': True,
+ 'maintainer': 'Camptocamp',
+ 'category': 'Finance',
+ 'complexity': 'normal',
+ 'depends': ['account_advanced_reconcile'],
+ 'description': """
+ Add specific reconciliation method which searches by:
+ On: *payment*  => *invoice*
+     credit     => debit
+     partner_id => partner_id
+     ref        => name or ref or
+                   "tid_" + name or "tid_mag_" + name or
+                   "tid_" + ref or "tid_mag_" + ref or
+
+ """,
+ 'website': 'http://www.camptocamp.com',
+ 'data': ['easy_reconcile_view.xml'],
+ 'test': [],
+ 'images': [],
+ 'installable': False,
+ 'auto_install': False,
+ 'license': 'AGPL-3',
  }

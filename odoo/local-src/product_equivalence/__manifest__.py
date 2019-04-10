@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Author: Nicolas Bessi
+#    Copyright 2010-2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,27 +18,22 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-{'name': 'Import Tracking Numbers',
+{'name': 'Product Equivalences',
  'version': '1.0',
- 'author': 'Camptocamp',
- 'maintainer': 'Camptocamp',
- 'license': 'AGPL-3',
- 'category': 'Generic Modules/Warehouse',
- 'complexity': "normal",  # easy, normal, expert
- 'depends': ['delivery',
-             'stock',
+ 'depends': ['base',
+             'product',
+             'packing_product_change',
              ],
+ 'author': 'Camptocamp',
  'description': """
- Custom module to import tracking references on packings
- """,
+Simple module which adds an link on products to:
+ - an equivalent product
+ - a list of compatibles products (no business logic for this list)
+
+If a product has an equivalent, it will be automatically
+replaced by its equivalent in delivery orders.
+""",
  'website': 'http://www.camptocamp.com',
- 'data': [
-     'res_company_view.xml',
-     'stock_data.xml',
-     'mail_data.xml',
- ],
- 'tests': [],
- 'installable': True,
- 'auto_install': False,
- }
+ 'data': ['product_view.xml',],
+ 'installable': False,
+}

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author: Guewen Baconnier
-#    Copyright 2014 Camptocamp SA
+#    Author: Vincent Renaville (Camptocamp)
+#    Copyright 2010-2014 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,34 +18,34 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-{'name': 'Picking Priority on Payment Method',
- 'version': '1.0',
+{'name': 'Balance on lines',
+ 'summary': 'Display balance totals in move line view',
+ 'version': '1.1',
  'author': 'Camptocamp',
- 'maintainer': 'Camptocamp',
- 'license': 'AGPL-3',
- 'category': 'Stock',
- 'depends': ['stock_picking_priority',  # stock-logistic-flows
-             'sale_payment_method',  # e-commerce-addons
-             ],
+ 'maintainter': 'Camptocamp',
+ 'category': 'Accounting',
+ 'depends': ['account'],
  'description': """
+Balance for a line
+==================
 
-THIS MODULE IS NO LONGER USED. IT IS STILL THERE SO IT COULD BE
-UNINSTALLED PROPERLY
+Add a balance total for grouped lines in move line view.
 
+Balance field will only be shown when move lines are grouped by account
+or filtered by account.
 
-Picking Priority on Payment Method
-==================================
+Contributors
+------------
 
-Add a priority on each payment methods.
-Delivery orders are created with the priority of the payment method
-used on the origin sales order.
- """,
+* Vincent revaville <vincent.renaville@camptocamp.com>
+* Yannick Vaucher <yannick.vaucher@camptocamp.com>
+""",
  'website': 'http://www.camptocamp.com',
- 'data': ['sale_view.xml',
-          'payment_method_view.xml',
+ 'data': ['account_move_line_view.xml',
           ],
- 'test': [],
- 'installable': True,
+ 'tests': [],
+ 'installable': False,
  'auto_install': False,
+ 'license': 'AGPL-3',
+ 'application': False,
  }

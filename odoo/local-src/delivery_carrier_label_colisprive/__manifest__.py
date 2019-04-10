@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author: Guewen Baconnier
-#    Copyright 2012 Camptocamp SA
+#    Author Charline Dumontet. Copyright Camptocamp SA
+#    Copyright 2017 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,37 +18,32 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-{'name': 'Magento Connector Customization',
+{'name': 'Colis Prive Labels WebService',
  'version': '1.1',
  'author': 'Camptocamp',
- 'license': 'AGPL-3',
- 'category': 'Connector',
- 'depends': ['magentoerpconnect',
-             'mrp',
-             'product_brand',
-             'base_transaction_id',
-             'delivery_carrier_file_chronopost',
-             'base_transaction_id',
-             'product_cost_incl_bom',  # for cost_price, lp:margin-analysis
-             'packing_product_change',  # lp:c2c-ecom-addons
-             'l10n_fr_intrastat_product',  # lp:new-report-intrastat
-             ],
- 'description': """
-Magento Connector Customization
-===============================
+ 'maintainer': 'Camptocamp',
+ 'category': 'Others',
+ 'complexity': "normal",
+ 'depends': ['base_delivery_carrier_label',
+             'base_delivery_carrier_files_document',
+             'specific_fct',
+             'stockit_synchro',
+             'debonix_purchase_edi'],
+ 'description': """Debonix Specific.
 
- """,
+This module generate labels with the 'Colis Prive Webservice'
+""",
  'website': 'http://www.camptocamp.com',
- 'data': ['magento_data.xml',
-          'product_data.xml',
-          'product_view.xml',
-          'magento_model_view.xml',
-          'security/ir.model.access.csv',
-          'wizard/export_all_stock_view.xml',
-          'cron_data.xml',
+ 'data': ['data/colis_prive_data.xml',
+          'carrier_file_view.xml',
+          'stock_view.xml',
           ],
- 'test': [],
- 'installable': True,
+ 'tests': [],
+ 'installable': False,
  'auto_install': False,
+ 'license': 'AGPL-3',
+ 'application': True,
+ 'external_dependencies': {
+     'python': ['suds'],
+ }
  }
