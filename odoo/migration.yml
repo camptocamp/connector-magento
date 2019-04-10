@@ -8,8 +8,8 @@ migration:
         post:
           ## PLATFORM
           - anthem openerp.addons.cloud_platform.songs::install_ovh
-          - anthem songs.install.accounting::main
-          - anthem songs.install.logistics::main
+          #- anthem songs.install.accounting::main
+          #- anthem songs.install.logistics::main
           - anthem songs.install.data_all::main
       modes:
         full:
