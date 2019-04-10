@@ -1,3 +1,0 @@
-[submodule "tasks"]
-	path = tasks
-	url = git@github.com:camptocamp/buildout_odoo_task.git
