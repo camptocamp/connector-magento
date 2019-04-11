@@ -1,0 +1,46 @@
+[tool.black]
+line-length = 79
+skip-string-normalization = 'True'
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | odoo/src
+    | odoo/external-src
+    | odoo/data
+    | odoo/local-src/account_balance_line
+    | odoo/local-src/account_financial_report_webkit_csv
+    | odoo/local-src/account_tid_reconcile
+    | odoo/local-src/cutoff_csv
+    | odoo/local-src/debonix_accounting_profile
+    | odoo/local-src/debonix_purchase_edi
+    | odoo/local-src/debonix_supplier_invoice_edi
+    | odoo/local-src/delivery_carrier_file_chronopost
+    | odoo/local-src/delivery_carrier_file_colissimo
+    | odoo/local-src/delivery_carrier_label_colisprive
+    | odoo/local-src/import_tracking
+    | odoo/local-src/intrastat_base
+    | odoo/local-src/l10n_fr_intrastat_product
+    | odoo/local-src/l10n_fr_intrastat_service
+    | odoo/local-src/l10n_nl_intrastat
+    | odoo/local-src/last_purchase_price
+    | odoo/local-src/last_sale_price
+    | odoo/local-src/packing_product_change
+    | odoo/local-src/picking_priority_on_payment_method
+    | odoo/local-src/product_equivalence
+    | odoo/local-src/product_links
+    | odoo/local-src/report_eur1
+    | odoo/local-src/specific_fct
+    | odoo/local-src/specific_magento
+    | odoo/local-src/specific_report
+    | odoo/local-src/specific_sale_exceptions
+    | odoo/local-src/stockit_synchro
+    | odoo/local-src/stock_values_csv
+    | odoo/local-src/toolstream_purchase_edi
+)/
+| /__openerp__.py
+| /__manifest__.py
+'''
