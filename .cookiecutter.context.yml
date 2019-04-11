@@ -6,5 +6,5 @@ project_id: '2534'
 project_name: debonix_odoo
 odoo_company_name: Debonix
 odoo_main_lang: fr_FR
-odoo_aux_langs: 
+odoo_aux_langs: None
 platform_name: fr
