@@ -12,3 +12,32 @@ ignore = E203,E501,W503,W504
 exclude =
   ./.git
   .eggs/
+  account_balance_line
+  account_financial_report_webkit_csv
+  account_tid_reconcile
+  cutoff_csv
+  debonix_accounting_profile
+  debonix_purchase_edi
+  debonix_supplier_invoice_edi
+  delivery_carrier_file_chronopost
+  delivery_carrier_file_colissimo
+  delivery_carrier_label_colisprive
+  import_tracking
+  intrastat_base
+  l10n_fr_intrastat_product
+  l10n_fr_intrastat_service
+  l10n_nl_intrastat
+  last_purchase_price
+  last_sale_price
+  packing_product_change
+  picking_priority_on_payment_method
+  product_equivalence
+  product_links
+  report_eur1
+  specific_fct
+  specific_magento
+  specific_report
+  specific_sale_exceptions
+  stockit_synchro
+  stock_values_csv
+  toolstream_purchase_edi
