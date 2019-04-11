@@ -25,4 +25,6 @@ latest (unreleased)
 
 **Build**
 
+* DBMIG-12: Initial build
+
 **Documentation**

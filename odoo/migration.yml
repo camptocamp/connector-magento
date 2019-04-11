@@ -25,6 +25,9 @@ migration:
               - anthem songs.sample.data_sample::main
       addons:
         upgrade:
+          ## Odoo
+          - base
+          - web
           ## PLATFORM
           - cloud_platform_ovh
           #### oca/server-ux
