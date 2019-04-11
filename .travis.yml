@@ -52,7 +52,7 @@ before_install:
   - if [ "$TESTS" == "1" -a "$TRAVIS_PULL_REQUEST" == "false" -a -z "$TRAVIS_TAG" ] ; then export CREATE_DB_CACHE="true" ; fi
   - if [ "$LINT_CHECK" == "1" ] ; then pip2 install --user -q pylint pylint_odoo; fi
   - if [ "$LINT_CHECK" == "1" ] ; then pip3 install -q pre-commit ; fi
-  - if [ "$LINT_CHECK" == "0" ] ; then pip3 install --user -q gitpython requests pyOpenSSL ndg-httpsclient pyasn1 pyyaml; fi
+  - if [ "$LINT_CHECK" == "0" ] ; then pip3 install -q gitpython requests pyOpenSSL ndg-httpsclient pyasn1 pyyaml; fi
 
 install:
   - if [ "$TESTS" == "1" ] ; then bundle install ; fi
