@@ -27,14 +27,14 @@ def setup_company(ctx):
         'street': "",
         'zip': "",
         'city': "",
-        'country_id': ctx.env.ref('base.ch').id,
+        'country_id': ctx.env.ref('base.fr').id,
         'phone': "+41 00 000 00 00",
         'fax': "+41 00 000 00 00",
-        'email': "contact@debonix.ch",
-        'website': "http://www.debonix.ch",
+        'email': "contact@debonix.fr",
+        'website': "http://www.debonix.fr",
         'vat': "VAT",
         'logo': b64_logo,
-        'currency_id': ctx.env.ref('base.CHF').id,
+        'currency_id': ctx.env.ref('base.EUR').id,
     }
     ctx.env.ref('base.main_company').write(values)
 

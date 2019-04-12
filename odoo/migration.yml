@@ -25,18 +25,41 @@ migration:
               - anthem songs.sample.data_sample::main
       addons:
         upgrade:
-          ## Odoo
-          - base
-          - web
-          ## PLATFORM
+          # Odoo
+          - account
+          - calendar
+          - crm
+          - hr
+          - hr_holidays
+          - im_livechat
+          - l10n_fr
+          - l10n_fr_certification
+          - l10n_fr_fec
+          - purchase
+          - sale
+          - stock
+
+          # Enterprise
+          - account_bank_statement_import_csv
+          - helpdesk
+
+          # C2C
+          #### camptocamp/cloud-platform
           - cloud_platform_ovh
-          #### oca/server-ux
-          - base_technical_features
+
+          # OCA
+          #### oca/account-financial-reporting
+          - account_financial_report
+          #### oca/credit-control
+          - account_credit_control
           #### oca/server-env
           - server_environment
           - server_environment_ir_config_parameter
+          #### oca/server-ux
+          - base_technical_features
           #### oca/web
           - web_environment_ribbon
+
           #### local-src
           # - my_addon
     # update step example

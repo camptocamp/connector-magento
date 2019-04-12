@@ -32,22 +32,22 @@
 ;	path = odoo/external-src/account-analytic
 ;	url = git@github.com:OCA/account-analytic.git
 ;	branch = 12.0
-;[submodule "odoo/external-src/account-financial-reporting"]
-;	path = odoo/external-src/account-financial-reporting
-;	url = git@github.com:OCA/account-financial-reporting.git
-;	branch = 12.0
-;[submodule "odoo/external-src/account-financial-tools"]
-;	path = odoo/external-src/account-financial-tools
-;	url = git@github.com:OCA/account-financial-tools.git
-;	branch = 12.0
+[submodule "odoo/external-src/account-financial-reporting"]
+	path = odoo/external-src/account-financial-reporting
+	url = git@github.com:camptocamp/account-financial-reporting.git
+	branch = 12.0
+[submodule "odoo/external-src/account-financial-tools"]
+	path = odoo/external-src/account-financial-tools
+	url = git@github.com:OCA/account-financial-tools.git
+	branch = 12.0
 ;[submodule "odoo/external-src/account-invoicing"]
 ;	path = odoo/external-src/account-invoicing
 ;	url = git@github.com:OCA/account-invoicing.git
 ;	branch = 12.0
-;[submodule "odoo/external-src/account-reconcile"]
-;	path = odoo/external-src/account-reconcile
-;	url = git@github.com:OCA/account-reconcile.git
-;	branch = 12.0
+[submodule "odoo/external-src/account-reconcile"]
+	path = odoo/external-src/account-reconcile
+	url = git@github.com:OCA/account-reconcile.git
+	branch = 12.0
 ;[submodule "odoo/external-src/bank-payment"]
 ;	path = odoo/external-src/bank-payment
 ;	url = git@github.com:OCA/bank-payment.git
@@ -56,10 +56,10 @@
 ;	path = odoo/external-src/bank-statement-import
 ;	url = git@github.com:OCA/bank-statement-import.git
 ;	branch = 12.0
-;[submodule "odoo/external-src/credit-control"]
-;	path = odoo/external-src/credit-control
-;	url = git@github.com:OCA/credit-control.git
-;	branch = 12.0
+[submodule "odoo/external-src/credit-control"]
+	path = odoo/external-src/credit-control
+	url = git@github.com:camptocamp/credit-control.git
+	branch = 12.0
 ;[submodule "odoo/external-src/crm"]
 ;	path = odoo/external-src/crm
 ;	url = git@github.com:OCA/crm.git
@@ -128,10 +128,10 @@
 ;	path = odoo/external-src/report-print-send
 ;	url = git@github.com:OCA/report-print-send.git
 ;	branch = 12.0
-;[submodule "odoo/external-src/reporting-engine"]
-;	path = odoo/external-src/reporting-engine
-;	url = git@github.com:OCA/reporting-engine.git
-;	branch = 12.0
+[submodule "odoo/external-src/reporting-engine"]
+	path = odoo/external-src/reporting-engine
+	url = git@github.com:OCA/reporting-engine.git
+	branch = 12.0
 ;[submodule "odoo/external-src/sale-workflow"]
 ;	path = odoo/external-src/sale-workflow
 ;	url = git@github.com:OCA/sale-workflow.git
