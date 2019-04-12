@@ -65,7 +65,12 @@ RUN cd /odoo && pip install -r src_requirements.txt
 # frequency: sometimes
 # cost:      very light
 ENV ADDONS_PATH="/odoo/external-src/enterprise, \
+  /odoo/external-src/account-financial-reporting, \
+  /odoo/external-src/account-financial-tools, \
+  /odoo/external-src/account-reconcile, \
+  /odoo/external-src/credit-control, \
   /odoo/external-src/odoo-cloud-platform, \
+  /odoo/external-src/reporting-engine, \
   /odoo/external-src/server-env, \
   /odoo/external-src/server-ux, \
   /odoo/external-src/web, \
