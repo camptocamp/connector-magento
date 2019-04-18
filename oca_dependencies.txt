@@ -1,8 +1,8 @@
 connector
-connector-ecommerce
+connector-ecommerce https://github.com/PESOL/connector-ecommerce    12.0-mig-connector_ecommerce
 e-commerce
 product-attribute
 sale-workflow
-server-tools
+server-tools    https://github.com/akretion/server-tools    12.0-mig-base_technical_user
 bank-payment
 partner-contact
