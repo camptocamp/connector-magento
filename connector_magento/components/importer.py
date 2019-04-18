@@ -161,6 +161,10 @@ class MagentoImporter(AbstractComponent):
         """ Update an OpenERP record """
         # special check on data before import
         self._validate_data(data)
+        # enable/disable reordering rules before the template as Odoo do not
+        # allow to disable a product while having active reordering rules on it
+        if 'active' in data:
+            binding.mapped('orderpoint_ids').write({'active': data['active']})
         binding.with_context(connector_no_export=True).write(data)
         _logger.debug('%d updated from magento %s', binding, self.external_id)
         return
