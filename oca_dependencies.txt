@@ -1,8 +1,12 @@
 connector
-connector-ecommerce
+connector-ecommerce https://github.com/PESOL/connector-ecommerce    12.0-mig-connector_ecommerce
 e-commerce
 product-attribute
-sale-workflow
+# sale-workflow:
+#   + sale_exception (PR #812)
+#   + sale_automatic_workflow (PR #735)
+#   + sale_automatic_workflow_payment_mode (PR #786)
+sale-workflow   https://github.com/camptocamp/sale-workflow merge-branch-2534-DBMIG-18-3785d28e
 server-tools
 bank-payment
 partner-contact
