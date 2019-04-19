@@ -59,6 +59,8 @@ migration:
           - base_technical_features
           #### oca/web
           - web_environment_ribbon
+          #### oca/connector-magento
+          - connector_magento
 
           #### local-src
           # - my_addon

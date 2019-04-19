@@ -19,3 +19,34 @@
     # [12.0][MIG] account_credit_control
     - oca refs/pull/16/head
   target: *default_target
+./external-src/connector-magento:
+  remotes:
+    oca: git@github.com:OCA/connector-magento.git
+    camptocamp: git@github.com:camptocamp/connector-magento.git
+  merges:
+    - oca 12.0
+    # [12.0][MIG][WIP] connector_magento
+    - oca refs/pull/292/head
+  target: *default_target
+./external-src/connector-ecommerce:
+  remotes:
+    oca: git@github.com:OCA/connector-ecommerce.git
+    camptocamp: git@github.com:camptocamp/connector-ecommerce.git
+  merges:
+    - oca 12.0
+    # [12.0][MIG] connector ecommerce
+    - oca refs/pull/49/head
+  target: *default_target
+./external-src/sale-workflow:
+  remotes:
+    oca: git@github.com:OCA/sale-workflow.git
+    camptocamp: git@github.com:camptocamp/sale-workflow.git
+  merges:
+    - oca 12.0
+    # [12.0][MIG] sale_exception
+    - oca refs/pull/831/head
+    # [12.0][MIG] sale_automatic_workflow
+    - oca refs/pull/830/head
+    # [12.0][MIG] sale_automatic_workflow_payment_mode
+    - oca refs/pull/786/head
+  target: *default_target

@@ -22,6 +22,7 @@ latest (unreleased)
 **Features and Improvements**
 
 * DBMIG-12: Install initial modules
+* DBMIG-18: Migration of Magento Connector (OCA modules)
 
 **Bugfixes**
 
