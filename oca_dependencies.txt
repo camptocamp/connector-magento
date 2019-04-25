@@ -6,7 +6,7 @@ product-attribute
 #   + sale_exception (PR #812)
 #   + sale_automatic_workflow (PR #735)
 #   + sale_automatic_workflow_payment_mode (PR #786)
-sale-workflow   https://github.com/camptocamp/sale-workflow merge-branch-2534-DBMIG-18-3785d28e
+sale-workflow   https://github.com/camptocamp/sale-workflow merge-branch-2534-DBMIG-18-671407e3
 server-tools
 bank-payment
 partner-contact
