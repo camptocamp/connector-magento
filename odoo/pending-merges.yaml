@@ -50,3 +50,12 @@
     # [12.0][MIG] sale_automatic_workflow_payment_mode
     - oca refs/pull/786/head
   target: *default_target
+./external-src/product-attribute:
+  remotes:
+    oca: git@github.com:OCA/product-attribute.git
+    camptocamp: git@github.com:camptocamp/product-attribute.git
+  merges:
+    - oca 12.0
+    # [12.0] [MIG] product_state
+    - oca refs/pull/428/head
+  target: *default_target

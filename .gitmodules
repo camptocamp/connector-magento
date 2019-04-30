@@ -106,7 +106,7 @@
 ;	branch = 12.0
 [submodule "odoo/external-src/product-attribute"]
 	path = odoo/external-src/product-attribute
-	url = git@github.com:OCA/product-attribute.git
+	url = git@github.com:camptocamp/product-attribute.git
 	branch = 12.0
 ;[submodule "odoo/external-src/product-variant"]
 ;	path = odoo/external-src/product-variant

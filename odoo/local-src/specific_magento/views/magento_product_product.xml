@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2019 Camptocamp SA
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl). -->
+<odoo>
+
+  <record id="view_magento_product_form" model="ir.ui.view">
+    <field name="name">magento.product.product.form</field>
+    <field name="model">magento.product.product</field>
+    <field name="inherit_id" ref="connector_magento.view_magento_product_form"/>
+    <field name="arch" type="xml">
+      <field name="product_type" position="after">
+        <field name="universe" readonly="1"/>
+      </field>
+      <form position="inside">
+        <group string="Pricing">
+          <div class="oe_inline">
+            <label for="magento_cost" class="oe_inline" />
+            <field name="magento_cost" readonly="1" class="oe_inline" nolabel="1"/>
+            <button name="recompute_magento_cost" string="(recompute)"
+              class="oe_link oe_inline" type="object"/>
+          </div>
+        </group>
+      </form>
+    </field>
+  </record>
+
+</odoo>

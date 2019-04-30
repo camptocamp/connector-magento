@@ -1,24 +1,11 @@
 "id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
-"access_magento_product_brand_user","magento_product_brand user","model_magento_product_brand","base.group_sale_salesman",1,0,0,0
-"access_magento_product_brand_sale_manager","magento_product_brand sale manager","model_magento_product_brand","base.group_sale_manager",1,1,1,1
+"access_magento_product_brand_user","magento_product_brand user","model_magento_product_brand","sales_team.group_sale_salesman",1,0,0,0
+"access_magento_product_brand_sale_manager","magento_product_brand sale manager","model_magento_product_brand","sales_team.group_sale_manager",1,1,1,1
 "access_magento_product_brand_connector","magento_product_brand connector","model_magento_product_brand","connector.group_connector_manager",1,1,1,1
-"access_magento_supplier_user","magento_supplier user","model_magento_supplier","base.group_sale_salesman",1,0,0,0
+"access_magento_supplier_user","magento_supplier user","model_magento_supplier","sales_team.group_sale_salesman",1,0,0,0
 "access_magento_supplier_group_user","magento_supplier group_user","model_magento_supplier","base.group_user",1,0,0,0
-"access_magento_supplier_sale_manager","magento_supplier sale manager","model_magento_supplier","base.group_sale_manager",1,1,1,1
+"access_magento_supplier_sale_manager","magento_supplier sale manager","model_magento_supplier","sales_team.group_sale_manager",1,1,1,1
 "access_magento_supplier_connector","magento_supplier connector","model_magento_supplier","connector.group_connector_manager",1,1,1,1
-access_magento_bundle_bom,magento.bundle.bom,model_magento_bundle_bom,mrp.group_mrp_user,1,0,0,0
-access_magento_bundle_bom_salesman,magento.bundle.bom,model_magento_bundle_bom,base.group_sale_salesman,1,0,0,0
-access_magento_bundle_bom_stockuser,magento.bundle.bom,model_magento_bundle_bom,stock.group_stock_user,1,0,0,0
-access_magento_bundle_bom_purchase_manager,magento.bundle.bom,model_magento_bundle_bom,purchase.group_purchase_manager,1,0,0,0
-access_magento_bundle_bom_connector,magento.bundle.bom,model_magento_bundle_bom,purchase.group_purchase_manager,1,0,0,0
-access_magento_bundle_bom_manager,magento.bundle.bom manager,model_magento_bundle_bom,mrp.group_mrp_manager,1,1,1,1
-access_magento_bundle_bom_connector,magento.bundle.bom connector,model_magento_bundle_bom,connector.group_connector_manager,1,1,1,1
-access_magento_bundle_bom_product,magento.bundle.bom.product,model_magento_bundle_bom_product,mrp.group_mrp_user,1,0,0,0
-access_magento_bundle_bom_product_salesman,magento.bundle.bom.product,model_magento_bundle_bom_product,base.group_sale_salesman,1,0,0,0
-access_magento_bundle_bom_product_stockuser,magento.bundle.bom.product,model_magento_bundle_bom_product,stock.group_stock_user,1,0,0,0
-access_magento_bundle_bom_product_purchase_manager,magento.bundle.bom.product,model_magento_bundle_bom_product,purchase.group_purchase_manager,1,0,0,0
-access_magento_bundle_bom_product_manager,magento.bundle.bom.product.manager,model_magento_bundle_bom_product,mrp.group_mrp_manager,1,1,1,1
-access_magento_bundle_bom_connector,magento.bundle.bom.product.manager connector,model_magento_bundle_bom_product,connector.group_connector_manager,1,1,1,1
-"access_magento_product_universe_user","magento_product_universe user","model_magento_product_universe","base.group_sale_salesman",1,0,0,0
-"access_magento_product_universe_sale_manager","magento_product_universe sale manager","model_magento_product_universe","base.group_sale_manager",1,1,1,1
+"access_magento_product_universe_user","magento_product_universe user","model_magento_product_universe","sales_team.group_sale_salesman",1,0,0,0
+"access_magento_product_universe_sale_manager","magento_product_universe sale manager","model_magento_product_universe","sales_team.group_sale_manager",1,1,1,1
 "access_magento_product_universe","magento_product_universe connector manager","model_magento_product_universe","connector.group_connector_manager",1,1,1,1
