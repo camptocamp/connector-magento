@@ -194,12 +194,13 @@ class DebonixProductImportMapper(Component):
         return {'magento_universe_id': universe.id}
 
     @mapping
-    @only_create
     def cost(self, record):
-        """ Standard price is only imported on creation,
-        because it will be updated from Odoo later.
+        """Standard price is imported only if the inventory method is set on
+        "standard".
         """
-        return {'standard_price': record.get('cost')}
+        # FIXME: is the 'cost' value always sent with 'openerp_cost_method'?
+        if record.get('openerp_cost_method', '').lower() == 'standard':
+            return {'standard_price': record.get('cost')}
 
     @mapping
     def intrastat(self, record):
@@ -221,7 +222,7 @@ class DebonixProductImportMapper(Component):
         method = record.get('openerp_cost_method')
         if not method:
             return
-        return {'cost_method': method.lower()}
+        return {'property_cost_method': method.lower()}
 
     @mapping
     def sale_ok(self, record):

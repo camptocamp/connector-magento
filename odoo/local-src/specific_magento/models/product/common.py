@@ -12,10 +12,6 @@ _logger = logging.getLogger(__name__)
 class MagentoProductProduct(models.Model):
     _inherit = 'magento.product.product'
 
-    magento_cost = fields.Float(
-        string="Computed Cost",
-        help="Last computed cost to send on Magento.",
-    )
     magento_universe_id = fields.Many2one(
         comodel_name="magento.product.universe",
         ondelete="restrict",
@@ -40,14 +36,6 @@ class MagentoProductProduct(models.Model):
         if 'bundle' not in [item[0] for item in selection]:
             selection.append(('bundle', 'Bundle'))
         return selection
-
-    @api.multi
-    def recompute_magento_cost(self):
-        for product in self.read(['standard_price', 'magento_cost']):
-            new_cost = product['standard_price']
-            if new_cost != product['magento_cost']:
-                product.magento_cost = new_cost
-        return True
 
 
 class ProductSupplierInfo(models.Model):

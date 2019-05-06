@@ -9,6 +9,7 @@
     'depends': [
         'connector_magento',
         'mrp',
+        'stock_account',
         'product_brand',
         'product_state',
         'base_transaction_id',
