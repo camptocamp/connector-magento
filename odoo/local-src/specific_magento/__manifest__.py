@@ -25,7 +25,6 @@
         'data/product_product.xml',
         'views/magento_product_product.xml',
         'views/magento_backend.xml',
-        'wizards/export_all_stock_view.xml',
     ],
     'installable': True,
 }

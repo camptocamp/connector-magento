@@ -3,18 +3,6 @@
      License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl). -->
 <odoo noupdate="1">
 
-  <record id="ir_cron_export_all_stock_all_products" model="ir.cron">
-    <field name="name">Export current stock of all products to Magento</field>
-    <field name="interval_number">1</field>
-    <field name="interval_type">weeks</field>
-    <field name="numbercall">-1</field>
-    <field name="doall" eval="False"/>
-    <field name="active" eval="False"/>
-    <field name="model_id" ref="model_stock_export_all_magento"/>
-    <field name="state">code</field>
-    <field name="code">model.export_stock_all_product_magento()</field>
-  </record>
-
   <record id="ir_cron_update_product_cost" model="ir.cron" forcecreate="True">
     <field name="name">Magento -  Update Product Cost</field>
     <field name="user_id" ref="base.user_root"/>
@@ -26,6 +14,11 @@
     <field name="model_id" ref="model_magento_backend"/>
     <field name="state">code</field>
     <field name="code">model._scheduler_update_product_cost()</field>
+  </record>
+
+  <!-- Disable the cron which export product qties to Magento -->
+  <record model="ir.cron" id="connector_magento.ir_cron_update_product_stock_qty">
+    <field name="active" eval="False"/>
   </record>
 
 </odoo>

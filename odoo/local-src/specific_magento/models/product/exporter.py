@@ -4,33 +4,6 @@
 from odoo.addons.component.core import Component
 
 
-class DebonixProductInventoryExporter(Component):
-    _inherit = 'magento.product.product.exporter'
-
-    def _get_data(self, binding, fields):
-        data = super()._get_data(binding, fields)
-
-        # FIXME: 'manage_stock' is a fields.Selection (even in v7.0)
-        # Here even if its value is 'no' we flag data['manage_stock'] to True
-        # is it what we want?
-        if binding.manage_stock:
-            backorders = binding.backorders
-            data.update({
-                'backorders': self._map_backorders[backorders],
-                'is_in_stock': True,
-                'use_config_manage_stock': True,
-                'manage_stock': True,
-                'use_config_min_sale_qty': True,
-                'use_config_max_sale_qty': True,
-            })
-        else:
-            data.update({
-                'manage_stock': False,
-                'use_config_manage_stock': False,
-            })
-        return data
-
-
 class DebonixProductExporter(Component):
     """ Products are created on Magento. Export only changes of
     some fields.

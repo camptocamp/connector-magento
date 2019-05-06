@@ -80,67 +80,70 @@ class DebonixMagentoPickingExport(MagentoPickingExport):
     """
     _model_name = 'magento.stock.picking.out'
 
-    def _get_lines_info(self, picking):
-        skus = []
-        for line in picking.move_lines:
-            old_sku = line.old_product_id.default_code
+    # NOTE: do not migrate it for the moment, to see with the customer
+    # def _get_lines_info(self, picking):
+    #     skus = []
+    #     for line in picking.move_lines:
+    #         old_sku = line.old_product_id.default_code
+    #         # create a list with all product of the packing
+    #         item = {'sku': line.product_id.default_code,
+    #                 'qty': line.product_qty,
+    #                 }
+    #         if old_sku:
+    #             item.update({'old_sku': old_sku})
+    #         skus.append(item)
+    #     return skus
 
-            # create a list with all product of the packing
-            item = {'sku': line.product_id.default_code,
-                    'qty': line.product_qty,
-                    }
-            if old_sku:
-                item.update({'old_sku': old_sku})
-            skus.append(item)
-        return skus
+    # NOTE: do not migrate this because we want to handle partial deliveries
+    # and this can block the process
+    # def _workaround_run(self, binding_id):
+    #     picking = self.session.browse(self.model._name, binding_id)
+    #     # Ideally we would have to check if another picking has already
+    #     # been delivered and in that case, return eagerly. As the pickings
+    #     # are exported fully, the second picking has nothing to do.
+    #     # But, when this code will be in production, we will have
+    #     # pickings which have been partially delivered on Magento and
+    #     # we must create the second picking, so in all cases we have
+    #     # to try to create it and catch the error if it was already
+    #     # delivered.
+    #     args = self._get_args(picking, {})
+    #     try:
+    #         # close is always false, no longer necessary in magento
+    #         magento_id = self.backend_adapter.create(*args, close=False)
+    #     except xmlrpclib.Fault as err:
+    #         # When the shipping is already created on Magento, it returns:
+    #         # <Fault 102: u"Impossible de faire l\'exp\xe9dition de la
+    #         # commande.">
+    #         if err.faultCode == 102:
+    #             return _('Canceled: the delivery order already '
+    #                      'exists on Magento (fault 102).')
+    #         else:
+    #             raise
+    #     else:
+    #         self.binder.bind(magento_id, binding_id)
 
-    def _workaround_run(self, binding_id):
-        picking = self.session.browse(self.model._name, binding_id)
-        # Ideally we would have to check if another picking has already
-        # been delivered and in that case, return eagerly. As the pickings
-        # are exported fully, the second picking has nothing to do.
-        # But, when this code will be in production, we will have
-        # pickings which have been partially delivered on Magento and
-        # we must create the second picking, so in all cases we have
-        # to try to create it and catch the error if it was already
-        # delivered.
-        args = self._get_args(picking, {})
-        try:
-            # close is always false, no longer necessary in magento
-            magento_id = self.backend_adapter.create(*args, close=False)
-        except xmlrpclib.Fault as err:
-            # When the shipping is already created on Magento, it returns:
-            # <Fault 102: u"Impossible de faire l\'exp\xe9dition de la
-            # commande.">
-            if err.faultCode == 102:
-                return _('Canceled: the delivery order already '
-                         'exists on Magento (fault 102).')
-            else:
-                raise
-        else:
-            self.binder.bind(magento_id, binding_id)
+    # NOTE: do not migrate it for the moment, to see with the customer
+    # def run(self, binding_id):
+    #     # TODO remove this line when the bundles are used
+    #     return self._workaround_run(binding_id)
 
-    def run(self, binding_id):
-        # TODO remove this line when the bundles are used
-        return self._workaround_run(binding_id)
-
-        picking = self.session.browse(self.model._name, binding_id)
-        lines_info = self._get_lines_info(picking)
-        args = self._get_args(picking, lines_info)
-        try:
-            # close is always false, no longer necessary in magento
-            magento_id = self.backend_adapter.create(*args, close=False)
-        except xmlrpclib.Fault as err:
-            # When the shipping is already created on Magento, it returns:
-            # <Fault 102: u"Impossible de faire l\'exp\xe9dition de la
-            # commande.">
-            if err.faultCode == 102:
-                return _('Canceled: the delivery order already '
-                         'exists on Magento (fault 102).')
-            else:
-                raise
-        else:
-            self.binder.bind(magento_id, binding_id)
+    #     picking = self.session.browse(self.model._name, binding_id)
+    #     lines_info = self._get_lines_info(picking)
+    #     args = self._get_args(picking, lines_info)
+    #     try:
+    #         # close is always false, no longer necessary in magento
+    #         magento_id = self.backend_adapter.create(*args, close=False)
+    #     except xmlrpclib.Fault as err:
+    #         # When the shipping is already created on Magento, it returns:
+    #         # <Fault 102: u"Impossible de faire l\'exp\xe9dition de la
+    #         # commande.">
+    #         if err.faultCode == 102:
+    #             return _('Canceled: the delivery order already '
+    #                      'exists on Magento (fault 102).')
+    #         else:
+    #             raise
+    #     else:
+    #         self.binder.bind(magento_id, binding_id)
 
 
 @magento_debonix
