@@ -173,7 +173,7 @@ class DebonixProductImportMapper(Component):
             [('code', '=', country_code)])
         if not country:
             raise MappingError('%s country code not found.' % country_code)
-        return {'country_id': country[0].id}
+        return {'origin_country_id': country[0].id}
 
     @mapping
     def brand(self, record):
@@ -204,18 +204,17 @@ class DebonixProductImportMapper(Component):
 
     @mapping
     def intrastat(self, record):
-        code = record.get('openerp_commodity')
-        if not code:
+        local_code = record.get('openerp_commodity')
+        if not local_code:
             return
-        code = code.strip()
-        codes = self.env['report.intrastat.code'].search(
-            [('intrastat_code', '=', code)])
-        if codes:
-            code_id = codes[0].id
-        else:
-            code_id = self.env['report.intrastat.code'].create(
-                {'name': code, 'intrastat_code': code}).id
-        return {'intrastat_id': code_id}
+        local_code = local_code.strip()
+        code = self.env['hs.code'].search(
+            [('local_code', '=', local_code)],
+            limit=1,
+        )
+        if not code:
+            code = self.env['hs.code'].create({'local_code': code})
+        return {'hs_code_id': code.id}
 
     @mapping
     def cost_method(self, record):

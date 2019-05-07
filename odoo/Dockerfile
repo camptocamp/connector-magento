@@ -70,6 +70,7 @@ ENV ADDONS_PATH="/odoo/external-src/enterprise, \
   /odoo/external-src/account-reconcile, \
   /odoo/external-src/bank-payment, \
   /odoo/external-src/credit-control, \
+  /odoo/external-src/intrastat-extrastat, \
   /odoo/external-src/product-attribute, \
   /odoo/external-src/odoo-cloud-platform, \
   /odoo/external-src/reporting-engine, \

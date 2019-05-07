@@ -18,6 +18,9 @@
         # 'product_cost_incl_bom',       # OCA, to migrate from 7.0?
         # 'packing_product_change',      # local, to migrate?
         # 'l10n_fr_intrastat_product',   # OCA, to migrate from 11.0?
+        # FIXME replacing l10n_fr_intrastat_product temporarily to add
+        # the field 'origin_country_id' on products
+        'product_harmonized_system',
     ],
     'website': 'http://www.camptocamp.com',
     'data': [
