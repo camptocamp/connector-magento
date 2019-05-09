@@ -19,6 +19,10 @@ Release History
 latest (unreleased)
 +++++++++++++++++++
 
+**Data**
+
+* DBMIG-21: Add partners data import
+
 **Features and Improvements**
 
 * DBMIG-12: Install initial modules
