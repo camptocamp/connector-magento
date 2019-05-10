@@ -24,6 +24,7 @@ latest (unreleased)
 * DBMIG-12: Install initial modules
 * DBMIG-18: Migration of Magento Connector (OCA modules)
 * DBMIG-20: Magento specific migration
+* Fix issue when invoicing sale orders (payment mode is overridden by Odoo)
 
 **Bugfixes**
 
