@@ -19,6 +19,8 @@
 #
 ##############################################################################
 
+# TODO: Don't migrate for the moment, we need to check with the customer
+
 import logging
 from openerp.osv import orm, fields
 from openerp.addons.magentoerpconnect.product import BundleImporter

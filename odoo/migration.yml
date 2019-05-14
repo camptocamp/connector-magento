@@ -59,9 +59,12 @@ migration:
           - base_technical_features
           #### oca/web
           - web_environment_ribbon
+          #### oca/connector-magento
+          - connector_magento
 
           #### local-src
-          # - my_addon
+          - debonix_sale
+          - specific_magento
     # update step example
     # - version: 12.0.x.y.z
     #   addons:

@@ -68,12 +68,21 @@ ENV ADDONS_PATH="/odoo/external-src/enterprise, \
   /odoo/external-src/account-financial-reporting, \
   /odoo/external-src/account-financial-tools, \
   /odoo/external-src/account-reconcile, \
+  /odoo/external-src/bank-payment, \
   /odoo/external-src/credit-control, \
+  /odoo/external-src/intrastat-extrastat, \
+  /odoo/external-src/product-attribute, \
   /odoo/external-src/odoo-cloud-platform, \
   /odoo/external-src/reporting-engine, \
+  /odoo/external-src/sale-workflow, \
   /odoo/external-src/server-env, \
+  /odoo/external-src/server-tools, \
   /odoo/external-src/server-ux, \
   /odoo/external-src/web, \
+  /odoo/external-src/queue, \
+  /odoo/external-src/connector, \
+  /odoo/external-src/connector-ecommerce, \
+  /odoo/external-src/connector-magento, \
   /odoo/src/addons, \
   /odoo/local-src" \
   LIMIT_TIME_CPU=86400 \
