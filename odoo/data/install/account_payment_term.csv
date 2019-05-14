@@ -1,0 +1,55 @@
+id,name,active
+__setup__.account_payment_term_1,30 Days End of Month,1
+__setup__.account_payment_term_10,CH30FM,1
+__setup__.account_payment_term_6,FIACO,1
+__setup__.account_payment_term_34,UTIL_COMPTA,1
+__setup__.account_payment_term_23,30J10,0
+__setup__.account_payment_term_11,1,0
+__setup__.account_payment_term_20,6010R,0
+__setup__.account_payment_term_17,C60F10,0
+__setup__.account_payment_term_35,VIRB30,1
+__setup__.account_payment_term_37,CH60JOURS,1
+__setup__.account_payment_term_4,CBCOM,1
+__setup__.account_payment_term_12,CH45,1
+__setup__.account_payment_term_3,CH60,0
+__setup__.account_payment_term_2,CH60FM,0
+__setup__.account_payment_term_19,CH90,0
+__setup__.account_payment_term_7,CHCOM,1
+__setup__.account_payment_term_16,MADM,1
+__setup__.account_payment_term_38,VIR60JFM,1
+__setup__.account_payment_term_14,V30F10,0
+__setup__.account_payment_term_18,VIR40,0
+__setup__.account_payment_term_22,VIR60,0
+__setup__.account_payment_term_13,VIRB45,1
+__setup__.account_payment_term_15,VIRBC,1
+__setup__.account_payment_term_21,TR45J,1
+__setup__.account_payment_term_25,ESPECE,1
+__setup__.account_payment_term_30,ONEY,1
+__setup__.account_payment_term_32,REGLEMENT A LA COMMANDE,1
+__setup__.account_payment_term_24,SPECIAL,1
+__setup__.account_payment_term_29,NC,1
+__setup__.account_payment_term_31,VIRB30,1
+__setup__.account_payment_term_5,CH3X,1
+__setup__.account_payment_term_28,CB5X,1
+__setup__.account_payment_term_8,CH5X,1
+__setup__.account_payment_term_33,TRAITE3X,1
+__setup__.account_payment_term_9,CH30,1
+__setup__.account_payment_term_41,COMPTANT AVEC ESCOMPTE,1
+__setup__.account_payment_term_43,CB3X,1
+__setup__.account_payment_term_27,CB2X,1
+__setup__.account_payment_term_44,VB45 FM,1
+__setup__.account_payment_term_46,PAYZENXFOIS,1
+__setup__.account_payment_term_47,VIRB7J,1
+__setup__.account_payment_term_48,REGLEMENT A LIVRAISON,1
+__setup__.account_payment_term_36,CB MAGASIN,1
+__setup__.account_payment_term_26,AVOIR,1
+__setup__.account_payment_term_39,LCR30JFM,1
+__setup__.account_payment_term_40,LCR45JNET,1
+__setup__.account_payment_term_42,PAYZEN,1
+__setup__.account_payment_term_49,VIRB60J,1
+__setup__.account_payment_term_50,30 Net Days,1
+__setup__.account_payment_term_51,30% Advance End 30 Days,1
+__setup__.account_payment_term_52,Immediate Payment,1
+__setup__.account_payment_term_53,15 Days,1
+__setup__.account_payment_term_54,CH30,1
+__setup__.account_payment_term_55,"owebiashipping4_express Taux de marque  55,52",1
