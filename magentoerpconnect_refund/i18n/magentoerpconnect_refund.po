@@ -1,0 +1,182 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* magentoerpconnect_refund
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 7.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-03-05 15:42+0000\n"
+"PO-Revision-Date: 2015-03-05 15:42+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: magentoerpconnect_refund
+#: sql_constraint:magento.credit.memo:0
+msgid "A Magento credit memo binding for this invoice already exists."
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: sql_constraint:magento.credit.memo:0
+msgid "An credit memo with the same ID on Magento already exists."
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: view:new.credit.memo:0
+msgid "Cancel"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: model:ir.model.fields,field_description:magentoerpconnect_refund.field_new_credit_note_magento_credit_memo
+#: field:new.credit.note,magento_credit_memo:0
+msgid "Create Magento credit memo"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: view:account.invoice:0
+msgid "Create credit memo"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: view:new.credit.memo:0
+msgid "Create credit memo linked to the refund in Magento.\n"
+"                        Make sure you previously assigned manually all the credit needed on existing sale orders."
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: model:ir.model.fields,field_description:magentoerpconnect_refund.field_new_credit_memo_credit_amount
+#: field:new.credit.memo,credit_amount:0
+msgid "Credit note amount"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: model:ir.model.fields,field_description:magentoerpconnect_refund.field_magento_credit_memo_magento_id
+#: field:magento.credit.memo,magento_id:0
+msgid "ID on Magento"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: help:new.credit.note,magento_credit_memo:0
+msgid "If checked, a credit memo will be created in Magento with the selected amount."
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: code:_description:0
+#: model:ir.model,name:magentoerpconnect_refund.model_account_invoice
+#: model:ir.model.fields,field_description:magentoerpconnect_refund.field_magento_credit_memo_openerp_id
+#: field:magento.credit.memo,openerp_id:0
+#, python-format
+msgid "Invoice"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: model:ir.model.fields,field_description:magentoerpconnect_refund.field_magento_credit_memo_sync_date
+#: field:magento.credit.memo,sync_date:0
+msgid "Last synchronization date"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: model:ir.model.fields,field_description:magentoerpconnect_refund.field_magento_credit_memo_backend_id
+#: field:magento.credit.memo,backend_id:0
+msgid "Magento Backend"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: view:account.invoice:0
+msgid "Magento Bindings"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: view:account.invoice:0
+#: view:magento.credit.memo:0
+msgid "Magento Credit Memo"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: field:account.invoice,magento_credit_memo_ids:0
+#: model:ir.model.fields,field_description:magentoerpconnect_refund.field_account_invoice_magento_credit_memo_ids
+msgid "Magento Credit Memo Bindings"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: code:_description:0
+#: model:ir.model,name:magentoerpconnect_refund.model_magento_credit_memo
+#, python-format
+msgid "Magento Credit Meno"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: model:ir.model.fields,field_description:magentoerpconnect_refund.field_magento_credit_memo_magento_order_id
+#: field:magento.credit.memo,magento_order_id:0
+msgid "Magento Sale Order"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: model:ir.model.fields,field_description:magentoerpconnect_refund.field_magento_credit_memo_magento_credit_amount
+#: field:magento.credit.memo,magento_credit_amount:0
+msgid "Magento credit amount"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: model:ir.actions.act_window,name:magentoerpconnect_refund.action_credit_memo
+#: view:new.credit.memo:0
+msgid "New credit memo"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: code:addons/magentoerpconnect_refund/invoice.py:178
+#, python-format
+msgid "Refund Created"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: code:_description:0
+#, python-format
+msgid "Sale Order"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: model:ir.model,name:magentoerpconnect_refund.model_sale_order
+msgid "Sales Order"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: view:sale.order:0
+msgid "['|', ('partner_id', '=', parent.partner_id),\n"
+"                                      ('partner_id', 'child_of', parent.partner_id),\n"
+"                                      ('type', '=', 'out_refund'),\n"
+"                                      ('state', '!=', 'cancel'),\n"
+"                                      ('credit_note_amount', '!=', 0),\n"
+"                                      ('magento_credit_memo_ids', '=', False)]"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: code:_description:0
+#: model:ir.model,name:magentoerpconnect_refund.model_magentoerpconnect_refund_installed
+#, python-format
+msgid "magentoerpconnect_refund.installed"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: code:_description:0
+#: model:ir.model,name:magentoerpconnect_refund.model_new_credit_memo
+#, python-format
+msgid "new.credit.memo"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: code:_description:0
+#: model:ir.model,name:magentoerpconnect_refund.model_new_credit_note
+#, python-format
+msgid "new.credit.note"
+msgstr ""
+
+#. module: magentoerpconnect_refund
+#: view:new.credit.memo:0
+msgid "or"
+msgstr ""
+
