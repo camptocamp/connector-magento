@@ -10,7 +10,7 @@
     <data>
         <record id="new_credit_note_view" model="ir.ui.view">
             <field name="name">New Credit None</field>
-            <field name="model">new.credit.note</field>
+            <field name="model">sale.new.credit.note</field>
             <field name="inherit_id" ref="sale_credit_note.new_credit_note_view"/>
             <field name="arch" type="xml">
                 <field name="credit_amount" position="after">

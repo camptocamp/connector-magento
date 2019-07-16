@@ -24,8 +24,8 @@ from openerp.osv import fields, orm
 from openerp.tools.translate import _
 
 
-class new_credit_note(orm.TransientModel):
-    _inherit = "new.credit.note"
+class sale_new_credit_note(orm.TransientModel):
+    _inherit = "sale.new.credit.note"
 
     _columns = {
         'magento_credit_memo': fields.boolean(
@@ -38,8 +38,8 @@ class new_credit_note(orm.TransientModel):
         invoice_obj = self.pool['account.invoice']
         if context is None:
             context = {}
-        res = super(new_credit_note, self).new_credit_note(cr, uid, ids,
-                                                           context=context)
+        res = super(sale_new_credit_note, self).new_credit_note(
+            cr, uid, ids, context=context)
         wizard = self.browse(cr, uid, ids[0], context=context)
         if context.get('active_id') and wizard.magento_credit_memo:
             refund = invoice_obj.browse(
