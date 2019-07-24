@@ -1,0 +1,9 @@
+connector
+connector-ecommerce https://github.com/PESOL/connector-ecommerce    12.0-mig-connector_ecommerce
+e-commerce
+product-attribute
+# OCA/sale-workflow, sale_automatic_workflow_payment_mode (PR #786)
+sale-workflow   https://github.com/akretion/sale-workflow 12-mig-sale_automatic_workflow_payment_mode
+server-tools
+bank-payment
+partner-contact
