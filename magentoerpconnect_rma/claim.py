@@ -474,7 +474,7 @@ class CrmClaimBatchImport(DelayedBatchImport):
 
     def run(self, filters=None):
         """ Run the synchronization """
-        from_date = filters.pop('from_date', None)
+        from_date = filters.copy().pop('from_date', None)
         record_ids = self.backend_adapter.search(filters, from_date)
         _logger.info('search for magento claims %s returned %s',
                      filters, record_ids)
@@ -522,7 +522,7 @@ class ClaimCommentBatchImport(DelayedBatchImport):
         """ Run the synchronization """
         record_ids = []
         index = 0
-        from_date = filters.pop('from_date', None)
+        from_date = filters.copy().pop('from_date', None)
         records = self.backend_adapter.search_read(filters, from_date)
         for record in records:
             record_ids.append(int(records[index]['rma_comment_id']))
@@ -614,7 +614,7 @@ class ClaimAttachmentBatchImport(DelayedBatchImport):
         """ Run the synchronization """
         record_ids = []
         index = 0
-        from_date = filters.pop('from_date', None)
+        from_date = filters.copy().pop('from_date', None)
         records = self.backend_adapter.search_read(filters, from_date)
         for record in records:
             record_ids.append(int(records[index]['rma_attachment_id']))
