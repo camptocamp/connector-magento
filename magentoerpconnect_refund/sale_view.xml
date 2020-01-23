@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Module for OpenERP
+  Copyright (C) 2015 Akretion (http://www.akretion.com). All Rights Reserved
+  @author Benoît GUILLOT <benoit.guillot@akretion.com>
+  The licence is in the file __openerp__.py
+-->
+
+<openerp>
+    <data>
+        <!-- INHERITED VIEW FOR THE OBJECT : sale.order -->
+
+<record id="view_order_form" model="ir.ui.view">
+    <field name="name">credit_memo.order.view_form</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale_credit_note.view_order_form" />
+    <field name="arch" type="xml">
+        <field name="refund_id" position="attributes">
+            <attribute name="domain">['|', ('partner_id', '=', parent.partner_id),
+                                      ('partner_id', 'child_of', parent.partner_id),
+                                      ('type', '=', 'out_refund'),
+                                      ('state', '!=', 'cancel'),
+                                      ('credit_note_amount', '!=', 0),
+                                      ('magento_credit_memo_ids', '=', False)]</attribute>
+        </field>
+    </field>
+</record>
+
+    </data>
+</openerp>
