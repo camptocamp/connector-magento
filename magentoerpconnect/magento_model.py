@@ -711,6 +711,7 @@ class StoreviewImportMapper2000(StoreviewImportMapper):
     def lang_id(self, record):
         lang_id = self.session.search(
             'res.lang', [('code', '=', record['locale'])], limit=1)
+        lang_id = lang_id[0] if lang_id else False
         return {'lang_id': lang_id}
 
 
