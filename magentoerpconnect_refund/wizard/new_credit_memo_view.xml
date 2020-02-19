@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Module for OpenERP
+  Copyright (C) 2015 Akretion (http://www.akretion.com). All Rights Reserved
+  @author Benoît GUILLOT <benoit.guillot@akretion.com>
+  The licence is in the file __openerp__.py
+-->
+
+<openerp>
+    <data>
+        <record id="new_credit_memo_view" model="ir.ui.view">
+            <field name="name">New Credit Memo</field>
+            <field name="model">new.credit.memo</field>
+            <field name="arch" type="xml">
+                <form string="New credit memo" version="7.0">
+                    <p class="oe_grey">
+                        Create credit memo linked to the refund in Magento.
+                        Make sure you previously assigned manually all the credit needed on existing sale orders.
+                    </p>
+                    <group>
+                        <field name="credit_amount" class="oe_inline" readonly="1"/>
+                    </group>
+                    <footer>
+                        <button name="new_credit_memo" type="object"
+                            string="New credit memo" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+         <record id="action_credit_memo" model="ir.actions.act_window">
+            <field name="name">New credit memo</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">new.credit.memo</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</openerp>
