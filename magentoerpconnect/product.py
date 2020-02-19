@@ -43,6 +43,7 @@ from openerp.addons.connector.exception import (MappingError,
 from openerp.addons.connector.unit.mapper import (mapping,
                                                   only_create,
                                                   ImportMapper,
+                                                  convert,
                                                   )
 from .unit.backend_adapter import (GenericAdapter,
                                    MAGENTO_DATETIME_FORMAT,
@@ -695,8 +696,8 @@ class ProductImportMapper(ImportMapper):
               ('type_id', 'product_type'),
               (normalize_datetime('created_at'), 'created_at'),
               (normalize_datetime('updated_at'), 'updated_at'),
-              ('visibility', 'visibility'),
-              ('status', 'status')
+              (convert('visibility', str), 'visibility'),
+              (convert('status', str), 'status')
               ]
 
     @mapping
