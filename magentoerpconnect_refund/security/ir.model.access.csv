@@ -1,0 +1,3 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_magento_credit_memo","access read magento_credit_memo","model_magento_credit_memo","base.group_user",1,0,0,0
+"access_magento_credit_memo_manager","access write magento_credit_memo","model_magento_credit_memo","base.group_sale_salesman",1,1,1,1
