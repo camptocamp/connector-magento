@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Module for OpenERP
+  Copyright (C) 2014 Akretion (http://www.akretion.com). All Rights Reserved
+  @author Benoît GUILLOT <benoit.guillot@akretion.com>
+  The licence is in the file __openerp__.py
+-->
+
+<openerp>
+    <data>
+        <!-- INHERITED VIEW FOR THE OBJECT : account_invoice -->
+
+        <record id="view_invoice_magento_form" model="ir.ui.view">
+            <field name="name">account.invoice.credit.memo.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="magentoerpconnect.view_invoice_magento_form"/>
+            <field name="arch" type="xml">
+                <button name="invoice_open" position="after">
+                    <button name="%(action_credit_memo)d" type="action"
+                        string="Create credit memo"
+                        attrs="{'invisible': ['|',
+                                              ('type', '!=', 'out_refund'),
+                                              '|',
+                                              ('credit_note_amount', '=', 0),
+                                              ('magento_credit_memo_ids', '!=', [])]}"/>
+                </button>
+                <group string="Magento Bindings" position="after">
+                    <group string="Magento Credit Memo">
+                        <field name="magento_credit_memo_ids" nolabel="1"/>
+                    </group>
+                </group>
+            </field>
+        </record>
+
+        <record id="view_magento_credit_memo_form" model="ir.ui.view">
+            <field name="name">magento.credit.memo.form</field>
+            <field name="model">magento.credit.memo</field>
+            <field name="arch" type="xml">
+                <form string="Magento Credit Memo"
+                        create="false" delete="false" version="7.0">
+                    <group>
+                        <field name="backend_id"/>
+                        <field name="magento_id"/>
+                        <field name="magento_order_id"/>
+                        <field name="magento_credit_amount"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_magento_credit_memo_tree" model="ir.ui.view">
+            <field name="name">magento.credit.memo.tree</field>
+            <field name="model">magento.credit.memo</field>
+            <field name="arch" type="xml">
+                <tree string="Magento Credit Memo"
+                        create="false" delete="false" version="7.0">
+                    <field name="backend_id"/>
+                    <field name="magento_id"/>
+                    <field name="magento_order_id"/>
+                    <field name="magento_credit_amount"/>
+                </tree>
+            </field>
+        </record>
+
+    </data>
+</openerp>
