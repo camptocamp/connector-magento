@@ -39,7 +39,9 @@ from openerp.addons.magentoerpconnect.unit.import_synchronizer import (
     AddCheckpoint)
 from openerp.addons.magentoerpconnect.unit.export_synchronizer import (
     MagentoExporter)
-from openerp.addons.magentoerpconnect.backend import magento
+from openerp.addons.magentoerpconnect.backend import (
+    magento, magento1700, magento2000
+)
 from openerp.addons.connector.queue.job import job
 from openerp.addons.magentoerpconnect.connector import get_environment
 from openerp.addons.connector.event import on_record_write
@@ -179,6 +181,10 @@ class MagentoClaimLine(orm.Model):
 @magento
 class CrmClaimAdapter(GenericAdapter):
     _model_name = ['magento.crm.claim']
+
+
+@magento1700
+class CrmClaimAdapter1700(CrmClaimAdapter):
     _magento_model = 'rma'
 
     def _call(self, method, arguments):
@@ -222,6 +228,13 @@ class CrmClaimAdapter(GenericAdapter):
             '%s.update' % self._magento_model, [id, vals['state']])
 
 
+@magento2000
+class CrmClaimAdapter2000(CrmClaimAdapter):
+    _magento2_model = 'returns'
+    _magento2_search = 'returns'
+    _magento2_key = 'entity_id'
+
+
 @magento
 class CrmClaimBatchImport(DelayedBatchImport):
     """ Import the Magento Claims.
@@ -236,6 +249,10 @@ class CrmClaimBatchImport(DelayedBatchImport):
         return super(CrmClaimBatchImport, self)._import_record(
             record_id, max_retries=0, priority=5)
 
+
+@magento1700
+class CrmClaimBatchImport1700(CrmClaimBatchImport):
+
     def run(self, filters=None):
         """ Run the synchronization """
         from_date = filters.pop('from_date', None)
@@ -246,20 +263,33 @@ class CrmClaimBatchImport(DelayedBatchImport):
             self._import_record(record_id)
 
 
+@magento2000
+class CrmClaimBatchImport2000(CrmClaimBatchImport):
+
+    def run(self, filters=None):
+        """ Run the synchronization """
+        # NOTE: 'to_date' value skipped
+        from_date = filters.pop('from_date', None)
+        filters = {}
+        if from_date:
+            filters["date_requested"] = {
+                "gteq": from_date.strftime('%Y-%m-%d %H:%M:%S'),
+            }
+        record_ids = self.backend_adapter.search(filters)
+        _logger.info('search for magento claims %s returned %s',
+                     filters, record_ids)
+        for record_id in record_ids:
+            print "IMPORT MAGENTO CLAIM ID", record_id
+            self._import_record(record_id)
+
+
 @magento
 class CrmClaimImport(MagentoImportSynchronizer):
     _model_name = ['magento.crm.claim']
 
-    def _import_dependencies(self):
-        record = self.magento_record
-        order_binder = self.get_binder_for_model('magento.sale.order')
-        order_importer = self.get_connector_unit_for_model(
-            MagentoImportSynchronizer, 'magento.sale.order')
-        if order_binder.to_openerp(record['order_increment_id']) is None:
-            order_importer.run(record['order_increment_id'])
-
     def _create(self, data):
         openerp_binding_id = super(CrmClaimImport, self)._create(data)
+        print "OPENERP BINDING ID", openerp_binding_id
         return openerp_binding_id
 
     def _must_skip(self):
@@ -270,22 +300,33 @@ class CrmClaimImport(MagentoImportSynchronizer):
         return False
 
 
+@magento1700
+class CrmClaimImport1700(CrmClaimImport):
+
+    def _import_dependencies(self):
+        record = self.magento_record
+        order_binder = self.get_binder_for_model('magento.sale.order')
+        order_importer = self.get_connector_unit_for_model(
+            MagentoImportSynchronizer, 'magento.sale.order')
+        if order_binder.to_openerp(record['order_increment_id']) is None:
+            order_importer.run(record['order_increment_id'])
+
+
+@magento2000
+class CrmClaimImport2000(CrmClaimImport):
+
+    def _import_dependencies(self):
+        record = self.magento_record
+        order_binder = self.get_binder_for_model('magento.sale.order')
+        order_importer = self.get_connector_unit_for_model(
+            MagentoImportSynchronizer, 'magento.sale.order')
+        if order_binder.to_openerp(record['order_id']) is None:
+            order_importer.run(record['order_id'])
+
+
 @magento
 class CrmClaimImportMapper(ImportMapper):
     _model_name = 'magento.crm.claim'
-
-    direct = [('subject', 'name'),
-              ('description', 'description'),
-              ('created_at', 'date'),
-              ]
-
-    children = [
-        ('items', 'magento_claim_line_ids', 'magento.claim.line'),
-        ('comments', 'magento_claim_comment_ids', 'magento.claim.comment'),
-        ('attachments',
-         'magento_claim_attachment_ids',
-         'magento.claim.attachment'),
-    ]
 
     def _map_child(self, map_record, from_attr, to_attr, model_name):
         if from_attr in map_record.source:
@@ -334,9 +375,61 @@ class CrmClaimImportMapper(ImportMapper):
     def backend_id(self, record):
         return {'backend_id': self.backend_record.id}
 
+
+@magento1700
+class CrmClaimImportMapper1700(CrmClaimImportMapper):
+
+    direct = [('subject', 'name'),
+              ('description', 'description'),
+              ('created_at', 'date'),
+              ]
+
+    children = [
+        ('items', 'magento_claim_line_ids', 'magento.claim.line'),
+        ('comments', 'magento_claim_comment_ids', 'magento.claim.comment'),
+        ('attachments',
+         'magento_claim_attachment_ids',
+         'magento.claim.attachment'),
+    ]
+
     @mapping
     def number(self, record):
-            return {'number': record['rma_id']}
+        return {'number': record['rma_id']}
+
+
+@magento2000
+class CrmClaimImportMapper2000(CrmClaimImportMapper):
+
+    direct = [
+	("increment_id", "number"),
+	# ('description', 'description'),
+	('date_requested', 'date'),
+    ]
+
+    children = [
+        ('items', 'magento_claim_line_ids', 'magento.claim.line'),
+	# NOTE: disabled as it's not needed currently
+        # ('comments', 'magento_claim_comment_ids', 'magento.claim.comment'),
+        # ('attachments',
+        #  'magento_claim_attachment_ids',
+        #  'magento.claim.attachment'),
+    ]
+
+    def _map_child(self, map_record, from_attr, to_attr, model_name):
+        if from_attr in map_record.source:
+            return super(CrmClaimImportMapper, self)._map_child(
+                map_record, from_attr, to_attr, model_name)
+    @mapping
+    def name(self, record):
+        # TODO reasons are on lines with Magento 2, concatenate them?
+        from pprint import pprint
+        pprint(record)
+        return {"name": u""}
+
+    @mapping
+    def description(self, record):
+        # TODO no idea what is the equivalent for 'description' in Magento 2
+        pass
 
 
 @magento
