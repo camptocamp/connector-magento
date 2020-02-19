@@ -39,7 +39,7 @@ from openerp.addons.magentoerpconnect.unit.import_synchronizer import (
     AddCheckpoint)
 from openerp.addons.magentoerpconnect.unit.export_synchronizer import (
     MagentoExporter)
-from openerp.addons.magentoerpconnect.backend import magento
+from openerp.addons.magentoerpconnect.backend import magento, magento2000
 from openerp.addons.connector.queue.job import job
 from openerp.addons.magentoerpconnect.connector import get_environment
 from openerp.addons.connector.event import on_record_write
@@ -220,6 +220,65 @@ class CrmClaimAdapter(GenericAdapter):
         """
         return self._call(
             '%s.update' % self._magento_model, [id, vals['state']])
+
+
+@magento2000
+class CrmClaimAdapter2000(CrmClaimAdapter):
+    _model_name = ['magento.crm.claim']
+    _magento2_model = 'returns'
+    _magento2_search = 'returns'
+    _magento2_key = 'entity_id'
+
+    def _call(self, method, arguments):
+        # FIXME need to migrate to Magento 2? to test
+        return super(CrmClaimAdapter2000, self)._call(method, arguments)
+        # try:
+        #     return super(CrmClaimAdapter, self)._call(method, arguments)
+        # except xmlrpclib.Fault as err:
+        #     # this is the error in the Magento API
+        #     # when the claim does not exist
+        #     if err.faultCode == 100:
+        #         raise IDMissingInBackend
+        #     else:
+        #         raise
+
+    def search(self, filters=None, from_date=None):
+        """ Search records according to some criterias
+        and returns a list of ids
+
+        :rtype: list
+        """
+        pass
+        # TODO migrate to Magento 2
+        if filters is None:
+            filters = {}
+        if from_date is not None:
+            filters["date_requested"] = {
+                "gteq": from_date.strftime('%Y/%d/%m %H:%M:%S'),
+            }
+        return super(CrmClaimAdapter2000, self).search(filters)
+        # return [int(row['rma_id']) for row
+        #         in self._call('%s.list' % self._magento_model,
+        #                       [filters] if filters else [{}])]
+
+    def read(self, id, storeview_id=None, attributes=None):
+        """ Returns the information of a record
+
+        :rtype: dict
+        """
+        pass
+        # TODO migrate to Magento 2
+        # return self._call('%s.get' % self._magento_model,
+        #                   [int(id), storeview_id, attributes, 'id'])
+
+    def write(self, id, vals):
+        """
+        Update claim state un Magento.
+        """
+        pass
+        # TODO migrate to Magento 2
+        # return self._call(
+        #     '%s.update' % self._magento_model, [id, vals['state']])
 
 
 @magento
