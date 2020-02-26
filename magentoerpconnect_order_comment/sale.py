@@ -33,7 +33,8 @@ from openerp.addons.magentoerpconnect.unit.backend_adapter import (
     GenericAdapter,
 )
 import openerp.addons.magentoerpconnect.consumer as magentoerpconnect
-from openerp.addons.magentoerpconnect.backend import magento
+from openerp.addons.magentoerpconnect.backend import (
+    magento, magento1700, magento2000)
 from openerp.addons.magentoerpconnect.unit.export_synchronizer import (
     MagentoExporter)
 from openerp.addons.magentoerpconnect import sale
@@ -160,13 +161,23 @@ class magento_sale_comment(orm.Model):
 
 @magento(replacing=sale.SaleOrderCommentImportMapper)
 class SaleOrderImportMapper(sale.SaleOrderCommentImportMapper):
-    "Sales order has got an 'status_history' list which all magento comments"
     _model_name = 'magento.sale.order'
+
+
+@magento1700
+class SaleOrderImportMapper1700(SaleOrderImportMapper):
+    """Sales order has got an 'status_history' list with all magento comments"""
 
     children = sale.SaleOrderCommentImportMapper.children + [
         ('status_history',
          'magento_order_comment_ids',
          'magento.sale.comment')]
+
+
+@magento2000
+class SaleOrderImportMapper2000(SaleOrderImportMapper):
+    # TODO need to import "status_history"/comments from Magento 2?
+    pass
 
 
 @magento
