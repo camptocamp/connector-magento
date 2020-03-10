@@ -1058,32 +1058,38 @@ class SaleOrderImportMapper(ImportMapper):
         method_id = method_ids[0]
         return {'payment_method_id': method_id}
 
-    @mapping
-    def shipping_method(self, record):
-        session = self.session
-        ifield = record.get('shipping_method')
-        if not ifield:
-            return
-
-        carrier_ids = session.search('delivery.carrier',
-                                     [('magento_code', '=', ifield)])
-        if carrier_ids:
-            result = {'carrier_id': carrier_ids[0]}
-        else:
-            fake_partner_id = session.search('res.partner', [])[0]
-            model_data_obj = session.pool['ir.model.data']
+    def _get_carrier_id(self, shipping_method):
+        carrier_ids = self.session.search(
+            'delivery.carrier',
+            [('magento_code', '=', shipping_method)],
+            limit=1)
+        carrier_id = carrier_ids and carrier_ids[0] or False
+        if not carrier_id:
+            fake_partner_id = self.session.search(
+                'res.partner', [], limit=1)[0]
+            model_data_obj = self.session.pool['ir.model.data']
             model, product_id = model_data_obj.get_object_reference(
-                session.cr, session.uid,
+                self.session.cr, self.session.uid,
                 'connector_ecommerce',
                 'product_product_shipping')
-            carrier_id = session.create('delivery.carrier',
-                                        {'partner_id': fake_partner_id,
-                                         'product_id': product_id,
-                                         'name': ifield,
-                                         'magento_code': ifield,
-                                         })
-            result = {'carrier_id': carrier_id}
-        return result
+            carrier_id = self.session.create(
+                'delivery.carrier',
+                {
+                    'partner_id': fake_partner_id,
+                    'product_id': product_id,
+                    'name': shipping_method,
+                    'magento_code': shipping_method,
+                }
+            )
+        return carrier_id
+
+    @mapping
+    def shipping_method(self, record):
+        shipping_method = record.get('shipping_method')
+        if not shipping_method:
+            return
+        carrier_id = self._get_carrier_id(shipping_method)
+        return {'carrier_id': carrier_id}
 
     # partner_id, partner_invoice_id, partner_shipping_id
     # are done in the importer
@@ -1104,6 +1110,21 @@ class SaleOrderImportMapper(ImportMapper):
             SaleOrderCommentImportMapper)
         map_record = comment_mapper.map_record(record)
         return map_record.values()
+
+
+@magento2000
+class SaleOrderImportMapper2000(SaleOrderImportMapper):
+
+    @mapping
+    def shipping_method(self, record):
+        shipping_data = record.get(
+            'extension_attributes', {}).get('shipping_assignments')
+        shipping_data = shipping_data[0] or {}
+        shipping_method = shipping_data.get('shipping', {}).get('method')
+        if not shipping_method:
+            return
+        carrier_id = self._get_carrier_id(shipping_method)
+        return {'carrier_id': carrier_id}
 
 
 @magento
