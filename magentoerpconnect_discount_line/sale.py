@@ -22,7 +22,7 @@ from openerp.osv import orm, fields
 from openerp.tools.translate import _
 from openerp.addons.magentoerpconnect import sale
 from openerp.addons.connector.unit.mapper import mapping
-from openerp.addons.magentoerpconnect.backend import magento
+from openerp.addons.magentoerpconnect.backend import magento, magento2000
 from openerp.addons.connector_ecommerce.sale import SpecialOrderLineBuilder
 from openerp.addons.connector_ecommerce.unit.sale_order_onchange import (
     SaleOrderOnChange)
@@ -37,6 +37,37 @@ class SaleOrderLineDiscountMapper(sale.SaleOrderLineImportMapper):
         """Remove discount on lines"""
         super(SaleOrderLineDiscountMapper, self).discount_amount(record)
         return {'discount': 0}
+
+
+
+@magento2000(replacing=sale.SaleOrderLineImportMapper2000)
+class SaleOrderLineDiscountMapper2000(sale.SaleOrderLineImportMapper2000):
+    _model_name = 'magento.sale.order.line'
+
+    @mapping
+    def discount_amount(self, record):
+        """Remove discount on lines"""
+        super(SaleOrderLineDiscountMapper2000, self).discount_amount(record)
+        return {'discount': 0}
+
+    @mapping
+    def price(self, record):
+        """
+            Original function is in module magentoerpconnect.
+            It takes the total of the line divide by quantity.
+            But the total of the line already contains discount reduce.
+            Here we want to have a amount without discount.
+            Then uses the unit price without discount.
+        """
+        result = {}
+        base_price = float(record['base_original_price'] or 0.)
+        base_price_incl_tax = float(
+            record.get('base_price_incl_tax') or base_price)
+        if self.options.tax_include:
+            result['price_unit'] = base_price_incl_tax
+        else:
+            result['price_unit'] = base_price
+        return result
 
 
 @magento(replacing=sale.SaleOrderImportMapper)
