@@ -234,6 +234,16 @@ class CrmClaimAdapter2000(CrmClaimAdapter):
     _magento2_search = 'returns'
     _magento2_key = 'entity_id'
 
+    def write(self, id_, data):
+        """Update claim on the external system."""
+        print "WRITE returns", id_, data
+        data = {
+            "rmaDataObject": data,
+        }
+        return self._call(
+            '%s/%s' % (self._magento2_model, id_),
+            data, http_method="put")
+
 
 @magento
 class CrmClaimBatchImport(DelayedBatchImport):
@@ -556,40 +566,64 @@ def crm_claim_import_batch(session, model_name, backend_id, filters=None):
 
 @on_record_write(model_names='crm.claim')
 def delay_export_all_bindings(session, model_name, record_id, vals):
+    """Export the claim as soon as we update its state/stage."""
     if 'stage_id' in vals:
         magentoerpconnect.delay_export_all_bindings(
             session, model_name, record_id, vals=vals)
 
 
-@magento
+@magento2000
 class MagentoCrmClaimExporter(MagentoExporter):
-    """ Export claim state to Magento. """
     _model_name = ['magento.crm.claim']
 
     def _should_import(self):
         return False
 
 
-@magento
+@magento2000
 class MagentoCrmClaimExportMapper(ExportMapper):
     _model_name = 'magento.crm.claim'
 
     @mapping
-    def stage_id(self, record):
-        state = record.stage_id.name
-        return {'state': state}
+    def items(self, record):
+        """Export the quantity actually returned by the customer."""
+        res = {
+            "entity_id": record.magento_id,
+            "increment_id": record.number,
+            "items": [],
+        }
+        for line in record.magento_claim_line_ids:
+            res["items"].append(
+                {
+                    "entity_id": record.magento_id,
+                    "rma_entity_id": line.magento_id,
+                    "qty_returned": line.product_returned_quantity,
+                }
+            )
+        return res
+
+    # FIXME: maybe not needed, status seems to be automatically computed
+    # on Magento based on the qty returned etc.
+    # @mapping
+    # def stage_id(self, record):
+    #     # TODO: if our stages are named exactly as the Magento RMA statuses
+    #     # we need to migrate them as there is a high chance that RMA statuses
+    #     # have changed their names between Magento 1 (RMA community module)
+    #     # and Magento 2 (standard module).
+    #     state = record.stage_id.name
+    #     return {'status': state}
 
 
-@magento
+@magento2000
 class MagentoClaimBinder(MagentoModelBinder):
 
     _model_name = [
         'magento.crm.claim',
         'magento.claim.line',
-        ]
+    ]
 
 
-@magento
+@magento2000
 class CrmClaimAddCheckpoint(AddCheckpoint):
 
     _model_name = [
@@ -597,4 +631,4 @@ class CrmClaimAddCheckpoint(AddCheckpoint):
         'magento.claim.line',
         'magento.claim.comment',
         'magento.claim.attachment'
-        ]
+    ]
