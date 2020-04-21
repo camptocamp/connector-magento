@@ -432,6 +432,7 @@ class SaleOrderBatchImport(DelayedBatchImport):
 
     def run(self, filters=None):
         """ Run the synchronization """
+        filters = filters.copy()
         if filters is None:
             filters = {}
         filters['state'] = {'neq': 'canceled'}
@@ -896,7 +897,8 @@ class SaleOrderImport(MagentoImportSynchronizer):
             **kwargs)
 
     def _import_dependencies(self):
-        self._import_addresses()
+        with self.session.change_context({'connector_no_export': True}):
+            self._import_addresses()
 
 
 @magento1700
