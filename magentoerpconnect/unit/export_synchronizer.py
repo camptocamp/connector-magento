@@ -425,7 +425,12 @@ class MagentoExporter(MagentoBaseExporter):
 @related_action(action=unwrap_binding)
 def export_record(session, model_name, binding_id, fields=None):
     """ Export a record on Magento """
-    record = session.browse(model_name, binding_id)
-    env = get_environment(session, model_name, record.backend_id.id)
-    exporter = env.get_connector_unit(MagentoExporter)
-    return exporter.run(binding_id, fields=fields)
+
+    # As we export data in CSV,
+    # we don't want to call old export job
+    return True
+
+    # record = session.browse(model_name, binding_id)
+    # env = get_environment(session, model_name, record.backend_id.id)
+    # exporter = env.get_connector_unit(MagentoExporter)
+    # return exporter.run(binding_id, fields=fields)
