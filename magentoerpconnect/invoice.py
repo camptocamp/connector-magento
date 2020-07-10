@@ -309,8 +309,13 @@ def export_invoice_paid(session, model_name, record_id):
 @related_action(action=unwrap_binding)
 def export_invoice(session, model_name, record_id):
     """ Export a validated or paid invoice. """
-    invoice = session.browse(model_name, record_id)
-    backend_id = invoice.backend_id.id
-    env = get_environment(session, model_name, backend_id)
-    invoice_exporter = env.get_connector_unit(MagentoInvoiceSynchronizer)
-    return invoice_exporter.run(record_id)
+
+    # As we export data by SFTP,
+    # we don't want to call old export job
+    return True
+
+    # invoice = session.browse(model_name, record_id)
+    # backend_id = invoice.backend_id.id
+    # env = get_environment(session, model_name, backend_id)
+    # invoice_exporter = env.get_connector_unit(MagentoInvoiceSynchronizer)
+    # return invoice_exporter.run(record_id)
