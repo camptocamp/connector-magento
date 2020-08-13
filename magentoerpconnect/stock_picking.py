@@ -165,15 +165,21 @@ class StockPickingAdapter2000(StockPickingAdapter):
     def add_tracking_number(self, binding_id, magento_id, carrier_code,
                             tracking_title, tracking_number):
         picking = self.session.browse(self.model._name, binding_id)
+
+        if not picking.sale_id or not picking.sale_id.magento_bind_ids:
+            return True
+
+        sale_magento_ids = picking.sale_id.magento_bind_ids
         arguments = {
             'entity': {
-                # FIXME: not sure about the difference between order_id
-                # and parent_id, but both have to be set to make Magento happy
-                'order_id': magento_id,
+                'order_id': sale_magento_ids[0].magento_id,
                 'parent_id': magento_id,
                 'track_number': tracking_number,
                 'title': tracking_title,
                 'carrier_code': carrier_code,
+                # FIXME: we don't care about these info
+                'weight': 0.1,
+                'qty': 1,
             },
         }
         # Update the existing tracking number if any
