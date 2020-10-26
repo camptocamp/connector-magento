@@ -550,7 +550,7 @@ class ClaimLineImportMapper2000(ClaimLineImportMapper):
 
     @mapping
     def magento_id(self, record):
-        return {'magento_id': record['rma_entity_id']}
+        return {'magento_id': record['entity_id']}
 
     @mapping
     def reason(self, record):
