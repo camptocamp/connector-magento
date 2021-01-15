@@ -47,7 +47,7 @@ from .unit.import_synchronizer import (DelayedBatchImport,
                                        MagentoImportSynchronizer
                                        )
 from .exception import OrderImportRuleRetry
-from .backend import magento
+from .backend import magento, magento1700, magento2000
 from .connector import get_environment
 from .partner import PartnerImportMapper
 
@@ -184,8 +184,8 @@ class sale_order(orm.Model):
                           {'openerp_id': new_id},
                           context=context)
         session = ConnectorSession(cr, uid, context=context)
-        for binding in binding_obj.browse(cr, uid, binding_ids,
-                                          context=context):
+        bindings = binding_obj.browse(cr, uid, binding_ids, context=context)
+        for binding in bindings:
             # the sales' status on Magento is likely 'canceled'
             # so we will export the new status (pending, processing, ...)
             export_state_change.delay(
@@ -315,18 +315,18 @@ class sale_order_line(orm.Model):
 class SaleOrderAdapter(GenericAdapter):
     _model_name = 'magento.sale.order'
     _magento_model = 'sales_order'
+    _magento2_model = 'orders'
+    _magento2_search = 'orders'
+    _magento2_key = 'entity_id'
+
     _admin_path = '{model}/view/order_id/{id}'
 
-    def _call(self, method, arguments):
-        try:
-            return super(SaleOrderAdapter, self)._call(method, arguments)
-        except xmlrpclib.Fault as err:
-            # this is the error in the Magento API
-            # when the sales order does not exist
-            if err.faultCode == 100:
-                raise IDMissingInBackend
-            else:
-                raise
+    def get_search_arguments(self, filters):
+        return {
+            'imported': False,
+            # 'limit': 200,
+            'filters': filters,
+        }
 
     def search(self, filters=None, from_date=None, to_date=None,
                magento_storeview_ids=None):
@@ -347,11 +347,29 @@ class SaleOrderAdapter(GenericAdapter):
         if magento_storeview_ids is not None:
             filters['store_id'] = {'in': magento_storeview_ids}
 
-        arguments = {'imported': False,
-                     # 'limit': 200,
-                     'filters': filters,
-                     }
+        arguments = self.get_search_arguments(filters)
         return super(SaleOrderAdapter, self).search(arguments)
+
+    def get_parent(self, id):
+        raise NotImplementedError
+
+    def add_comment(self, id, status, comment=None, notify=False):
+        raise NotImplementedError
+
+
+@magento1700
+class SaleOrderAdapter1700(SaleOrderAdapter):
+
+    def _call(self, method, arguments):
+        try:
+            return super(SaleOrderAdapter, self)._call(method, arguments)
+        except xmlrpclib.Fault as err:
+            # this is the error in the Magento API
+            # when the sales order does not exist
+            if err.faultCode == 100:
+                raise IDMissingInBackend
+            else:
+                raise
 
     def read(self, id, attributes=None):
         """ Returns the information of a record
@@ -368,6 +386,39 @@ class SaleOrderAdapter(GenericAdapter):
     def add_comment(self, id, status, comment=None, notify=False):
         return self._call('%s.addComment' % self._magento_model,
                           [id, status, comment, notify])
+
+
+@magento2000
+class SaleOrderAdapter2000(SaleOrderAdapter):
+
+    def get_search_arguments(self, filters):
+        return filters
+
+    def read(self, id, attributes=None):
+        """ Returns the information of a record
+
+        :rtype: dict
+        """
+        res = super(SaleOrderAdapter, self).read(
+            id, attributes=attributes)
+        return res
+
+    def get_parent(self, id):
+        return self.read(id).get('relation_parent_id')
+
+    def add_comment(self, id, status, comment=None, notify=False):
+        arguments = {
+            'statusHistory': {
+                'comment': comment,
+                # 'created_at': "2018-06-05  15:22:04",
+                'parent_id': id,
+                'is_customer_notified': int(notify),
+                'is_visible_on_front': 1,
+                'status': status,
+            }
+        }
+        return self._call(
+            'orders/%s/comments' % id, arguments, http_method='post')
 
 
 @magento
@@ -523,6 +574,9 @@ class SaleOrderImport(MagentoImportSynchronizer):
         for item in resource['items']:
             if item.get('parent_item_id'):
                 child_items.setdefault(item['parent_item_id'], []).append(item)
+            elif item.get('parent_item'):  # 2.0
+                child_items.setdefault(
+                    item['parent_item']['item_id'], []).append(item)
             else:
                 top_items.append(item)
 
@@ -565,7 +619,11 @@ class SaleOrderImport(MagentoImportSynchronizer):
             # have to be extracted from the child
             for field in ['sku', 'product_id', 'name']:
                 item[field] = child_items[0][field]
-            return item
+            # Experimental support for configurable products with multiple
+            # subitems
+            return [item] + child_items[1:]
+        elif product_type == 'bundle':
+            return child_items
         return top_item
 
     def _import_customer_group(self, group_id):
@@ -603,7 +661,7 @@ class SaleOrderImport(MagentoImportSynchronizer):
         Note that we have to walk through all the chain of parent sales orders
         in the case of multiple editions / cancellations.
         """
-        parent_id = self.magento_record.get('relation_parent_real_id')
+        parent_id = self.magento_record.get('relation_parent_id')
         if not parent_id:
             return
         all_parent_ids = []
@@ -722,7 +780,7 @@ class SaleOrderImport(MagentoImportSynchronizer):
 
             customer_record = {
                 'firstname': address['firstname'],
-                'middlename': address['middlename'],
+                'middlename': address.get('middlename'),
                 'lastname': address['lastname'],
                 'prefix': address.get('prefix'),
                 'suffix': address.get('suffix'),
@@ -795,8 +853,9 @@ class SaleOrderImport(MagentoImportSynchronizer):
         billing_id = create_address(record['billing_address'])
 
         shipping_id = None
-        if record['shipping_address']:
-            shipping_id = create_address(record['shipping_address'])
+        shipping_address = self._get_shipping_address()
+        if shipping_address:
+            shipping_id = create_address(shipping_address)
 
         self.partner_id = partner.id
         self.partner_invoice_id = billing_id
@@ -838,14 +897,42 @@ class SaleOrderImport(MagentoImportSynchronizer):
             **kwargs)
 
     def _import_dependencies(self):
-        record = self.magento_record
-
         self._import_addresses()
 
-        for line in record.get('items', []):
+
+@magento1700
+class SaleOrderImporter1700(SaleOrderImport):
+    _model_name = ['magento.sale.order']
+
+    def _get_shipping_address(self):
+        return self.magento_record['shipping_address']
+
+    def _import_dependencies(self):
+        super(SaleOrderImporter1700, self)._import_dependencies()
+        for line in self.magento_record.get('items', []):
             _logger.debug('line: %s', line)
             if 'product_id' in line:
                 self._import_dependency(line['product_id'],
+                                        'magento.product.product')
+
+
+@magento2000
+class SaleOrderImporter2000(SaleOrderImport):
+    _model_name = ['magento.sale.order']
+
+    def _get_shipping_address(self):
+        # TODO: Magento2 allows for a different shipping address per line.
+        # Look to https://github.com/OCA/sale-workflow/tree/8.0/sale_allotment?
+        shippings = self.magento_record[
+            'extension_attributes']['shipping_assignments']
+        return shippings and shippings[0]['shipping'].get('address')
+
+    def _import_dependencies(self):
+        super(SaleOrderImporter2000, self)._import_dependencies()
+        for line in self.magento_record.get('items', []):
+            _logger.debug('line: %s', line)
+            if 'sku' in line:
+                self._import_dependency(line['sku'],
                                         'magento.product.product')
 
 
@@ -970,32 +1057,38 @@ class SaleOrderImportMapper(ImportMapper):
         method_id = method_ids[0]
         return {'payment_method_id': method_id}
 
-    @mapping
-    def shipping_method(self, record):
-        session = self.session
-        ifield = record.get('shipping_method')
-        if not ifield:
-            return
-
-        carrier_ids = session.search('delivery.carrier',
-                                     [('magento_code', '=', ifield)])
-        if carrier_ids:
-            result = {'carrier_id': carrier_ids[0]}
-        else:
-            fake_partner_id = session.search('res.partner', [])[0]
-            model_data_obj = session.pool['ir.model.data']
+    def _get_carrier_id(self, shipping_method):
+        carrier_ids = self.session.search(
+            'delivery.carrier',
+            [('magento_code', '=', shipping_method)],
+            limit=1)
+        carrier_id = carrier_ids and carrier_ids[0] or False
+        if not carrier_id:
+            fake_partner_id = self.session.search(
+                'res.partner', [], limit=1)[0]
+            model_data_obj = self.session.pool['ir.model.data']
             model, product_id = model_data_obj.get_object_reference(
-                session.cr, session.uid,
+                self.session.cr, self.session.uid,
                 'connector_ecommerce',
                 'product_product_shipping')
-            carrier_id = session.create('delivery.carrier',
-                                        {'partner_id': fake_partner_id,
-                                         'product_id': product_id,
-                                         'name': ifield,
-                                         'magento_code': ifield,
-                                         })
-            result = {'carrier_id': carrier_id}
-        return result
+            carrier_id = self.session.create(
+                'delivery.carrier',
+                {
+                    'partner_id': fake_partner_id,
+                    'product_id': product_id,
+                    'name': shipping_method,
+                    'magento_code': shipping_method,
+                }
+            )
+        return carrier_id
+
+    @mapping
+    def shipping_method(self, record):
+        shipping_method = record.get('shipping_method')
+        if not shipping_method:
+            return
+        carrier_id = self._get_carrier_id(shipping_method)
+        return {'carrier_id': carrier_id}
 
     # partner_id, partner_invoice_id, partner_shipping_id
     # are done in the importer
@@ -1016,6 +1109,21 @@ class SaleOrderImportMapper(ImportMapper):
             SaleOrderCommentImportMapper)
         map_record = comment_mapper.map_record(record)
         return map_record.values()
+
+
+@magento2000
+class SaleOrderImportMapper2000(SaleOrderImportMapper):
+
+    @mapping
+    def shipping_method(self, record):
+        shipping_data = record.get(
+            'extension_attributes', {}).get('shipping_assignments')
+        shipping_data = shipping_data[0] or {}
+        shipping_method = shipping_data.get('shipping', {}).get('method')
+        if not shipping_method:
+            return
+        carrier_id = self._get_carrier_id(shipping_method)
+        return {'carrier_id': carrier_id}
 
 
 @magento
@@ -1049,14 +1157,37 @@ class SaleOrderLineImportMapper(ImportMapper):
     @mapping
     def product_id(self, record):
         binder = self.get_binder_for_model('magento.product.product')
-        product_id = binder.to_openerp(record['product_id'], unwrap=True)
+        product_ref = self._get_product_ref(record)
+        product_id = binder.to_openerp(product_ref, unwrap=True)
         assert product_id is not None, (
             "product_id %s should have been imported in "
-            "SaleOrderImport._import_dependencies" % record['product_id'])
+            "SaleOrderImport._import_dependencies" % product_ref)
         return {'product_id': product_id}
 
     @mapping
+    def price(self, record):
+        """ tax key may not be present in magento2 when no taxes apply """
+        result = {}
+        base_row_total = float(record['base_row_total'] or 0.)
+        base_row_total_incl_tax = float(
+            record.get('base_row_total_incl_tax') or base_row_total)
+        qty_ordered = float(record['qty_ordered'])
+        if self.options.tax_include:
+            result['price_unit'] = base_row_total_incl_tax / qty_ordered
+        else:
+            result['price_unit'] = base_row_total / qty_ordered
+        return result
+
+
+@magento1700
+class SaleOrderLineImportMapper1700(SaleOrderLineImportMapper):
+
+    def _get_product_ref(self, record):
+        return record['product_id']
+
+    @mapping
     def product_options(self, record):
+        # TODO: product_options for Magento 2.0?
         result = {}
         ifield = record['product_options']
         if ifield:
@@ -1073,18 +1204,12 @@ class SaleOrderLineImportMapper(ImportMapper):
             result = {'notes': notes}
         return result
 
-    @mapping
-    def price(self, record):
-        result = {}
-        base_row_total = float(record['base_row_total'] or 0.)
-        base_row_total_incl_tax = float(record['base_row_total_incl_tax'] or
-                                        0.)
-        qty_ordered = float(record['qty_ordered'])
-        if self.options.tax_include:
-            result['price_unit'] = base_row_total_incl_tax / qty_ordered
-        else:
-            result['price_unit'] = base_row_total / qty_ordered
-        return result
+
+@magento2000
+class SaleOrderLineImportMapper2000(SaleOrderLineImportMapper):
+
+    def _get_product_ref(self, record):
+        return record['sku']
 
 
 @magento
@@ -1161,7 +1286,7 @@ class StateExporter(ExportSynchronizer):
 
 @job
 def export_state_change(session, model_name, binding_id, allowed_states=None,
-                        comment=None, notify=None):
+                        comment=None, notify=False):
     """ Change state of a sales order on Magento """
     binding = session.browse(model_name, binding_id)
     backend_id = binding.backend_id.id
