@@ -40,7 +40,8 @@ msgstr "Un Commentaire de RMA avec le même ID sur Magento existe déjà."
 #. module: magentoerpconnect_rma
 #: field:magento.claim.attachment,sync_date:0
 #: field:magento.claim.comment,sync_date:0
-#: field:magento.claim.line,sync_date:0 field:magento.crm.claim,sync_date:0
+#: field:magento.claim.line,sync_date:0
+#: field:magento.crm.claim,sync_date:0
 msgid "Last synchronization date"
 msgstr "Date de la dernière synchronisation"
 
@@ -95,7 +96,8 @@ msgid "Import in background"
 msgstr "Importer en arrière-plan"
 
 #. module: magentoerpconnect_rma
-#: field:claim.line,magento_bind_ids:0 field:crm.claim,magento_bind_ids:0
+#: field:claim.line,magento_bind_ids:0
+#: field:crm.claim,magento_bind_ids:0
 #: field:ir.attachment,magento_claim_bind_ids:0
 #: field:mail.message,magento_claim_bind_ids:0
 msgid "Magento Bindings"
@@ -104,7 +106,8 @@ msgstr "Magento Bindings"
 #. module: magentoerpconnect_rma
 #: field:magento.claim.attachment,magento_id:0
 #: field:magento.claim.comment,magento_id:0
-#: field:magento.claim.line,magento_id:0 field:magento.crm.claim,magento_id:0
+#: field:magento.claim.line,magento_id:0
+#: field:magento.crm.claim,magento_id:0
 msgid "ID on Magento"
 msgstr "ID sur Magento"
 
@@ -155,6 +158,8 @@ msgstr "ID de RMA"
 #: field:magento.claim.attachment,backend_id:0
 #: field:magento.claim.comment,backend_id:0
 #: field:magento.claim.line,backend_id:0 field:magento.crm.claim,backend_id:0
+#: field:magento.claim.line,backend_id:0
+#: field:magento.crm.claim,backend_id:0
 msgid "Magento Backend"
 msgstr "Backend Magento"
 
@@ -189,7 +194,8 @@ msgstr "Commentaires de RMA"
 #. module: magentoerpconnect_rma
 #: field:ir.attachment,claim_id:0
 #: model:ir.model,name:magentoerpconnect_rma.model_crm_claim
-#: field:magento.crm.claim,openerp_id:0 field:mail.message,claim_id:0
+#: field:magento.crm.claim,openerp_id:0
+#: field:mail.message,claim_id:0
 msgid "Claim"
 msgstr "Claim"
 
