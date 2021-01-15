@@ -409,7 +409,7 @@ class MagentoExporter(MagentoBaseExporter):
         """ Flow of the synchronization, implemented in inherited classes"""
         assert self.binding_id
         assert self.binding_record
-
+        start = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
         if not self.magento_id:
             fields = None  # should be created with all the fields
 
@@ -417,25 +417,38 @@ class MagentoExporter(MagentoBaseExporter):
             return
 
         # export the missing linked resources
-        self._export_dependencies()
+        dependencies_exported = self._export_dependencies()
 
         # prevent other jobs to export the same record
         # will be released on commit (or rollback)
         self._lock()
-
+        before_read = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
         map_record = self._map_data()
-
+        after_read = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+        after_write = ''
+        after_create = ''
         if self.magento_id:
             record = self._update_data(map_record, fields=fields)
+            after_update = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
             if not record:
                 return _('Nothing to export.')
             self._update(record)
+            after_write = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
         else:
             record = self._create_data(map_record, fields=fields)
+            after_update = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
             if not record:
                 return _('Nothing to export.')
             self.magento_id = self._create(record)
-        return _('Record exported with ID %s on Magento.') % self.magento_id
+            after_create = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+        return _('Record exported with ID %s on Magento. \n'
+                 'Dependencies exported : %s \n'
+                 'Start : %s \n'
+                 'Before read: %s \n'
+                 'After read : %s \n'
+                 'After update : %s \n'
+                 'After write: %s \n'
+                 'After create : %s') % (self.magento_id, dependencies_exported, start, before_read, after_read, after_update, after_write, after_create)
 
 class MagentoTranslationExporter(MagentoExporter):
     """ A common flow for the exports record with translation to Magento """
