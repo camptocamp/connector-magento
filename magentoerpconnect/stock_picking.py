@@ -303,6 +303,10 @@ class MagentoPickingExporter2000(MagentoPickingExport):
                 'qty': val,
             } for key, val in lines_info.iteritems()]
         }
+        # The notify field is used to trigger
+        # Magento to send the shipment email
+        arguments['notify'] = True
+
         magento_id = self.backend_adapter._call(
             'order/%s/ship' % picking.sale_id.magento_bind_ids[0].magento_id,
             arguments, http_method='post')
