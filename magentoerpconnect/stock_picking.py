@@ -22,6 +22,7 @@
 import logging
 import xmlrpclib
 from openerp.osv import orm, fields
+from openerp.tools.parse_version import parse_version as v
 from openerp.tools.translate import _
 from openerp.addons.connector.queue.job import job, related_action
 from openerp.addons.connector.event import on_record_create
@@ -31,7 +32,7 @@ from openerp.addons.connector.exception import IDMissingInBackend
 from openerp.addons.connector_ecommerce.event import on_picking_out_done
 from .unit.backend_adapter import GenericAdapter
 from .connector import get_environment
-from .backend import magento
+from .backend import magento, magento2000
 from .stock_tracking import export_tracking_number
 from .related_action import unwrap_binding
 
@@ -56,6 +57,13 @@ class magento_stock_picking(orm.Model):
                                             ('partial', 'Partial')],
                                            string='Picking Method',
                                            required=True),
+        'magento_track_id': fields.char(
+            string="Tracking ID",
+            help=u"Used with Magento 2, it stores the Magento ID of the "
+                 u"tracking number.\n"
+                 u"Magento is able to assign several tracking numbers to a "
+                 u"shipment, but we assume we handle only one tracking number "
+                 u"per shipment. "),
     }
 
     _sql_constraints = [
@@ -111,9 +119,10 @@ class StockPickingAdapter(GenericAdapter):
     _magento_model = 'sales_order_shipment'
     _admin_path = 'sales_shipment/view/shipment_id/{id}'
 
-    def _call(self, method, arguments):
+    def _call(self, method, arguments, http_method=None):
         try:
-            return super(StockPickingAdapter, self)._call(method, arguments)
+            return super(StockPickingAdapter, self)._call(
+                method, arguments, http_method=http_method)
         except xmlrpclib.Fault as err:
             # this is the error in the Magento API
             # when the shipment does not exist
@@ -127,7 +136,7 @@ class StockPickingAdapter(GenericAdapter):
         return self._call('%s.create' % self._magento_model,
                           [order_id, items, comment, email, include_comment])
 
-    def add_tracking_number(self, magento_id, carrier_code,
+    def add_tracking_number(self, binding_id, magento_id, carrier_code,
                             tracking_title, tracking_number):
         """ Add new tracking number.
 
@@ -148,6 +157,38 @@ class StockPickingAdapter(GenericAdapter):
         """
         return self._call('%s.getCarriers' % self._magento_model,
                           [magento_id])
+
+
+@magento2000
+class StockPickingAdapter2000(StockPickingAdapter):
+
+    def add_tracking_number(self, binding_id, magento_id, carrier_code,
+                            tracking_title, tracking_number):
+        picking = self.session.browse(self.model._name, binding_id)
+
+        if not picking.sale_id or not picking.sale_id.magento_bind_ids:
+            return True
+
+        sale_magento_ids = picking.sale_id.magento_bind_ids
+        arguments = {
+            'entity': {
+                'order_id': sale_magento_ids[0].magento_id,
+                'parent_id': magento_id,
+                'track_number': tracking_number,
+                'title': tracking_title,
+                'carrier_code': carrier_code,
+                # FIXME: we don't care about these info
+                'weight': 0.1,
+                'qty': 1,
+            },
+        }
+        # Update the existing tracking number if any
+        if picking.magento_track_id:
+            arguments['entity']['entity_id'] = picking.magento_track_id
+        res = self._call('shipment/track', arguments, http_method='post')
+        if not picking.magento_track_id:
+            picking.write({'magento_track_id': res['entity_id']})
+        return res
 
 
 @magento
@@ -239,6 +280,33 @@ class MagentoPickingExport(ExportSynchronizer):
             # ensure that we store the external ID
             if not self.session.context.get('__test_no_commit'):
                 self.session.commit()
+
+
+@magento2000
+class MagentoPickingExporter2000(MagentoPickingExport):
+
+    def run(self, binding_id):
+        """
+        Export the picking to Magento2
+        """
+        picking = self.session.browse(self.model._name, binding_id)
+        if picking.magento_id:
+            return _('Already exported')
+        lines_info = self._get_lines_info(picking)
+        if not lines_info:
+            raise NothingToDoJob(_('Canceled: the delivery order does not '
+                                   'contain lines from the original '
+                                   'sale order.'))
+        arguments = {
+            'items': [{
+                'order_item_id': key,
+                'qty': val,
+            } for key, val in lines_info.iteritems()]
+        }
+        magento_id = self.backend_adapter._call(
+            'order/%s/ship' % picking.sale_id.magento_bind_ids[0].magento_id,
+            arguments, http_method='post')
+        self.binder.bind(magento_id, binding_id)
 
 
 @on_picking_out_done
