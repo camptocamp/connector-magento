@@ -295,11 +295,11 @@ class MagentoPickingExporter2000(MagentoPickingExport):
             'items': [{
                 'order_item_id': key,
                 'qty': val,
-            } for key, val in lines_info.iteritems()]
+            } for key, val in lines_info.iteritems()],
+            # The notify field is used to trigger
+            # Magento to send the shipment email
+            'notify': True,
         }
-        # The notify field is used to trigger
-        # Magento to send the shipment email
-        arguments['notify'] = True
 
         magento_id = self.backend_adapter._call(
             'order/%s/ship' % picking.sale_id.magento_bind_ids[0].magento_id,
