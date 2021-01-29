@@ -515,9 +515,15 @@ def export_record(session, model_name, binding_id, fields=None):
     if model_name in (
             'magento.product.category',
             'magento.product.product',
-            'magento.product.image'):
-        if not session.search(model_name, [['id', '=', binding_id]]):
-            return "The binding do not exist anymore, skip it"
+            'magento.product.image'
+            'magento.product.attribute',
+            'magento.attribute.set',
+            'magento.attribute.option',
+    ):
+        return (
+            "Export of '{}' through Magento API has been disabled "
+            "and replaced by CSV exports."
+        ).format(model_name)
     record = session.browse(model_name, binding_id)
     env = get_environment(session, model_name, record.backend_id.id)
     exporter = env.get_connector_unit(MagentoExporter)
