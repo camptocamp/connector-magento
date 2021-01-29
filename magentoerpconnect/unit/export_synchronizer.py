@@ -334,7 +334,11 @@ class MagentoExporter(MagentoBaseExporter):
         """ Can do several actions after exporting a record on magento """
         pass
 
+    #TODO FIXME we should adapt magentopartner_export
     def _validate_data(self, data):
+        return
+
+    def _validate_create_data(self, data):
         """ Check if the values to import are correct
 
         Kept for retro-compatibility. To remove in 8.0
@@ -368,7 +372,17 @@ class MagentoExporter(MagentoBaseExporter):
 
         Raise `InvalidDataError`
         """
-        return
+        return self._validate_data(data)
+
+    def _validate_update_data(self, data):
+        """ Check if the values to import are correct
+
+        Pro-actively check before the ``Model.create`` or
+        ``Model.update`` if some fields are missing
+
+        Raise `InvalidDataError`
+        """
+        return self._validate_data(data)
 
     def _create_data(self, map_record, fields=None, **kwargs):
         """ Get the data to pass to :py:meth:`_create` """
@@ -446,13 +460,18 @@ class MagentoTranslationExporter(MagentoExporter):
             session.context = {}
         session.context['lang'] = default_lang.code
         res = super(MagentoTranslationExporter, self)._run(fields)
-        
+        start = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
         storeview_ids = session.search(
                 'magento.storeview',
                 [('backend_id', '=', self.backend_record.id)])
         storeviews = session.browse('magento.storeview', storeview_ids)
         lang_storeviews = [sv for sv in storeviews
                            if sv.lang_id and sv.lang_id != default_lang]
+        before_read = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+        after_read = ''
+        after_write = ''
+        #TODO FIXME
+        fields = []
         if lang_storeviews:
             translatable_fields = self._get_translatable_field(fields)   
             if translatable_fields:
@@ -468,8 +487,11 @@ class MagentoTranslationExporter(MagentoExporter):
                     self._validate_data(record)
                     binder = self.get_binder_for_model('magento.storeview')
                     magento_storeview_id = binder.to_backend(storeview.id)
+                    after_read = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
                     self.backend_adapter.write(
                         self.magento_id, record, magento_storeview_id)
+                    after_write = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
+        res = res + ' \nstart traduction : %s \nBefore read : %s \nAfter read : %s \nAfter write : %s' % (start, before_read, after_read, after_write)
         return res
 
 
@@ -477,6 +499,12 @@ class MagentoTranslationExporter(MagentoExporter):
 @related_action(action=unwrap_binding)
 def export_record(session, model_name, binding_id, fields=None):
     """ Export a record on Magento """
+    if model_name in (
+            'magento.product.category',
+            'magento.product.product',
+            'magento.product.image'):
+        if not session.search(model_name, [['id', '=', binding_id]]):
+            return "The binding do not exist anymore, skip it"
     record = session.browse(model_name, binding_id)
     env = get_environment(session, model_name, record.backend_id.id)
     exporter = env.get_connector_unit(MagentoExporter)
